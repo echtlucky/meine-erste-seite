@@ -46,9 +46,12 @@ header {
 }
 
 .logo img {
-  height: 65px;                     /* passt perfekt zum dünnen Header */
+  height: 55px;                     /* gewünschte Höhe */
+  max-height: 55px;                 /* verhindert, dass das Original-Bild größer ist */
+  width: auto;                      /* Breite passt sich automatisch an */
+  object-fit: contain;              /* Bild wird nicht verzerrt */
   vertical-align: middle;
-  transition: height 0.3s;
+  display: block;                   /* entfernt manchmal unsichtbare Leerzeichen */
 }
 
 /* Hamburger-Button (nur Mobile) */
