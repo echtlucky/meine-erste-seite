@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | echtlucky</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .login-container {
+      max-width: 400px;
+      margin: 180px auto 80px;
+      padding: 2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.8rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+    .btn-login {
+      background: var(--accent);
+      color: black;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    .google-btn {
+      background: white;
+      color: black;
+      margin-top: 1rem;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">
+      <img src="assets/logo.png" alt="echtlucky Logo">
+    </a>
+  </header>
+
+  <div class="container">
+    <div class="login-container">
+      <h2>Admin-Login</h2>
+      <input type="email" id="email" placeholder="E-Mail" required>
+      <input type="password" id="password" placeholder="Passwort" required>
+      <button class="btn btn-login" onclick="loginWithEmail()">Mit E-Mail anmelden</button>
+      <button class="btn google-btn" onclick="loginWithGoogle()">Mit Google anmelden</button>
+      <p id="error" style="color: red; margin-top: 1rem; text-align: center;"></p>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 echtlucky • Competitives Fortnite Journey
+  </footer>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { auth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from './firebase.js';
+
+    const errorEl = document.getElementById('error');
+
+    window.loginWithEmail = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = 'index.html'; // oder admin.html
+      } catch (err) {
+        errorEl.textContent = err.message.includes('wrong-password') ? 'Falsches Passwort' : err.message;
+      }
+    };
+
+    window.loginWithGoogle = async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+        window.location.href = 'index.html';
+      } catch (err) {
+        errorEl.textContent = err.message;
+      }
+    };
+  </script>
+</body>
+</html>
