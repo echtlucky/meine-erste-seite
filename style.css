@@ -51,8 +51,16 @@ header {
 }
 
 .logo img {
-  height: 48px;
+  height: 80px;                     /* Desktop-Standard-Größe (anpassen, wenn zu klein/groß) */
   vertical-align: middle;
+  transition: height 0.3s;          /* Sanfter Übergang */
+}
+
+/* Responsive: Kleiner auf Mobile */
+@media (max-width: 768px) {
+  .logo img {
+    height: 60px;                   /* Kleiner auf Handy/Tablet */
+  }
 }
 
 nav {
