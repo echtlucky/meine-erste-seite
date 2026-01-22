@@ -3,125 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>mr. z00m | Fortnite Grind</title>
+  <title>mr. z00m | Fortnite Competitive</title>
   <style>
+    :root {
+      --bg: #0b0015;
+      --text: #d0d0ff;
+      --accent: #a78bfa;
+      --accent-hover: #c4b5fd;
+      --card-bg: rgba(20, 10, 40, 0.65);
+      --border: rgba(167, 139, 250, 0.3);
+      --discord: #5865f2;
+      --discord-hover: #7289da;
+    }
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #0a0a2a, #000);
-      color: #00ff88;
-      text-align: center;
-      padding: 20px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      line-height: 1.6;
     }
     header {
-      padding: 20px;
-      background: rgba(0,0,0,0.6);
-      position: sticky;
+      background: rgba(10, 5, 30, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 1.2rem 6%;
+      position: fixed;
+      width: 100%;
       top: 0;
-      z-index: 10;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    nav {
+      display: flex;
+      gap: 2.8rem;
+    }
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.05rem;
+      transition: color 0.25s;
+    }
+    nav a:hover,
+    nav a.active { color: var(--accent); }
+    .container {
+      max-width: 1100px;
+      margin: 140px auto 80px;
+      padding: 0 5%;
     }
     h1 {
-      font-size: 3.5em;
-      text-shadow: 0 0 20px #00ff88;
-      margin: 40px 0 20px;
+      font-size: 3.4rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 1.6rem;
+      text-align: center;
+      letter-spacing: -1px;
     }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
+    .intro {
+      font-size: 1.28rem;
+      max-width: 780px;
+      margin: 0 auto 3.5rem;
+      text-align: center;
+      opacity: 0.9;
     }
-    .box {
-      background: rgba(0, 255, 136, 0.1);
-      padding: 40px;
-      border: 2px solid #00ff88;
-      border-radius: 20px;
-      margin: 30px auto;
-      max-width: 700px;
+    .stats-section,
+    .discord-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 3rem 2.5rem;
+      margin: 4rem 0;
+      text-align: center;
+    }
+    .stats-section h2,
+    .discord-section h2 {
+      color: var(--accent);
+      font-size: 2.1rem;
+      margin-bottom: 1.8rem;
     }
     .btn {
-      display: inline-block;
-      background: #00ff88;
-      color: black;
-      padding: 15px 40px;
-      font-size: 1.4em;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
+      background: var(--accent);
+      color: #0f001a;
+      padding: 0.9rem 2.4rem;
+      border-radius: 50px;
       text-decoration: none;
-      margin: 15px;
-      transition: all 0.3s;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0.8rem;
+      display: inline-block;
+      transition: all 0.25s;
     }
     .btn:hover {
-      background: #00cc66;
-      transform: scale(1.05);
+      background: var(--accent-hover);
+      transform: translateY(-2px);
     }
-    .stats-section {
-      margin: 60px 0;
+    .discord-btn {
+      background: var(--discord);
+      color: white;
+      padding: 1.2rem 3.5rem;
+      font-size: 1.3rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(88, 101, 242, 0.4);
+      transition: all 0.3s;
+    }
+    .discord-btn:hover {
+      background: var(--discord-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(88, 101, 242, 0.6);
     }
     footer {
-      margin-top: 80px;
-      padding: 20px;
-      font-size: 0.9em;
-      opacity: 0.8;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #888;
+      font-size: 0.95rem;
+      border-top: 1px solid rgba(167,139,250,0.15);
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h2 style="color:#00ff88;">mr. z00m</h2>
+    <a href="#" class="logo">mr. z00m</a>
+    <nav>
+      <a href="#" class="active">Home</a>
+      <a href="post1.html">Blog</a>
+      <a href="#stats">Stats</a>
+      <a href="#discord">Discord</a>
+    </nav>
   </header>
 
   <div class="container">
-    <h1>Hallo! Ich bin mr. z00m 🚀</h1>
-    
-    <div class="box">
-      <p>Fortnite Grinder aus Herten • Ballistic & Ranked Push • Auf dem Weg zum Pro</p>
-      <p>Live auf GitHub Pages – gestartet am 22. Januar 2026</p>
-      <button onclick="alert('Cool! Die Seite lebt! 😄')">Klick für Spaß</button>
-    </div>
+    <h1>mr. z00m</h1>
+    <p class="intro">
+      Competitive Fortnite Player • Focused on Ballistic & Ranked<br>
+      Building consistency, game sense and high-level performance.
+    </p>
 
-    <section class="stats-section">
-      <h2 style="color:#ffcc00; margin-bottom: 30px;">Meine Ballistic Stats (Live)</h2>
-      <p style="font-size: 1.3em; margin-bottom: 30px;">
-        Schau dir meinen aktuellen Rank, Division % und mehr an – updated automatisch nach jedem Match!
-      </p>
-      
-      <a href="https://fortnitetracker.com/profile/all/mr.%20z00m" 
-         target="_blank" 
-         class="btn">
-        Ballistic Stats auf Fortnite Tracker
-      </a>
-      
-      <a href="https://fortnite.gg/ballistic-stats?player=mr.%20z00m" 
-         target="_blank" 
-         class="btn" 
-         style="background:#ff3366; color:white;">
-        Ballistic Stats auf fortnite.gg
-      </a>
+    <section id="stats" class="stats-section">
+      <h2>Ballistic Statistics</h2>
+      <p>Current rank, division progress and performance metrics – updated in real time.</p>
+      <a href="https://fortnitetracker.com/profile/all/mr.%20z00m" target="_blank" class="btn">View on Fortnite Tracker</a>
+      <a href="https://fortnite.gg/ballistic-stats?player=mr.%20z00m" target="_blank" class="btn" style="background: #7c3aed; color: white;">View on fortnite.gg</a>
     </section>
 
-    <section style="margin: 60px 0; text-align: center;">
-      <h2 style="color: #ffcc00; margin-bottom: 30px;">Join my Discord Community</h2>
-      <p style="font-size: 1.3em; margin-bottom: 20px;">
-        Für Scrims, Ballistic-Tipps, Ranked-Grind und mehr – online-Mitglieder live!
-      </p>
-      
-      <!-- Dein Discord Widget – domain auf discord.com geändert -->
-      <iframe src="https://discord.com/widget?id=717503243986534411&theme=dark" 
-              width="100%" height="450" 
-              allowtransparency="true" frameborder="0" 
-              sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+    <section id="discord" class="discord-section">
+      <h2>Discord Community</h2>
+      <p>Join for scrims, VOD reviews, strategy discussions and competitive Fortnite networking.</p>
+      <a href="https://discord.gg/c7jmXnBSv6" target="_blank" class="discord-btn">
+        Join Discord
+      </a>
     </section>
-
-    <!-- Hier kannst du später Blog-Posts oder About mehr hinzufügen -->
-
   </div>
 
   <footer>
-    <p>© 2026 mr. z00m • Made with HTML/CSS & Fortnite Passion • <a href="https://github.com/echtlucky/meine-erste-seite" style="color:#00ff88;">Quellcode</a></p>
+    © 2026 mr. z00m • Competitive Fortnite Journey
   </footer>
 
 </body>
