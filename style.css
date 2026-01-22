@@ -1,0 +1,155 @@
+/* Farben – dein Grün-Weiß-Schwarz-Motto */
+:root {
+  --bg: #000000;               /* Schwarz als Hintergrund */
+  --text: #ffffff;             /* Weiß für Text */
+  --accent: #00ff88;           /* Dein schönes Neon-Grün */
+  --accent-hover: #00cc66;     /* Dunkleres Grün beim Hover */
+  --card-bg: rgba(0, 255, 136, 0.08);  /* Sehr helles Grün im Kasten */
+  --border: rgba(0, 255, 136, 0.4);
+  --discord: #5865f2;
+  --discord-hover: #7289da;
+}
+
+/* Restliches Styling – clean & professionell */
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+header {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 1.2rem 6%;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+nav {
+  display: flex;
+  gap: 2.8rem;
+}
+nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  transition: color 0.25s;
+}
+nav a:hover,
+nav a.active { color: var(--accent); }
+.container {
+  max-width: 1100px;
+  margin: 140px auto 120px;
+  padding: 0 5%;
+}
+h1 {
+  font-size: 3.8rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  letter-spacing: -1px;
+}
+.intro {
+  font-size: 1.3rem;
+  max-width: 820px;
+  margin: 0 auto 4rem;
+  text-align: center;
+  opacity: 0.9;
+}
+.bio {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+  margin: 3rem 0;
+  text-align: left;
+}
+.bio h2 {
+  color: var(--accent);
+  font-size: 2rem;
+  margin-bottom: 1.2rem;
+}
+.stats-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 3.5rem 2.5rem;
+  margin: 6rem 0 4rem;
+  text-align: center;
+}
+.stats-section h2 {
+  color: var(--accent);
+  font-size: 2.2rem;
+  margin-bottom: 1.8rem;
+}
+.btn {
+  background: var(--accent);
+  color: #000000;
+  padding: 1rem 2.6rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin: 1rem;
+  display: inline-block;
+  transition: all 0.25s;
+}
+.btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+.discord-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+  margin: 6rem 0 3rem;
+  text-align: center;
+}
+.discord-section h2 {
+  color: var(--accent);
+  font-size: 2.2rem;
+  margin-bottom: 1.2rem;
+}
+.discord-btn-wrapper {
+  margin: 4rem auto 2rem;
+  text-align: center;
+}
+.discord-btn {
+  background: var(--discord);
+  color: white;
+  padding: 1.1rem 3.2rem;
+  font-size: 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 25px rgba(88, 101, 242, 0.4);
+  transition: all 0.3s;
+  display: inline-block;
+}
+.discord-btn:hover {
+  background: var(--discord-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(88, 101, 242, 0.6);
+}
+footer {
+  text-align: center;
+  padding: 4rem 1rem 2rem;
+  color: #888;
+  font-size: 0.95rem;
+  border-top: 1px solid var(--border);
+}
