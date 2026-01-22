@@ -1,7 +1,7 @@
 # echtlucky – Fortnite Competitive Portfolio
 
 <p align="center">
-  <img src="logo.png" alt="echtlucky Logo" width="320">
+  <img src="assets/logo.png" alt="echtlucky Logo" width="320">
   <br><br>
   <strong>Persönliche Website & Portfolio von echtlucky</strong><br>
   Competitiver Fortnite-Spieler • Ballistic & Ranked Grind
