@@ -13,7 +13,6 @@
       <img src="assets/logo.png" alt="echtlucky Logo">
     </a>
 
-    <!-- Hamburger-Button (Mobile) -->
     <button class="menu-toggle" id="menuToggle">☰</button>
 
     <nav id="mainNav">
@@ -76,30 +75,12 @@
     <a href="login.html">Admin-Login</a>
   </footer>
 
-  <!-- Hamburger-Menü JavaScript -->
-  <script>
-    const menuToggle = document.getElementById('menuToggle');
-    const mainNav = document.getElementById('mainNav');
-
-    if (menuToggle && mainNav) {
-      menuToggle.addEventListener('click', () => {
-        mainNav.classList.toggle('active');
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
-          mainNav.classList.remove('active');
-        }
-      });
-    }
-  </script>
-  
   <script src="js/menu.js"></script>
 
-<script>
-  // Seite lädt → Animation starten
-  document.body.classList.add('loaded');
-</script>
+  <script>
+    // Seite lädt → Animation starten
+    document.body.classList.add('loaded');
+  </script>
 
 </body>
 </html>
