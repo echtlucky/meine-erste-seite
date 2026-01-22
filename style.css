@@ -1,16 +1,15 @@
-/* Farben – dein Grün-Weiß-Schwarz-Motto */
+/* Farben – Grün, Weiß, Schwarz Motto */
 :root {
-  --bg: #000000;               /* Schwarz als Hintergrund */
-  --text: #ffffff;             /* Weiß für Text */
-  --accent: #00ff88;           /* Dein schönes Neon-Grün */
-  --accent-hover: #00cc66;     /* Dunkleres Grün beim Hover */
-  --card-bg: rgba(0, 255, 136, 0.08);  /* Sehr helles Grün im Kasten */
-  --border: rgba(0, 255, 136, 0.4);
+  --bg: #000000;                    /* Tiefschwarz */
+  --text: #e0ffe0;                  /* Hellgrün-weißlicher Text */
+  --accent: #00ff88;                /* Dein schönes Neon-Grün */
+  --accent-hover: #00cc66;          /* Dunkleres Grün beim Hover */
+  --card-bg: rgba(0, 255, 136, 0.08);  /* Sehr transparentes Grün */
+  --border: rgba(0, 255, 136, 0.35);
   --discord: #5865f2;
   --discord-hover: #7289da;
 }
 
-/* Restliches Styling – clean & professionell */
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
@@ -38,6 +37,10 @@ header {
   color: var(--accent);
   text-decoration: none;
   letter-spacing: -0.5px;
+}
+.logo img {
+  height: 48px;
+  vertical-align: middle;
 }
 nav {
   display: flex;
@@ -128,7 +131,7 @@ h1 {
   margin-bottom: 1.2rem;
 }
 .discord-btn-wrapper {
-  margin: 4rem auto 2rem;
+  margin: 4rem auto 4rem;
   text-align: center;
 }
 .discord-btn {
