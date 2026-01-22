@@ -22,11 +22,11 @@ body {
   line-height: 1.6;
 }
 
-/* Header – schlank & modern */
+/* Header – jetzt richtig schlank */
 header {
   background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(10px);
-  padding: 0.6rem 6%;               /* sehr dünn – sollte jetzt passen */
+  padding: 0.4rem 6%;               /* extrem dünn – 0.4rem oben/unten */
   position: fixed;
   width: 100%;
   top: 0;
@@ -34,27 +34,41 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 55px;                     /* feste Höhe – zwingt alles rein */
   border-bottom: 1px solid rgba(0, 255, 136, 0.2);
 }
 
 .logo {
-  font-size: 1.6rem;
-  font-weight: 700;
   color: var(--accent);
-  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.8rem;
   letter-spacing: -0.5px;
-  line-height: 1;
+  text-decoration: none;
   display: flex;
   align-items: center;
+  height: 100%;
 }
 
-.logo img {
-  height: 65px;                     /* Hauptgröße Desktop */
-  max-height: 65px;
-  width: auto;
-  object-fit: contain;
-  vertical-align: middle;
-  transition: height 0.3s;
+/* Navigation – Desktop */
+nav {
+  display: flex;
+  gap: 2.5rem;
+}
+
+nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  transition: color 0.25s;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+nav a:hover,
+nav a.active {
+  color: var(--accent);
 }
 
 /* Hamburger-Button (nur Mobile) */
@@ -65,25 +79,6 @@ header {
   color: var(--accent);
   font-size: 2rem;
   cursor: pointer;
-}
-
-/* Navigation – Desktop */
-nav {
-  display: flex;
-  gap: 2.8rem;
-}
-
-nav a {
-  color: var(--text);
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 1.05rem;
-  transition: color 0.25s;
-}
-
-nav a:hover,
-nav a.active {
-  color: var(--accent);
 }
 
 /* Mobile: Hamburger-Menü */
@@ -100,7 +95,7 @@ nav a.active {
     left: 0;
     width: 100%;
     background: rgba(0, 0, 0, 0.95);
-    padding: 1.5rem 0;
+    padding: 1rem 0;
     border-bottom: 1px solid var(--border);
   }
 
@@ -109,12 +104,12 @@ nav a.active {
   }
 
   nav a {
-    padding: 1rem 6%;
-    font-size: 1.2rem;
+    padding: 0.8rem 6%;
+    font-size: 1.1rem;
     text-align: center;
   }
 
-  .logo img {
+  header {
     height: 50px;
   }
 }
@@ -122,7 +117,7 @@ nav a.active {
 /* Hauptinhalt */
 .container {
   max-width: 1100px;
-  margin: 100px auto 100px;         /* angepasst, damit dünner Header nicht drückt */
+  margin: 80px auto 80px;           /* weniger Margin oben – Header drückt nicht */
   padding: 0 5%;
 }
 
@@ -143,19 +138,19 @@ h1 {
   opacity: 0.9;
 }
 
-/* Blog-Übersicht – sauber & professionell */
+/* Blog-Übersicht */
 .blog-list {
   display: flex;
   flex-direction: column;
   gap: 4rem;
-  margin-top: 4rem;
+  margin-top: 3rem;
 }
 
 .blog-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 3rem 2.8rem;
+  padding: 2.8rem;
   text-align: left;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -167,7 +162,7 @@ h1 {
 
 .blog-card h2 {
   color: var(--accent);
-  font-size: 2.3rem;
+  font-size: 2.2rem;
   margin-bottom: 0.8rem;
 }
 
@@ -180,7 +175,7 @@ h1 {
 
 .blog-card p {
   font-size: 1.1rem;
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.6rem;
   opacity: 0.9;
 }
 
@@ -190,7 +185,7 @@ h1 {
   border-radius: 50px;
 }
 
-/* Page Transition – Smooth Slide */
+/* Page Transition */
 .page-transition {
   opacity: 1;
   transform: translateX(0);
@@ -207,7 +202,7 @@ body.loaded {
   transform: translateX(0);
 }
 
-/* Restlicher Inhalt (Bio, Stats, Discord, Twitch, Footer) */
+/* Rest (Bio, Stats, Discord, Twitch, Footer) */
 .bio, .stats-section, .discord-section, .twitch-section {
   background: var(--card-bg);
   border: 1px solid var(--border);
