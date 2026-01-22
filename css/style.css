@@ -25,7 +25,7 @@ body {
 header {
   background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(10px);
-  padding: 0 6%;                    /* oben/unten 0 – nur links/rechts */
+  padding: 0 4%;                    /* oben/unten 0 – nur links/rechts */
   position: fixed;
   width: 100%;
   top: 0;
