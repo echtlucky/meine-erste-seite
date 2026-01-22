@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog | echtlucky</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">
+      <img src="assets/logo.png" alt="echtlucky Logo">
+    </a>
+
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav id="mainNav">
+      <a href="index.html">Home</a>
+      <a href="blog.html" class="active">Blog</a>
+      <a href="index.html#stats">Stats</a>
+      <a href="index.html#discord">Discord</a>
+      <a href="index.html#twitch">Twitch</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h1>Blog</h1>
+    <p class="intro">Neueste Beiträge, Grind-Tipps und Updates aus meinem Ballistic-Weg.</p>
+
+    <div class="blog-list">
+      <div class="blog-card">
+        <h2>Mein Ballistic-Setup 2026</h2>
+        <p class="meta">22. Januar 2026 • Hardware, Settings & Trainings-Tools</p>
+        <p>Kurzfassung: Mein aktueller Monitor, Maus, Sens und Software-Stack für den täglichen Grind.</p>
+        <a href="post2.html" class="btn">Lesen</a>
+      </div>
+
+      <div class="blog-card">
+        <h2>Mein Start in Ballistic – Erste Eindrücke</h2>
+        <p class="meta">22. Januar 2026 • Erste Matches, Learnings & Ziele</p>
+        <p>Was mir in den ersten Ballistic-Lobbys aufgefallen ist und wohin ich will.</p>
+        <a href="post1.html" class="btn">Lesen</a>
+      </div>
+
+      <!-- Hier kommen später mehr Posts -->
+    </div>
+  </div>
+
+  <footer>
+    © 2026 echtlucky • Competitives Fortnite Journey • 
+    <a href="login.html">Admin-Login</a>
+  </footer>
+
+  <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+
+    menuToggle.addEventListener('click', () => {
+      mainNav.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
+        mainNav.classList.remove('active');
+      }
+    });
+  </script>
+
+</body>
+</html>
