@@ -2,46 +2,114 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Hallo von Lucas!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mr. z00m | Fortnite Grind</title>
   <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: linear-gradient(to bottom, #0a0a2a, #000);
       color: #00ff88;
       text-align: center;
-      padding: 80px 20px;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    header {
+      padding: 20px;
+      background: rgba(0,0,0,0.6);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     h1 {
-      font-size: 4em;
+      font-size: 3.5em;
       text-shadow: 0 0 20px #00ff88;
+      margin: 40px 0 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
     }
     .box {
-      margin: 50px auto;
-      max-width: 700px;
       background: rgba(0, 255, 136, 0.1);
       padding: 40px;
       border: 2px solid #00ff88;
       border-radius: 20px;
+      margin: 30px auto;
+      max-width: 700px;
     }
-    button {
-      padding: 15px 40px;
-      font-size: 1.3em;
+    .btn {
+      display: inline-block;
       background: #00ff88;
       color: black;
+      padding: 15px 40px;
+      font-size: 1.4em;
       border: none;
       border-radius: 10px;
       cursor: pointer;
+      text-decoration: none;
+      margin: 15px;
+      transition: all 0.3s;
     }
-    button:hover { background: #00cc66; }
+    .btn:hover {
+      background: #00cc66;
+      transform: scale(1.05);
+    }
+    .stats-section {
+      margin: 60px 0;
+    }
+    footer {
+      margin-top: 80px;
+      padding: 20px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
-  <h1>Hallo Welt! 🌍</h1>
-  <div class="box">
-    <p>Das ist meine erste eigene Website.</p>
-    <p>Live auf GitHub Pages – erstellt in Herten am 22. Januar 2026</p>
-    <button onclick="alert('Cool! Es lebt! 😄')">Klick mich mal</button>
+
+  <header>
+    <h2 style="color:#00ff88;">mr. z00m</h2>
+  </header>
+
+  <div class="container">
+    <h1>Hallo! Ich bin mr. z00m 🚀</h1>
+    
+    <div class="box">
+      <p>Fortnite Grinder aus Herten • Ballistic & Ranked Push • Auf dem Weg zum Pro</p>
+      <p>Live auf GitHub Pages – gestartet am 22. Januar 2026</p>
+      <button onclick="alert('Cool! Die Seite lebt! 😄')">Klick für Spaß</button>
+    </div>
+
+    <section class="stats-section">
+      <h2 style="color:#ffcc00; margin-bottom: 30px;">Meine Ballistic Stats (Live)</h2>
+      <p style="font-size: 1.3em; margin-bottom: 30px;">
+        Schau dir meinen aktuellen Rank, Division % und mehr an – updated automatisch nach jedem Match!
+      </p>
+      
+      <a href="https://fortnitetracker.com/profile/all/mr.%20z00m" 
+         target="_blank" 
+         class="btn">
+        Ballistic Stats auf Fortnite Tracker
+      </a>
+      
+      <a href="https://fortnite.gg/ballistic-stats?player=mr.%20z00m" 
+         target="_blank" 
+         class="btn" 
+         style="background:#ff3366; color:white;">
+        Ballistic Stats auf fortnite.gg
+      </a>
+    </section>
+
+    <!-- Hier kannst du später Blog-Posts oder About mehr hinzufügen -->
+
   </div>
+
+  <footer>
+    <p>© 2026 mr. z00m • Made with HTML/CSS & Fortnite Passion • <a href="https://github.com/echtlucky/meine-erste-seite" style="color:#00ff88;">Quellcode</a></p>
+  </footer>
+
 </body>
 </html>
