@@ -137,3 +137,35 @@ h1 { font-size: 3.8rem; font-weight: 700; color: white; margin-bottom: 1.2rem; t
 .discord-btn { background: var(--discord); color: white; padding: 1.1rem 3.2rem; font-size: 1.25rem; border-radius: 12px; box-shadow: 0 6px 25px rgba(88,101,242,0.4); transition: all 0.3s; }
 .discord-btn:hover { background: var(--discord-hover); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(88,101,242,0.6); }
 footer { text-align: center; padding: 4rem 1rem 2rem; color: #888; font-size: 0.95rem; border-top: 1px solid var(--border); }
+
+/* Page Transition – Smooth Slide beim Wechsel */
+.page-transition {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* Wenn die Seite lädt, starten wir mit Slide-Effekt von links */
+body.page-transition {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+/* Nach dem Laden (Klasse wird entfernt) */
+body.loaded {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Beim Klick auf einen Link: Slide nach rechts (Richtung „zurück“) */
+a[href]:not([target="_blank"]) {
+  position: relative;
+  z-index: 1;
+}
+
+a[href]:not([target="_blank"]):active ~ body,
+a[href]:not([target="_blank"]):focus ~ body {
+  transform: translateX(30px);
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
