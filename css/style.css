@@ -22,11 +22,10 @@ body {
   line-height: 1.6;
 }
 
-/* Header – jetzt richtig schlank */
 header {
   background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(10px);
-  padding: 0.4rem 6%;               /* extrem dünn – 0.4rem oben/unten */
+  padding: 0 6%;                    /* oben/unten 0 – nur links/rechts */
   position: fixed;
   width: 100%;
   top: 0;
@@ -34,19 +33,20 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 55px;                     /* feste Höhe – zwingt alles rein */
+  height: 50px;                     /* feste Höhe – das ist jetzt der Schlüssel */
   border-bottom: 1px solid rgba(0, 255, 136, 0.2);
 }
 
 .logo {
   color: var(--accent);
   font-weight: 700;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   letter-spacing: -0.5px;
   text-decoration: none;
   display: flex;
   align-items: center;
   height: 100%;
+  line-height: 1;                   /* kein extra Platz durch Text */
 }
 
 /* Navigation – Desktop */
