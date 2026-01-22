@@ -12,7 +12,11 @@
     <a href="#" class="logo">
       <img src="assets/logo.png" alt="echtlucky Logo">
     </a>
-    <nav>
+
+    <!-- Hamburger-Button (nur Mobile) -->
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav id="mainNav">
       <a href="#" class="active">Home</a>
       <a href="post1.html">Blog</a>
       <a href="#stats">Stats</a>
@@ -70,6 +74,23 @@
   <footer>
     © 2026 echtlucky • Competitives Fortnite Journey
   </footer>
+
+  <!-- JavaScript für Hamburger-Menü -->
+  <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+
+    menuToggle.addEventListener('click', () => {
+      mainNav.classList.toggle('active');
+    });
+
+    // Schließen, wenn man außerhalb klickt (optional, aber nice)
+    document.addEventListener('click', (e) => {
+      if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
+        mainNav.classList.remove('active');
+      }
+    });
+  </script>
 
 </body>
 </html>

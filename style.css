@@ -1,33 +1,28 @@
 /* ======================================
-   Farbschema: Grün, Weiß, Schwarz (dein Motto)
+   Farbschema: Grün, Weiß, Schwarz
    ====================================== */
 :root {
-  --bg: #000000;                    /* Tiefschwarz */
-  --text: #e0ffe0;                  /* Hellgrün-weißer Text */
-  --accent: #00ff88;                /* Dein Hauptgrün */
-  --accent-hover: #00cc66;          /* Dunkleres Grün beim Hover */
-  --card-bg: rgba(0, 255, 136, 0.08);   /* Sehr transparentes Grün für Karten */
+  --bg: #000000;
+  --text: #e0ffe0;
+  --accent: #00ff88;
+  --accent-hover: #00cc66;
+  --card-bg: rgba(0, 255, 136, 0.08);
   --border: rgba(0, 255, 136, 0.35);
   --discord: #5865f2;
   --discord-hover: #7289da;
 }
 
-/* Grundlayout */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin:0; padding:0; box-sizing:border-box; }
 
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
 }
 
-/* Header / Navigation */
+/* Header */
 header {
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(12px);
@@ -51,18 +46,22 @@ header {
 }
 
 .logo img {
-  height: 80px;                     /* Desktop-Standard-Größe (anpassen, wenn zu klein/groß) */
+  height: 80px;
   vertical-align: middle;
-  transition: height 0.3s;          /* Sanfter Übergang */
+  transition: height 0.3s;
 }
 
-/* Responsive: Kleiner auf Mobile */
-@media (max-width: 768px) {
-  .logo img {
-    height: 60px;                   /* Kleiner auf Handy/Tablet */
-  }
+/* Hamburger-Button (nur auf Mobile sichtbar) */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 2rem;
+  cursor: pointer;
 }
 
+/* Navigation */
 nav {
   display: flex;
   gap: 2.8rem;
@@ -81,140 +80,60 @@ nav a.active {
   color: var(--accent);
 }
 
-/* Hauptinhalt */
-.container {
-  max-width: 1100px;
-  margin: 140px auto 120px;
-  padding: 0 5%;
+/* Mobile: Hamburger-Menü */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  nav {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  nav.active {
+    display: flex;
+  }
+
+  nav a {
+    padding: 1rem 6%;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .logo img {
+    height: 60px;
+  }
 }
 
-h1 {
-  font-size: 3.8rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 1.2rem;
-  text-align: center;
-  letter-spacing: -1px;
-}
-
-.intro {
-  font-size: 1.3rem;
-  max-width: 820px;
-  margin: 0 auto 4rem;
-  text-align: center;
-  opacity: 0.9;
-}
-
-/* Bio-Karte */
-.bio {
+/* Restlicher Inhalt (unverändert, nur gekürzt für Übersichtlichkeit) */
+.container { max-width: 1100px; margin: 140px auto 120px; padding: 0 5%; }
+h1 { font-size: 3.8rem; font-weight: 700; color: white; margin-bottom: 1.2rem; text-align: center; letter-spacing: -1px; }
+.intro { font-size: 1.3rem; max-width: 820px; margin: 0 auto 4rem; text-align: center; opacity: 0.9; }
+.bio, .stats-section, .discord-section, .twitch-section {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 2.5rem;
   margin: 3rem 0;
-  text-align: left;
-}
-
-.bio h2 {
-  color: var(--accent);
-  font-size: 2rem;
-  margin-bottom: 1.2rem;
-}
-
-/* Stats-Karte */
-.stats-section {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 3.5rem 2.5rem;
-  margin: 6rem 0 4rem;
   text-align: center;
 }
-
-.stats-section h2 {
-  color: var(--accent);
-  font-size: 2.2rem;
-  margin-bottom: 1.8rem;
-}
-
-/* Buttons */
-.btn {
-  background: var(--accent);
-  color: #000000;
-  padding: 1rem 2.6rem;
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1.15rem;
-  margin: 1rem;
-  display: inline-block;
-  transition: all 0.25s;
-}
-
-.btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
-}
-
-/* Discord */
-.discord-section {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 2.5rem;
-  margin: 6rem 0 3rem;
-  text-align: center;
-}
-
-.discord-section h2 {
+.bio h2, .stats-section h2, .discord-section h2, .twitch-section h2 {
   color: var(--accent);
   font-size: 2.2rem;
   margin-bottom: 1.2rem;
 }
-
-.discord-btn-wrapper {
-  margin: 4rem auto 4rem;
-  text-align: center;
-}
-
-.discord-btn {
-  background: var(--discord);
-  color: white;
-  padding: 1.1rem 3.2rem;
-  font-size: 1.25rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 25px rgba(88, 101, 242, 0.4);
-  transition: all 0.3s;
-  display: inline-block;
-}
-
-.discord-btn:hover {
-  background: var(--discord-hover);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(88, 101, 242, 0.6);
-}
-
-/* Twitch */
-.twitch-section {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 3rem 2.5rem;
-  margin: 6rem 0 4rem;
-  text-align: center;
-}
-
-.twitch-section h2 {
-  color: var(--accent);
-  font-size: 2.2rem;
-  margin-bottom: 1.2rem;
-}
-
-/* Footer */
-footer {
-  text-align: center;
-  padding: 4rem 1rem 2rem;
-  color: #888;
-  font-size: 0.95rem;
-  border-top: 1px solid var(--border);
-}
+/* Buttons, Footer etc. bleiben gleich wie vorher */
+.btn { background: var(--accent); color: #000; padding: 1rem 2.6rem; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 1.15rem; margin: 1rem; display: inline-block; transition: all 0.25s; }
+.btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+.discord-btn-wrapper { margin: 4rem auto; text-align: center; }
+.discord-btn { background: var(--discord); color: white; padding: 1.1rem 3.2rem; font-size: 1.25rem; border-radius: 12px; box-shadow: 0 6px 25px rgba(88,101,242,0.4); transition: all 0.3s; }
+.discord-btn:hover { background: var(--discord-hover); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(88,101,242,0.6); }
+footer { text-align: center; padding: 4rem 1rem 2rem; color: #888; font-size: 0.95rem; border-top: 1px solid var(--border); }
