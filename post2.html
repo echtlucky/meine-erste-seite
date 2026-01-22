@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog | echtlucky – Mein Ballistic-Setup 2026</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">
+      <img src="assets/logo.png" alt="echtlucky Logo">
+    </a>
+
+    <!-- Hamburger-Button (Mobile) -->
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav id="mainNav">
+      <a href="index.html">Home</a>
+      <a href="post1.html">Blog</a>
+      <a href="index.html#stats">Stats</a>
+      <a href="index.html#discord">Discord</a>
+      <a href="index.html#twitch">Twitch</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <section class="blog-post">
+      <h1>Mein Ballistic-Setup 2026</h1>
+      <p class="meta">Veröffentlicht: 22. Januar 2026 • Lesezeit: ca. 4 Minuten</p>
+
+      <div class="post-content">
+        <h2>Warum Ballistic das Potenzial hat, die Szene zu verändern</h2>
+        <p>Seit Ballistic im Ranked-Modus ist, hat sich mein gesamter Ansatz verändert. Das 5v5-Format zwingt zu viel mehr Kommunikation, Timing und Rollenverständnis als klassische BR. Hier ist mein aktuelles Setup, mit dem ich aktuell grind und die höheren Lobbys erreiche.</p>
+
+        <h3>Hardware & Peripherie</h3>
+        <ul>
+          <li><strong>Monitor</strong>: 240 Hz, 27 Zoll, 1440p – wichtig für präzise Edits und schnelle Reaktionen</li>
+          <li><strong>Maus</strong>: Leichte Gaming-Maus (~60 g), 8000 Hz Polling Rate</li>
+          <li><strong>Tastatur</strong>: Linear-Switches (z. B. Gateron Reds oder Speed Silvers)</li>
+          <li><strong>Headset</strong>: Open-Back oder gutes Stereo für Footsteps – kein 7.1 Fake-Surround</li>
+        </ul>
+
+        <h3>Ingame Settings (Stand Januar 2026)</h3>
+        <ul>
+          <li>Sens: 800 DPI, X/Y-Achse 6.5–7.0 % (je nach Tag)</li>
+          <li>Build/Edit Confirm: Auf LMB (schnelleres Editing)</li>
+          <li>Turbo Building: An</li>
+          <li>Visuals: Low/Medium-Mix (Performance > Optik)</li>
+          <li>Colorblind Mode: Deuteranopia Strength 10 (besserer Kontrast)</li>
+        </ul>
+
+        <h3>Software & Tools</h3>
+        <ul>
+          <li>Kovaak’s / Aim Lab: Täglich 30–45 Min Warmup</li>
+          <li>Fortnite Tracker Overlay: Live Stats im Hintergrund</li>
+          <li>Discord + Voice Mods: Noise Suppression + Push-to-Talk</li>
+          <li>Streamlabs OBS (für VOD-Aufnahmen)</li>
+        </ul>
+
+        <h2>Was ich in den nächsten Monaten ändern will</h2>
+        <p>Ich plane, auf 360 Hz zu wechseln und die Sens nochmal um 0.5–1 % zu senken. Außerdem teste ich gerade einen neuen Controller für bestimmte Rotations (Switch-Style), um zu sehen, ob das in Ballistic einen Vorteil bringt.</p>
+
+        <p>Wenn ihr Fragen zu Settings habt oder Tipps für euren eigenen Grind – droppt sie gerne im Discord. Ich antworte immer, wenn ich Zeit habe.</p>
+
+        <div style="margin-top: 3rem; text-align: center;">
+          <a href="index.html" class="btn">Zurück zur Startseite</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    © 2026 echtlucky • Competitives Fortnite Journey
+  </footer>
+
+  <!-- JavaScript für Hamburger-Menü -->
+  <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+
+    menuToggle.addEventListener('click', () => {
+      mainNav.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
+        mainNav.classList.remove('active');
+      }
+    });
+  </script>
+
+</body>
+</html>
