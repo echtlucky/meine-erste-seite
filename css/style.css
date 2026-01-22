@@ -26,7 +26,7 @@ body {
 header {
   background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(10px);
-  padding: 0.2rem 6%;               /* sehr dünn – Hauptfix für dein Problem */
+  padding: 0.6rem 6%;               /* sehr dünn – sollte jetzt passen */
   position: fixed;
   width: 100%;
   top: 0;
@@ -43,15 +43,18 @@ header {
   color: var(--accent);
   text-decoration: none;
   letter-spacing: -0.5px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 .logo img {
-  height: 55px;                     /* gewünschte Höhe */
-  max-height: 55px;                 /* verhindert, dass das Original-Bild größer ist */
-  width: auto;                      /* Breite passt sich automatisch an */
-  object-fit: contain;              /* Bild wird nicht verzerrt */
+  height: 65px;                     /* Hauptgröße Desktop */
+  max-height: 65px;
+  width: auto;
+  object-fit: contain;
   vertical-align: middle;
-  display: block;                   /* entfernt manchmal unsichtbare Leerzeichen */
+  transition: height 0.3s;
 }
 
 /* Hamburger-Button (nur Mobile) */
@@ -112,14 +115,14 @@ nav a.active {
   }
 
   .logo img {
-    height: 50px;                   /* kleiner auf Mobile */
+    height: 50px;
   }
 }
 
 /* Hauptinhalt */
 .container {
   max-width: 1100px;
-  margin: 100px auto 100px;        /* weniger Margin oben → Header drückt nicht */
+  margin: 100px auto 100px;         /* angepasst, damit dünner Header nicht drückt */
   padding: 0 5%;
 }
 
@@ -140,11 +143,11 @@ h1 {
   opacity: 0.9;
 }
 
-/* Blog-Übersicht – jetzt richtig sauber */
+/* Blog-Übersicht – sauber & professionell */
 .blog-list {
   display: flex;
   flex-direction: column;
-  gap: 4rem;                        /* viel mehr Luft */
+  gap: 4rem;
   margin-top: 4rem;
 }
 
@@ -152,7 +155,7 @@ h1 {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 3rem 2.8rem;             /* mehr Padding innen */
+  padding: 3rem 2.8rem;
   text-align: left;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
