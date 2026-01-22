@@ -22,11 +22,11 @@ body {
   line-height: 1.6;
 }
 
-/* Header */
+/* Header – jetzt schlanker */
 header {
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(12px);
-  padding: 1.2rem 6%;
+  padding: 0.8rem 6%;               /* dünner als vorher (war 1.2rem) */
   position: fixed;
   width: 100%;
   top: 0;
@@ -46,12 +46,12 @@ header {
 }
 
 .logo img {
-  height: 80px;
+  height: 70px;                     /* leicht verkleinert, passt besser zum dünnen Header */
   vertical-align: middle;
   transition: height 0.3s;
 }
 
-/* Hamburger-Button (nur auf Mobile sichtbar) */
+/* Hamburger-Button (nur Mobile) */
 .menu-toggle {
   display: none;
   background: none;
@@ -61,7 +61,7 @@ header {
   cursor: pointer;
 }
 
-/* Navigation */
+/* Navigation – Desktop */
 nav {
   display: flex;
   gap: 2.8rem;
@@ -109,63 +109,155 @@ nav a.active {
   }
 
   .logo img {
-    height: 60px;
+    height: 55px;
   }
 }
 
-/* Restlicher Inhalt (unverändert, nur gekürzt für Übersichtlichkeit) */
-.container { max-width: 1100px; margin: 140px auto 120px; padding: 0 5%; }
-h1 { font-size: 3.8rem; font-weight: 700; color: white; margin-bottom: 1.2rem; text-align: center; letter-spacing: -1px; }
-.intro { font-size: 1.3rem; max-width: 820px; margin: 0 auto 4rem; text-align: center; opacity: 0.9; }
-.bio, .stats-section, .discord-section, .twitch-section {
+/* Hauptinhalt */
+.container {
+  max-width: 1100px;
+  margin: 120px auto 100px;        /* etwas mehr Luft oben, damit Header nicht drückt */
+  padding: 0 5%;
+}
+
+h1 {
+  font-size: 3.8rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  letter-spacing: -1px;
+}
+
+.intro {
+  font-size: 1.3rem;
+  max-width: 820px;
+  margin: 0 auto 4rem;
+  text-align: center;
+  opacity: 0.9;
+}
+
+/* Blog-Übersicht – sauberer Look */
+.blog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;                     /* mehr Abstand zwischen Karten */
+  margin-top: 3rem;
+}
+
+.blog-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 2.5rem;
-  margin: 3rem 0;
-  text-align: center;
+  text-align: left;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.bio h2, .stats-section h2, .discord-section h2, .twitch-section h2 {
-  color: var(--accent);
-  font-size: 2.2rem;
-  margin-bottom: 1.2rem;
-}
-/* Buttons, Footer etc. bleiben gleich wie vorher */
-.btn { background: var(--accent); color: #000; padding: 1rem 2.6rem; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 1.15rem; margin: 1rem; display: inline-block; transition: all 0.25s; }
-.btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
-.discord-btn-wrapper { margin: 4rem auto; text-align: center; }
-.discord-btn { background: var(--discord); color: white; padding: 1.1rem 3.2rem; font-size: 1.25rem; border-radius: 12px; box-shadow: 0 6px 25px rgba(88,101,242,0.4); transition: all 0.3s; }
-.discord-btn:hover { background: var(--discord-hover); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(88,101,242,0.6); }
-footer { text-align: center; padding: 4rem 1rem 2rem; color: #888; font-size: 0.95rem; border-top: 1px solid var(--border); }
 
-/* Page Transition – Smooth Slide beim Wechsel */
+.blog-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 255, 136, 0.15);
+}
+
+.blog-card h2 {
+  color: var(--accent);
+  font-size: 2.1rem;
+  margin-bottom: 0.8rem;
+}
+
+.blog-card .meta {
+  font-size: 0.95rem;
+  opacity: 0.7;
+  margin-bottom: 1.2rem;
+  display: block;
+}
+
+.blog-card p {
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.blog-card .btn {
+  font-size: 1.1rem;
+  padding: 0.9rem 2.2rem;
+}
+
+/* Page Transition – Smooth Slide */
 .page-transition {
   opacity: 1;
   transform: translateX(0);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-/* Wenn die Seite lädt, starten wir mit Slide-Effekt von links */
 body.page-transition {
   opacity: 0;
   transform: translateX(-30px);
 }
 
-/* Nach dem Laden (Klasse wird entfernt) */
 body.loaded {
   opacity: 1;
   transform: translateX(0);
 }
 
-/* Beim Klick auf einen Link: Slide nach rechts (Richtung „zurück“) */
-a[href]:not([target="_blank"]) {
-  position: relative;
-  z-index: 1;
+/* Restlicher Inhalt (Bio, Stats, Discord, Twitch, Footer) */
+.bio, .stats-section, .discord-section, .twitch-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+  margin: 4rem 0;
+  text-align: center;
 }
 
-a[href]:not([target="_blank"]):active ~ body,
-a[href]:not([target="_blank"]):focus ~ body {
-  transform: translateX(30px);
-  opacity: 0;
-  transition: opacity 0.6s ease, transform 0.6s ease;
+.bio h2, .stats-section h2, .discord-section h2, .twitch-section h2 {
+  color: var(--accent);
+  font-size: 2.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.btn {
+  background: var(--accent);
+  color: #000;
+  padding: 1rem 2.6rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin: 1rem;
+  display: inline-block;
+  transition: all 0.25s;
+}
+
+.btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.discord-btn-wrapper {
+  margin: 4rem auto;
+  text-align: center;
+}
+
+.discord-btn {
+  background: var(--discord);
+  color: white;
+  padding: 1.1rem 3.2rem;
+  font-size: 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 25px rgba(88,101,242,0.4);
+  transition: all 0.3s;
+}
+
+.discord-btn:hover {
+  background: var(--discord-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(88,101,242,0.6);
+}
+
+footer {
+  text-align: center;
+  padding: 4rem 1rem 2rem;
+  color: #888;
+  font-size: 0.95rem;
+  border-top: 1px solid var(--border);
 }
