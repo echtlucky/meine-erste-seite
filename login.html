@@ -6,16 +6,11 @@
   <title>Community Login | echtlucky</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    body {
-      overflow: hidden;
-    }
-
     .login-page {
       display: flex;
       min-height: 100vh;
     }
 
-    /* Linke Seite – Game-Vibes + Mosaik */
     .left-side {
       flex: 1;
       background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.92)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80') center/cover no-repeat fixed;
@@ -64,7 +59,6 @@
       margin: 0 auto 2rem;
     }
 
-    /* Rechte Seite – Login-Formular */
     .right-side {
       flex: 1;
       background: rgba(0,0,0,0.7);
@@ -139,25 +133,31 @@
       color: var(--accent-hover);
     }
 
-    .discord-login {
-      margin-top: 3rem;
-      text-align: center;
-    }
-
-    .discord-btn {
-      background: #5865f2;
-      color: white;
-      padding: 1rem 2.5rem;
-      border-radius: 12px;
+    .google-login-btn {
+      background: white;
+      color: #000;
+      width: 100%;
+      padding: 1rem;
       font-size: 1.1rem;
-      display: inline-block;
-      text-decoration: none;
-      box-shadow: 0 6px 20px rgba(88,101,242,0.3);
+      border-radius: 12px;
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: all 0.3s;
     }
 
-    .discord-btn:hover {
-      background: #7289da;
+    .google-login-btn:hover {
+      background: #f8f8f8;
       transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .google-icon {
+      width: 24px;
+      height: 24px;
     }
   </style>
 </head>
@@ -170,7 +170,7 @@
         <h1>echtlucky</h1>
         <p>Competitive Fortnite Community</p>
         <p style="font-size: 1.2rem; opacity: 0.8;">
-          Scrims, VOD-Reviews, Trainingspläne, Team-Suche & Cash-Cup-Vibes
+          Scrims • VOD-Reviews • Trainingspläne • Team-Suche • Cash-Cup-Vibes
         </p>
       </div>
     </div>
@@ -187,16 +187,19 @@
           Einloggen
         </button>
 
+        <button class="google-login-btn" onclick="loginWithGoogle()">
+          <svg class="google-icon" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.51h5.84c-.25 1.31-.98 2.42-2.07 3.16v2.63h3.35c1.96-1.81 3.09-4.46 3.09-7.25z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.35-2.63c-.98.66-2.23 1.06-3.93 1.06-3.02 0-5.57-2.04-6.49-4.79H.96v2.67C2.75 20.99 6.89 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.51 14.21c-.23-.66-.36-1.37-.36-2.21s.13-1.55.36-2.21V7.34H.96C.35 8.85 0 10.39 0 12s.35 3.15.96 4.66l4.55-2.45z"/>
+            <path fill="#EA4335" d="M12 4.98c1.64 0 3.11.56 4.27 1.66l3.19-3.19C17.46 1.01 14.97 0 12 0 6.89 0 2.75 2.01.96 5.34l4.55 2.45C6.43 5.02 8.98 3 12 3z"/>
+          </svg>
+          Mit Google anmelden
+        </button>
+
         <div class="links">
           <a href="register.html">Registrieren</a>
           <a href="#">Passwort vergessen?</a>
-        </div>
-
-        <div class="discord-login">
-          <p style="margin: 2rem 0 1rem;">Oder direkt über Discord beitreten</p>
-          <a href="https://discord.gg/c7jmXnBSv6" target="_blank" class="discord-btn">
-            Discord beitreten
-          </a>
         </div>
 
         <p id="error" style="color: red; margin-top: 1.5rem; text-align: center;"></p>
@@ -242,7 +245,7 @@
           window.location.href = 'index.html';
         })
         .catch((err) => {
-          errorEl.textContent = err.message;
+          errorEl.textContent = err.code + ': ' + err.message;
         });
     }
   </script>
