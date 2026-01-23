@@ -15,10 +15,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
 
-  <!-- Deine firebase.js (muss nach SDKs kommen) -->
+  <!-- Deine firebase.js (nach SDKs, damit auth definiert ist) -->
   <script src="firebase.js"></script>
 
-  <!-- Test-Logik – ganz unten -->
+  <!-- Test-Logik – ganz unten, nach allem -->
   <script>
     function testFirebase() {
       const output = document.getElementById('output');
