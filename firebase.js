@@ -1,6 +1,5 @@
-// firebase.js – globale Version für GitHub Pages
+// firebase.js – globale Version für GitHub Pages (kein import/export)
 
-// Deine Config
 const firebaseConfig = {
   apiKey: "AIzaSyCVOWzlu3_N3zd6yS90D2YY-U1ZL0VYHVo",
   authDomain: "echtlucky-blog.firebaseapp.com",
@@ -13,7 +12,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Google Provider
 const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+// Optional: Firestore, wenn du später Posts speichern willst
+const db = firebase.firestore();

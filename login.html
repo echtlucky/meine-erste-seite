@@ -68,7 +68,7 @@
     © 2026 echtlucky • Competitives Fortnite Journey
   </footer>
 
-  <!-- Firebase CDN (global) -->
+  <!-- Firebase SDKs – global laden -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
 
@@ -84,6 +84,7 @@
       const password = document.getElementById('password').value;
       auth.signInWithEmailAndPassword(email, password)
         .then(() => {
+          alert('Erfolgreich eingeloggt!');
           window.location.href = 'index.html';
         })
         .catch((err) => {
@@ -95,6 +96,7 @@
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
         .then(() => {
+          alert('Mit Google eingeloggt!');
           window.location.href = 'index.html';
         })
         .catch((err) => {
@@ -102,7 +104,7 @@
         });
     }
 
-    // Status checken (optional)
+    // Optional: Status checken (wenn schon eingeloggt)
     auth.onAuthStateChanged((user) => {
       if (user) {
         console.log('Eingeloggt als:', user.email);
