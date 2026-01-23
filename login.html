@@ -290,35 +290,7 @@
 </head>
 <body>
 
-  <header>
-  <a href="index.html" class="logo">echtlucky</a>
-
-  <button class="menu-toggle" id="menuToggle">☰</button>
-
-  <nav id="mainNav">
-    <!-- Links zentriert in der Mitte -->
-    <div class="nav-links">
-      <a href="index.html" class="active">Home</a>
-      <a href="blog.html">Blog</a>
-      <a href="index.html#stats">Stats</a>
-      <a href="index.html#discord">Discord</a>
-      <a href="index.html#twitch">Twitch</a>
-    </div>
-
-    <!-- Rechts: Nutzername + Dropdown oder Anmelden -->
-    <div class="nav-right">
-      <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
-
-      <div class="user-dropdown-wrapper">
-        <span id="user-name-display" class="user-name" style="display:none;"></span>
-        <div id="dropdown-menu" class="dropdown-menu">
-          <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
-          <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
-        </div>
-      </div>
-    </div>
-  </nav>
-</header>
+    <div id="header-placeholder"></div>
 
   <div class="login-page">
     <!-- Linke Seite – Game-Mosaik-Vibes -->
@@ -721,6 +693,16 @@ auth.createUserWithEmailAndPassword(emailInput.value.trim(), pwInput.value)
       }
     });
   }
+</script>
+
+<script>
+  // Header laden
+  fetch('header.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('header-placeholder').innerHTML = html;
+      initHeaderScripts(); // Dropdown & Firebase Auth initialisieren
+    });
 </script>
 
 </body>
