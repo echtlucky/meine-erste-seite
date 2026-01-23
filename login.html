@@ -590,23 +590,24 @@
         return;
       }
 
-auth.createUserWithEmailAndPassword(email, password)
+auth.createUserWithEmailAndPassword(emailInput.value.trim(), pwInput.value)
   .then((userCredential) => {
-    const user = userCredential.user;
-    // Nutzername speichern
-    user.updateProfile({ displayName: username });
+  const user = userCredential.user;
+  // Nutzername speichern
+  user.updateProfile({ displayName: usernameInput.value });
 
-    // Rolle in Firestore speichern
-    db.collection('users').doc(user.uid).set({
-      email: email,
-      username: username,
-      role: 'user', // Standard = user
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+  // Rolle in Firestore speichern
+  db.collection('users').doc(user.uid).set({
+    email: emailInput.value.trim(),
+    username: usernameInput.value,
+    role: 'user',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
 
-    alert('Registrierung erfolgreich! Willkommen, ' + username + '!');
-    closeRegisterModal();
-  })
+  alert('Registrierung erfolgreich! Willkommen, ' + usernameInput.value + '!');
+  closeRegisterModal();
+})
+
         .catch((err) => {
           let msg = 'Etwas ist schiefgelaufen';
 
