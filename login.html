@@ -27,8 +27,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 30% 40%, rgba(0,255,136,0.06) 0%, transparent 60%),
-                  radial-gradient(circle at 70% 60%, rgba(0,255,136,0.04) 0%, transparent 70%);
+      background: radial-gradient(circle at 50% 50%, rgba(0,255,136,0.06) 0%, transparent 60%);
       pointer-events: none;
     }
 
@@ -42,7 +41,7 @@
     }
 
     .left-content h1 {
-      font-size: 5rem;
+      font-size: 5.5rem;
       font-weight: 900;
       margin-bottom: 1rem;
       text-shadow: 0 0 30px var(--accent);
@@ -53,8 +52,7 @@
     }
 
     .left-content p {
-      font-size: 1.5rem;
-      max-width: 600px;
+      font-size: 1.6rem;
       opacity: 0.9;
       margin: 0 auto 2rem;
     }
@@ -72,39 +70,56 @@
     .login-card {
       width: 100%;
       max-width: 420px;
-      padding: 3rem 2.5rem;
+      padding: 3.5rem 2.5rem;
       background: var(--card-bg);
       border: 1px solid rgba(0,255,136,0.3);
-      border-radius: 20px;
+      border-radius: 24px;
       box-shadow: 0 10px 40px rgba(0,255,136,0.12);
+      text-align: center;
     }
 
     .login-card h2 {
       color: var(--accent);
-      font-size: 2.4rem;
-      margin-bottom: 2rem;
-      text-align: center;
+      font-size: 2.6rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .input-group {
+      position: relative;
+      margin: 1.5rem 0;
     }
 
     input {
       width: 100%;
-      padding: 1rem;
-      margin: 1rem 0;
+      padding: 1.1rem;
       border: 1px solid var(--border);
       border-radius: 12px;
       background: rgba(255,255,255,0.03);
       color: var(--text);
       font-size: 1.1rem;
+      transition: all 0.3s;
+    }
+
+    input.error {
+      border-color: #ff3366;
+      box-shadow: 0 0 0 4px rgba(255,51,102,0.15);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255,51,102,0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255,51,102,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,51,102,0); }
     }
 
     .btn-login {
       background: var(--accent);
       color: #000;
       width: 100%;
-      padding: 1.2rem;
-      font-size: 1.3rem;
+      padding: 1.3rem;
+      font-size: 1.35rem;
       border-radius: 12px;
-      margin-top: 1.5rem;
+      margin-top: 2rem;
       box-shadow: 0 8px 30px rgba(0,255,136,0.3);
       transition: all 0.3s;
     }
@@ -115,36 +130,18 @@
       box-shadow: 0 15px 50px rgba(0,255,136,0.5);
     }
 
-    .links {
-      text-align: center;
-      margin-top: 2rem;
-      font-size: 0.95rem;
-      opacity: 0.85;
-    }
-
-    .links a {
-      color: var(--accent);
-      text-decoration: none;
-      margin: 0 1rem;
-      transition: color 0.25s;
-    }
-
-    .links a:hover {
-      color: var(--accent-hover);
-    }
-
     .google-login-btn {
       background: white;
       color: #000;
       width: 100%;
-      padding: 1rem;
-      font-size: 1.1rem;
+      padding: 1.2rem;
+      font-size: 1.2rem;
       border-radius: 12px;
       margin-top: 1.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.8rem;
+      gap: 1rem;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       transition: all 0.3s;
     }
@@ -156,8 +153,66 @@
     }
 
     .google-icon {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 2.5rem;
+      font-size: 1rem;
+      opacity: 0.85;
+    }
+
+    .links a {
+      color: var(--accent);
+      text-decoration: none;
+      margin: 0 1.5rem;
+      transition: color 0.25s;
+      cursor: pointer;
+    }
+
+    .links a:hover {
+      color: var(--accent-hover);
+    }
+
+    /* Modal für Registrierung */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg);
+      border: 1px solid rgba(0,255,136,0.3);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 10px 40px rgba(0,255,136,0.2);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 2rem;
+      font-size: 2rem;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    .modal h2 {
+      color: var(--accent);
+      font-size: 2.4rem;
+      margin-bottom: 2rem;
+      text-align: center;
     }
   </style>
 </head>
@@ -169,7 +224,7 @@
       <div class="left-content">
         <h1>echtlucky</h1>
         <p>Competitive Fortnite Community</p>
-        <p style="font-size: 1.2rem; opacity: 0.8;">
+        <p style="font-size: 1.4rem; opacity: 0.85; max-width: 600px;">
           Scrims • VOD-Reviews • Trainingspläne • Team-Suche • Cash-Cup-Vibes
         </p>
       </div>
@@ -180,8 +235,13 @@
       <div class="login-card">
         <h2>Community Login</h2>
 
-        <input type="email" id="email" placeholder="E-Mail" required>
-        <input type="password" id="password" placeholder="Passwort" required>
+        <div class="input-group">
+          <input type="email" id="email" placeholder="E-Mail" required>
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="password" placeholder="Passwort" required>
+        </div>
 
         <button class="btn btn-login" onclick="loginWithEmail()">
           Einloggen
@@ -198,12 +258,38 @@
         </button>
 
         <div class="links">
-          <a href="register.html">Registrieren</a>
+          <a onclick="showRegisterModal()">Registrieren</a>
           <a href="#">Passwort vergessen?</a>
         </div>
 
         <p id="error" style="color: red; margin-top: 1.5rem; text-align: center;"></p>
       </div>
+    </div>
+  </div>
+
+  <!-- Registrierungs-Modal -->
+  <div id="registerModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeRegisterModal()">×</span>
+      <h2>Registrieren</h2>
+
+      <div class="input-group">
+        <input type="email" id="reg-email" placeholder="E-Mail" required>
+      </div>
+
+      <div class="input-group">
+        <input type="password" id="reg-password" placeholder="Passwort" required>
+      </div>
+
+      <div class="input-group">
+        <input type="password" id="reg-password-confirm" placeholder="Passwort wiederholen" required>
+      </div>
+
+      <button class="btn btn-login" onclick="registerUser()">
+        Registrieren
+      </button>
+
+      <p id="reg-error" style="color: red; margin-top: 1.5rem; text-align: center;"></p>
     </div>
   </div>
 
@@ -223,11 +309,48 @@
     document.body.classList.add('loaded');
 
     const errorEl = document.getElementById('error');
+    const regErrorEl = document.getElementById('reg-error');
+    const modal = document.getElementById('registerModal');
+
+    function showRegisterModal() {
+      modal.style.display = 'flex';
+      regErrorEl.textContent = '';
+    }
+
+    function closeRegisterModal() {
+      modal.style.display = 'none';
+    }
+
+    // Klick außerhalb Modal schließt es
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeRegisterModal();
+    });
 
     function loginWithEmail() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      auth.signInWithEmailAndPassword(email, password)
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+
+      emailInput.classList.remove('error');
+      passwordInput.classList.remove('error');
+      errorEl.textContent = '';
+
+      let hasError = false;
+
+      if (!emailInput.value.trim()) {
+        emailInput.classList.add('error');
+        hasError = true;
+      }
+
+      if (!passwordInput.value.trim()) {
+        passwordInput.classList.add('error');
+        hasError = true;
+      }
+
+      if (hasError) {
+        return;
+      }
+
+      auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
         .then(() => {
           alert('Erfolgreich eingeloggt!');
           window.location.href = 'index.html';
@@ -246,6 +369,38 @@
         })
         .catch((err) => {
           errorEl.textContent = err.code + ': ' + err.message;
+        });
+    }
+
+    function registerUser() {
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirm = document.getElementById('reg-password-confirm').value;
+
+      regErrorEl.textContent = '';
+
+      if (!email || !password || !confirm) {
+        regErrorEl.textContent = 'Bitte alle Felder ausfüllen';
+        return;
+      }
+
+      if (password !== confirm) {
+        regErrorEl.textContent = 'Passwörter stimmen nicht überein';
+        return;
+      }
+
+      if (password.length < 6) {
+        regErrorEl.textContent = 'Passwort muss mindestens 6 Zeichen lang sein';
+        return;
+      }
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          alert('Registrierung erfolgreich! Du kannst dich jetzt einloggen.');
+          closeRegisterModal();
+        })
+        .catch((err) => {
+          regErrorEl.textContent = err.code + ': ' + err.message;
         });
     }
   </script>
