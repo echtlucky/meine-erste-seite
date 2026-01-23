@@ -55,8 +55,13 @@
         user.updateProfile({ displayName: username })
           .then(() => console.log("Nutzername gespeichert:", username))
           .catch(err => console.error("Fehler beim Speichern:", err));
+          window.auth = auth;
+          window.db = db;
       }
     };
+
+    window.auth = auth;
+    window.db = db;
 
     console.log("Firebase initialisiert – auth & db bereit");
   }
