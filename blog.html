@@ -78,41 +78,6 @@
 
   <script src="firebase.js"></script>
 
-  <script>
-  document.body.classList.add('loaded');
-
-  // Logout-Funktion (falls nicht schon da)
-  function logout() {
-    auth.signOut()
-      .then(() => {
-        alert('Erfolgreich ausgeloggt!');
-        window.location.href = 'index.html';
-      })
-      .catch((err) => {
-        alert('Ausloggen fehlgeschlagen: ' + err.message);
-      });
-  }
-
-  // Prüfen, ob eingeloggt + ob Admin → Button anzeigen
-  auth.onAuthStateChanged((user) => {
-    const logoutLink = document.getElementById('logout-link');
-    const adminWrapper = document.getElementById('admin-button-wrapper');
-
-    if (user) {
-      // Ausloggen-Link immer anzeigen, wenn eingeloggt
-      if (logoutLink) logoutLink.style.display = 'inline-block';
-
-      // Admin-Button nur für dich
-      if (adminWrapper && user.email === "lucassteckel04@gmail.com") {
-        adminWrapper.style.display = 'block';
-      }
-    } else {
-      if (logoutLink) logoutLink.style.display = 'none';
-      if (adminWrapper) adminWrapper.style.display = 'none';
-    }
-  });
-</script>
-
 <script>
   document.body.classList.add('loaded');
 
@@ -127,30 +92,44 @@
       });
   }
 
-  // Prüfen, ob eingeloggt → Nutzername + Dropdown anzeigen
+  // Prüfen, ob eingeloggt → Ausloggen-Link + Admin-Button + Nutzername + Dropdown anzeigen
   auth.onAuthStateChanged((user) => {
+    const logoutLink = document.getElementById('logout-link');
     const loginLink = document.getElementById('login-link');
     const userNameDisplay = document.getElementById('user-name-display');
     const dropdownMenu = document.getElementById('dropdown-menu');
     const adminPanelLink = document.getElementById('admin-panel-link');
+    const adminWrapper = document.getElementById('admin-button-wrapper');
 
     if (user) {
+      // Ausloggen-Link anzeigen
+      if (logoutLink) logoutLink.style.display = 'inline-block';
+
+      // Anmelden-Link verstecken
       if (loginLink) loginLink.style.display = 'none';
+
+      // Nutzername anzeigen
       if (userNameDisplay) {
         userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
         userNameDisplay.style.display = 'inline-block';
       }
 
-      // Admin-Link nur für dich
-      const ADMIN_EMAIL = "lucassteckel04@gmail.com"; // ← deine E-Mail
-      if (user.email === ADMIN_EMAIL && adminPanelLink) {
+      // Admin-Button nur für dich (auf blog.html)
+      if (adminWrapper && user.email === "lucassteckel04@gmail.com") {
+        adminWrapper.style.display = 'block';
+      }
+
+      // Admin-Link im Dropdown nur für dich
+      if (adminPanelLink && user.email === "lucassteckel04@gmail.com") {
         adminPanelLink.style.display = 'block';
       }
     } else {
+      if (logoutLink) logoutLink.style.display = 'none';
       if (loginLink) loginLink.style.display = 'inline-block';
       if (userNameDisplay) userNameDisplay.style.display = 'none';
       if (dropdownMenu) dropdownMenu.classList.remove('show');
       if (adminPanelLink) adminPanelLink.style.display = 'none';
+      if (adminWrapper) adminWrapper.style.display = 'none';
     }
   });
 
