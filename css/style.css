@@ -14,42 +14,47 @@
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
+  padding-top: 48px; /* ← KRITISCHER FIX: Body schiebt den Content unter den Header */
 }
 
-/* Header – dünn mit kleinem Akzent */
+/* Header – dünn & fixed */
 header {
-  background: rgba(0, 0, 0, 0.88);
-  backdrop-filter: blur(10px);
-  padding: 0.5rem 6%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 0.2rem 6%;
   position: fixed;
   width: 100%;
   top: 0;
+  left: 0;
   z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 48px;                     /* schlank & modern */
-  border-bottom: 2px solid var(--accent); /* der Akzent: grüne Linie */
+  height: 48px;                     /* feste, dünne Höhe */
+  border-bottom: 2px solid rgba(0, 255, 136, 0.25);
 }
 
-/* Logo mit Glow-Akzent */
 .logo {
   color: var(--accent);
   font-weight: 700;
   font-size: 1.6rem;
-  letter-spacing: -0.5px;
+  letter-spacing: 1px;
   text-decoration: none;
   display: flex;
   align-items: center;
   height: 100%;
   line-height: 1;
-  text-shadow: 0 0 10px rgba(0, 255, 136, 0.4); /* subtiler Glow */
 }
 
 /* Navigation – Desktop */
@@ -62,7 +67,7 @@ nav a {
   color: var(--text);
   text-decoration: none;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 1.05rem;
   transition: color 0.25s;
   display: flex;
   align-items: center;
@@ -116,15 +121,15 @@ nav a.active {
     height: 44px;
   }
 
-  .logo {
-    font-size: 1.4rem;
+  body {
+    padding-top: 44px; /* passt sich Mobile-Höhe an */
   }
 }
 
-/* Hauptinhalt – angepasst an dünnen Header */
+/* Hauptinhalt – kein Margin oben mehr, Body-Padding übernimmt */
 .container {
   max-width: 1100px;
-  margin: 70px auto 80px; /* Luft oben angepasst */
+  margin: 20px auto 80px; /* nur wenig oben, weil Body padding-top hat */
   padding: 0 5%;
 }
 
