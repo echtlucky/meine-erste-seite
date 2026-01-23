@@ -1,50 +1,55 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Firebase Test | echtlucky</title>
 </head>
-<body>
+<body style="background:#111;color:white;font-family:sans-serif;">
 
-  <h2>Firebase Test-Seite</h2>
+  <h2>🔥 Firebase Test-Seite</h2>
+
   <button onclick="testFirebase()">Test-Button drücken</button>
-  <p id="output" style="margin-top: 20px; font-size: 1.2rem;"></p>
 
-  <!-- Firebase SDKs zuerst laden -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <p id="output" style="margin-top:20px;font-size:1.1rem;"></p>
 
-  <!-- Deine firebase.js (nach SDKs, damit auth definiert ist) -->
-  <script src="firebase.js"></script>
+  <!-- Firebase COMPAT SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
-  <!-- Test-Logik – ganz unten, nach allem -->
+  <!-- Firebase Init -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "DEIN_API_KEY",
+      authDomain: "DEIN_PROJECT.firebaseapp.com",
+      projectId: "DEIN_PROJECT_ID",
+      appId: "DEINE_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    // GLOBAL verfügbar machen
+    window.auth = firebase.auth();
+  </script>
+
+  <!-- Test-Logik -->
   <script>
     function testFirebase() {
-      const output = document.getElementById('output');
-      output.style.color = 'white';
+      const output = document.getElementById("output");
 
-      if (typeof firebase === 'undefined') {
-        output.textContent = 'Fehler: Firebase SDK nicht geladen (firebase undefined)';
-        output.style.color = 'red';
+      if (!window.auth) {
+        output.textContent = "❌ auth nicht verfügbar";
+        output.style.color = "red";
         return;
       }
 
-      if (typeof auth === 'undefined') {
-        output.textContent = 'Fehler: auth nicht definiert (firebase.js fehlt oder lädt nicht)';
-        output.style.color = 'red';
-        return;
-      }
+      output.textContent = "✅ Firebase erfolgreich geladen!";
+      output.style.color = "lime";
 
-      output.textContent = 'Erfolg: Firebase geladen! auth existiert.';
-
-      // Status prüfen
       auth.onAuthStateChanged((user) => {
-        if (user) {
-          output.textContent += '\nDu bist eingeloggt als: ' + user.email;
-        } else {
-          output.textContent += '\nNicht eingeloggt.';
-        }
+        output.textContent += user
+          ? "\n👤 Eingeloggt als: " + user.email
+          : "\n🔓 Nicht eingeloggt";
       });
     }
   </script>
