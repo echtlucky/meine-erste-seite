@@ -102,6 +102,7 @@
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 2.5rem;
       margin-top: 3rem;
+      min-height: 300px; /* Platz für Spinner */
     }
 
     .blog-card {
@@ -137,11 +138,34 @@
       margin-bottom: 1.5rem;
     }
 
-    .loading {
-      text-align: center;
+    /* Laderad (Spinner) */
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      margin: 0 auto;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 6px solid rgba(0,255,136,0.2);
+      border-top: 6px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1.5rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
       font-size: 1.3rem;
       opacity: 0.8;
-      margin: 4rem 0;
     }
   </style>
 </head>
@@ -180,7 +204,10 @@
     <p class="intro">Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind.</p>
 
     <div id="blog-list" class="blog-list">
-      <p class="loading">Posts werden geladen...</p>
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p class="loading-text">Posts werden geladen...</p>
+      </div>
     </div>
   </div>
 
@@ -281,7 +308,12 @@
     // Posts aus Firestore laden
     function loadBlogPosts() {
       const blogList = document.getElementById('blog-list');
-      blogList.innerHTML = '<p class="loading">Posts werden geladen...</p>';
+      blogList.innerHTML = `
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p class="loading-text">Posts werden geladen...</p>
+        </div>
+      `;
 
       db.collection('posts')
         .orderBy('createdAt', 'desc')
