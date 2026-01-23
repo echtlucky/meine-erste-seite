@@ -39,19 +39,19 @@
 </head>
 <body class="page-transition">
 
-<header>
-  <a href="index.html" class="logo">echtlucky</a>
+  <header>
+    <a href="index.html" class="logo">echtlucky</a>
 
-  <button class="menu-toggle" id="menuToggle">☰</button>
+    <button class="menu-toggle" id="menuToggle">☰</button>
 
-  <nav id="mainNav">
-      <a href="#" class="active">Home</a>
+    <nav id="mainNav">
+      <a href="index.html">Home</a>
       <a href="blog.html">Blog</a>
-      <a href="#stats">Stats</a>
-      <a href="#discord">Discord</a>
-      <a href="#twitch">Twitch</a>
-  </nav>
-</header>
+      <a href="index.html#stats">Stats</a>
+      <a href="index.html#discord">Discord</a>
+      <a href="index.html#twitch">Twitch</a>
+    </nav>
+  </header>
 
   <div class="container">
     <div class="login-container">
@@ -68,40 +68,55 @@
     © 2026 echtlucky • Competitives Fortnite Journey
   </footer>
 
-  <!-- Firebase SDKs -->
-  <script type="module">
-    import { auth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from './firebase.js';
+  <!-- Firebase SDK CDN (global, kein module) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
 
+  <!-- Dein firebase.js (global, kein import) -->
+  <script src="firebase.js"></script>
+
+  <!-- Login-Logik -->
+  <script>
     const errorEl = document.getElementById('error');
 
-    window.loginWithEmail = async () => {
+    function loginWithEmail() {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = 'index.html'; // oder admin.html
-      } catch (err) {
-        errorEl.textContent = err.message.includes('wrong-password') ? 'Falsches Passwort' : err.message;
-      }
-    };
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = 'index.html';
+        })
+        .catch((err) => {
+          errorEl.textContent = err.code === 'auth/wrong-password' ? 'Falsches Passwort' : err.message;
+        });
+    }
 
-    window.loginWithGoogle = async () => {
-      const provider = new GoogleAuthProvider();
-      try {
-        await signInWithPopup(auth, provider);
-        window.location.href = 'index.html';
-      } catch (err) {
-        errorEl.textContent = err.message;
+    function loginWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(() => {
+          window.location.href = 'index.html';
+        })
+        .catch((err) => {
+          errorEl.textContent = err.message;
+        });
+    }
+
+    // Optional: Status checken (ob schon eingeloggt)
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log('Eingeloggt als:', user.email);
+        // Optional: Weiterleitung, wenn schon eingeloggt
+        // window.location.href = 'index.html';
       }
-    };
+    });
   </script>
-  
+
   <script src="js/menu.js"></script>
 
-<script>
-  // Seite lädt → Animation starten
-  document.body.classList.add('loaded');
-</script>
+  <script>
+    document.body.classList.add('loaded');
+  </script>
 
 </body>
 </html>
