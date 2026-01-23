@@ -150,24 +150,24 @@ if (!auth.currentUser || auth.currentUser.email !== "deine-echte-email@gmail.com
   const statusEl = document.getElementById('status');
 
   if (!user) {
-    // Nicht eingeloggt → zurück zu login
+    // Gar nicht eingeloggt → zurück zu Login
     window.location.href = 'login.html';
     return;
   }
 
-  // Hier deine echte E-Mail als Admin
-  const ADMIN_EMAIL = "lucassteckel04@gmail.com";  // ← DEINE ECHTE E-MAIL HIER EINTRAGEN!
+  // Hier deine echte E-Mail-Adresse (die, mit der du dich anmeldest)
+  const ADMIN_EMAIL = "lucassteckel04@gmail.com";  // ← DAS HIER ÄNDERN!
 
   if (user.email === ADMIN_EMAIL) {
-    // Du bist Admin → alles normal anzeigen
-    statusEl.textContent = 'Eingeloggt als Admin: ' + user.email;
+    // Du bist Admin → Seite normal laden
+    statusEl.textContent = 'Admin-Zugriff: ' + user.email;
     statusEl.style.color = 'lime';
-    // Optional: Versteckte Inhalte anzeigen, falls du welche hast
+    // Optional: Formular anzeigen (falls du es versteckt hast)
     // document.getElementById('admin-form').style.display = 'block';
   } else {
-    // Eingeloggt, aber kein Admin → raus
+    // Eingeloggt, aber nicht Admin → rauswerfen
     alert('Zugriff verweigert: Nur Admin erlaubt');
-    auth.signOut();  // sofort ausloggen
+    auth.signOut();  // Sofort ausloggen
     window.location.href = 'index.html';
   }
 });

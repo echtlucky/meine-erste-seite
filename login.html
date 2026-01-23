@@ -229,9 +229,93 @@
       font-size: 2.4rem;
       margin-bottom: 2rem;
     }
+
+    /* Hover-Dropdown für Nutzername */
+    .user-dropdown-wrapper {
+      position: relative;
+    }
+
+    .user-name {
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+
+    .user-name:hover {
+      background: rgba(0,255,136,0.1);
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(0,0,0,0.95);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      min-width: 140px;
+      z-index: 110;
+      overflow: hidden;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 0.8rem 1.5rem;
+      color: white;
+      text-decoration: none;
+      display: block;
+      transition: background 0.2s;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(0,255,136,0.15);
+      color: var(--accent);
+    }
+
+    .dropdown-item.logout {
+      color: #ff3366;
+    }
+
+    .dropdown-item.logout:hover {
+      background: rgba(255,51,102,0.15);
+    }
   </style>
 </head>
 <body>
+
+  <header>
+    <a href="index.html" class="logo">echtlucky</a>
+
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav id="mainNav">
+      <!-- Links zentriert in der Mitte -->
+      <div style="flex: 1; display: flex; justify-content: center; gap: 3rem;">
+        <a href="index.html">Home</a>
+        <a href="blog.html">Blog</a>
+        <a href="index.html#stats">Stats</a>
+        <a href="index.html#discord">Discord</a>
+        <a href="index.html#twitch">Twitch</a>
+      </div>
+
+      <!-- Rechts: Nutzername + Dropdown oder Anmelden -->
+      <div class="user-dropdown-wrapper">
+        <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
+
+        <span id="user-name-display" class="user-name" style="display:none;"></span>
+        <div id="dropdown-menu" class="dropdown-menu">
+          <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+        </div>
+      </div>
+    </nav>
+  </header>
 
   <div class="login-page">
     <!-- Linke Seite – Game-Mosaik-Vibes -->
@@ -289,6 +373,10 @@
     <div class="modal-content">
       <span class="modal-close" onclick="closeRegisterModal()">×</span>
       <h2>Registrieren</h2>
+
+      <div class="input-group">
+        <input type="text" id="reg-username" placeholder="Nutzername (öffentlich sichtbar)" required>
+      </div>
 
       <div class="input-group">
         <input type="email" id="reg-email" placeholder="E-Mail" required>
@@ -448,16 +536,23 @@
 
     // Registrierung mit normalen Meldungen und roten Boxen
     function registerUser() {
+      const usernameInput = document.getElementById('reg-username');
       const emailInput = document.getElementById('reg-email');
       const pwInput = document.getElementById('reg-password');
       const confirmInput = document.getElementById('reg-password-confirm');
 
+      usernameInput.classList.remove('error');
       emailInput.classList.remove('error');
       pwInput.classList.remove('error');
       confirmInput.classList.remove('error');
       regErrorEl.textContent = '';
 
       let hasError = false;
+
+      if (!usernameInput.value.trim()) {
+        usernameInput.classList.add('error');
+        hasError = true;
+      }
 
       if (!emailInput.value.trim()) {
         emailInput.classList.add('error');
@@ -493,9 +588,15 @@
       }
 
       auth.createUserWithEmailAndPassword(emailInput.value, pwInput.value)
-        .then(() => {
-          alert('Registrierung erfolgreich! Du kannst dich jetzt einloggen.');
-          closeRegisterModal();
+        .then((userCredential) => {
+          const user = userCredential.user;
+          // Nutzername speichern
+          user.updateProfile({
+            displayName: usernameInput.value.trim()
+          }).then(() => {
+            alert('Registrierung erfolgreich! Willkommen, ' + usernameInput.value.trim() + '!');
+            closeRegisterModal();
+          });
         })
         .catch((err) => {
           let msg = 'Etwas ist schiefgelaufen';

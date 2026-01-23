@@ -23,3 +23,21 @@ const ADMIN_EMAIL = "deine-echte-email@gmail.com";  // ← HIER DEINE E-MAIL EIN
 
 // Exportiere sie (falls du später mehr Logik brauchst)
 window.isAdmin = (user) => user && user.email === ADMIN_EMAIL;
+
+// firebase.js (am Ende hinzufügen)
+
+// Hilfsfunktion: Nutzername beim Registrieren speichern
+function saveUsername(user, username) {
+  if (user) {
+    user.updateProfile({
+      displayName: username
+    }).then(() => {
+      console.log('Nutzername gespeichert:', username);
+    }).catch((err) => {
+      console.error('Nutzername speichern fehlgeschlagen:', err);
+    });
+  }
+}
+
+// Mach window.saveUsername verfügbar
+window.saveUsername = saveUsername;
