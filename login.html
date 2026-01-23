@@ -176,7 +176,7 @@
       color: var(--accent-hover);
     }
 
-    /* Modal für Registrierung */
+    /* Modal für Registrierung & Passwort vergessen */
     .modal {
       display: none;
       position: fixed;
@@ -197,13 +197,14 @@
       padding: 3rem 2.5rem;
       box-shadow: 0 10px 40px rgba(0,255,136,0.2);
       position: relative;
+      text-align: center;
     }
 
     .modal-close {
       position: absolute;
       top: 1.5rem;
       right: 2rem;
-      font-size: 2rem;
+      font-size: 2.5rem;
       color: var(--accent);
       cursor: pointer;
     }
@@ -212,7 +213,6 @@
       color: var(--accent);
       font-size: 2.4rem;
       margin-bottom: 2rem;
-      text-align: center;
     }
   </style>
 </head>
@@ -259,7 +259,7 @@
 
         <div class="links">
           <a onclick="showRegisterModal()">Registrieren</a>
-          <a href="#">Passwort vergessen?</a>
+          <a onclick="showResetModal()">Passwort vergessen?</a>
         </div>
 
         <p id="error" style="color: red; margin-top: 1.5rem; text-align: center;"></p>
@@ -293,6 +293,28 @@
     </div>
   </div>
 
+  <!-- Passwort vergessen Modal -->
+  <div id="resetModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeResetModal()">×</span>
+      <h2>Passwort zurücksetzen</h2>
+
+      <p style="margin-bottom: 2rem; opacity: 0.9;">
+        Gib deine E-Mail ein – wir senden dir einen Link zum Zurücksetzen.
+      </p>
+
+      <div class="input-group">
+        <input type="email" id="reset-email" placeholder="Deine E-Mail" required>
+      </div>
+
+      <button class="btn btn-login" onclick="sendPasswordReset()">
+        Link senden
+      </button>
+
+      <p id="reset-error" style="color: red; margin-top: 1.5rem; text-align: center;"></p>
+    </div>
+  </div>
+
   <footer>
     © 2026 echtlucky • Competitives Fortnite Journey
   </footer>
@@ -310,22 +332,39 @@
 
     const errorEl = document.getElementById('error');
     const regErrorEl = document.getElementById('reg-error');
-    const modal = document.getElementById('registerModal');
+    const resetErrorEl = document.getElementById('reset-error');
+    const registerModal = document.getElementById('registerModal');
+    const resetModal = document.getElementById('resetModal');
 
+    // Modal öffnen/schließen
     function showRegisterModal() {
-      modal.style.display = 'flex';
+      registerModal.style.display = 'flex';
       regErrorEl.textContent = '';
     }
 
     function closeRegisterModal() {
-      modal.style.display = 'none';
+      registerModal.style.display = 'none';
+    }
+
+    function showResetModal() {
+      resetModal.style.display = 'flex';
+      resetErrorEl.textContent = '';
+    }
+
+    function closeResetModal() {
+      resetModal.style.display = 'none';
     }
 
     // Klick außerhalb Modal schließt es
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeRegisterModal();
+    registerModal.addEventListener('click', (e) => {
+      if (e.target === registerModal) closeRegisterModal();
     });
 
+    resetModal.addEventListener('click', (e) => {
+      if (e.target === resetModal) closeResetModal();
+    });
+
+    // Login-Funktionen
     function loginWithEmail() {
       const emailInput = document.getElementById('email');
       const passwordInput = document.getElementById('password');
@@ -346,9 +385,7 @@
         hasError = true;
       }
 
-      if (hasError) {
-        return;
-      }
+      if (hasError) return;
 
       auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
         .then(() => {
@@ -356,7 +393,23 @@
           window.location.href = 'index.html';
         })
         .catch((err) => {
-          errorEl.textContent = err.code + ': ' + err.message;
+          let msg = 'Etwas ist schiefgelaufen';
+
+          if (err.code === 'auth/wrong-password') {
+            msg = 'Passwort falsch';
+            passwordInput.classList.add('error');
+          } else if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-email') {
+            msg = 'E-Mail Adresse falsch oder nicht gefunden';
+            emailInput.classList.add('error');
+          } else if (err.code === 'auth/invalid-credential') {
+            msg = 'E-Mail oder Passwort falsch';
+            emailInput.classList.add('error');
+            passwordInput.classList.add('error');
+          } else {
+            msg = err.message;
+          }
+
+          errorEl.textContent = msg;
         });
     }
 
@@ -368,39 +421,7 @@
           window.location.href = 'index.html';
         })
         .catch((err) => {
-          errorEl.textContent = err.code + ': ' + err.message;
-        });
-    }
-
-    function registerUser() {
-      const email = document.getElementById('reg-email').value.trim();
-      const password = document.getElementById('reg-password').value;
-      const confirm = document.getElementById('reg-password-confirm').value;
-
-      regErrorEl.textContent = '';
-
-      if (!email || !password || !confirm) {
-        regErrorEl.textContent = 'Bitte alle Felder ausfüllen';
-        return;
-      }
-
-      if (password !== confirm) {
-        regErrorEl.textContent = 'Passwörter stimmen nicht überein';
-        return;
-      }
-
-      if (password.length < 6) {
-        regErrorEl.textContent = 'Passwort muss mindestens 6 Zeichen lang sein';
-        return;
-      }
-
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(() => {
-          alert('Registrierung erfolgreich! Du kannst dich jetzt einloggen.');
-          closeRegisterModal();
-        })
-        .catch((err) => {
-          regErrorEl.textContent = err.code + ': ' + err.message;
+          errorEl.textContent = err.code === 'auth/popup-blocked' ? 'Pop-up wurde blockiert' : err.message;
         });
     }
   </script>
