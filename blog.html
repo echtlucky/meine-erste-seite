@@ -6,29 +6,6 @@
   <title>Blog | echtlucky</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* Header – Smart Scroll (verschwindet runter, kommt hoch) */
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 1000;
-      background: rgba(0, 0, 0, 0.92);
-      backdrop-filter: blur(12px);
-      transition: transform 0.4s ease;
-      transform: translateY(0);
-      height: 60px;
-      border-bottom: 1px solid rgba(0,255,136,0.2);
-    }
-
-    header.hidden {
-      transform: translateY(-100%);
-    }
-
-    header.scrolled {
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-
     /* Laderad (Spinner) */
     .loading-spinner {
       display: flex;
@@ -73,7 +50,7 @@
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 2.5rem;
       margin-top: 3rem;
-      min-height: 300px;
+      min-height: 300px; /* Platz für Spinner */
     }
 
     .blog-card {
@@ -249,6 +226,7 @@
 
   <footer>
     © 2026 echtlucky • Competitives Fortnite Journey • 
+    <a href="login.html">Login / Registrieren</a>
   </footer>
 
   <!-- Firebase SDKs -->
@@ -257,6 +235,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script src="firebase.js"></script>
+
   <script src="js/menu.js"></script>
 
   <script>
@@ -402,39 +381,23 @@
     loadBlogPosts();
   </script>
 
-  <!-- Smart Header – versteckt beim Runterscrollen, zeigt beim Hochscrollen -->
   <script>
-    let lastScrollY = window.scrollY;
-    let ticking = false;
+  let lastScrollY = 0;
 
-    function onScroll() {
-      const currentScrollY = window.scrollY;
+  window.addEventListener('scroll', () => {
+    const currentScrollY = window.scrollY;
 
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        document.querySelector('header').classList.add('hidden');
-      } else {
-        document.querySelector('header').classList.remove('hidden');
-      }
-
-      lastScrollY = currentScrollY <= 0 ? 0 : currentScrollY;
-
-      // Optional: Schatten beim Scrollen
-      if (currentScrollY > 50) {
-        document.querySelector('header').classList.add('scrolled');
-      } else {
-        document.querySelector('header').classList.remove('scrolled');
-      }
-
-      ticking = false;
+    if (currentScrollY > lastScrollY) {
+      // Runterscrollen → Header verstecken
+      document.querySelector('header').classList.add('hidden');
+    } else {
+      // Hochscrollen → Header zeigen
+      document.querySelector('header').classList.remove('hidden');
     }
 
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        window.requestAnimationFrame(onScroll);
-        ticking = true;
-      }
-    });
-  </script>
+    lastScrollY = currentScrollY;
+  });
+</script>
 
 </body>
 </html>
