@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Test | echtlucky</title>
+</head>
+<body>
+
+  <h2>Firebase Test-Seite</h2>
+  <button onclick="testFirebase()">Test-Button drücken</button>
+  <p id="output" style="margin-top: 20px; font-size: 1.2rem;"></p>
+
+  <!-- Firebase SDKs global laden -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+
+  <!-- Dein firebase.js -->
+  <script src="firebase.js"></script>
+
+  <script>
+    function testFirebase() {
+      const output = document.getElementById('output');
+      output.style.color = 'white';
+
+      if (typeof firebase === 'undefined') {
+        output.textContent = 'Fehler: Firebase SDK nicht geladen (firebase undefined)';
+        output.style.color = 'red';
+        return;
+      }
+
+      if (typeof auth === 'undefined') {
+        output.textContent = 'Fehler: auth nicht definiert (firebase.js fehlt oder lädt nicht)';
+        output.style.color = 'red';
+        return;
+      }
+
+      output.textContent = 'Erfolg: Firebase geladen! auth existiert.';
+      output.style.color = 'lime';
+
+      // Bonus-Test: Auth-Status prüfen
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          output.textContent += '\nDu bist eingeloggt als: ' + user.email;
+        } else {
+          output.textContent += '\nNicht eingeloggt.';
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
