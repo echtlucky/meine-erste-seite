@@ -8,7 +8,7 @@
 </head>
 <body class="page-transition">
 
-  <header>
+<header>
   <a href="index.html" class="logo">echtlucky</a>
 
   <button class="menu-toggle" id="menuToggle">☰</button>
@@ -16,8 +16,8 @@
   <nav id="mainNav">
     <!-- Links zentriert in der Mitte -->
     <div class="nav-links">
-      <a href="index.html" class="active">Home</a>
-      <a href="blog.html">Blog</a>
+      <a href="index.html">Home</a>
+      <a href="blog.html" class="active">Blog</a>
       <a href="index.html#stats">Stats</a>
       <a href="index.html#discord">Discord</a>
       <a href="index.html#twitch">Twitch</a>
@@ -67,8 +67,7 @@
   </div>
 
   <footer>
-    © 2026 echtlucky • Competitives Fortnite Journey • 
-    <a href="login.html">Login / Registrieren</a>
+    © 2026 echtlucky • Competitives Fortnite Journey
   </footer>
 
   <script src="js/menu.js"></script>
@@ -143,7 +142,7 @@
       }
 
       // Admin-Link nur für dich
-      const ADMIN_EMAIL = "lucassteckel04@gmail.com"; // Deine E-Mail
+      const ADMIN_EMAIL = "lucassteckel04@gmail.com"; // ← deine E-Mail
       if (user.email === ADMIN_EMAIL && adminPanelLink) {
         adminPanelLink.style.display = 'block';
       }
