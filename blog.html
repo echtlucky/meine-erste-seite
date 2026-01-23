@@ -5,183 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blog | echtlucky</title>
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    /* Pop-up für Post (groß, clean, bessere Qualität) */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(8px);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-    }
-
-    .modal.show {
-      display: flex;
-      opacity: 1;
-    }
-
-    .modal-content {
-      width: 90%;
-      max-width: 900px;
-      background: var(--card-bg);
-      border: 1px solid rgba(0,255,136,0.3);
-      border-radius: 24px;
-      padding: 3.5rem 3rem;
-      box-shadow: 0 15px 50px rgba(0,255,136,0.2);
-      position: relative;
-      text-align: left;
-      transform: scale(0.85);
-      opacity: 0;
-      transition: transform 0.4s ease, opacity 0.4s ease;
-    }
-
-    .modal.show .modal-content {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 1.5rem;
-      right: 2rem;
-      font-size: 2.5rem;
-      color: var(--accent);
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .modal-close:hover {
-      color: var(--accent-hover);
-    }
-
-    .modal h2 {
-      color: var(--accent);
-      font-size: 2.8rem;
-      margin-bottom: 1rem;
-    }
-
-    .modal .meta {
-      font-size: 1.1rem;
-      opacity: 0.7;
-      margin-bottom: 2rem;
-    }
-
-    .modal .post-content {
-      font-size: 1.2rem;
-      line-height: 1.7;
-      opacity: 0.95;
-    }
-
-    .modal .delete-btn {
-      background: #ff3366;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 12px;
-      margin-top: 3rem;
-      display: inline-block;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .modal .delete-btn:hover {
-      background: #ff1a4d;
-      transform: translateY(-2px);
-    }
-
-    /* Blog-Liste (clean) */
-    .blog-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      margin-top: 3rem;
-    }
-
-    .blog-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 2rem;
-      text-align: left;
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-
-    .blog-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 40px rgba(0,255,136,0.15);
-    }
-
-    .blog-card h2 {
-      color: var(--accent);
-      font-size: 2rem;
-      margin-bottom: 0.8rem;
-    }
-
-    .blog-card .meta {
-      font-size: 0.95rem;
-      opacity: 0.7;
-      margin-bottom: 1.2rem;
-    }
-
-    .blog-card p {
-      font-size: 1.1rem;
-      opacity: 0.9;
-      margin-bottom: 1.5rem;
-    }
-  </style>
 </head>
 <body class="page-transition">
 
-  <header>
-    <a href="index.html" class="logo">echtlucky</a>
+<header>
+  <a href="index.html" class="logo">echtlucky</a>
 
-    <button class="menu-toggle" id="menuToggle">☰</button>
+  <button class="menu-toggle" id="menuToggle">☰</button>
 
-    <nav id="mainNav">
-      <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="blog.html" class="active">Blog</a>
-        <a href="index.html#stats">Stats</a>
-        <a href="index.html#discord">Discord</a>
-        <a href="index.html#twitch">Twitch</a>
-      </div>
+  <nav id="mainNav">
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="blog.html" class="active">Blog</a>
+      <a href="index.html#stats">Stats</a>
+      <a href="index.html#discord">Discord</a>
+      <a href="index.html#twitch">Twitch</a>
+    </div>
 
-      <div class="nav-right">
-        <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
+    <div class="nav-right">
+      <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
 
-        <div class="user-dropdown-wrapper">
-          <span id="user-name-display" class="user-name" style="display:none;"></span>
-          <div id="dropdown-menu" class="dropdown-menu">
-            <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
-            <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
-          </div>
+      <div class="user-dropdown-wrapper">
+        <span id="user-name-display" class="user-name" style="display:none;"></span>
+        <div id="dropdown-menu" class="dropdown-menu">
+          <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
+          <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
         </div>
       </div>
-    </nav>
-  </header>
+    </div>
+  </nav>
+</header>
 
   <div class="container">
     <h1>Blog</h1>
     <p class="intro">Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind.</p>
 
     <div id="blog-list" class="blog-list"></div>
-  </div>
-
-  <!-- Pop-up für Post-Inhalt -->
-  <div id="postModal" class="modal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closePostModal()">×</span>
-      <h2 id="post-title"></h2>
-      <p class="meta" id="post-meta"></p>
-      <div class="post-content" id="post-content"></div>
-
-      <button class="delete-btn" id="delete-post-btn" style="display: none;" onclick="deletePost()">Post löschen</button>
-    </div>
   </div>
 
   <footer>
@@ -211,17 +70,15 @@
         });
     }
 
-    // Prüfen, ob eingeloggt → Anmelden/Ausloggen + Nutzername + Dropdown + Admin-Button
+    // Header-Logik (Nutzername, Dropdown, Admin-Link)
     auth.onAuthStateChanged((user) => {
       const loginLink = document.getElementById('login-link');
       const logoutLink = document.getElementById('logout-link');
       const userNameDisplay = document.getElementById('user-name-display');
       const dropdownMenu = document.getElementById('dropdown-menu');
       const adminPanelLink = document.getElementById('admin-panel-link');
-      const deletePostBtn = document.getElementById('delete-post-btn');
 
       if (user) {
-        // Eingeloggt
         if (loginLink) loginLink.style.display = 'none';
         if (logoutLink) logoutLink.style.display = 'inline-block';
 
@@ -230,30 +87,20 @@
           userNameDisplay.style.display = 'inline-block';
         }
 
-        // Admin-Link im Dropdown
         const ADMIN_EMAIL = "lucassteckel04@gmail.com";
         if (user.email === ADMIN_EMAIL && adminPanelLink) {
           adminPanelLink.style.display = 'block';
         }
-
-        // Delete-Button in Pop-up für Admin
-        if (user.email === ADMIN_EMAIL) {
-          if (deletePostBtn) deletePostBtn.style.display = 'inline-block';
-        }
       } else {
-        // Ausgeloggt
         if (loginLink) loginLink.style.display = 'inline-block';
         if (logoutLink) logoutLink.style.display = 'none';
         if (userNameDisplay) userNameDisplay.style.display = 'none';
         if (dropdownMenu) dropdownMenu.classList.remove('show');
         if (adminPanelLink) adminPanelLink.style.display = 'none';
-        if (deletePostBtn) deletePostBtn.style.display = 'none';
       }
-
-      loadBlogPosts(); // Posts laden
     });
 
-    // Hover → Dropdown öffnen/schließen
+    // Hover → Dropdown
     const userNameDisplay = document.getElementById('user-name-display');
     const dropdownMenu = document.getElementById('dropdown-menu');
 
@@ -269,16 +116,50 @@
       });
     }
 
-    // Pop-up öffnen/schließen
+    // Posts aus Firestore laden
+    function loadBlogPosts() {
+      const blogList = document.getElementById('blog-list');
+      blogList.innerHTML = '<p style="text-align: center; opacity: 0.7;">Posts werden geladen...</p>';
+
+      db.collection('posts')
+        .orderBy('createdAt', 'desc')
+        .get()
+        .then((snapshot) => {
+          blogList.innerHTML = '';
+
+          if (snapshot.empty) {
+            blogList.innerHTML = '<p style="text-align: center; opacity: 0.7;">Noch keine Beiträge vorhanden.</p>';
+            return;
+          }
+
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const card = document.createElement('div');
+            card.classList.add('blog-card');
+            card.innerHTML = `
+              <h2>${data.title}</h2>
+              <p class="meta">${data.date} • von ${data.author}</p>
+              <p>${data.content.substring(0, 150)}...</p>
+              <button class="btn" onclick="showPostModal('${doc.id}', '${data.title.replace(/'/g, "\\'")}', '${data.date} • von ${data.author}', '${data.content.replace(/'/g, "\\'")}')">Lesen</button>
+            `;
+            blogList.appendChild(card);
+          });
+        })
+        .catch((err) => {
+          blogList.innerHTML = '<p style="color: red; text-align: center;">Fehler beim Laden: ' + err.message + '</p>';
+          console.error(err);
+        });
+    }
+
+    // Pop-up für Post-Inhalt
     const postModal = document.getElementById('postModal');
-    let currentPostId = null;
 
     function showPostModal(id, title, meta, content) {
       document.getElementById('post-title').textContent = title;
       document.getElementById('post-meta').textContent = meta;
       document.getElementById('post-content').innerHTML = content; // HTML erlaubt
 
-      currentPostId = id; // Für Löschung speichern
+      currentPostId = id;
 
       postModal.style.display = 'flex';
       setTimeout(() => postModal.classList.add('show'), 10);
@@ -294,32 +175,9 @@
       if (e.target === postModal) closePostModal();
     });
 
-    // Blog-Posts aus Firestore laden
-    function loadBlogPosts() {
-      const blogList = document.getElementById('blog-list');
-      blogList.innerHTML = '';
+    let currentPostId = null;
 
-      db.collection('posts').orderBy('createdAt', 'desc').get()
-        .then((snapshot) => {
-          snapshot.forEach((doc) => {
-            const data = doc.data();
-            const card = document.createElement('div');
-            card.classList.add('blog-card');
-            card.innerHTML = `
-              <h2>${data.title}</h2>
-              <p class="meta">${data.date} • von ${data.author}</p>
-              <p>${data.content.substring(0, 150)}...</p>
-              <button class="btn" onclick="showPostModal('${doc.id}', '${data.title}', '${data.date} • von ${data.author}', '${data.content.replace(/\n/g, '<br>')}')">Lesen</button>
-            `;
-            blogList.appendChild(card);
-          });
-        })
-        .catch((err) => {
-          console.error('Posts laden fehlgeschlagen:', err);
-        });
-    }
-
-    // Post löschen (aus Pop-up)
+    // Post löschen (aus Pop-up, nur Admin)
     function deletePost() {
       if (currentPostId && confirm('Post wirklich löschen?')) {
         db.collection('posts').doc(currentPostId).delete()
@@ -333,6 +191,9 @@
           });
       }
     }
+
+    // Seite laden → Posts anzeigen
+    loadBlogPosts();
   </script>
 
 </body>
