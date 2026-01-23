@@ -3,47 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin | echtlucky</title>
+  <title>Admin – Neuen Beitrag erstellen | echtlucky</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     .admin-container {
       max-width: 800px;
       margin: 140px auto 80px;
-      padding: 2rem;
+      padding: 3rem 2.5rem;
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,255,136,0.08);
     }
-    input, textarea {
-      width: 100%;
-      padding: 0.8rem;
-      margin: 0.8rem 0;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: rgba(255,255,255,0.05);
-      color: var(--text);
+
+    h2 {
+      color: var(--accent);
+      font-size: 2.6rem;
+      margin-bottom: 2rem;
+      text-align: center;
     }
+
+    label {
+      display: block;
+      margin: 1.5rem 0 0.5rem;
+      font-size: 1.1rem;
+      color: #aaa;
+    }
+
+    input[type="text"],
+    input[type="date"],
     textarea {
-      height: 200px;
+      width: 100%;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+
+    textarea {
+      min-height: 220px;
       resize: vertical;
     }
+
     .btn-save {
       background: var(--accent);
-      color: black;
+      color: #000;
       width: 100%;
-      margin-top: 1rem;
-      padding: 1rem;
+      padding: 1.2rem;
+      font-size: 1.3rem;
+      border-radius: 12px;
+      margin-top: 2rem;
+      box-shadow: 0 8px 30px rgba(0,255,136,0.3);
+      transition: all 0.3s;
     }
+
+    .btn-save:hover {
+      background: var(--accent-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 50px rgba(0,255,136,0.5);
+    }
+
     #status {
-      margin-top: 1rem;
+      margin-top: 1.5rem;
       text-align: center;
+      font-size: 1.2rem;
       font-weight: bold;
     }
+
     #logout {
       background: #ff3366;
       color: white;
-      margin-top: 2rem;
       width: 100%;
+      padding: 1rem;
+      margin-top: 3rem;
+      border-radius: 12px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -54,28 +90,33 @@
 
     <button class="menu-toggle" id="menuToggle">☰</button>
 
-<nav id="mainNav">
-  <a href="index.html">Home</a>
-  <a href="blog.html">Blog</a>
-  <a href="index.html#stats">Stats</a>
-  <a href="index.html#discord">Discord</a>
-  <a href="index.html#twitch">Twitch</a>
+    <nav id="mainNav">
+      <a href="index.html">Home</a>
+      <a href="blog.html">Blog</a>
+      <a href="index.html#stats">Stats</a>
+      <a href="index.html#discord">Discord</a>
+      <a href="index.html#twitch">Twitch</a>
 
-  <!-- Ausloggen-Link – nur sichtbar wenn eingeloggt -->
-  <a href="#" id="logout-link" style="display:none; color:#ff3366;" onclick="logout()">Ausloggen</a>
-</nav>
+      <a href="#" id="logout-link" style="display:none; color:#ff3366;" onclick="logout()">Ausloggen</a>
+    </nav>
   </header>
 
   <div class="container">
     <div class="admin-container">
-      <h2>Neuen Blog-Post erstellen</h2>
+      <h2>Neuen Beitrag erstellen</h2>
 
-      <input type="text" id="title" placeholder="Titel des Posts" required>
-      <textarea id="content" placeholder="Inhalt des Posts (HTML erlaubt)" required></textarea>
+      <label for="title">Titel</label>
+      <input type="text" id="title" placeholder="z. B. Mein Ballistic-Setup 2026" required>
+
+      <label for="content">Inhalt (HTML erlaubt)</label>
+      <textarea id="content" placeholder="Dein Text hier... Markdown/HTML wird unterstützt" required></textarea>
+
+      <label for="date">Datum</label>
       <input type="date" id="date" value="2026-01-23" required>
 
       <button class="btn btn-save" onclick="savePost()">Post veröffentlichen</button>
-      <p id="status" style="color: lime;"></p>
+
+      <p id="status"></p>
 
       <button id="logout" onclick="logout()">Ausloggen</button>
     </div>
@@ -90,14 +131,16 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-  <!-- Deine firebase.js -->
   <script src="firebase.js"></script>
 
-  <!-- Admin-Logik -->
+  <script src="js/menu.js"></script>
+
   <script>
+    document.body.classList.add('loaded');
+
     const statusEl = document.getElementById('status');
 
-    // Prüfen, ob eingeloggt
+    // Schutz: Nur eingeloggt erlaubt
     auth.onAuthStateChanged((user) => {
       if (!user) {
         window.location.href = 'login.html';
@@ -107,9 +150,10 @@
       }
     });
 
+    // Post speichern
     function savePost() {
-      const title = document.getElementById('title').value;
-      const content = document.getElementById('content').value;
+      const title = document.getElementById('title').value.trim();
+      const content = document.getElementById('content').value.trim();
       const date = document.getElementById('date').value;
 
       if (!title || !content || !date) {
@@ -118,66 +162,41 @@
         return;
       }
 
-      const post = {
+      const postData = {
         title,
         content,
         date,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        author: auth.currentUser ? auth.currentUser.email : 'Unbekannt'
       };
 
-      db.collection('posts').add(post)
-        .then(() => {
-          statusEl.textContent = 'Post erfolgreich gespeichert!';
+      db.collection('posts')
+        .add(postData)
+        .then((docRef) => {
+          statusEl.textContent = 'Post erfolgreich gespeichert! (ID: ' + docRef.id + ')';
           statusEl.style.color = 'lime';
+          // Felder leeren
           document.getElementById('title').value = '';
           document.getElementById('content').value = '';
         })
-        .catch((err) => {
-          statusEl.textContent = 'Fehler: ' + err.message;
+        .catch((error) => {
+          statusEl.textContent = 'Fehler beim Speichern: ' + error.message;
           statusEl.style.color = 'red';
         });
     }
 
+    // Logout
     function logout() {
       auth.signOut()
         .then(() => {
-          window.location.href = 'login.html';
+          alert('Erfolgreich ausgeloggt!');
+          window.location.href = 'index.html';
         })
         .catch((err) => {
           alert('Ausloggen fehlgeschlagen: ' + err.message);
         });
     }
   </script>
-
-  <script src="js/menu.js"></script>
-
-  <script>
-    document.body.classList.add('loaded');
-  </script>
-
-  <script>
-  // Logout-Funktion
-  function logout() {
-    auth.signOut()
-      .then(() => {
-        alert('Erfolgreich ausgeloggt!');
-        window.location.href = 'index.html';
-      })
-      .catch((err) => {
-        alert('Ausloggen fehlgeschlagen: ' + err.message);
-      });
-  }
-
-  // Prüfen, ob eingeloggt → Ausloggen-Link anzeigen
-  auth.onAuthStateChanged((user) => {
-    const logoutLink = document.getElementById('logout-link');
-    if (user && logoutLink) {
-      logoutLink.style.display = 'inline-block';
-    } else if (logoutLink) {
-      logoutLink.style.display = 'none';
-    }
-  });
-</script>
 
 </body>
 </html>
