@@ -104,7 +104,7 @@
         });
     }
 
-    // Optional: Status checken (wenn schon eingeloggt)
+    // Optional: Status checken
     auth.onAuthStateChanged((user) => {
       if (user) {
         console.log('Eingeloggt als:', user.email);

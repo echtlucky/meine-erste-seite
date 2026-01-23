@@ -1,4 +1,4 @@
-// firebase.js – globale Version für GitHub Pages (kein import/export)
+// firebase.js – globale Version (funktioniert ohne type="module")
 
 const firebaseConfig = {
   apiKey: "AIzaSyCVOWzlu3_N3zd6yS90D2YY-U1ZL0VYHVo",
@@ -11,8 +11,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
+// Globale Variablen
 const auth = firebase.auth();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-// Optional: Firestore, wenn du später Posts speichern willst
-const db = firebase.firestore();
