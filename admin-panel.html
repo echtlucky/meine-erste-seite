@@ -10,6 +10,7 @@
   <style>
     body {
       font-family: 'Roboto', sans-serif;
+      overflow-x: hidden;
       background: var(--bg);
       padding-top: 60px;
     }
@@ -56,6 +57,7 @@
       font-size: 1.8rem;
       letter-spacing: -0.3px;
       text-decoration: none;
+      text-shadow: 0 0 8px rgba(0,255,136,0.2);
     }
 
     nav {
@@ -122,6 +124,7 @@
       position: fixed;
       height: 100%;
       overflow-y: auto;
+      transition: all 0.3s;
     }
 
     .sidebar-header {
@@ -133,6 +136,8 @@
       color: var(--accent);
       font-size: 2.4rem;
       margin: 0;
+      letter-spacing: 0.3px;
+      text-shadow: 0 0 8px rgba(0,255,136,0.2);
     }
 
     .sidebar-menu {
@@ -173,12 +178,15 @@
       margin-left: 280px;
       padding: 3rem 4rem;
       width: calc(100% - 280px);
+      background: rgba(255,255,255,0.02);
+      border-left: 1px solid var(--border);
     }
 
     h2 {
       color: var(--accent);
       font-size: 3.4rem;
       margin-bottom: 2rem;
+      letter-spacing: 0.2px;
     }
 
     #status {
@@ -218,21 +226,23 @@
       border-radius: 12px;
       background: rgba(255,255,255,0.05);
       color: var(--text);
-      transition: border-color 0.3s;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
 
     input:focus, textarea:focus {
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,255,136,0.15);
       outline: none;
     }
 
     input[type="date"] {
-      background: white;
-      color: #000;
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
     }
 
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(1);
+      opacity: 0.8;
     }
 
     textarea {
@@ -248,14 +258,16 @@
       font-size: 1.4rem;
       border-radius: 12px;
       margin-top: 2rem;
-      cursor: pointer;
-      border: none;
+      box-shadow: 0 8px 30px rgba(0,255,136,0.3);
       transition: all 0.3s;
+      border: none;
+      cursor: pointer;
     }
 
     .btn-save:hover {
       background: var(--accent-hover);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 50px rgba(0,255,136,0.5);
     }
 
     .post-list, .user-list, .ban-list {
@@ -275,6 +287,12 @@
       align-items: center;
       gap: 1rem;
       flex-wrap: wrap;
+      transition: all 0.3s;
+    }
+
+    .post-item:hover, .user-item:hover, .ban-item:hover {
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     }
 
     .delete-btn {
@@ -300,6 +318,11 @@
       border-radius: 8px;
       color: var(--text);
       font-size: 1.1rem;
+      transition: border-color 0.3s;
+    }
+
+    .role-select:focus {
+      border-color: var(--accent);
     }
 
     .ban-table {
@@ -448,12 +471,12 @@
 
       <div id="comments-tab" class="tab-content">
         <h3 style="font-size: 2rem;">Kommentare verwalten</h3>
-        <p class="empty" style="font-size: 1.3rem;">Noch keine Kommentare (kommt später).</p>
+        <p class="empty" style="font-size: 1.3rem;">Noch keine Kommentare vorhanden (kommt später).</p>
       </div>
 
       <div id="bans-tab" class="tab-content">
         <h3 style="font-size: 2rem;">Gesperrte Nutzer</h3>
-        <div class="input-group" style="display: flex; gap: 1.5rem;">
+        <div class="input-group" style="display: flex; gap: 1.5rem; align-items: center;">
           <input type="email" id="ban-email" placeholder="E-Mail-Adresse" required style="flex: 1;">
           <button class="btn btn-save" onclick="addBan()" style="width: auto; padding: 1rem 2rem;">Bannen</button>
         </div>
@@ -472,8 +495,8 @@
       </div>
 
       <div id="settings-tab" class="tab-content">
-        <h3 style="font-size: 2rem;">Settings</h3>
-        <p class="empty">Zukünftige Einstellungen (kommt später).</p>
+        <h3 style="font-size: 2rem;">Einstellungen</h3>
+        <p class="empty">Zukünftige Einstellungen (z. B. Theme, API-Keys).</p>
       </div>
     </main>
   </div>
@@ -508,7 +531,7 @@
     const userList = document.getElementById('user-list');
     const banList = document.getElementById('ban-list');
 
-    // Schutz: Nur du als Admin
+    // Schutz: Nur Admin
     auth.onAuthStateChanged((user) => {
       if (!user || user.email !== "lucassteckel04@gmail.com") {
         alert('Zugriff verweigert – nur Admin erlaubt');
