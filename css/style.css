@@ -168,38 +168,51 @@ nav {
   color: #ff3366;
 }
 
-/* Mobile: Hamburger-Menü */
+/* ======================================
+   Mobile: Hamburger-Menü (final)
+   ====================================== */
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 2rem;
+  cursor: pointer;
+}
+
 @media (max-width: 992px) {
+
   .menu-toggle {
     display: block;
   }
 
-  nav .nav-links,
-  nav .nav-right {
-    display: none;
+  nav {
+    position: relative;
   }
 
-  nav.active .nav-links,
-  nav.active .nav-right {
-    display: flex;
-    flex-direction: column;
+  #mainNav {
+    display: none;
     position: absolute;
     top: 100%;
     left: 0;
     width: 100%;
-    background: rgba(0,0,0,0.95);
-    padding: 1.5rem 0;
+    background: rgba(0,0,0,0.96);
+    flex-direction: column;
+    padding: 1.8rem 0;
     border-bottom: 1px solid var(--border);
   }
 
-  .nav-links {
-    gap: 1.5rem;
-    align-items: center;
+  #mainNav.open {
+    display: flex;
   }
 
+  .nav-links,
   .nav-right {
-    gap: 1.2rem;
-    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.4rem;
   }
 
   header {
