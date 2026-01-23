@@ -5,47 +5,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel | echtlucky</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    .admin-container {
-      max-width: 1100px;
-      margin: 140px auto 80px;
-      padding: 3rem 2.5rem;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,255,136,0.08);
-    }
-
-    h2 {
-      color: var(--accent);
-      font-size: 2.6rem;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-
-    .tabs {
+    .admin-layout {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 3rem;
-      justify-content: center;
-      flex-wrap: wrap;
+      min-height: calc(100vh - 50px);
+      margin-top: 50px; /* Header-Höhe */
     }
 
-    .tab-btn {
-      background: var(--card-bg);
-      color: var(--text);
-      padding: 1rem 2rem;
-      border-radius: 50px;
+    .sidebar {
+      width: 260px;
+      background: rgba(0,0,0,0.9);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .sidebar-header h3 {
+      color: var(--accent);
+      font-size: 1.8rem;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-item {
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s;
-      font-weight: 600;
-      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--text);
     }
 
-    .tab-btn.active {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
+    .sidebar-item:hover,
+    .sidebar-item.active {
+      background: rgba(0,255,136,0.1);
+      color: var(--accent);
+    }
+
+    .sidebar-item i {
+      font-size: 1.3rem;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      padding: 2rem;
+      width: calc(100% - 260px);
+    }
+
+    .dashboard-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 40px rgba(0,255,136,0.15);
+    }
+
+    .card h3 {
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .card-number {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: white;
     }
 
     .tab-content {
@@ -56,202 +105,127 @@
       display: block;
     }
 
-    /* Blog Verwalten */
-    .post-form {
-      margin-bottom: 3rem;
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 80px;
+        padding: 2rem 0.5rem;
+      }
+
+      .sidebar-header h3,
+      .sidebar-item span {
+        display: none;
+      }
+
+      .main-content {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+      }
     }
 
-    .post-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
 
-    .post-item {
-      background: rgba(255,255,255,0.05);
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .delete-btn {
-      background: #ff3366;
-      color: white;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      cursor: pointer;
-      border: none;
-    }
-
-    /* Benutzer Verwalten */
-    .user-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-
-    .user-item {
-      background: rgba(255,255,255,0.05);
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .user-role {
-      color: var(--accent);
-    }
-
-    .role-select {
-      padding: 0.6rem;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-    }
-
-    /* Kommentare / Bans */
-    .empty {
-      text-align: center;
-      opacity: 0.7;
-      padding: 2rem;
-    }
-
-    #status {
-      margin-top: 1.5rem;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    #logout {
-      background: #ff3366;
-      color: white;
-      width: 100%;
-      padding: 1rem;
-      margin-top: 3rem;
-      border-radius: 12px;
-      cursor: pointer;
-      border: none;
-    }
-
-    /* Hover-Dropdown für Nutzername (Header) */
-    .user-dropdown-wrapper {
-      position: relative;
-    }
-
-    .user-name {
-      color: var(--accent);
-      font-weight: 600;
-      cursor: pointer;
-      padding: 0.4rem 1rem;
-      border-radius: 8px;
-      transition: background 0.3s;
-    }
-
-    .user-name:hover {
-      background: rgba(0,255,136,0.1);
-    }
-
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background: rgba(0,0,0,0.95);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-      min-width: 180px;
-      z-index: 110;
-      overflow: hidden;
-    }
-
-    .dropdown-menu.show {
-      display: block;
-    }
-
-    .dropdown-item {
-      padding: 0.8rem 1.5rem;
-      color: white;
-      text-decoration: none;
-      display: block;
-      transition: background 0.2s;
-    }
-
-    .dropdown-item:hover {
-      background: rgba(0,255,136,0.15);
-      color: var(--accent);
-    }
-
-    .dropdown-item.admin-panel {
-      color: #00ff88;
-    }
-
-    .dropdown-item.logout {
-      color: #ff3366;
-    }
-
-    .dropdown-item.logout:hover {
-      background: rgba(255,51,102,0.15);
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body class="page-transition">
 
-<header>
-  <a href="index.html" class="logo">echtlucky</a>
+  <header>
+    <a href="index.html" class="logo">echtlucky</a>
 
-  <button class="menu-toggle" id="menuToggle">☰</button>
+    <button class="menu-toggle" id="menuToggle">☰</button>
 
-  <nav id="mainNav">
-    <!-- Links zentriert in der Mitte -->
-    <div class="nav-links">
-      <a href="index.html" class="active">Home</a>
-      <a href="blog.html">Blog</a>
-      <a href="index.html#stats">Stats</a>
-      <a href="index.html#discord">Discord</a>
-      <a href="index.html#twitch">Twitch</a>
-    </div>
+    <nav id="mainNav">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="blog.html">Blog</a>
+        <a href="index.html#stats">Stats</a>
+        <a href="index.html#discord">Discord</a>
+        <a href="index.html#twitch">Twitch</a>
+      </div>
 
-    <!-- Rechts: Nutzername + Dropdown oder Anmelden -->
-    <div class="nav-right">
-      <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
+      <div class="nav-right">
+        <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
 
-      <div class="user-dropdown-wrapper">
-        <span id="user-name-display" class="user-name" style="display:none;"></span>
-        <div id="dropdown-menu" class="dropdown-menu">
-          <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
-          <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+        <div class="user-dropdown-wrapper">
+          <span id="user-name-display" class="user-name" style="display:none;"></span>
+          <div id="dropdown-menu" class="dropdown-menu">
+            <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
+            <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+          </div>
         </div>
       </div>
-    </div>
-  </nav>
-</header>
+    </nav>
+  </header>
 
-  <div class="container">
-    <div class="admin-container">
-      <h2>Admin Panel</h2>
-
-      <p id="status" style="text-align: center; margin-bottom: 3rem;"></p>
-
-      <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('blog-tab')">Blog Verwalten</button>
-        <button class="tab-btn" onclick="showTab('users-tab')">Benutzer Verwalten</button>
-        <button class="tab-btn" onclick="showTab('comments-tab')">Kommentare Verwalten</button>
-        <button class="tab-btn" onclick="showTab('bans-tab')">Gesperrte Nutzer</button>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h3>Admin Panel</h3>
       </div>
 
-      <div id="blog-tab" class="tab-content active">
+      <ul class="sidebar-menu">
+        <li class="sidebar-item active" onclick="showTab('dashboard-tab')">
+          <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+        </li>
+        <li class="sidebar-item" onclick="showTab('blog-tab')">
+          <i class="fas fa-blog"></i> <span>Blog Verwalten</span>
+        </li>
+        <li class="sidebar-item" onclick="showTab('users-tab')">
+          <i class="fas fa-users"></i> <span>Benutzer Verwalten</span>
+        </li>
+        <li class="sidebar-item" onclick="showTab('comments-tab')">
+          <i class="fas fa-comments"></i> <span>Kommentare Verwalten</span>
+        </li>
+        <li class="sidebar-item" onclick="showTab('bans-tab')">
+          <i class="fas fa-ban"></i> <span>Gesperrte Nutzer</span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Hauptbereich -->
+    <main class="main-content">
+      <h2 id="tab-title">Dashboard</h2>
+      <p id="status" style="text-align: center; margin-bottom: 2rem;"></p>
+
+      <!-- Dashboard Tab -->
+      <div id="dashboard-tab" class="tab-content active">
+        <div class="dashboard-cards">
+          <div class="card">
+            <h3>Posts</h3>
+            <div class="card-number" id="post-count">0</div>
+          </div>
+
+          <div class="card">
+            <h3>Nutzer</h3>
+            <div class="card-number" id="user-count">0</div>
+          </div>
+
+          <div class="card">
+            <h3>Gesperrte User</h3>
+            <div class="card-number" id="ban-count">0</div>
+          </div>
+
+          <div class="card">
+            <h3>Kommentare</h3>
+            <div class="card-number" id="comment-count">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blog Tab -->
+      <div id="blog-tab" class="tab-content">
         <h3>Neuen Post erstellen</h3>
         <div class="post-form">
           <label for="title">Titel</label>
@@ -270,16 +244,19 @@
         <div id="post-list" class="post-list"></div>
       </div>
 
+      <!-- Benutzer Tab -->
       <div id="users-tab" class="tab-content">
         <h3>Benutzer verwalten</h3>
         <div id="user-list" class="user-list"></div>
       </div>
 
+      <!-- Kommentare Tab -->
       <div id="comments-tab" class="tab-content">
         <h3>Kommentare verwalten</h3>
         <p class="empty">Noch keine Kommentare vorhanden. (Funktion kommt später.)</p>
       </div>
 
+      <!-- Bans Tab -->
       <div id="bans-tab" class="tab-content">
         <h3>Gesperrte Nutzer</h3>
         <label for="ban-email">E-Mail zum Bannen hinzufügen</label>
@@ -289,9 +266,7 @@
         <h4>Gesperrte E-Mails</h4>
         <div id="ban-list" class="user-list"></div>
       </div>
-
-      <button id="logout" onclick="logout()">Ausloggen</button>
-    </div>
+    </main>
   </div>
 
   <footer>
@@ -314,7 +289,9 @@
     const postList = document.getElementById('post-list');
     const userList = document.getElementById('user-list');
     const banList = document.getElementById('ban-list');
-    const adminPanelLink = document.getElementById('admin-panel-link');
+    const postCountEl = document.getElementById('post-count');
+    const userCountEl = document.getElementById('user-count');
+    const banCountEl = document.getElementById('ban-count');
 
     // Schutz: Nur du als Admin
     auth.onAuthStateChanged((user) => {
@@ -323,24 +300,22 @@
         return;
       }
 
-      const ADMIN_EMAIL = "lucassteckel04@gmail.com"; // Deine E-Mail
+      const ADMIN_EMAIL = "lucassteckel04@gmail.com";
 
-      if (user.email === ADMIN_EMAIL) {
-        statusEl.textContent = 'Admin-Zugriff erteilt: ' + user.email;
-        statusEl.style.color = 'lime';
-
-        // Admin-Link im Dropdown anzeigen
-        if (adminPanelLink) adminPanelLink.style.display = 'block';
-
-        // Admin-Funktionen laden
-        loadPosts();
-        loadUsers();
-        loadBans();
-      } else {
-        alert('Zugriff verweigert: Nur Admin erlaubt');
+      if (user.email !== ADMIN_EMAIL) {
+        alert('Zugriff verweigert – nur Admin erlaubt');
         auth.signOut();
         window.location.href = 'index.html';
+        return;
       }
+
+      statusEl.textContent = 'Admin-Zugriff erteilt: ' + user.email;
+      statusEl.style.color = 'lime';
+
+      // Daten laden
+      loadPosts();
+      loadUsers();
+      loadBans();
     });
 
     // Logout
@@ -362,6 +337,8 @@
 
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
+
+      document.getElementById('tab-title').textContent = event.target.textContent;
     }
 
     // Blog Verwalten – Post speichern
@@ -404,12 +381,16 @@
 
       db.collection('posts').orderBy('createdAt', 'desc').get()
         .then((snapshot) => {
+          postCountEl.textContent = snapshot.size;
           snapshot.forEach((doc) => {
             const data = doc.data();
             const item = document.createElement('div');
             item.classList.add('post-item');
             item.innerHTML = `
-              <span>${data.title} (${data.date})</span>
+              <div>
+                <strong>${data.title}</strong><br>
+                <small>${data.date} • von ${data.author}</small>
+              </div>
               <button class="delete-btn" onclick="deletePost('${doc.id}')">Löschen</button>
             `;
             postList.appendChild(item);
@@ -442,12 +423,16 @@
 
       db.collection('users').get()
         .then((snapshot) => {
+          userCountEl.textContent = snapshot.size;
           snapshot.forEach((doc) => {
             const data = doc.data();
             const item = document.createElement('div');
             item.classList.add('user-item');
             item.innerHTML = `
-              <span>${data.email} (${data.role || 'user'})</span>
+              <div>
+                <strong>${data.email}</strong><br>
+                <small>Role: <span class="user-role">${data.role || 'user'}</span></small>
+              </div>
               <select class="role-select" onchange="changeRole('${doc.id}', this.value)">
                 <option value="user" ${data.role === 'user' ? 'selected' : ''}>User</option>
                 <option value="mod" ${data.role === 'mod' ? 'selected' : ''}>Mod</option>
@@ -468,6 +453,7 @@
         .then(() => {
           statusEl.textContent = 'Rolle geändert';
           statusEl.style.color = 'lime';
+          loadUsers();
         })
         .catch((err) => {
           statusEl.textContent = 'Rolle ändern fehlgeschlagen: ' + err.message;
@@ -481,6 +467,7 @@
 
       db.collection('bans').get()
         .then((snapshot) => {
+          banCountEl.textContent = snapshot.size;
           snapshot.forEach((doc) => {
             const data = doc.data();
             const item = document.createElement('div');
@@ -535,64 +522,6 @@
       }
     }
   </script>
-
-  <script>
-  document.body.classList.add('loaded');
-
-  function logout() {
-    auth.signOut()
-      .then(() => {
-        alert('Erfolgreich ausgeloggt!');
-        window.location.href = 'index.html';
-      })
-      .catch((err) => {
-        alert('Ausloggen fehlgeschlagen: ' + err.message);
-      });
-  }
-
-  // Prüfen, ob eingeloggt → Nutzername + Dropdown anzeigen
-  auth.onAuthStateChanged((user) => {
-    const loginLink = document.getElementById('login-link');
-    const userNameDisplay = document.getElementById('user-name-display');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    const adminPanelLink = document.getElementById('admin-panel-link');
-
-    if (user) {
-      if (loginLink) loginLink.style.display = 'none';
-      if (userNameDisplay) {
-        userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
-        userNameDisplay.style.display = 'inline-block';
-      }
-
-      // Admin-Link nur für dich
-      const ADMIN_EMAIL = "lucassteckel04@gmail.com"; // Deine E-Mail
-      if (user.email === ADMIN_EMAIL && adminPanelLink) {
-        adminPanelLink.style.display = 'block';
-      }
-    } else {
-      if (loginLink) loginLink.style.display = 'inline-block';
-      if (userNameDisplay) userNameDisplay.style.display = 'none';
-      if (dropdownMenu) dropdownMenu.classList.remove('show');
-      if (adminPanelLink) adminPanelLink.style.display = 'none';
-    }
-  });
-
-  // Hover → Dropdown öffnen/schließen
-  const userNameDisplay = document.getElementById('user-name-display');
-  const dropdownMenu = document.getElementById('dropdown-menu');
-
-  if (userNameDisplay && dropdownMenu) {
-    userNameDisplay.addEventListener('mouseenter', () => {
-      dropdownMenu.classList.add('show');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!userNameDisplay.contains(e.target) && !dropdownMenu.contains(e.target)) {
-        dropdownMenu.classList.remove('show');
-      }
-    });
-  }
-</script>
 
 </body>
 </html>
