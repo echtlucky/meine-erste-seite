@@ -380,26 +380,28 @@
   </script>
 
 <script>
-  let lastScrollTop = 0;
+  let lastScrollY = window.scrollY;
+  let ticking = false;
 
-  window.addEventListener('scroll', function() {
-    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  function onScroll() {
+    const currentScrollY = window.scrollY;
 
-    if (scrollTop > lastScrollTop) {
-      // Runterscrollen → Header verstecken
+    if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      // Runterscrollen und mehr als 100px gescrollt → verstecken
       document.querySelector('header').classList.add('hidden');
     } else {
-      // Hochscrollen → Header zeigen
+      // Hochscrollen → immer wieder zeigen
       document.querySelector('header').classList.remove('hidden');
     }
 
-    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // Für negative Werte
+    lastScrollY = currentScrollY;
+    ticking = false;
+  }
 
-    // Optional: Schatten hinzufügen, wenn gescrollt
-    if (scrollTop > 50) {
-      document.querySelector('header').classList.add('scrolled');
-    } else {
-      document.querySelector('header').classList.remove('scrolled');
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(onScroll);
+      ticking = true;
     }
   });
 </script>
