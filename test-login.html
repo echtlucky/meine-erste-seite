@@ -15,7 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
 
-  <!-- Dein firebase.js -->
+  <!-- Deine firebase.js -->
   <script src="firebase.js"></script>
 
   <script>
@@ -36,9 +36,8 @@
       }
 
       output.textContent = 'Erfolg: Firebase geladen! auth existiert.';
-      output.style.color = 'lime';
 
-      // Bonus-Test: Auth-Status prüfen
+      // Bonus: Status prüfen
       auth.onAuthStateChanged((user) => {
         if (user) {
           output.textContent += '\nDu bist eingeloggt als: ' + user.email;
