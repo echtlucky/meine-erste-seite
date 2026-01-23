@@ -43,11 +43,11 @@
     <p class="intro">Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind.</p>
 
     <!-- Admin-Button – nur für dich sichtbar -->
-<div id="admin-button-wrapper" style="text-align: center; margin: 2rem 0 4rem; display: none;">
-  <a href="admin.html" class="btn" style="background: #ff3366; color: white; font-size: 1.3rem; padding: 1.2rem 3rem;">
-    Neuen Beitrag erstellen (Admin)
-  </a>
-</div>
+    <div id="admin-button-wrapper" style="text-align: center; margin: 2rem 0 4rem; display: none;">
+      <a href="admin-panel.html" class="btn" style="background: #ff3366; color: white; font-size: 1.3rem; padding: 1.2rem 3rem;">
+        Neuen Beitrag erstellen (Admin)
+      </a>
+    </div>
 
     <div class="blog-list">
       <div class="blog-card">
@@ -67,10 +67,9 @@
   </div>
 
   <footer>
-    © 2026 echtlucky • Competitives Fortnite Journey
+    © 2026 echtlucky • Competitives Fortnite Journey • 
+    <a href="login.html">Login / Registrieren</a>
   </footer>
-
-  <script src="js/menu.js"></script>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -78,77 +77,77 @@
 
   <script src="firebase.js"></script>
 
-<script>
-  document.body.classList.add('loaded');
+  <script src="js/menu.js"></script>
 
-  function logout() {
-    auth.signOut()
-      .then(() => {
-        alert('Erfolgreich ausgeloggt!');
-        window.location.href = 'index.html';
-      })
-      .catch((err) => {
-        alert('Ausloggen fehlgeschlagen: ' + err.message);
-      });
-  }
+  <script>
+    document.body.classList.add('loaded');
 
-  // Prüfen, ob eingeloggt → Ausloggen-Link + Admin-Button + Nutzername + Dropdown anzeigen
-  auth.onAuthStateChanged((user) => {
-    const logoutLink = document.getElementById('logout-link');
-    const loginLink = document.getElementById('login-link');
+    function logout() {
+      auth.signOut()
+        .then(() => {
+          alert('Erfolgreich ausgeloggt!');
+          window.location.href = 'index.html';
+        })
+        .catch((err) => {
+          alert('Ausloggen fehlgeschlagen: ' + err.message);
+        });
+    }
+
+    // Prüfen, ob eingeloggt → Anmelden/Ausloggen + Nutzername + Dropdown + Admin-Button
+    auth.onAuthStateChanged((user) => {
+      const loginLink = document.getElementById('login-link');
+      const logoutLink = document.getElementById('logout-link');
+      const userNameDisplay = document.getElementById('user-name-display');
+      const dropdownMenu = document.getElementById('dropdown-menu');
+      const adminPanelLink = document.getElementById('admin-panel-link');
+      const adminWrapper = document.getElementById('admin-button-wrapper');
+
+      if (user) {
+        // Eingeloggt
+        if (loginLink) loginLink.style.display = 'none';
+        if (logoutLink) logoutLink.style.display = 'inline-block';
+
+        if (userNameDisplay) {
+          userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
+          userNameDisplay.style.display = 'inline-block';
+        }
+
+        // Admin-Button (Blog-Seite)
+        if (adminWrapper && user.email === "lucassteckel04@gmail.com") {
+          adminWrapper.style.display = 'block';
+        }
+
+        // Admin-Link im Dropdown
+        if (adminPanelLink && user.email === "lucassteckel04@gmail.com") {
+          adminPanelLink.style.display = 'block';
+        }
+      } else {
+        // Ausgeloggt
+        if (loginLink) loginLink.style.display = 'inline-block';
+        if (logoutLink) logoutLink.style.display = 'none';
+        if (userNameDisplay) userNameDisplay.style.display = 'none';
+        if (dropdownMenu) dropdownMenu.classList.remove('show');
+        if (adminPanelLink) adminPanelLink.style.display = 'none';
+        if (adminWrapper) adminWrapper.style.display = 'none';
+      }
+    });
+
+    // Hover → Dropdown öffnen/schließen
     const userNameDisplay = document.getElementById('user-name-display');
     const dropdownMenu = document.getElementById('dropdown-menu');
-    const adminPanelLink = document.getElementById('admin-panel-link');
-    const adminWrapper = document.getElementById('admin-button-wrapper');
 
-    if (user) {
-      // Ausloggen-Link anzeigen
-      if (logoutLink) logoutLink.style.display = 'inline-block';
+    if (userNameDisplay && dropdownMenu) {
+      userNameDisplay.addEventListener('mouseenter', () => {
+        dropdownMenu.classList.add('show');
+      });
 
-      // Anmelden-Link verstecken
-      if (loginLink) loginLink.style.display = 'none';
-
-      // Nutzername anzeigen
-      if (userNameDisplay) {
-        userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
-        userNameDisplay.style.display = 'inline-block';
-      }
-
-      // Admin-Button nur für dich (auf blog.html)
-      if (adminWrapper && user.email === "lucassteckel04@gmail.com") {
-        adminWrapper.style.display = 'block';
-      }
-
-      // Admin-Link im Dropdown nur für dich
-      if (adminPanelLink && user.email === "lucassteckel04@gmail.com") {
-        adminPanelLink.style.display = 'block';
-      }
-    } else {
-      if (logoutLink) logoutLink.style.display = 'none';
-      if (loginLink) loginLink.style.display = 'inline-block';
-      if (userNameDisplay) userNameDisplay.style.display = 'none';
-      if (dropdownMenu) dropdownMenu.classList.remove('show');
-      if (adminPanelLink) adminPanelLink.style.display = 'none';
-      if (adminWrapper) adminWrapper.style.display = 'none';
+      document.addEventListener('click', (e) => {
+        if (!userNameDisplay.contains(e.target) && !dropdownMenu.contains(e.target)) {
+          dropdownMenu.classList.remove('show');
+        }
+      });
     }
-  });
-
-  // Hover → Dropdown öffnen/schließen
-  const userNameDisplay = document.getElementById('user-name-display');
-  const dropdownMenu = document.getElementById('dropdown-menu');
-
-  if (userNameDisplay && dropdownMenu) {
-    userNameDisplay.addEventListener('mouseenter', () => {
-      dropdownMenu.classList.add('show');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!userNameDisplay.contains(e.target) && !dropdownMenu.contains(e.target)) {
-        dropdownMenu.classList.remove('show');
-      }
-    });
-  }
-</script>
+  </script>
 
 </body>
 </html>
