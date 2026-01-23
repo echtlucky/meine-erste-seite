@@ -1,4 +1,4 @@
-// firebase.js – globale Version (compat, funktioniert auf GitHub Pages)
+// firebase.js – globale compat-Version
 
 const firebaseConfig = {
   apiKey: "AIzaSyCVOWzlu3_N3zd6yS90D2YY-U1ZL0VYHVo",
@@ -10,9 +10,9 @@ const firebaseConfig = {
   measurementId: "G-MEFF1FQDFF"
 };
 
-// Firebase initialisieren
+// Firebase initialisieren (compat-Style)
 firebase.initializeApp(firebaseConfig);
 
-// 🔥 GLOBAL verfügbar machen
-window.auth = firebase.auth();
-window.googleProvider = new firebase.auth.GoogleAuthProvider();
+// Globale auth & provider
+const auth = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
