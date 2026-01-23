@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | echtlucky</title>
   <link rel="stylesheet" href="css/style.css">
+
   <style>
     .login-container {
       max-width: 400px;
@@ -37,65 +38,69 @@
     }
   </style>
 </head>
+
 <body class="page-transition">
 
   <header>
     <a href="index.html" class="logo">echtlucky</a>
-
-    <button class="menu-toggle" id="menuToggle">☰</button>
-
-    <nav id="mainNav">
-      <a href="index.html">Home</a>
-      <a href="blog.html">Blog</a>
-      <a href="index.html#stats">Stats</a>
-      <a href="index.html#discord">Discord</a>
-      <a href="index.html#twitch">Twitch</a>
-    </nav>
   </header>
 
   <div class="container">
     <div class="login-container">
       <h2>Admin-Login</h2>
+
       <input type="email" id="email" placeholder="E-Mail" required>
       <input type="password" id="password" placeholder="Passwort" required>
-      <button class="btn btn-login" onclick="loginWithEmail()">Mit E-Mail anmelden</button>
-      <button class="btn google-btn" onclick="loginWithGoogle()">Mit Google anmelden</button>
-      <p id="error" style="color: red; margin-top: 1rem; text-align: center;"></p>
+
+      <button class="btn btn-login" onclick="loginWithEmail()">
+        Mit E-Mail anmelden
+      </button>
+
+      <button class="btn google-btn" onclick="loginWithGoogle()">
+        Mit Google anmelden
+      </button>
+
+      <p id="error" style="color:red;margin-top:1rem;text-align:center;"></p>
     </div>
   </div>
 
   <footer>
-    © 2026 echtlucky • Competitives Fortnite Journey
+    © 2026 echtlucky
   </footer>
 
-  <!-- Firebase SDKs global laden -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <!-- 🔥 Firebase COMPAT SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
-  <!-- Deine firebase.js -->
+  <!-- Firebase Init -->
   <script src="firebase.js"></script>
 
   <!-- Login-Logik -->
   <script>
-    const errorEl = document.getElementById('error');
+    const errorEl = document.getElementById("error");
 
     function loginWithEmail() {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  alert('Versuche Anmeldung mit: ' + email);
-  auth.signInWithEmailAndPassword(email, password)
-}
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-function loginWithGoogle() {
-  alert('Google-Button geklickt');
-  const provider = new firebase.auth.GoogleAuthProvider();
-}
-  </script>
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = "admin.html";
+        })
+        .catch((error) => {
+          errorEl.textContent = error.message;
+        });
+    }
 
-  <script src="js/menu.js"></script>
-
-  <script>
-    document.body.classList.add('loaded');
+    function loginWithGoogle() {
+      auth.signInWithPopup(googleProvider)
+        .then(() => {
+          window.location.href = "admin.html";
+        })
+        .catch((error) => {
+          errorEl.textContent = error.message;
+        });
+    }
   </script>
 
 </body>
