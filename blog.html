@@ -6,7 +6,7 @@
   <title>Blog | echtlucky</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* Pop-up für neuen Post (gleiches Design wie Registrierung) */
+    /* Pop-up für Post (groß, clean, bessere Qualität) */
     .modal {
       display: none;
       position: fixed;
@@ -26,16 +26,16 @@
     }
 
     .modal-content {
-      width: 100%;
-      max-width: 700px;
+      width: 90%;
+      max-width: 900px;
       background: var(--card-bg);
       border: 1px solid rgba(0,255,136,0.3);
       border-radius: 24px;
-      padding: 3rem 2.5rem;
-      box-shadow: 0 10px 40px rgba(0,255,136,0.2);
+      padding: 3.5rem 3rem;
+      box-shadow: 0 15px 50px rgba(0,255,136,0.2);
       position: relative;
-      text-align: center;
-      transform: scale(0.8);
+      text-align: left;
+      transform: scale(0.85);
       opacity: 0;
       transition: transform 0.4s ease, opacity 0.4s ease;
     }
@@ -52,157 +52,141 @@
       font-size: 2.5rem;
       color: var(--accent);
       cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: var(--accent-hover);
     }
 
     .modal h2 {
       color: var(--accent);
-      font-size: 2.4rem;
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal .meta {
+      font-size: 1.1rem;
+      opacity: 0.7;
       margin-bottom: 2rem;
     }
 
-    .input-group {
-      margin: 1.5rem 0;
-      text-align: left;
+    .modal .post-content {
+      font-size: 1.2rem;
+      line-height: 1.7;
+      opacity: 0.95;
     }
 
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-size: 1.1rem;
-      color: #aaa;
-    }
-
-    input[type="text"],
-    input[type="date"],
-    textarea {
-      width: 100%;
-      padding: 1rem;
-      border: 1px solid var(--border);
+    .modal .delete-btn {
+      background: #ff3366;
+      color: white;
+      padding: 1rem 2rem;
       border-radius: 12px;
-      background: rgba(255,255,255,0.03);
-      color: var(--text);
-      font-size: 1.1rem;
-    }
-
-    textarea {
-      min-height: 250px;
-      resize: vertical;
-    }
-
-    .btn-save {
-      background: var(--accent);
-      color: #000;
-      width: 100%;
-      padding: 1.2rem;
-      font-size: 1.3rem;
-      border-radius: 12px;
-      margin-top: 2rem;
-      box-shadow: 0 8px 30px rgba(0,255,136,0.3);
+      margin-top: 3rem;
+      display: inline-block;
+      cursor: pointer;
       transition: all 0.3s;
     }
 
-    .btn-save:hover {
-      background: var(--accent-hover);
-      transform: translateY(-3px);
-      box-shadow: 0 15px 50px rgba(0,255,136,0.5);
+    .modal .delete-btn:hover {
+      background: #ff1a4d;
+      transform: translateY(-2px);
     }
 
-    #post-status {
-      margin-top: 1.5rem;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: bold;
+    /* Blog-Liste (clean) */
+    .blog-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .blog-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: left;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .blog-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 40px rgba(0,255,136,0.15);
+    }
+
+    .blog-card h2 {
+      color: var(--accent);
+      font-size: 2rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .blog-card .meta {
+      font-size: 0.95rem;
+      opacity: 0.7;
+      margin-bottom: 1.2rem;
+    }
+
+    .blog-card p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-bottom: 1.5rem;
     }
   </style>
 </head>
 <body class="page-transition">
 
-<header>
-  <a href="index.html" class="logo">echtlucky</a>
+  <header>
+    <a href="index.html" class="logo">echtlucky</a>
 
-  <button class="menu-toggle" id="menuToggle">☰</button>
+    <button class="menu-toggle" id="menuToggle">☰</button>
 
-  <nav id="mainNav">
-    <!-- Links zentriert in der Mitte -->
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="blog.html" class="active">Blog</a>
-      <a href="index.html#stats">Stats</a>
-      <a href="index.html#discord">Discord</a>
-      <a href="index.html#twitch">Twitch</a>
-    </div>
+    <nav id="mainNav">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="blog.html" class="active">Blog</a>
+        <a href="index.html#stats">Stats</a>
+        <a href="index.html#discord">Discord</a>
+        <a href="index.html#twitch">Twitch</a>
+      </div>
 
-    <!-- Rechts: Nutzername + Dropdown oder Anmelden -->
-    <div class="nav-right">
-      <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
+      <div class="nav-right">
+        <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
 
-      <div class="user-dropdown-wrapper">
-        <span id="user-name-display" class="user-name" style="display:none;"></span>
-        <div id="dropdown-menu" class="dropdown-menu">
-          <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
-          <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+        <div class="user-dropdown-wrapper">
+          <span id="user-name-display" class="user-name" style="display:none;"></span>
+          <div id="dropdown-menu" class="dropdown-menu">
+            <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
+            <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+          </div>
         </div>
       </div>
-    </div>
-  </nav>
-</header>
+    </nav>
+  </header>
 
   <div class="container">
     <h1>Blog</h1>
     <p class="intro">Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind.</p>
 
-    <!-- Admin-Button – nur für dich sichtbar -->
-    <div id="admin-button-wrapper" style="text-align: center; margin: 2rem 0 4rem; display: none;">
-      <button class="btn" onclick="showPostModal()" style="background: #ff3366; color: white; font-size: 1.3rem; padding: 1.2rem 3rem;">
-        Neuen Beitrag erstellen (Admin)
-      </button>
-    </div>
-
-    <div class="blog-list">
-      <div class="blog-card">
-        <h2>Mein Ballistic-Setup 2026</h2>
-        <p class="meta">22. Januar 2026 • Hardware, Settings, Trainings-Tools</p>
-        <p>Mein aktueller Monitor, Maus, Sens, Software-Stack und was ich in den nächsten Monaten ändern will.</p>
-        <a href="posts/post2.html" class="btn">Lesen</a>
-      </div>
-
-      <div class="blog-card">
-        <h2>Mein Start in Ballistic – Erste Eindrücke</h2>
-        <p class="meta">22. Januar 2026 • Erste Matches, Learnings & Ziele</p>
-        <p>Was mir in den ersten Ballistic-Lobbys aufgefallen ist und wohin ich will.</p>
-        <a href="posts/post1.html" class="btn">Lesen</a>
-      </div>
-    </div>
+    <div id="blog-list" class="blog-list"></div>
   </div>
 
-  <!-- Pop-up für neuen Post -->
+  <!-- Pop-up für Post-Inhalt -->
   <div id="postModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closePostModal()">×</span>
-      <h2>Neuen Beitrag erstellen</h2>
+      <h2 id="post-title"></h2>
+      <p class="meta" id="post-meta"></p>
+      <div class="post-content" id="post-content"></div>
 
-      <div class="input-group">
-        <input type="text" id="post-title" placeholder="Titel des Posts" required>
-      </div>
-
-      <div class="input-group">
-        <textarea id="post-content" placeholder="Inhalt des Posts (HTML/Markdown erlaubt)" required></textarea>
-      </div>
-
-      <div class="input-group">
-        <input type="date" id="post-date" required>
-      </div>
-
-      <button class="btn btn-login" onclick="savePost()">
-        Post veröffentlichen
-      </button>
-
-      <p id="post-status" style="margin-top: 1.5rem; text-align: center;"></p>
+      <button class="delete-btn" id="delete-post-btn" style="display: none;" onclick="deletePost()">Post löschen</button>
     </div>
   </div>
 
   <footer>
     © 2026 echtlucky • Competitives Fortnite Journey • 
+    <a href="login.html">Login / Registrieren</a>
   </footer>
 
   <!-- Firebase SDKs -->
@@ -235,7 +219,7 @@
       const userNameDisplay = document.getElementById('user-name-display');
       const dropdownMenu = document.getElementById('dropdown-menu');
       const adminPanelLink = document.getElementById('admin-panel-link');
-      const adminWrapper = document.getElementById('admin-button-wrapper');
+      const deletePostBtn = document.getElementById('delete-post-btn');
 
       if (user) {
         // Eingeloggt
@@ -247,14 +231,15 @@
           userNameDisplay.style.display = 'inline-block';
         }
 
-        // Admin-Button (Blog-Seite)
-        if (adminWrapper && user.email === "lucassteckel04@gmail.com") {
-          adminWrapper.style.display = 'block';
+        // Admin-Link im Dropdown
+        const ADMIN_EMAIL = "lucassteckel04@gmail.com";
+        if (user.email === ADMIN_EMAIL && adminPanelLink) {
+          adminPanelLink.style.display = 'block';
         }
 
-        // Admin-Link im Dropdown
-        if (adminPanelLink && user.email === "lucassteckel04@gmail.com") {
-          adminPanelLink.style.display = 'block';
+        // Delete-Button in Pop-up für Admin
+        if (user.email === ADMIN_EMAIL) {
+          if (deletePostBtn) deletePostBtn.style.display = 'inline-block';
         }
       } else {
         // Ausgeloggt
@@ -263,8 +248,10 @@
         if (userNameDisplay) userNameDisplay.style.display = 'none';
         if (dropdownMenu) dropdownMenu.classList.remove('show');
         if (adminPanelLink) adminPanelLink.style.display = 'none';
-        if (adminWrapper) adminWrapper.style.display = 'none';
+        if (deletePostBtn) deletePostBtn.style.display = 'none';
       }
+
+      loadBlogPosts(); // Posts laden
     });
 
     // Hover → Dropdown öffnen/schließen
@@ -283,58 +270,69 @@
       });
     }
 
-    // Pop-up für neuen Post
+    // Pop-up öffnen/schließen
     const postModal = document.getElementById('postModal');
-    const postStatus = document.getElementById('post-status');
+    let currentPostId = null;
 
-    function showPostModal() {
+    function showPostModal(id, title, meta, content) {
+      document.getElementById('post-title').textContent = title;
+      document.getElementById('post-meta').textContent = meta;
+      document.getElementById('post-content').innerHTML = content; // HTML erlaubt
+
+      currentPostId = id; // Für Löschung speichern
+
       postModal.style.display = 'flex';
       setTimeout(() => postModal.classList.add('show'), 10);
-      postStatus.textContent = '';
     }
 
     function closePostModal() {
       postModal.classList.remove('show');
       setTimeout(() => postModal.style.display = 'none', 400);
+      currentPostId = null;
     }
 
     postModal.addEventListener('click', (e) => {
       if (e.target === postModal) closePostModal();
     });
 
-    // Post speichern
-    function savePost() {
-      const title = document.getElementById('post-title').value.trim();
-      const content = document.getElementById('post-content').value.trim();
-      const date = document.getElementById('post-date').value;
+    // Blog-Posts aus Firestore laden
+    function loadBlogPosts() {
+      const blogList = document.getElementById('blog-list');
+      blogList.innerHTML = '';
 
-      if (!title || !content || !date) {
-        postStatus.textContent = 'Bitte alle Felder ausfüllen';
-        postStatus.style.color = 'red';
-        return;
-      }
-
-      const postData = {
-        title,
-        content,
-        date,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        author: auth.currentUser.email
-      };
-
-      db.collection('posts').add(postData)
-        .then(() => {
-          postStatus.textContent = 'Post gespeichert!';
-          postStatus.style.color = 'lime';
-          // Felder leeren
-          document.getElementById('post-title').value = '';
-          document.getElementById('post-content').value = '';
-          closePostModal();
+      db.collection('posts').orderBy('createdAt', 'desc').get()
+        .then((snapshot) => {
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const card = document.createElement('div');
+            card.classList.add('blog-card');
+            card.innerHTML = `
+              <h2>${data.title}</h2>
+              <p class="meta">${data.date} • von ${data.author}</p>
+              <p>${data.content.substring(0, 150)}...</p>
+              <button class="btn" onclick="showPostModal('${doc.id}', '${data.title}', '${data.date} • von ${data.author}', '${data.content.replace(/\n/g, '<br>')}')">Lesen</button>
+            `;
+            blogList.appendChild(card);
+          });
         })
         .catch((err) => {
-          postStatus.textContent = 'Fehler: ' + err.message;
-          postStatus.style.color = 'red';
+          console.error('Posts laden fehlgeschlagen:', err);
         });
+    }
+
+    // Post löschen (aus Pop-up)
+    function deletePost() {
+      if (currentPostId && confirm('Post wirklich löschen?')) {
+        db.collection('posts').doc(currentPostId).delete()
+          .then(() => {
+            alert('Post gelöscht');
+            closePostModal();
+            loadBlogPosts();
+          })
+          .catch((err) => {
+            alert('Fehler: ' + err.message);
+          });
+      }
     }
   </script>
 
