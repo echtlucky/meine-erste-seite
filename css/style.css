@@ -12,11 +12,7 @@
   --discord-hover: #7289da;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin:0; padding:0; box-sizing:border-box; }
 
 html, body {
   margin: 0;
@@ -29,11 +25,11 @@ body {
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
-  padding-top: 50px; /* ← Header-Höhe – Content fängt darunter an */
+  padding-top: 50px; /* Header-Höhe – Content fängt darunter an */
 }
 
 /* ======================================
-   Header – schlank, zentriert, Nutzername rechts
+   Header – schlank, mittig, Nutzername rechts
    ====================================== */
 header {
   background: rgba(0, 0, 0, 0.88);
@@ -67,13 +63,13 @@ nav {
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
 .nav-links {
+  flex: 1;
   display: flex;
   justify-content: center;
-  gap: 3rem;
+  gap: 2.5rem;
   margin: 0 auto;
 }
 
@@ -111,7 +107,7 @@ nav {
 }
 
 .user-name:hover {
-  background: rgba(0, 255, 136, 0.1);
+  background: rgba(0,255,136,0.1);
 }
 
 .dropdown-menu {
@@ -119,10 +115,10 @@ nav {
   position: absolute;
   top: 100%;
   right: 0;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0,0,0,0.95);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
   min-width: 180px;
   z-index: 110;
   overflow: hidden;
@@ -141,7 +137,7 @@ nav {
 }
 
 .dropdown-item:hover {
-  background: rgba(0, 255, 136, 0.15);
+  background: rgba(0,255,136,0.15);
   color: var(--accent);
 }
 
@@ -151,7 +147,7 @@ nav {
 }
 
 .dropdown-item.admin-panel:hover {
-  background: rgba(0, 255, 136, 0.2);
+  background: rgba(0,255,136,0.2);
 }
 
 .dropdown-item.logout {
@@ -159,7 +155,7 @@ nav {
 }
 
 .dropdown-item.logout:hover {
-  background: rgba(255, 51, 102, 0.15);
+  background: rgba(255,51,102,0.15);
 }
 
 /* Hamburger-Button (Mobile) */
@@ -194,7 +190,7 @@ nav {
     display: flex;
   }
 
-  nav .nav-links {
+  .nav-links {
     flex-direction: column;
     gap: 1.5rem;
     margin: 0;
@@ -216,99 +212,126 @@ nav {
   }
 }
 
-/* Hauptinhalt – kein Margin oben mehr, Body-Padding übernimmt */
+/* Hauptinhalt */
 .container {
   max-width: 1100px;
   margin: 20px auto 80px;
   padding: 0 5%;
 }
 
-h1 {
-  font-size: 3.8rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 1.2rem;
-  text-align: center;
-  letter-spacing: -1px;
-}
-
-.intro {
-  font-size: 1.3rem;
-  max-width: 820px;
-  margin: 0 auto 4rem;
-  text-align: center;
-  opacity: 0.9;
-}
-
-/* Blog-Übersicht */
-.blog-list {
+/* Hero – aufgeräumt */
+.hero {
+  min-height: 90vh;
   display: flex;
   flex-direction: column;
-  gap: 4rem;
-  margin-top: 3rem;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 5%;
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2000') center/cover no-repeat fixed;
+  position: relative;
 }
 
-.blog-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2.8rem;
-  text-align: left;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.hero h1 {
+  font-size: 5.5rem;
+  font-weight: 900;
+  margin: 0 0 1.5rem;
+  background: linear-gradient(90deg, #00ff88, #00cc66, #00ff88);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(0,255,136,0.5);
 }
 
-.blog-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 40px rgba(0, 255, 136, 0.12);
-}
-
-.blog-card h2 {
-  color: var(--accent);
-  font-size: 2.2rem;
-  margin-bottom: 0.8rem;
-}
-
-.blog-card .meta {
-  font-size: 0.95rem;
-  opacity: 0.7;
-  margin-bottom: 1.4rem;
-  display: block;
-}
-
-.blog-card p {
-  font-size: 1.1rem;
-  margin-bottom: 1.6rem;
+.hero .tagline {
+  font-size: 1.6rem;
+  margin: 0 0 3rem;
+  max-width: 900px;
   opacity: 0.9;
 }
 
-.blog-card .btn {
-  font-size: 1.15rem;
-  padding: 1rem 2.4rem;
+.hero .btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.hero .btn {
+  font-size: 1.3rem;
+  padding: 1.1rem 2.8rem;
   border-radius: 50px;
+  transition: all 0.4s;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
 }
 
-/* Page Transition */
-.page-transition {
-  opacity: 1;
-  transform: translateX(0);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+.hero .btn:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 20px 50px rgba(0,255,136,0.4);
 }
 
-body.page-transition {
-  opacity: 0;
-  transform: translateX(-30px);
+/* Community-Teaser – aufgeräumt */
+.community-teaser {
+  background: linear-gradient(135deg, rgba(0,255,136,0.06) 0%, rgba(0,0,0,0.6) 100%);
+  border: 1px solid rgba(0,255,136,0.3);
+  border-radius: 24px;
+  padding: 3.5rem 2.5rem;
+  margin: 5rem auto;
+  max-width: 1000px;
+  text-align: center;
+  backdrop-filter: blur(8px);
 }
 
-body.loaded {
-  opacity: 1;
-  transform: translateX(0);
+.community-teaser h2 {
+  font-size: 2.8rem;
+  margin-bottom: 1.2rem;
+  background: linear-gradient(90deg, #00ff88, #00cc66);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Rest (Bio, Stats, Discord, Twitch, Footer) */
+.community-teaser p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.community-teaser .features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  margin: 2.5rem 0;
+}
+
+.feature {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 16px;
+  padding: 1.8rem 1.5rem;
+  transition: all 0.3s;
+}
+
+.feature:hover {
+  transform: translateY(-8px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 30px rgba(0,255,136,0.15);
+}
+
+.feature h3 {
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.feature p {
+  opacity: 0.85;
+}
+
+/* Bio, Stats, Discord, Twitch, Footer (leicht aufgeräumt) */
 .bio, .stats-section, .discord-section, .twitch-section {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 2.5rem;
   margin: 4rem 0;
   text-align: center;
@@ -365,4 +388,21 @@ footer {
   color: #888;
   font-size: 0.95rem;
   border-top: 1px solid var(--border);
+}
+
+/* Page Transition */
+.page-transition {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+body.page-transition {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+body.loaded {
+  opacity: 1;
+  transform: translateX(0);
 }
