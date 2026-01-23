@@ -379,5 +379,30 @@
     loadBlogPosts();
   </script>
 
+<script>
+  let lastScrollTop = 0;
+
+  window.addEventListener('scroll', function() {
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (scrollTop > lastScrollTop) {
+      // Runterscrollen → Header verstecken
+      document.querySelector('header').classList.add('hidden');
+    } else {
+      // Hochscrollen → Header zeigen
+      document.querySelector('header').classList.remove('hidden');
+    }
+
+    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // Für negative Werte
+
+    // Optional: Schatten hinzufügen, wenn gescrollt
+    if (scrollTop > 50) {
+      document.querySelector('header').classList.add('scrolled');
+    } else {
+      document.querySelector('header').classList.remove('scrolled');
+    }
+  });
+</script>
+
 </body>
 </html>

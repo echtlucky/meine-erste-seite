@@ -518,7 +518,7 @@
   <footer>
     © 2026 echtlucky • Competitives Fortnite Journey
   </footer>
-  
+
       <!-- Firebase Core (compat!) -->
    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -556,6 +556,31 @@
       document.getElementById('header-placeholder').innerHTML = html;
       initHeaderScripts(); // Dropdown & Firebase Auth initialisieren
     });
+</script>
+
+<script>
+  let lastScrollTop = 0;
+
+  window.addEventListener('scroll', function() {
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (scrollTop > lastScrollTop) {
+      // Runterscrollen → Header verstecken
+      document.querySelector('header').classList.add('hidden');
+    } else {
+      // Hochscrollen → Header zeigen
+      document.querySelector('header').classList.remove('hidden');
+    }
+
+    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // Für negative Werte
+
+    // Optional: Schatten hinzufügen, wenn gescrollt
+    if (scrollTop > 50) {
+      document.querySelector('header').classList.add('scrolled');
+    } else {
+      document.querySelector('header').classList.remove('scrolled');
+    }
+  });
 </script>
 
 </body>

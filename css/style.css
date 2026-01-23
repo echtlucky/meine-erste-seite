@@ -418,3 +418,30 @@ body.loaded {
   opacity: 1;
   transform: translateX(0);
 }
+
+/* ======================================
+   Smart Header: Versteckt beim Runterscrollen, zeigt beim Hochscrollen
+   ====================================== */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(12px);
+  transition: transform 0.3s ease-in-out;
+  transform: translateY(0);
+  height: 60px;
+  border-bottom: 1px solid rgba(0,255,136,0.2);
+}
+
+/* Header verstecken beim Runterscrollen */
+header.hidden {
+  transform: translateY(-100%);
+}
+
+/* Optional: Leichter Schatten beim Scrollen */
+header.scrolled {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
