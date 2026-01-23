@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | echtlucky</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-container {
+      max-width: 800px;
+      margin: 140px auto 80px;
+      padding: 2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.8rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+    textarea {
+      height: 200px;
+      resize: vertical;
+    }
+    .btn-save {
+      background: var(--accent);
+      color: black;
+      width: 100%;
+      margin-top: 1rem;
+      padding: 1rem;
+    }
+    #status {
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: bold;
+    }
+    #logout {
+      background: #ff3366;
+      color: white;
+      margin-top: 2rem;
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="page-transition">
+
+  <header>
+    <a href="index.html" class="logo">echtlucky</a>
+
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav id="mainNav">
+      <a href="index.html">Home</a>
+      <a href="blog.html">Blog</a>
+      <a href="index.html#stats">Stats</a>
+      <a href="index.html#discord">Discord</a>
+      <a href="index.html#twitch">Twitch</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="admin-container">
+      <h2>Neuen Blog-Post erstellen</h2>
+
+      <input type="text" id="title" placeholder="Titel des Posts" required>
+      <textarea id="content" placeholder="Inhalt des Posts (HTML erlaubt)" required></textarea>
+      <input type="date" id="date" value="2026-01-23" required>
+
+      <button class="btn btn-save" onclick="savePost()">Post veröffentlichen</button>
+      <p id="status" style="color: lime;"></p>
+
+      <button id="logout" onclick="logout()">Ausloggen</button>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 echtlucky • Competitives Fortnite Journey
+  </footer>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+  <!-- Deine firebase.js -->
+  <script src="firebase.js"></script>
+
+  <!-- Admin-Logik -->
+  <script>
+    const statusEl = document.getElementById('status');
+
+    // Prüfen, ob eingeloggt
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        statusEl.textContent = 'Eingeloggt als: ' + user.email;
+        statusEl.style.color = 'lime';
+      }
+    });
+
+    function savePost() {
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+      const date = document.getElementById('date').value;
+
+      if (!title || !content || !date) {
+        statusEl.textContent = 'Bitte alle Felder ausfüllen';
+        statusEl.style.color = 'red';
+        return;
+      }
+
+      const post = {
+        title,
+        content,
+        date,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      db.collection('posts').add(post)
+        .then(() => {
+          statusEl.textContent = 'Post erfolgreich gespeichert!';
+          statusEl.style.color = 'lime';
+          document.getElementById('title').value = '';
+          document.getElementById('content').value = '';
+        })
+        .catch((err) => {
+          statusEl.textContent = 'Fehler: ' + err.message;
+          statusEl.style.color = 'red';
+        });
+    }
+
+    function logout() {
+      auth.signOut()
+        .then(() => {
+          window.location.href = 'login.html';
+        })
+        .catch((err) => {
+          alert('Ausloggen fehlgeschlagen: ' + err.message);
+        });
+    }
+  </script>
+
+  <script src="js/menu.js"></script>
+
+  <script>
+    document.body.classList.add('loaded');
+  </script>
+
+</body>
+</html>
