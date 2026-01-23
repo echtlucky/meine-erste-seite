@@ -14,11 +14,6 @@
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
-html, body {
-  margin: 0;
-  padding: 0;
-}
-
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
@@ -27,38 +22,37 @@ body {
   line-height: 1.6;
 }
 
-/* Header – dünn & Schrift mittig */
+/* Header – dünn mit kleinem Akzent */
 header {
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  padding: 0.2rem 6%;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 6%;
   position: fixed;
-  width: 100%;                      /* wieder 100% – kein Scroll mehr */
+  width: 100%;
   top: 0;
   z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 42px;                     /* dünn, aber Schrift passt rein */
-  border-bottom: 2px solid rgba(0, 255, 136, 0.25);
+  height: 48px;                     /* schlank & modern */
+  border-bottom: 2px solid var(--accent); /* der Akzent: grüne Linie */
 }
 
+/* Logo mit Glow-Akzent */
 .logo {
   color: var(--accent);
   font-weight: 700;
-  font-size: 1.4rem;                /* Schrift etwas kleiner – sitzt jetzt mittig */
-  letter-spacing: 1px;
+  font-size: 1.6rem;
+  letter-spacing: -0.5px;
   text-decoration: none;
   display: flex;
   align-items: center;
-  justify-content: center;
   height: 100%;
   line-height: 1;
-  margin: 0;
-  padding: 0;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.4); /* subtiler Glow */
 }
 
-/* Navigation – Desktop – mittig ausgerichtet */
+/* Navigation – Desktop */
 nav {
   display: flex;
   gap: 2rem;
@@ -73,7 +67,6 @@ nav a {
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 0 0.8rem;
 }
 
 nav a:hover,
@@ -120,18 +113,18 @@ nav a.active {
   }
 
   header {
-    height: 40px;
+    height: 44px;
   }
 
   .logo {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
   }
 }
 
-/* Hauptinhalt – mehr Platz oben */
+/* Hauptinhalt – angepasst an dünnen Header */
 .container {
   max-width: 1100px;
-  margin: 60px auto 80px;           /* angepasst an neuen dünnen Header */
+  margin: 70px auto 80px; /* Luft oben angepasst */
   padding: 0 5%;
 }
 
