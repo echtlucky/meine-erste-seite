@@ -11,13 +11,14 @@
   <button onclick="testFirebase()">Test-Button drücken</button>
   <p id="output" style="margin-top: 20px; font-size: 1.2rem;"></p>
 
-  <!-- Firebase SDKs global laden -->
+  <!-- Firebase SDKs zuerst laden -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
 
-  <!-- Deine firebase.js -->
+  <!-- Deine firebase.js (muss nach SDKs kommen) -->
   <script src="firebase.js"></script>
 
+  <!-- Test-Logik – ganz unten -->
   <script>
     function testFirebase() {
       const output = document.getElementById('output');
@@ -37,7 +38,7 @@
 
       output.textContent = 'Erfolg: Firebase geladen! auth existiert.';
 
-      // Bonus: Status prüfen
+      // Status prüfen
       auth.onAuthStateChanged((user) => {
         if (user) {
           output.textContent += '\nDu bist eingeloggt als: ' + user.email;
