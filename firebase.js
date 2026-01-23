@@ -1,4 +1,4 @@
-// firebase.js – globale compat-Version
+// firebase.js – globale compat-Version (GitHub Pages ready)
 
 const firebaseConfig = {
   apiKey: "AIzaSyCVOWzlu3_N3zd6yS90D2YY-U1ZL0VYHVo",
@@ -10,34 +10,53 @@ const firebaseConfig = {
   measurementId: "G-MEFF1FQDFF"
 };
 
-// Firebase initialisieren (compat-Style)
+// 🔥 Firebase initialisieren
 firebase.initializeApp(firebaseConfig);
 
-// Globale auth & provider
-const auth = firebase.auth();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
-// firebase.js (Ende hinzufügen)
+// ==========================
+// 🔐 AUTH
+// ==========================
+window.auth = firebase.auth();
+window.googleProvider = new firebase.auth.GoogleAuthProvider();
 
-// Deine E-Mail als Admin
-const ADMIN_EMAIL = "lucassteckel04@gmail.com";  // ← HIER DEINE E-MAIL EINTRAGEN!
+// ==========================
+// 📦 FIRESTORE
+// ==========================
+window.db = firebase.firestore();
 
-// Exportiere sie (falls du später mehr Logik brauchst)
-window.isAdmin = (user) => user && user.email === ADMIN_EMAIL;
+// ==========================
+// 👑 ADMIN-LOGIK
+// ==========================
+const ADMIN_EMAIL = "lucassteckel04@gmail.com";
 
-// firebase.js (am Ende hinzufügen)
+// Globaler Admin-Check
+window.isAdmin = (user) => {
+  return user && user.email === "lucassteckel04@gmail.com";
+};
 
-// Hilfsfunktion: Nutzername beim Registrieren speichern
-function saveUsername(user, username) {
-  if (user) {
-    user.updateProfile({
-      displayName: username
-    }).then(() => {
-      console.log('Nutzername gespeichert:', username);
-    }).catch((err) => {
-      console.error('Nutzername speichern fehlgeschlagen:', err);
-    });
-  }
-}
+// ==========================
+// 👤 USER-HELPER
+// ==========================
 
-// Mach window.saveUsername verfügbar
-window.saveUsername = saveUsername;
+// Nutzername speichern (z. B. nach Registrierung)
+window.saveUsername = function (user, username) {
+  if (!user || !username) return;
+
+  user.updateProfile({
+    displayName: username
+  })
+  .then(() => {
+    console.log("Nutzername gespeichert:", username);
+  })
+  .catch((err) => {
+    console.error("Fehler beim Speichern des Nutzernamens:", err);
+  });
+};
+
+// ==========================
+// 🔎 DEBUG (optional)
+// ==========================
+console.log("🔥 Firebase initialisiert:", {
+  auth: !!window.auth,
+  db: !!window.db
+});

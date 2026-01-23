@@ -555,16 +555,23 @@
   <script src="js/menu.js"></script>
 
   <script>
-    document.body.classList.add('loaded');
+  document.body.classList.add('loaded');
 
-    const db = firebase.firestore();  // Firestore initialisieren
+  // 🔒 ADMIN-SCHUTZ
+  auth.onAuthStateChanged((user) => {
+    if (!user || !window.isAdmin(user)) {
+      alert("Kein Zugriff auf das Admin Panel");
+      window.location.href = "index.html";
+    }
+  });
 
-    const statusEl = document.getElementById('status');
-    const postList = document.getElementById('post-list');
-    const userList = document.getElementById('user-list');
-    const banList = document.getElementById('ban-list');
+  // ❌ NICHT neu initialisieren!
+  // const db = firebase.firestore();  ← BLEIBT WEG
 
-    // ... dein restlicher Code (onAuthStateChanged, savePost, loadPosts usw.) bleibt gleich ...
+  const statusEl = document.getElementById('status');
+  const postList = document.getElementById('post-list');
+  const userList = document.getElementById('user-list');
+  const banList = document.getElementById('ban-list');
   </script>
 
 </body>

@@ -348,42 +348,41 @@
         });
     }
 
-    let currentUserRole = 'user';
     let currentPostId = null;
 
     // Header + Rollen + Kommentar-Formular
     auth.onAuthStateChanged((user) => {
-      const loginLink = document.getElementById('login-link');
-      const userNameDisplay = document.getElementById('user-name-display');
-      const dropdownMenu = document.getElementById('dropdown-menu');
-      const adminPanelLink = document.getElementById('admin-panel-link');
-      const commentFormWrapper = document.getElementById('comment-form-wrapper');
+  const loginLink = document.getElementById('login-link');
+  const userNameDisplay = document.getElementById('user-name-display');
+  const adminPanelLink = document.getElementById('admin-panel-link');
+  const commentFormWrapper = document.getElementById('comment-form-wrapper');
 
-      if (user) {
-        loginLink.style.display = 'none';
-        userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
-        userNameDisplay.style.display = 'inline-block';
-        commentFormWrapper.style.display = 'block';
+  if (!user) {
+    loginLink.style.display = 'inline-block';
+    userNameDisplay.style.display = 'none';
+    commentFormWrapper.style.display = 'none';
+    adminPanelLink.style.display = 'none';
+    loadBlogPosts();
+    return;
+  }
 
-        const ADMIN_EMAIL = "lucassteckel04@gmail.com";
-        if (user.email === ADMIN_EMAIL && adminPanelLink) {
-          adminPanelLink.style.display = 'block';
-        }
+  loginLink.style.display = 'none';
+  userNameDisplay.textContent =
+    user.displayName || user.email.split('@')[0];
+  userNameDisplay.style.display = 'inline-block';
+  commentFormWrapper.style.display = 'block';
 
-        // Rolle holen
-        db.collection('users').doc(user.uid).get()
-          .then((doc) => {
-            currentUserRole = doc.exists ? (doc.data().role || 'user') : 'user';
-          });
-      } else {
-        loginLink.style.display = 'inline-block';
-        userNameDisplay.style.display = 'none';
-        dropdownMenu.classList.remove('show');
-        commentFormWrapper.style.display = 'none';
-      }
+  // 🔥 HIER kommt der Rollen-Code rein
+  loadUserRole(user).then((role) => {
+    if (role === "admin" || role === "moderator") {
+      adminPanelLink.style.display = 'block';
+    } else {
+      adminPanelLink.style.display = 'none';
+    }
 
-      loadBlogPosts();
-    });
+    loadBlogPosts();
+  });
+});
 
     // Hover Dropdown
     const userNameDisplay = document.getElementById('user-name-display');
