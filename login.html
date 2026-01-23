@@ -713,30 +713,45 @@ auth.createUserWithEmailAndPassword(emailInput.value.trim(), pwInput.value)
 </script>
 
 <script>
-  let lastScrollY = window.scrollY;
-  let ticking = false;
+  fetch('header.html')
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById('header-placeholder').innerHTML = html;
+      setupMenuToggle();  // Menü-Button nachladen
+      setupUserDropdown(); // Nutzer-Dropdown nachladen
+    });
 
-  function onScroll() {
-    const currentScrollY = window.scrollY;
-
-    if (currentScrollY > lastScrollY && currentScrollY > 100) {
-      // Runterscrollen und mehr als 100px gescrollt → verstecken
-      document.querySelector('header').classList.add('hidden');
-    } else {
-      // Hochscrollen → immer wieder zeigen
-      document.querySelector('header').classList.remove('hidden');
+  function setupMenuToggle() {
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+    if (menuToggle && mainNav) {
+      menuToggle.addEventListener('click', () => {
+        mainNav.classList.toggle('open');
+      });
     }
-
-    lastScrollY = currentScrollY;
-    ticking = false;
   }
 
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      window.requestAnimationFrame(onScroll);
-      ticking = true;
+  function setupUserDropdown() {
+    const userNameDisplay = document.getElementById('user-name-display');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    if (!userNameDisplay || !dropdownMenu) return;
+
+    userNameDisplay.addEventListener('click', () => {
+      dropdownMenu.classList.toggle('show');
+    });
+
+    // Hier könntest du auch Auth-Status abfragen und UI anpassen
+    // z.B. login-link ausblenden wenn User eingeloggt
+  }
+
+  function logout() {
+    // Beispiel-Logout-Funktion mit Firebase Auth
+    if (window.auth) {
+      window.auth.signOut().then(() => {
+        window.location.href = 'index.html';
+      });
     }
-  });
+  }
 </script>
 
 </body>

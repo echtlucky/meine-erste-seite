@@ -909,5 +909,47 @@
     }
   </script>
 
+<script>
+  fetch('header.html')
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById('header-placeholder').innerHTML = html;
+      setupMenuToggle();  // Menü-Button nachladen
+      setupUserDropdown(); // Nutzer-Dropdown nachladen
+    });
+
+  function setupMenuToggle() {
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+    if (menuToggle && mainNav) {
+      menuToggle.addEventListener('click', () => {
+        mainNav.classList.toggle('open');
+      });
+    }
+  }
+
+  function setupUserDropdown() {
+    const userNameDisplay = document.getElementById('user-name-display');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    if (!userNameDisplay || !dropdownMenu) return;
+
+    userNameDisplay.addEventListener('click', () => {
+      dropdownMenu.classList.toggle('show');
+    });
+
+    // Hier könntest du auch Auth-Status abfragen und UI anpassen
+    // z.B. login-link ausblenden wenn User eingeloggt
+  }
+
+  function logout() {
+    // Beispiel-Logout-Funktion mit Firebase Auth
+    if (window.auth) {
+      window.auth.signOut().then(() => {
+        window.location.href = 'index.html';
+      });
+    }
+  }
+</script>
+
 </body>
 </html>
