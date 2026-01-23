@@ -19,7 +19,7 @@ const googleProvider = new firebase.auth.GoogleAuthProvider();
 // firebase.js (Ende hinzufügen)
 
 // Deine E-Mail als Admin
-const ADMIN_EMAIL = "deine-echte-email@gmail.com";  // ← HIER DEINE E-MAIL EINTRAGEN!
+const ADMIN_EMAIL = "lucassteckel04@gmail.com";  // ← HIER DEINE E-MAIL EINTRAGEN!
 
 // Exportiere sie (falls du später mehr Logik brauchst)
 window.isAdmin = (user) => user && user.email === ADMIN_EMAIL;
