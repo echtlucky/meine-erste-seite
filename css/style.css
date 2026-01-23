@@ -14,44 +14,51 @@
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* Header – dünn, aber nutzbar */
+/* Header – dünn & Schrift mittig */
 header {
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
-  padding: 0.4rem 5%;
+  backdrop-filter: blur(12px);
+  padding: 0.2rem 6%;
   position: fixed;
-  width: 100%;                    /* zurück auf 100% – kein Scroll mehr */
+  width: 100%;                      /* wieder 100% – kein Scroll mehr */
   top: 0;
   z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 255, 136, 0.25);
-  height: 48px;                   /* Kompromiss: dünn, aber Schrift passt */
+  height: 42px;                     /* dünn, aber Schrift passt rein */
+  border-bottom: 2px solid rgba(0, 255, 136, 0.25);
 }
 
-/* Logo */
 .logo {
   color: var(--accent);
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.4rem;                /* Schrift etwas kleiner – sitzt jetzt mittig */
   letter-spacing: 1px;
   text-decoration: none;
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 100%;
   line-height: 1;
+  margin: 0;
+  padding: 0;
 }
 
-/* Navigation – Desktop */
+/* Navigation – Desktop – mittig ausgerichtet */
 nav {
   display: flex;
   gap: 2rem;
@@ -66,6 +73,7 @@ nav a {
   display: flex;
   align-items: center;
   height: 100%;
+  padding: 0 0.8rem;
 }
 
 nav a:hover,
@@ -79,7 +87,7 @@ nav a.active {
   background: none;
   border: none;
   color: var(--accent);
-  font-size: 1.8rem;
+  font-size: 2rem;
   cursor: pointer;
 }
 
@@ -112,7 +120,7 @@ nav a.active {
   }
 
   header {
-    height: 44px;
+    height: 40px;
   }
 
   .logo {
@@ -120,10 +128,10 @@ nav a.active {
   }
 }
 
-/* Hauptinhalt */
+/* Hauptinhalt – mehr Platz oben */
 .container {
   max-width: 1100px;
-  margin: 70px auto 80px; /* angepasst an dünneren Header */
+  margin: 60px auto 80px;           /* angepasst an neuen dünnen Header */
   padding: 0 5%;
 }
 
