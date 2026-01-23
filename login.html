@@ -297,21 +297,24 @@
 
     <nav id="mainNav">
       <!-- Links zentriert in der Mitte -->
-      <div style="flex: 1; display: flex; justify-content: center; gap: 3rem;">
-        <a href="index.html">Home</a>
+      <div class="nav-links">
+        <a href="#" class="active">Home</a>
         <a href="blog.html">Blog</a>
-        <a href="index.html#stats">Stats</a>
-        <a href="index.html#discord">Discord</a>
-        <a href="index.html#twitch">Twitch</a>
+        <a href="#stats">Stats</a>
+        <a href="#discord">Discord</a>
+        <a href="#twitch">Twitch</a>
       </div>
 
       <!-- Rechts: Nutzername + Dropdown oder Anmelden -->
-      <div class="user-dropdown-wrapper">
+      <div class="nav-right">
         <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
 
-        <span id="user-name-display" class="user-name" style="display:none;"></span>
-        <div id="dropdown-menu" class="dropdown-menu">
-          <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+        <div class="user-dropdown-wrapper">
+          <span id="user-name-display" class="user-name" style="display:none;"></span>
+          <div id="dropdown-menu" class="dropdown-menu">
+            <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
+            <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+          </div>
         </div>
       </div>
     </nav>
