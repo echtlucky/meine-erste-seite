@@ -80,29 +80,16 @@
     const errorEl = document.getElementById('error');
 
     function loginWithEmail() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          alert('Eingeloggt!');
-          window.location.href = 'index.html';
-        })
-        .catch((err) => {
-          errorEl.textContent = err.code === 'auth/wrong-password' ? 'Falsches Passwort' : err.message;
-        });
-    }
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  alert('Versuche Anmeldung mit: ' + email);
+  // auth.signInWithEmailAndPassword(email, password) ← auskommentiert
+}
 
-    function loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(() => {
-          alert('Mit Google eingeloggt!');
-          window.location.href = 'index.html';
-        })
-        .catch((err) => {
-          errorEl.textContent = err.message;
-        });
-    }
+function loginWithGoogle() {
+  alert('Google-Button geklickt');
+  // const provider = new firebase.auth.GoogleAuthProvider(); ← auskommentiert
+}
   </script>
 
   <script src="js/menu.js"></script>
