@@ -68,11 +68,11 @@
     © 2026 echtlucky • Competitives Fortnite Journey
   </footer>
 
-  <!-- Firebase SDK CDN (global, kein module) -->
+  <!-- Firebase CDN (global) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
 
-  <!-- Dein firebase.js (global, kein import) -->
+  <!-- Deine firebase.js -->
   <script src="firebase.js"></script>
 
   <!-- Login-Logik -->
@@ -102,12 +102,10 @@
         });
     }
 
-    // Optional: Status checken (ob schon eingeloggt)
+    // Status checken (optional)
     auth.onAuthStateChanged((user) => {
       if (user) {
         console.log('Eingeloggt als:', user.email);
-        // Optional: Weiterleitung, wenn schon eingeloggt
-        // window.location.href = 'index.html';
       }
     });
   </script>

@@ -1,9 +1,6 @@
-// firebase.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+// firebase.js – globale Version für GitHub Pages
 
-  // ← HIER DEINEN ECHTEN CONFIG-BLOCK EINFÜGEN
+// Deine Config
 const firebaseConfig = {
   apiKey: "AIzaSyCVOWzlu3_N3zd6yS90D2YY-U1ZL0VYHVo",
   authDomain: "echtlucky-blog.firebaseapp.com",
@@ -14,11 +11,9 @@ const firebaseConfig = {
   measurementId: "G-MEFF1FQDFF"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-const googleProvider = new GoogleAuthProvider();
-
-// Export für andere Dateien
-export { auth, db, signInWithEmailAndPassword, signInWithPopup, googleProvider, onAuthStateChanged, signOut, collection, addDoc, getDocs, query, orderBy };
+// Google Provider
+const googleProvider = new firebase.auth.GoogleAuthProvider();
