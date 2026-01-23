@@ -3,37 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login | echtlucky</title>
+  <title>Login | echtlucky Community</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     .login-container {
-      max-width: 400px;
-      margin: 180px auto 80px;
-      padding: 2rem;
+      max-width: 420px;
+      margin: 160px auto 100px;
+      padding: 3rem 2.5rem;
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,255,136,0.08);
     }
+
+    h2 {
+      color: var(--accent);
+      font-size: 2.2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
     input {
       width: 100%;
-      padding: 0.8rem;
-      margin: 0.8rem 0;
+      padding: 1rem;
+      margin: 1rem 0;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
       color: var(--text);
+      font-size: 1.1rem;
     }
+
     .btn-login {
       background: var(--accent);
-      color: black;
+      color: #000;
       width: 100%;
-      margin-top: 1rem;
+      padding: 1.2rem;
+      font-size: 1.25rem;
+      border-radius: 12px;
+      margin-top: 1.5rem;
+      box-shadow: 0 6px 20px rgba(0,255,136,0.3);
     }
-    .google-btn {
-      background: white;
-      color: black;
-      margin-top: 1rem;
-      width: 100%;
+
+    .btn-login:hover {
+      background: var(--accent-hover);
+      transform: translateY(-3px);
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.95rem;
+      opacity: 0.85;
+    }
+
+    .links a {
+      color: var(--accent);
+      text-decoration: none;
+      margin: 0 1rem;
+      transition: color 0.25s;
+    }
+
+    .links a:hover {
+      color: var(--accent-hover);
+    }
+
+    .discord-login {
+      margin-top: 2.5rem;
+      text-align: center;
+    }
+
+    .discord-btn {
+      background: #5865f2;
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      display: inline-block;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(88,101,242,0.3);
+    }
+
+    .discord-btn:hover {
+      background: #7289da;
+      transform: translateY(-3px);
     }
   </style>
 </head>
@@ -44,26 +97,42 @@
 
     <button class="menu-toggle" id="menuToggle">☰</button>
 
- <nav id="mainNav">
-  <a href="index.html">Home</a>
-  <a href="blog.html">Blog</a>
-  <a href="index.html#stats">Stats</a>
-  <a href="index.html#discord">Discord</a>
-  <a href="index.html#twitch">Twitch</a>
+    <nav id="mainNav">
+      <a href="index.html">Home</a>
+      <a href="blog.html">Blog</a>
+      <a href="index.html#stats">Stats</a>
+      <a href="index.html#discord">Discord</a>
+      <a href="index.html#twitch">Twitch</a>
 
-  <!-- Ausloggen-Link – nur sichtbar wenn eingeloggt -->
-  <a href="#" id="logout-link" style="display:none; color:#ff3366;" onclick="logout()">Ausloggen</a>
- </nav>
+      <!-- Ausloggen-Link – nur sichtbar wenn eingeloggt -->
+      <a href="#" id="logout-link" style="display:none; color:#ff3366;" onclick="logout()">Ausloggen</a>
+    </nav>
   </header>
 
   <div class="container">
     <div class="login-container">
-      <h2>Admin-Login</h2>
+      <h2>Community Login</h2>
+
       <input type="email" id="email" placeholder="E-Mail" required>
       <input type="password" id="password" placeholder="Passwort" required>
-      <button class="btn btn-login" onclick="loginWithEmail()">Mit E-Mail anmelden</button>
-      <button class="btn google-btn" onclick="loginWithGoogle()">Mit Google anmelden</button>
-      <p id="error" style="color: red; margin-top: 1rem; text-align: center;"></p>
+
+      <button class="btn btn-login" onclick="loginWithEmail()">
+        Einloggen
+      </button>
+
+      <div class="links">
+        <a href="register.html">Registrieren</a>
+        <a href="#">Passwort vergessen?</a>
+      </div>
+
+      <div class="discord-login">
+        <p style="margin: 2rem 0 1rem;">Oder direkt über Discord beitreten</p>
+        <a href="https://discord.gg/c7jmXnBSv6" target="_blank" class="discord-btn">
+          Discord beitreten
+        </a>
+      </div>
+
+      <p id="error" style="color: red; margin-top: 1.5rem; text-align: center;"></p>
     </div>
   </div>
 
@@ -71,27 +140,30 @@
     © 2026 echtlucky • Competitives Fortnite Journey
   </footer>
 
-  <!-- Firebase SDKs – global + compat -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
-  <!-- Deine firebase.js -->
   <script src="firebase.js"></script>
 
-  <!-- Login-Logik -->
+  <script src="js/menu.js"></script>
+
   <script>
+    document.body.classList.add('loaded');
+
     const errorEl = document.getElementById('error');
 
     function loginWithEmail() {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+
       auth.signInWithEmailAndPassword(email, password)
         .then(() => {
           alert('Erfolgreich eingeloggt!');
           window.location.href = 'index.html';
         })
         .catch((err) => {
-          errorEl.textContent = err.code + ': ' + err.message;
+          errorEl.textContent = err.code === 'auth/wrong-password' ? 'Falsches Passwort' : err.message;
         });
     }
 
@@ -103,40 +175,10 @@
           window.location.href = 'index.html';
         })
         .catch((err) => {
-          errorEl.textContent = err.code + ': ' + err.message;
+          errorEl.textContent = err.message;
         });
     }
   </script>
-
-  <script src="js/menu.js"></script>
-
-  <script>
-    document.body.classList.add('loaded');
-  </script>
-
-  <script>
-  // Logout-Funktion
-  function logout() {
-    auth.signOut()
-      .then(() => {
-        alert('Erfolgreich ausgeloggt!');
-        window.location.href = 'index.html';
-      })
-      .catch((err) => {
-        alert('Ausloggen fehlgeschlagen: ' + err.message);
-      });
-  }
-
-  // Prüfen, ob eingeloggt → Ausloggen-Link anzeigen
-  auth.onAuthStateChanged((user) => {
-    const logoutLink = document.getElementById('logout-link');
-    if (user && logoutLink) {
-      logoutLink.style.display = 'inline-block';
-    } else if (logoutLink) {
-      logoutLink.style.display = 'none';
-    }
-  });
-</script>
 
 </body>
 </html>
