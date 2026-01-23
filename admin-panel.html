@@ -209,30 +209,34 @@
 <body class="page-transition">
 
   <header>
-    <a href="index.html" class="logo">echtlucky</a>
+  <a href="index.html" class="logo">echtlucky</a>
 
-    <button class="menu-toggle" id="menuToggle">☰</button>
+  <button class="menu-toggle" id="menuToggle">☰</button>
 
-    <nav id="mainNav">
-      <!-- Links zentriert in der Mitte -->
-      <div style="flex: 1; display: flex; justify-content: center; gap: 3rem;">
-        <a href="index.html">Home</a>
-        <a href="blog.html">Blog</a>
-        <a href="index.html#stats">Stats</a>
-        <a href="index.html#discord">Discord</a>
-        <a href="index.html#twitch">Twitch</a>
-      </div>
+  <nav id="mainNav">
+    <!-- Links zentriert in der Mitte -->
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="blog.html">Blog</a>
+      <a href="index.html#stats">Stats</a>
+      <a href="index.html#discord">Discord</a>
+      <a href="index.html#twitch">Twitch</a>
+    </div>
 
-      <!-- Rechts: Nutzername + Dropdown -->
+    <!-- Rechts: Nutzername + Dropdown oder Anmelden -->
+    <div class="nav-right">
+      <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
+
       <div class="user-dropdown-wrapper">
         <span id="user-name-display" class="user-name" style="display:none;"></span>
         <div id="dropdown-menu" class="dropdown-menu">
-          <a href="admin-panel.html" class="dropdown-item admin-panel" style="display:none;" id="admin-panel-link">Admin Panel</a>
+          <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
           <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
         </div>
       </div>
-    </nav>
-  </header>
+    </div>
+  </nav>
+</header>
 
   <div class="container">
     <div class="admin-container">
@@ -531,6 +535,64 @@
       }
     }
   </script>
+
+  <script>
+  document.body.classList.add('loaded');
+
+  function logout() {
+    auth.signOut()
+      .then(() => {
+        alert('Erfolgreich ausgeloggt!');
+        window.location.href = 'index.html';
+      })
+      .catch((err) => {
+        alert('Ausloggen fehlgeschlagen: ' + err.message);
+      });
+  }
+
+  // Prüfen, ob eingeloggt → Nutzername + Dropdown anzeigen
+  auth.onAuthStateChanged((user) => {
+    const loginLink = document.getElementById('login-link');
+    const userNameDisplay = document.getElementById('user-name-display');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    const adminPanelLink = document.getElementById('admin-panel-link');
+
+    if (user) {
+      if (loginLink) loginLink.style.display = 'none';
+      if (userNameDisplay) {
+        userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
+        userNameDisplay.style.display = 'inline-block';
+      }
+
+      // Admin-Link nur für dich
+      const ADMIN_EMAIL = "lucassteckel04@gmail.com"; // Deine E-Mail
+      if (user.email === ADMIN_EMAIL && adminPanelLink) {
+        adminPanelLink.style.display = 'block';
+      }
+    } else {
+      if (loginLink) loginLink.style.display = 'inline-block';
+      if (userNameDisplay) userNameDisplay.style.display = 'none';
+      if (dropdownMenu) dropdownMenu.classList.remove('show');
+      if (adminPanelLink) adminPanelLink.style.display = 'none';
+    }
+  });
+
+  // Hover → Dropdown öffnen/schließen
+  const userNameDisplay = document.getElementById('user-name-display');
+  const dropdownMenu = document.getElementById('dropdown-menu');
+
+  if (userNameDisplay && dropdownMenu) {
+    userNameDisplay.addEventListener('mouseenter', () => {
+      dropdownMenu.classList.add('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!userNameDisplay.contains(e.target) && !dropdownMenu.contains(e.target)) {
+        dropdownMenu.classList.remove('show');
+      }
+    });
+  }
+</script>
 
 </body>
 </html>
