@@ -229,3 +229,16 @@ footer {
   font-size: 0.95rem;
   border-top: 1px solid var(--border);
 }
+.logo {
+  font-size: 1.1rem !important; /* klein genug für 10px Höhe */
+  line-height: 1 !important;
+}
+
+header * {
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+header {
+  height: 28px !important; /* etwas mehr als 10px, damit Schrift reinpasst */
+}
