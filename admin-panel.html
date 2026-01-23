@@ -60,7 +60,7 @@
     }
 
     .sidebar-item.active {
-      background: rgba(0,255,136,0.15);
+      background: rgba(0,255,136,0.2);
       color: var(--accent);
       font-weight: 600;
     }
@@ -120,6 +120,15 @@
       border-radius: 12px;
       background: rgba(255,255,255,0.03);
       color: var(--text);
+    }
+
+    input[type="date"] {
+      background: white;
+      color: #000;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1); /* Weißer Kalender-Icon */
     }
 
     textarea {
@@ -189,21 +198,37 @@
       font-size: 1.1rem;
     }
 
-    @media (max-width: 992px) {
-      .sidebar {
-        width: 80px;
-        padding: 2rem 0.5rem;
-      }
+    /* Bans-Tabelle */
+    .ban-table {
+      width: 100%;
+      margin-top: 2rem;
+      border-collapse: separate;
+      border-spacing: 0 1.5rem;
+    }
 
-      .sidebar-header h3,
-      .sidebar-item span {
-        display: none;
-      }
+    .ban-table th {
+      text-align: left;
+      font-size: 1.2rem;
+      color: #ccc;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
 
-      .main-content {
-        margin-left: 80px;
-        width: calc(100% - 80px);
-      }
+    .ban-table td {
+      padding: 1rem 0;
+      font-size: 1.1rem;
+    }
+
+    .ban-table td .delete-btn {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+    }
+
+    .empty {
+      text-align: center;
+      opacity: 0.7;
+      font-size: 1.2rem;
+      padding: 2rem;
     }
 
     @media (max-width: 768px) {
@@ -282,49 +307,60 @@
 
       <!-- Blog Tab -->
       <div id="blog-tab" class="tab-content active">
-        <h3>Neuen Beitrag erstellen</h3>
         <div class="post-form">
           <div class="input-group">
+            <label for="title">Titel</label>
             <input type="text" id="title" placeholder="Titel des Beitrags" required>
           </div>
 
           <div class="input-group">
+            <label for="content">Inhalt</label>
             <textarea id="content" placeholder="Inhalt hier... (HTML/Markdown möglich)" required></textarea>
           </div>
 
           <div class="input-group">
+            <label for="date">Datum</label>
             <input type="date" id="date" required>
           </div>
 
           <button class="btn btn-save" onclick="savePost()">Speichern</button>
         </div>
 
-        <h3 style="margin-top: 3rem;">Alle Beiträge</h3>
+        <h3 style="margin-top: 3rem; font-size: 2rem;">Alle Beiträge</h3>
         <div id="post-list" class="post-list"></div>
       </div>
 
       <!-- Benutzer Tab -->
       <div id="users-tab" class="tab-content">
-        <h3>Registrierte Nutzer</h3>
+        <h3 style="font-size: 2rem;">Registrierte Nutzer</h3>
         <div id="user-list" class="user-list"></div>
       </div>
 
       <!-- Kommentare Tab -->
       <div id="comments-tab" class="tab-content">
-        <h3>Kommentare verwalten</h3>
-        <p class="empty">Noch keine Kommentare vorhanden (kommt später).</p>
+        <h3 style="font-size: 2rem;">Kommentare verwalten</h3>
+        <p class="empty" style="font-size: 1.3rem;">Noch keine Kommentare vorhanden (kommt später).</p>
       </div>
 
       <!-- Bans Tab -->
       <div id="bans-tab" class="tab-content">
-        <h3>Gesperrte Nutzer</h3>
-        <div class="input-group" style="display: flex; gap: 1rem;">
-          <input type="email" id="ban-email" placeholder="E-Mail-Adresse" required>
-          <button class="btn btn-save" onclick="addBan()">Bannen</button>
+        <h3 style="font-size: 2rem;">Gesperrte Nutzer</h3>
+        <div class="input-group" style="display: flex; gap: 1.5rem; align-items: center;">
+          <input type="email" id="ban-email" placeholder="E-Mail-Adresse" required style="flex: 1;">
+          <button class="btn btn-save" onclick="addBan()" style="width: auto; padding: 1rem 2rem;">Bannen</button>
         </div>
 
-        <h3 style="margin-top: 2rem;">Aktuelle Sperren</h3>
-        <div id="ban-list" class="ban-list"></div>
+        <h4 style="margin-top: 3rem; font-size: 1.8rem;">Aktuelle Sperren</h4>
+        <table class="ban-table">
+          <thead>
+            <tr>
+              <th>E-Mail</th>
+              <th>Gesperrt am</th>
+              <th>Aktion</th>
+            </tr>
+          </thead>
+          <tbody id="ban-list"></tbody>
+        </table>
       </div>
     </main>
   </div>
@@ -352,7 +388,14 @@
 
     // Schutz: Nur du als Admin
     auth.onAuthStateChanged((user) => {
-      if (!user || user.email !== "lucassteckel04@gmail.com") {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const ADMIN_EMAIL = "lucassteckel04@gmail.com"; // Deine E-Mail
+
+      if (user.email !== ADMIN_EMAIL) {
         alert('Zugriff verweigert – nur Admin erlaubt');
         auth.signOut();
         window.location.href = 'index.html';
@@ -362,6 +405,7 @@
       statusEl.textContent = 'Admin-Zugriff erteilt: ' + user.email;
       statusEl.style.color = 'lime';
 
+      // Daten laden
       loadPosts();
       loadUsers();
       loadBans();
@@ -379,13 +423,15 @@
         });
     }
 
-    // Tabs wechseln
+    // Tabs umschalten
     function showTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
 
       document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
       event.target.classList.add('active');
+
+      document.getElementById('tab-title').textContent = event.target.textContent;
     }
 
     // Blog – Post speichern
@@ -422,7 +468,7 @@
         });
     }
 
-    // Posts laden
+    // Blog – Posts laden
     function loadPosts() {
       postList.innerHTML = '';
 
@@ -435,7 +481,7 @@
             item.innerHTML = `
               <div>
                 <strong>${data.title}</strong><br>
-                <small>${data.date} • ${data.author}</small>
+                <small>${data.date} • von ${data.author}</small>
               </div>
               <button class="delete-btn" onclick="deletePost('${doc.id}')">Löschen</button>
             `;
@@ -444,6 +490,7 @@
         });
     }
 
+    // Blog – Post löschen
     function deletePost(id) {
       if (confirm('Post wirklich löschen?')) {
         db.collection('posts').doc(id).delete()
@@ -498,7 +545,7 @@
         });
     }
 
-    // Bans laden
+    // Bans laden (als Tabelle)
     function loadBans() {
       banList.innerHTML = '';
 
@@ -506,26 +553,32 @@
         .then((snapshot) => {
           snapshot.forEach((doc) => {
             const data = doc.data();
-            const item = document.createElement('div');
-            item.classList.add('ban-item');
-            item.innerHTML = `
-              <span>${data.email}</span>
-              <button class="delete-btn" onclick="removeBan('${doc.id}')">Entbannen</button>
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${data.email}</td>
+              <td>${data.bannedAt ? new Date(data.bannedAt.toDate()).toLocaleString() : 'Unbekannt'}</td>
+              <td><button class="delete-btn" onclick="removeBan('${doc.id}')">Entsperren</button></td>
             `;
-            banList.appendChild(item);
+            banList.appendChild(row);
           });
         });
     }
 
+    // Bans hinzufügen (mit Datum)
     function addBan() {
       const email = document.getElementById('ban-email').value.trim();
+
       if (!email) return alert('E-Mail eingeben');
 
-      db.collection('bans').add({ email })
+      db.collection('bans').add({
+        email,
+        bannedAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
         .then(() => {
-          statusEl.textContent = 'User gesperrt';
+          statusEl.textContent = 'User gebannt';
           statusEl.style.color = 'lime';
           loadBans();
+          document.getElementById('ban-email').value = '';
         })
         .catch((err) => {
           statusEl.textContent = 'Fehler: ' + err.message;
@@ -534,10 +587,10 @@
     }
 
     function removeBan(id) {
-      if (confirm('Entbannen?')) {
+      if (confirm('Entsperren?')) {
         db.collection('bans').doc(id).delete()
           .then(() => {
-            statusEl.textContent = 'Ban entfernt';
+            statusEl.textContent = 'Sperre entfernt';
             statusEl.style.color = 'lime';
             loadBans();
           })
