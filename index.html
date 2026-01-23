@@ -14,15 +14,15 @@
     <button class="menu-toggle" id="menuToggle">☰</button>
 
     <nav id="mainNav">
-  <a href="index.html">Home</a>
-  <a href="blog.html">Blog</a>
-  <a href="index.html#stats">Stats</a>
-  <a href="index.html#discord">Discord</a>
-  <a href="index.html#twitch">Twitch</a>
+      <a href="#" class="active">Home</a>
+      <a href="blog.html">Blog</a>
+      <a href="#stats">Stats</a>
+      <a href="#discord">Discord</a>
+      <a href="#twitch">Twitch</a>
 
-  <!-- Ausloggen-Link – nur sichtbar wenn eingeloggt -->
-  <a href="#" id="logout-link" style="display:none; color:#ff3366;" onclick="logout()">Ausloggen</a>
-</nav>
+      <!-- Ausloggen-Link – nur sichtbar wenn eingeloggt -->
+      <a href="#" id="logout-link" style="display:none; color:#ff3366;" onclick="logout()">Ausloggen</a>
+    </nav>
   </header>
 
   <div class="container">
@@ -76,35 +76,43 @@
     <a href="login.html">Admin-Login</a>
   </footer>
 
-  <script src="js/menu.js"></script>
+  <!-- Firebase SDKs – global laden -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
+  <!-- Deine firebase.js -->
+  <script src="firebase.js"></script>
+
+  <!-- Logout-Logik + Sichtbarkeit des Ausloggen-Links -->
   <script>
+    // Logout-Funktion
+    function logout() {
+      auth.signOut()
+        .then(() => {
+          alert('Erfolgreich ausgeloggt!');
+          window.location.href = 'index.html';
+        })
+        .catch((err) => {
+          alert('Ausloggen fehlgeschlagen: ' + err.message);
+        });
+    }
+
+    // Prüfen, ob eingeloggt → Ausloggen-Link anzeigen
+    auth.onAuthStateChanged((user) => {
+      const logoutLink = document.getElementById('logout-link');
+      if (user && logoutLink) {
+        logoutLink.style.display = 'inline-block';
+      } else if (logoutLink) {
+        logoutLink.style.display = 'none';
+      }
+    });
+
+    // Page Transition starten
     document.body.classList.add('loaded');
   </script>
 
-  <script>
-  // Logout-Funktion
-  function logout() {
-    auth.signOut()
-      .then(() => {
-        alert('Erfolgreich ausgeloggt!');
-        window.location.href = 'index.html';
-      })
-      .catch((err) => {
-        alert('Ausloggen fehlgeschlagen: ' + err.message);
-      });
-  }
-
-  // Prüfen, ob eingeloggt → Ausloggen-Link anzeigen
-  auth.onAuthStateChanged((user) => {
-    const logoutLink = document.getElementById('logout-link');
-    if (user && logoutLink) {
-      logoutLink.style.display = 'inline-block';
-    } else if (logoutLink) {
-      logoutLink.style.display = 'none';
-    }
-  });
-</script>
+  <!-- Hamburger-Menü -->
+  <script src="js/menu.js"></script>
 
 </body>
 </html>
