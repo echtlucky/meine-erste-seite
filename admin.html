@@ -131,7 +131,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-  <script src="firebase.js"></script>
+  <script src="firebase.js">
+
+    // Sofort prüfen – bevor die Seite überhaupt lädt
+if (!auth.currentUser || auth.currentUser.email !== "deine-echte-email@gmail.com") {
+  window.location.href = 'login.html';
+}
+  </script>
 
   <script src="js/menu.js"></script>
 
@@ -140,15 +146,31 @@
 
     const statusEl = document.getElementById('status');
 
-    // Schutz: Nur eingeloggt erlaubt
     auth.onAuthStateChanged((user) => {
-      if (!user) {
-        window.location.href = 'login.html';
-      } else {
-        statusEl.textContent = 'Eingeloggt als: ' + user.email;
-        statusEl.style.color = 'lime';
-      }
-    });
+  const statusEl = document.getElementById('status');
+
+  if (!user) {
+    // Nicht eingeloggt → zurück zu login
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // Hier deine echte E-Mail als Admin
+  const ADMIN_EMAIL = "lucassteckel04@gmail.com";  // ← DEINE ECHTE E-MAIL HIER EINTRAGEN!
+
+  if (user.email === ADMIN_EMAIL) {
+    // Du bist Admin → alles normal anzeigen
+    statusEl.textContent = 'Eingeloggt als Admin: ' + user.email;
+    statusEl.style.color = 'lime';
+    // Optional: Versteckte Inhalte anzeigen, falls du welche hast
+    // document.getElementById('admin-form').style.display = 'block';
+  } else {
+    // Eingeloggt, aber kein Admin → raus
+    alert('Zugriff verweigert: Nur Admin erlaubt');
+    auth.signOut();  // sofort ausloggen
+    window.location.href = 'index.html';
+  }
+});
 
     // Post speichern
     function savePost() {

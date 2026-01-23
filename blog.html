@@ -29,12 +29,12 @@
     <h1>Blog</h1>
     <p class="intro">Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind.</p>
 
-    <!-- Admin-Button – nur sichtbar wenn eingeloggt -->
-    <div id="admin-button-wrapper" style="text-align: center; margin: 2rem 0 4rem; display: none;">
-      <a href="admin.html" class="btn" style="background: #ff3366; color: white; font-size: 1.3rem; padding: 1.2rem 3rem;">
-        Neuen Beitrag erstellen
-      </a>
-    </div>
+    <!-- Admin-Button – nur für dich sichtbar -->
+<div id="admin-button-wrapper" style="text-align: center; margin: 2rem 0 4rem; display: none;">
+  <a href="admin.html" class="btn" style="background: #ff3366; color: white; font-size: 1.3rem; padding: 1.2rem 3rem;">
+    Neuen Beitrag erstellen (Admin)
+  </a>
+</div>
 
     <div class="blog-list">
       <div class="blog-card">
@@ -67,34 +67,39 @@
   <script src="firebase.js"></script>
 
   <script>
-    document.body.classList.add('loaded');
+  document.body.classList.add('loaded');
 
-    // Logout-Funktion
-    function logout() {
-      auth.signOut()
-        .then(() => {
-          alert('Erfolgreich ausgeloggt!');
-          window.location.href = 'index.html';
-        })
-        .catch((err) => {
-          alert('Ausloggen fehlgeschlagen: ' + err.message);
-        });
-    }
+  // Logout-Funktion (falls nicht schon da)
+  function logout() {
+    auth.signOut()
+      .then(() => {
+        alert('Erfolgreich ausgeloggt!');
+        window.location.href = 'index.html';
+      })
+      .catch((err) => {
+        alert('Ausloggen fehlgeschlagen: ' + err.message);
+      });
+  }
 
-    // Prüfen, ob eingeloggt → Ausloggen-Link + Admin-Button anzeigen
-    auth.onAuthStateChanged((user) => {
-      const logoutLink = document.getElementById('logout-link');
-      const adminWrapper = document.getElementById('admin-button-wrapper');
+  // Prüfen, ob eingeloggt + ob Admin → Button anzeigen
+  auth.onAuthStateChanged((user) => {
+    const logoutLink = document.getElementById('logout-link');
+    const adminWrapper = document.getElementById('admin-button-wrapper');
 
-      if (user) {
-        if (logoutLink) logoutLink.style.display = 'inline-block';
-        if (adminWrapper) adminWrapper.style.display = 'block';
-      } else {
-        if (logoutLink) logoutLink.style.display = 'none';
-        if (adminWrapper) adminWrapper.style.display = 'none';
+    if (user) {
+      // Ausloggen-Link immer anzeigen, wenn eingeloggt
+      if (logoutLink) logoutLink.style.display = 'inline-block';
+
+      // Admin-Button nur für dich
+      if (adminWrapper && user.email === "lucassteckel04@gmail.com") {
+        adminWrapper.style.display = 'block';
       }
-    });
-  </script>
+    } else {
+      if (logoutLink) logoutLink.style.display = 'none';
+      if (adminWrapper) adminWrapper.style.display = 'none';
+    }
+  });
+</script>
 
 </body>
 </html>
