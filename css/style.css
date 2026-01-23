@@ -14,6 +14,11 @@
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
@@ -22,10 +27,11 @@ body {
   line-height: 1.6;
 }
 
+/* Header – jetzt ULTRA-FLACH (28px Höhe) */
 header {
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  padding: 0.2rem 7%;
+  background: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(8px);
+  padding: 0 5%;
   position: fixed;
   width: 100%;
   top: 0;
@@ -33,36 +39,39 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 255, 136, 0.25);
+  height: 28px;                     /* feste, sehr flache Höhe */
+  border-bottom: 1px solid rgba(0, 255, 136, 0.4);
 }
 
+/* Logo – Schrift exakt mittig */
 .logo {
   color: var(--accent);
   font-weight: 700;
-  font-size: 1.5rem;
-  letter-spacing: -0.5px;
+  font-size: 1.1rem;                /* klein genug für 28px Höhe */
+  letter-spacing: -0.3px;
   text-decoration: none;
   display: flex;
   align-items: center;
   height: 100%;
-  line-height: 1;                   /* kein extra Platz durch Text */
+  line-height: 1;
 }
 
-/* Navigation – Desktop */
+/* Navigation – Desktop – Schrift mittig */
 nav {
   display: flex;
-  gap: 2.5rem;
+  gap: 1.8rem;
 }
 
 nav a {
   color: var(--text);
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.05rem;
+  font-size: 0.9rem;                /* passt perfekt in die Höhe */
   transition: color 0.25s;
   display: flex;
   align-items: center;
   height: 100%;
+  line-height: 1;
 }
 
 nav a:hover,
@@ -70,13 +79,13 @@ nav a.active {
   color: var(--accent);
 }
 
-/* Hamburger-Button (nur Mobile) */
+/* Hamburger-Button (Mobile) */
 .menu-toggle {
   display: none;
   background: none;
   border: none;
   color: var(--accent);
-  font-size: 2rem;
+  font-size: 1.6rem;
   cursor: pointer;
 }
 
@@ -94,7 +103,7 @@ nav a.active {
     left: 0;
     width: 100%;
     background: rgba(0, 0, 0, 0.95);
-    padding: 1rem 0;
+    padding: 0.6rem 0;
     border-bottom: 1px solid var(--border);
   }
 
@@ -103,20 +112,24 @@ nav a.active {
   }
 
   nav a {
-    padding: 0.8rem 6%;
-    font-size: 1.1rem;
+    padding: 0.6rem 6%;
+    font-size: 1rem;
     text-align: center;
   }
 
   header {
-    height: 50px;
+    height: 26px;
+  }
+
+  .logo {
+    font-size: 1rem;
   }
 }
 
-/* Hauptinhalt */
+/* Hauptinhalt – mehr Luft oben, damit der dünne Header nicht drückt */
 .container {
   max-width: 1100px;
-  margin: 80px auto 80px;           /* weniger Margin oben – Header drückt nicht */
+  margin: 50px auto 80px;           /* angepasst an neuen dünnen Header */
   padding: 0 5%;
 }
 
@@ -137,7 +150,7 @@ h1 {
   opacity: 0.9;
 }
 
-/* Blog-Übersicht */
+/* Blog-Übersicht – sauber */
 .blog-list {
   display: flex;
   flex-direction: column;
