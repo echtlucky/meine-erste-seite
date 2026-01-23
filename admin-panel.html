@@ -128,7 +128,7 @@
     }
 
     input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(1); /* Weißer Kalender-Icon */
+      filter: invert(1);
     }
 
     textarea {
@@ -376,16 +376,8 @@
 
   <script src="firebase.js"></script>
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
-<script src="firebase.js"></script>
-
-<script>
-  // ← HIER diese Zeile einfügen
-  const db = firebase.firestore();  // ← das fehlte!
-
-  // Rest deines Scripts (statusEl, onAuthStateChanged, savePost, loadPosts usw.) bleibt gleich
-</script>
+  <!-- db initialisieren -->
+  <script>const db = firebase.firestore();</script>
 
   <script src="js/menu.js"></script>
 
@@ -498,6 +490,9 @@
             `;
             postList.appendChild(item);
           });
+        })
+        .catch((err) => {
+          console.error('Posts laden fehlgeschlagen:', err);
         });
     }
 
@@ -540,6 +535,9 @@
             `;
             userList.appendChild(item);
           });
+        })
+        .catch((err) => {
+          console.error('Users laden fehlgeschlagen:', err);
         });
     }
 
