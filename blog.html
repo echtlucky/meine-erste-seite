@@ -50,7 +50,7 @@
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 2.5rem;
       margin-top: 3rem;
-      min-height: 300px; /* Platz für Spinner */
+      min-height: 300px;
     }
 
     .blog-card {
@@ -172,7 +172,34 @@
 </head>
 <body class="page-transition">
 
-    <div id="header-placeholder"></div>
+  <!-- Header – identisch zu index.html -->
+  <header>
+    <a href="index.html" class="logo">echtlucky</a>
+
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav id="mainNav">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="blog.html" class="active">Blog</a>
+        <a href="index.html#stats">Stats</a>
+        <a href="index.html#discord">Discord</a>
+        <a href="index.html#twitch">Twitch</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
+
+        <div class="user-dropdown-wrapper">
+          <span id="user-name-display" class="user-name" style="display:none;"></span>
+          <div id="dropdown-menu" class="dropdown-menu">
+            <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
+            <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
 
   <div class="container">
     <h1>Blog</h1>
@@ -198,16 +225,16 @@
     </div>
   </div>
 
-<footer>
-  <div class="footer-content">
-    <p>© 2026 echtlucky • Competitives Fortnite Journey</p>
-    <div class="footer-links">
-      <a href="impressum.html">Impressum</a>
-      <a href="datenschutz.html">Datenschutz</a>
-      <a href="kontakt.html">Kontakt</a>
+  <footer>
+    <div class="footer-content">
+      <p>© 2026 echtlucky • Competitives Fortnite Journey</p>
+      <div class="footer-links">
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+        <a href="kontakt.html">Kontakt</a>
+      </div>
     </div>
-  </div>
-</footer>
+  </footer>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -215,7 +242,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script src="firebase.js"></script>
-
   <script src="js/menu.js"></script>
 
   <script>
@@ -360,24 +386,6 @@
     // Seite laden → Posts anzeigen
     loadBlogPosts();
   </script>
-
-  <script>
-  let lastScrollY = 0;
-
-  window.addEventListener('scroll', () => {
-    const currentScrollY = window.scrollY;
-
-    if (currentScrollY > lastScrollY) {
-      // Runterscrollen → Header verstecken
-      document.querySelector('header').classList.add('hidden');
-    } else {
-      // Hochscrollen → Header zeigen
-      document.querySelector('header').classList.remove('hidden');
-    }
-
-    lastScrollY = currentScrollY;
-  });
-</script>
 
 </body>
 </html>
