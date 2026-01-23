@@ -6,7 +6,47 @@
   <title>Blog | echtlucky</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* Pop-up für Post (groß, clean, bessere Qualität) */
+    .blog-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2.5rem;
+      margin-top: 3rem;
+    }
+
+    .blog-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: left;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .blog-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 40px rgba(0,255,136,0.15);
+    }
+
+    .blog-card h2 {
+      color: var(--accent);
+      font-size: 2rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .blog-card .meta {
+      font-size: 0.95rem;
+      opacity: 0.7;
+      margin-bottom: 1.2rem;
+    }
+
+    .blog-card p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Pop-up für Post */
     .modal {
       display: none;
       position: fixed;
@@ -54,11 +94,6 @@
       font-size: 2.5rem;
       color: var(--accent);
       cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .modal-close:hover {
-      color: var(--accent-hover);
     }
 
     .modal h2 {
@@ -87,85 +122,134 @@
       margin-top: 3rem;
       display: inline-block;
       cursor: pointer;
-      transition: all 0.3s;
       border: none;
     }
 
     .modal .delete-btn:hover {
       background: #ff1a4d;
-      transform: translateY(-2px);
     }
 
-    /* Blog-Liste (clean) */
-    .blog-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2.5rem;
-      margin-top: 3rem;
-      min-height: 300px; /* Platz für Spinner */
+    /* Kommentare im Pop-up */
+    .comments-section {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
     }
 
-    .blog-card {
-      background: var(--card-bg);
+    .comments-section h3 {
+      color: var(--accent);
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .comment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .comment-item {
+      background: rgba(255,255,255,0.05);
+      padding: 1.2rem;
+      border-radius: 12px;
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 2rem;
-      text-align: left;
-      transition: all 0.3s;
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .comment-user {
+      font-weight: 600;
+    }
+
+    .comment-role {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      margin-left: 0.5rem;
+    }
+
+    .role-admin { background: rgba(0,255,136,0.2); color: #00ff88; }
+    .role-moderator { background: rgba(0,100,255,0.2); color: #0066ff; }
+    .role-supporter { background: rgba(180,0,255,0.2); color: #b400ff; }
+
+    .comment-date {
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+
+    .comment-content {
+      margin: 0.5rem 0;
+    }
+
+    .comment-actions {
+      margin-top: 0.5rem;
+    }
+
+    .comment-actions button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-right: 1rem;
+    }
+
+    .comment-actions button:hover {
+      text-decoration: underline;
+    }
+
+    .comment-actions .delete {
+      color: #ff3366;
+    }
+
+    .comment-edit-form {
+      margin-top: 1rem;
+    }
+
+    .comment-edit-form textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+    }
+
+    .comment-form {
+      margin-top: 2rem;
+    }
+
+    .comment-form textarea {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      font-size: 1.1rem;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .comment-form button {
+      background: var(--accent);
+      color: #000;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      margin-top: 1rem;
       cursor: pointer;
     }
 
-    .blog-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 40px rgba(0,255,136,0.15);
-    }
-
-    .blog-card h2 {
-      color: var(--accent);
-      font-size: 2rem;
-      margin-bottom: 0.8rem;
-    }
-
-    .blog-card .meta {
-      font-size: 0.95rem;
-      opacity: 0.7;
-      margin-bottom: 1.2rem;
-    }
-
-    .blog-card p {
+    .comment-status {
+      margin-top: 1rem;
       font-size: 1.1rem;
-      opacity: 0.9;
-      margin-bottom: 1.5rem;
-    }
-
-    /* Laderad (Spinner) */
-    .loading-spinner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 300px;
-      margin: 0 auto;
-    }
-
-    .spinner {
-      width: 60px;
-      height: 60px;
-      border: 6px solid rgba(0,255,136,0.2);
-      border-top: 6px solid var(--accent);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 1.5rem;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      font-size: 1.3rem;
-      opacity: 0.8;
+      text-align: center;
     }
   </style>
 </head>
@@ -204,14 +288,11 @@
     <p class="intro">Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind.</p>
 
     <div id="blog-list" class="blog-list">
-      <div class="loading-spinner">
-        <div class="spinner"></div>
-        <p class="loading-text">Posts werden geladen...</p>
-      </div>
+      <p style="text-align: center; opacity: 0.7;">Posts werden geladen...</p>
     </div>
   </div>
 
-  <!-- Pop-up für Post-Inhalt -->
+  <!-- Pop-up für Post-Inhalt + Kommentare -->
   <div id="postModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closePostModal()">×</span>
@@ -219,7 +300,21 @@
       <p class="meta" id="post-meta"></p>
       <div class="post-content" id="post-content"></div>
 
-      <button class="delete-btn" id="delete-post-btn" style="display: none;" onclick="deletePost()">Post löschen</button>
+      <button class="delete-btn" id="delete-post-btn" style="display:none;" onclick="deletePost()">Post löschen</button>
+
+      <div class="comments-section">
+        <h3>Kommentare</h3>
+        <div id="comments-list" class="comment-list"></div>
+
+        <div id="comment-form-wrapper" style="display:none;">
+          <div class="comment-form">
+            <textarea id="comment-content" placeholder="Dein Kommentar..."></textarea>
+            <button class="btn btn-save" onclick="addComment()">Kommentar senden</button>
+          </div>
+        </div>
+
+        <p id="comment-status" class="comment-status"></p>
+      </div>
     </div>
   </div>
 
@@ -251,53 +346,49 @@
         });
     }
 
-    // Header-Logik (Nutzername, Dropdown, Admin-Link)
+    let currentUserRole = 'user';
+    let currentPostId = null;
+
+    // Header + Rollen + Kommentar-Formular
     auth.onAuthStateChanged((user) => {
       const loginLink = document.getElementById('login-link');
-      const logoutLink = document.getElementById('logout-link');
       const userNameDisplay = document.getElementById('user-name-display');
       const dropdownMenu = document.getElementById('dropdown-menu');
       const adminPanelLink = document.getElementById('admin-panel-link');
-      const deletePostBtn = document.getElementById('delete-post-btn');
+      const commentFormWrapper = document.getElementById('comment-form-wrapper');
 
       if (user) {
-        if (loginLink) loginLink.style.display = 'none';
-        if (logoutLink) logoutLink.style.display = 'inline-block';
-
-        if (userNameDisplay) {
-          userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
-          userNameDisplay.style.display = 'inline-block';
-        }
+        loginLink.style.display = 'none';
+        userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
+        userNameDisplay.style.display = 'inline-block';
+        commentFormWrapper.style.display = 'block';
 
         const ADMIN_EMAIL = "lucassteckel04@gmail.com";
         if (user.email === ADMIN_EMAIL && adminPanelLink) {
           adminPanelLink.style.display = 'block';
         }
 
-        if (user.email === ADMIN_EMAIL) {
-          if (deletePostBtn) deletePostBtn.style.display = 'inline-block';
-        }
+        // Rolle holen
+        db.collection('users').doc(user.uid).get()
+          .then((doc) => {
+            currentUserRole = doc.exists ? (doc.data().role || 'user') : 'user';
+          });
       } else {
-        if (loginLink) loginLink.style.display = 'inline-block';
-        if (logoutLink) logoutLink.style.display = 'none';
-        if (userNameDisplay) userNameDisplay.style.display = 'none';
-        if (dropdownMenu) dropdownMenu.classList.remove('show');
-        if (adminPanelLink) adminPanelLink.style.display = 'none';
-        if (deletePostBtn) deletePostBtn.style.display = 'none';
+        loginLink.style.display = 'inline-block';
+        userNameDisplay.style.display = 'none';
+        dropdownMenu.classList.remove('show');
+        commentFormWrapper.style.display = 'none';
       }
 
-      loadBlogPosts(); // Posts laden
+      loadBlogPosts();
     });
 
-    // Hover → Dropdown öffnen/schließen
+    // Hover Dropdown
     const userNameDisplay = document.getElementById('user-name-display');
     const dropdownMenu = document.getElementById('dropdown-menu');
 
     if (userNameDisplay && dropdownMenu) {
-      userNameDisplay.addEventListener('mouseenter', () => {
-        dropdownMenu.classList.add('show');
-      });
-
+      userNameDisplay.addEventListener('mouseenter', () => dropdownMenu.classList.add('show'));
       document.addEventListener('click', (e) => {
         if (!userNameDisplay.contains(e.target) && !dropdownMenu.contains(e.target)) {
           dropdownMenu.classList.remove('show');
@@ -305,22 +396,14 @@
       });
     }
 
-    // Posts aus Firestore laden
+    // Posts laden
     function loadBlogPosts() {
       const blogList = document.getElementById('blog-list');
-      blogList.innerHTML = `
-        <div class="loading-spinner">
-          <div class="spinner"></div>
-          <p class="loading-text">Posts werden geladen...</p>
-        </div>
-      `;
+      blogList.innerHTML = '<p style="text-align: center; opacity: 0.7;">Posts werden geladen...</p>';
 
-      db.collection('posts')
-        .orderBy('createdAt', 'desc')
-        .get()
+      db.collection('posts').orderBy('createdAt', 'desc').get()
         .then((snapshot) => {
           blogList.innerHTML = '';
-
           if (snapshot.empty) {
             blogList.innerHTML = '<p style="text-align: center; opacity: 0.7;">Noch keine Beiträge vorhanden.</p>';
             return;
@@ -340,24 +423,24 @@
           });
         })
         .catch((err) => {
-          blogList.innerHTML = '<p style="color: red; text-align: center;">Fehler beim Laden: ' + err.message + '</p>';
-          console.error('Firestore Fehler:', err);
+          blogList.innerHTML = '<p style="color: red; text-align: center;">Fehler beim Laden der Posts.</p>';
         });
     }
 
-    // Pop-up für Post-Inhalt
+    // Pop-up öffnen
     const postModal = document.getElementById('postModal');
-    let currentPostId = null;
 
     function showPostModal(id, title, meta, content) {
       document.getElementById('post-title').textContent = title;
       document.getElementById('post-meta').textContent = meta;
-      document.getElementById('post-content').innerHTML = content; // HTML erlaubt
+      document.getElementById('post-content').innerHTML = content.replace(/\n/g, '<br>');
 
       currentPostId = id;
 
       postModal.style.display = 'flex';
       setTimeout(() => postModal.classList.add('show'), 10);
+
+      loadComments(id);
     }
 
     function closePostModal() {
@@ -370,9 +453,155 @@
       if (e.target === postModal) closePostModal();
     });
 
-    // Post löschen (aus Pop-up, nur Admin)
+    // Kommentare laden
+    function loadComments(postId) {
+      const commentsList = document.getElementById('comments-list');
+      const commentStatus = document.getElementById('comment-status');
+      commentsList.innerHTML = '<p class="loading-text">Kommentare werden geladen...</p>';
+
+      db.collection('comments')
+        .where('postId', '==', postId)
+        .orderBy('createdAt', 'asc')
+        .get()
+        .then((snapshot) => {
+          commentsList.innerHTML = '';
+          if (snapshot.empty) {
+            commentsList.innerHTML = '<p class="empty">Noch keine Kommentare.</p>';
+            return;
+          }
+
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const roleClass = data.role === 'admin' ? 'role-admin' :
+                             data.role === 'moderator' ? 'role-moderator' :
+                             data.role === 'supporter' ? 'role-supporter' : '';
+
+            const roleText = data.role === 'admin' ? '[★] Admin' :
+                            data.role === 'moderator' ? '[★] Moderator' :
+                            data.role === 'supporter' ? '[★] Supporter' : '';
+
+            const item = document.createElement('div');
+            item.classList.add('comment-item');
+            item.innerHTML = `
+              <div class="comment-header">
+                <span class="comment-user">${data.username} <span class="comment-role ${roleClass}">${roleText}</span></span>
+                <span class="comment-date">${new Date(data.createdAt.toDate()).toLocaleString()}</span>
+              </div>
+              <div class="comment-content">${data.content.replace(/\n/g, '<br>')}</div>
+              <div class="comment-actions" style="display:${currentUserRole === 'admin' || currentUserRole === 'moderator' ? 'block' : 'none'};">
+                <button onclick="editComment('${doc.id}', '${data.content.replace(/'/g, "\\'")}')">Bearbeiten</button>
+                <button class="delete" onclick="deleteComment('${doc.id}')">Löschen</button>
+              </div>
+              <div class="comment-edit-form" id="edit-form-${doc.id}" style="display:none;">
+                <textarea id="edit-content-${doc.id}">${data.content}</textarea>
+                <button onclick="saveEditedComment('${doc.id}')">Speichern</button>
+                <button onclick="cancelEdit('${doc.id}')">Abbrechen</button>
+              </div>
+            `;
+            commentsList.appendChild(item);
+          });
+        })
+        .catch((err) => {
+          commentsList.innerHTML = '<p style="color: red;">Kommentare laden fehlgeschlagen.</p>';
+        });
+    }
+
+    // Kommentar hinzufügen
+    function addComment() {
+      const content = document.getElementById('comment-content').value.trim();
+      const status = document.getElementById('comment-status');
+
+      if (!content) {
+        status.textContent = 'Bitte etwas eingeben';
+        status.style.color = 'red';
+        return;
+      }
+
+      if (!auth.currentUser) {
+        status.textContent = 'Nicht eingeloggt';
+        status.style.color = 'red';
+        return;
+      }
+
+      status.textContent = 'Kommentar wird gesendet...';
+      status.style.color = 'gray';
+
+      db.collection('comments').add({
+        postId: currentPostId,
+        userId: auth.currentUser.uid,
+        username: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+        role: currentUserRole,
+        content,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
+        .then(() => {
+          status.textContent = 'Kommentar gesendet';
+          status.style.color = 'lime';
+          document.getElementById('comment-content').value = '';
+          loadComments(currentPostId);
+        })
+        .catch((err) => {
+          status.textContent = 'Kommentar senden fehlgeschlagen';
+          status.style.color = 'red';
+        });
+    }
+
+    // Kommentar löschen
+    function deleteComment(id) {
+      const status = document.getElementById('comment-status');
+      status.textContent = 'Kommentar wird gelöscht...';
+      status.style.color = 'gray';
+
+      db.collection('comments').doc(id).delete()
+        .then(() => {
+          status.textContent = 'Kommentar gelöscht';
+          status.style.color = 'lime';
+          loadComments(currentPostId);
+        })
+        .catch((err) => {
+          status.textContent = 'Kommentar löschen fehlgeschlagen';
+          status.style.color = 'red';
+        });
+    }
+
+    // Kommentar bearbeiten
+    function editComment(id, content) {
+      document.getElementById(`edit-form-${id}`).style.display = 'block';
+    }
+
+    function cancelEdit(id) {
+      document.getElementById(`edit-form-${id}`).style.display = 'none';
+    }
+
+    function saveEditedComment(id) {
+      const content = document.getElementById(`edit-content-${id}`).value.trim();
+      const status = document.getElementById('comment-status');
+
+      if (!content) {
+        status.textContent = 'Bitte etwas eingeben';
+        status.style.color = 'red';
+        return;
+      }
+
+      status.textContent = 'Kommentar wird bearbeitet...';
+      status.style.color = 'gray';
+
+      db.collection('comments').doc(id).update({ content })
+        .then(() => {
+          status.textContent = 'Kommentar bearbeitet';
+          status.style.color = 'lime';
+          document.getElementById(`edit-form-${id}`).style.display = 'none';
+          loadComments(currentPostId);
+        })
+        .catch((err) => {
+          status.textContent = 'Kommentar bearbeiten fehlgeschlagen';
+          status.style.color = 'red';
+        });
+    }
+
+    // Post löschen
     function deletePost() {
-      if (currentPostId && confirm('Post wirklich löschen?')) {
+      if (confirm('Post wirklich löschen?')) {
         db.collection('posts').doc(currentPostId).delete()
           .then(() => {
             alert('Post gelöscht');
@@ -385,7 +614,7 @@
       }
     }
 
-    // Seite laden → Posts anzeigen
+    // Posts laden beim Start
     loadBlogPosts();
   </script>
 
