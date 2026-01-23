@@ -19,32 +19,31 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
-/* Header – dünn, perfekt mittig, keine Breiten-Probleme */
+/* Header – dünn, aber nutzbar */
 header {
-  background: rgba(0, 0, 0, 0.88);
-  backdrop-filter: blur(12px);
-  padding: 0.4rem 5%;               /* dünn oben/unten */
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 0.4rem 5%;
   position: fixed;
-  width: 100%;                      /* 100% Breite – kein Verschieben mehr! */
-  left: 0;
+  width: 100%;                    /* zurück auf 100% – kein Scroll mehr */
   top: 0;
   z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 48px;                     /* feste Höhe – passt perfekt */
-  border-bottom: 1px solid rgba(0, 255, 136, 0.35);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.25);
+  height: 48px;                   /* Kompromiss: dünn, aber Schrift passt */
 }
 
-/* Logo – exakt mittig zwischen Rand und Linie */
+/* Logo */
 .logo {
   color: var(--accent);
   font-weight: 700;
-  font-size: 1.6rem;
-  letter-spacing: -0.5px;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -55,14 +54,14 @@ header {
 /* Navigation – Desktop */
 nav {
   display: flex;
-  gap: 2.8rem;
+  gap: 2rem;
 }
 
 nav a {
   color: var(--text);
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.05rem;
+  font-size: 1rem;
   transition: color 0.25s;
   display: flex;
   align-items: center;
@@ -80,7 +79,7 @@ nav a.active {
   background: none;
   border: none;
   color: var(--accent);
-  font-size: 2rem;
+  font-size: 1.8rem;
   cursor: pointer;
 }
 
@@ -98,7 +97,7 @@ nav a.active {
     left: 0;
     width: 100%;
     background: rgba(0, 0, 0, 0.95);
-    padding: 1.5rem 0;
+    padding: 1rem 0;
     border-bottom: 1px solid var(--border);
   }
 
@@ -107,24 +106,24 @@ nav a.active {
   }
 
   nav a {
-    padding: 1rem 6%;
-    font-size: 1.2rem;
+    padding: 0.8rem 6%;
+    font-size: 1.1rem;
     text-align: center;
   }
 
   header {
-    height: 48px;
+    height: 44px;
   }
 
   .logo {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
   }
 }
 
-/* Hauptinhalt – perfekt angepasst */
+/* Hauptinhalt */
 .container {
   max-width: 1100px;
-  margin: 100px auto 100px;
+  margin: 70px auto 80px; /* angepasst an dünneren Header */
   padding: 0 5%;
 }
 
@@ -145,7 +144,7 @@ h1 {
   opacity: 0.9;
 }
 
-/* Blog-Übersicht – sauber & schön */
+/* Blog-Übersicht */
 .blog-list {
   display: flex;
   flex-direction: column;
@@ -157,7 +156,7 @@ h1 {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 3rem;
+  padding: 2.8rem;
   text-align: left;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -177,11 +176,12 @@ h1 {
   font-size: 0.95rem;
   opacity: 0.7;
   margin-bottom: 1.4rem;
+  display: block;
 }
 
 .blog-card p {
   font-size: 1.1rem;
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.6rem;
   opacity: 0.9;
 }
 
