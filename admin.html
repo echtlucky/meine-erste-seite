@@ -155,5 +155,29 @@
     document.body.classList.add('loaded');
   </script>
 
+  <script>
+  // Logout-Funktion
+  function logout() {
+    auth.signOut()
+      .then(() => {
+        alert('Erfolgreich ausgeloggt!');
+        window.location.href = 'index.html';
+      })
+      .catch((err) => {
+        alert('Ausloggen fehlgeschlagen: ' + err.message);
+      });
+  }
+
+  // Prüfen, ob eingeloggt → Ausloggen-Link anzeigen
+  auth.onAuthStateChanged((user) => {
+    const logoutLink = document.getElementById('logout-link');
+    if (user && logoutLink) {
+      logoutLink.style.display = 'inline-block';
+    } else if (logoutLink) {
+      logoutLink.style.display = 'none';
+    }
+  });
+</script>
+
 </body>
 </html>
