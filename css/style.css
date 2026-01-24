@@ -523,20 +523,17 @@ footer{
 /* ======================================
    PAGE TRANSITION
 ====================================== */
-.page-transition{
-  opacity:1;
-  transform: translateX(0);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+.page-transition {
+  opacity: 1;
+  transition: opacity 0.6s ease;
 }
 
-body.page-transition{
-  opacity:0;
-  transform: translateX(-30px);
+body.page-transition {
+  opacity: 0;
 }
 
-body.loaded{
-  opacity:1;
-  transform: translateX(0);
+body.loaded {
+  opacity: 1;
 }
 
 /* ======================================
@@ -653,3 +650,6 @@ body.modal-open{ overflow:hidden; }
   background: rgba(255, 51, 102, 0.25);
   transform: scale(1.05);
 }
+
+.legal-modal { z-index: 99999; }
+.legal-modal__panel { z-index: 100000; }
