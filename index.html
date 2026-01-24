@@ -11,11 +11,10 @@
 </head>
 
 <body class="page-transition home-page">
-  <!-- Header wird dynamisch geladen -->
   <div id="header-placeholder"></div>
 
-  <!-- HERO (als Card wie Login) -->
-  <section class="hero home-hero">
+  <!-- HERO -->
+  <header class="hero">
     <div class="hero-inner">
       <div class="hero-badge">⚡ echtlucky • Competitive</div>
 
@@ -25,50 +24,49 @@
         Unreal Grind • Ballistic & Ranked • EU Competitive Scene • Auf dem Weg nach ganz oben
       </p>
 
-      <div class="btn-group">
+      <nav class="btn-group" aria-label="Schnellaktionen">
         <a href="blog.html" class="btn">Zum Blog</a>
         <a href="login.html" class="btn">Community beitreten</a>
         <a href="https://discord.gg/c7jmXnBSv6" target="_blank" rel="noopener" class="discord-btn">Discord joinen</a>
-      </div>
+      </nav>
 
-      <div class="hero-stats">
+      <div class="hero-stats" aria-label="Schwerpunkte">
         <div class="stat-pill">⚔️ Ballistic</div>
         <div class="stat-pill">🏆 Ranked</div>
         <div class="stat-pill">🌍 EU</div>
       </div>
     </div>
-  </section>
+  </header>
 
-  <!-- CONTENT -->
-  <main class="container home-container">
+  <main class="container">
 
     <!-- COMMUNITY -->
-    <section class="community-teaser">
+    <section class="community-teaser" aria-labelledby="community-title">
       <div class="section-head">
-        <h2>Werde Teil der echten Grind-Community</h2>
+        <h2 id="community-title">Werde Teil der echten Grind-Community</h2>
         <p>Hier treffen sich ambitionierte Spieler, die mehr wollen als nur Casual-Ranked.</p>
       </div>
 
-      <div class="features">
-        <div class="feature">
+      <div class="features" role="list">
+        <article class="feature" role="listitem">
           <h3>Scrims & Customs</h3>
           <p>Tägliche organisierte Matches, VOD-Reviews und 1v1s gegen starke Gegner.</p>
-        </div>
+        </article>
 
-        <div class="feature">
+        <article class="feature" role="listitem">
           <h3>Trainingspläne & Tipps</h3>
           <p>Wöchentliche Challenges, Mechanics-Guides und Settings-Tuning von echten Grindern.</p>
-        </div>
+        </article>
 
-        <div class="feature">
+        <article class="feature" role="listitem">
           <h3>Team-Suche & Networking</h3>
           <p>Finde IGLs, Fraggers, Coaches und Contender-Teams – direkt und ohne Drama.</p>
-        </div>
+        </article>
 
-        <div class="feature">
+        <article class="feature" role="listitem">
           <h3>Exklusive Inhalte</h3>
           <p>Nur für Mitglieder: Private Streams, Cash-Cup-Vorbereitung und Insider-Tipps.</p>
-        </div>
+        </article>
       </div>
 
       <div class="section-actions">
@@ -77,9 +75,9 @@
     </section>
 
     <!-- ÜBER MICH -->
-    <section class="bio">
+    <section class="bio" aria-labelledby="bio-title">
       <div class="section-head">
-        <h2>Über mich</h2>
+        <h2 id="bio-title">Über mich</h2>
         <p>Kurzer Kontext – damit klar ist, wofür echtlucky steht.</p>
       </div>
 
@@ -101,13 +99,13 @@
     </section>
 
     <!-- STATS -->
-    <section id="stats" class="stats-section">
+    <section id="stats" class="stats-section" aria-labelledby="stats-title">
       <div class="section-head">
-        <h2>Ballistic Statistiken</h2>
+        <h2 id="stats-title">Ballistic Statistiken</h2>
         <p>Aktueller Rank, Divisionsfortschritt und Performance-Metriken – werden in Echtzeit aktualisiert.</p>
       </div>
 
-      <div class="link-row">
+      <div class="link-row" aria-label="Statistik-Links">
         <a href="https://fortnitetracker.com/profile/all/mr.%20z00m" target="_blank" rel="noopener" class="btn">
           Fortnite Tracker
         </a>
@@ -118,9 +116,9 @@
     </section>
 
     <!-- DISCORD -->
-    <section id="discord" class="discord-section">
+    <section id="discord" class="discord-section" aria-labelledby="discord-title">
       <div class="section-head">
-        <h2>Discord Community</h2>
+        <h2 id="discord-title">Discord Community</h2>
         <p>Trete bei für Scrims, VOD-Reviews, Strategie-Diskussionen und kompetitives Fortnite-Netzwerken.</p>
       </div>
 
@@ -132,9 +130,9 @@
     </section>
 
     <!-- TWITCH -->
-    <section id="twitch" class="twitch-section">
+    <section id="twitch" class="twitch-section" aria-labelledby="twitch-title">
       <div class="section-head">
-        <h2>Twitch Stream</h2>
+        <h2 id="twitch-title">Twitch Stream</h2>
         <p>Live dabei, wenn ich Ballistic & Ranked grinde – oder schau dir VODs an.</p>
       </div>
 
@@ -152,7 +150,6 @@
 
   </main>
 
-  <!-- Footer wird dynamisch geladen -->
   <div id="footer-placeholder"></div>
 
   <!-- Firebase SDKs -->
@@ -171,7 +168,7 @@
       .then(r => r.text())
       .then(html => {
         document.getElementById('header-placeholder').innerHTML = html;
-        initHeaderScripts();
+        if (typeof initHeaderScripts === "function") initHeaderScripts();
         if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
       });
 
