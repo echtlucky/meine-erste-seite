@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impressum | EchtLucky</title>
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="page-transition">
+
+  <!-- HEADER -->
+  <div id="header-placeholder"></div>
+
+  <main class="container">
+    <section class="bio">
+      <h2>Impressum</h2>
+
+      <p><strong>Angaben gemäß § 5 TMG</strong></p>
+
+      <p>
+        <strong>Name:</strong><br>
+        Lucas Steckel
+      </p>
+
+      <p>
+        <strong>Anschrift:</strong><br>
+        Ackerstraße 4a<br>
+        45701 Herten<br>
+        Deutschland
+      </p>
+
+      <p>
+        <strong>Kontakt:</strong><br>
+        E-Mail:
+        <a href="mailto:lucassteckel04@gmail.com">
+          lucassteckel04@gmail.com
+        </a>
+      </p>
+
+      <hr>
+
+      <p><strong>Art der Website</strong></p>
+
+      <p>
+        Bei dieser Website handelt es sich um ein
+        <strong>privates, nicht-kommerzielles Online-Angebot</strong>.
+        Es werden keine kostenpflichtigen Leistungen, Abonnements,
+        Spenden, Affiliate-Links oder sonstige entgeltliche Inhalte angeboten.
+      </p>
+
+      <p>
+        Die Inhalte dienen ausschließlich der persönlichen Darstellung,
+        Information und Unterhaltung.
+      </p>
+
+      <hr>
+
+      <p><strong>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</strong></p>
+
+      <p>
+        Lucas Steckel<br>
+        Ackerstraße 4a<br>
+        45701 Herten
+      </p>
+
+      <hr>
+
+      <p><strong>Haftung für Inhalte</strong></p>
+
+      <p>
+        Als Diensteanbieter bin ich gemäß § 7 Abs.1 TMG für eigene Inhalte
+        auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.
+      </p>
+
+      <p>
+        Ich übernehme jedoch keine Gewähr für die Aktualität, Richtigkeit
+        und Vollständigkeit der bereitgestellten Inhalte.
+      </p>
+
+      <hr>
+
+      <p><strong>Haftung für Links</strong></p>
+
+      <p>
+        Diese Website enthält ggf. Links zu externen Websites Dritter,
+        auf deren Inhalte ich keinen Einfluss habe.
+      </p>
+
+      <p>
+        Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter
+        oder Betreiber der Seiten verantwortlich.
+      </p>
+
+      <hr>
+
+      <p><strong>Urheberrecht</strong></p>
+
+      <p>
+        Die durch den Seitenbetreiber erstellten Inhalte und Werke
+        auf dieser Website unterliegen dem deutschen Urheberrecht.
+      </p>
+
+      <p>
+        Downloads und Kopien dieser Seite sind nur für den privaten,
+        nicht kommerziellen Gebrauch gestattet.
+      </p>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Header & Footer laden -->
+  <script>
+    fetch("header.html")
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("header-placeholder").innerHTML = data;
+        initHeaderScripts();
+      });
+
+    fetch("footer.html")
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("footer-placeholder").innerHTML = data;
+      });
+  </script>
+
+  <script src="js/menu.js"></script>
+
+</body>
+</html>
