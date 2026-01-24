@@ -1,6 +1,6 @@
-/* ======================================
-   Farbschema
-   ====================================== */
+/* ===============================
+   BASIS
+================================ */
 :root {
   --bg: #000;
   --text: #e0ffe0;
@@ -9,7 +9,6 @@
   --card-bg: rgba(0, 255, 136, 0.08);
   --border: rgba(0, 255, 136, 0.35);
   --discord: #5865f2;
-  --discord-hover: #7289da;
 }
 
 * {
@@ -19,7 +18,7 @@
 }
 
 html, body {
-  font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Roboto', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -27,12 +26,12 @@ html, body {
 }
 
 body {
-  padding-top: 60px; /* Platz für Fixed Header */
+  padding-top: 60px; /* Fixed Header Offset */
 }
 
-/* ======================================
+/* ===============================
    HEADER
-   ====================================== */
+================================ */
 header {
   position: fixed;
   top: 0;
@@ -40,235 +39,156 @@ header {
   width: 100%;
   height: 60px;
   z-index: 1000;
-
   background: rgba(0,0,0,0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 5%;
 }
 
-/* Logo */
 .logo {
   color: var(--accent);
-  font-weight: 800;
   font-size: 1.8rem;
+  font-weight: 800;
   text-decoration: none;
 }
 
-/* Navigation */
 nav {
   display: flex;
   align-items: center;
   gap: 3rem;
 }
 
-/* Nav Links */
 .nav-links {
   display: flex;
-  gap: 3rem;
+  gap: 2.5rem;
 }
 
 .nav-links a {
   color: var(--text);
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.05rem;
-  padding: 0.5rem 0.9rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
 }
 
 .nav-links a:hover {
-  background: rgba(0,255,136,0.08);
   color: var(--accent);
 }
 
-.nav-links a.active {
-  background: rgba(0,255,136,0.15);
-  color: var(--accent);
-  font-weight: 600;
-}
-
-/* Rechts */
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 1.6rem;
+  gap: 1.5rem;
 }
 
-.nav-auth {
-  color: var(--accent);
-  font-weight: 600;
-  text-decoration: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 8px;
-}
-
-.nav-auth:hover {
-  background: rgba(0,255,136,0.1);
-}
-
-/* User Dropdown */
-.user-dropdown-wrapper {
-  position: relative;
-}
-
-.user-name {
-  color: var(--accent);
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0.5rem 1.2rem;
-  border-radius: 8px;
-}
-
-.user-name:hover {
-  background: rgba(0,255,136,0.1);
-}
-
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  min-width: 180px;
-  background: rgba(0,0,0,0.96);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
-  overflow: hidden;
-  z-index: 1100;
-}
-
-.dropdown-menu.show {
-  display: block;
-}
-
-.dropdown-item {
-  display: block;
-  padding: 0.8rem 1.5rem;
-  color: var(--text);
-  text-decoration: none;
-}
-
-.dropdown-item:hover {
-  background: rgba(0,255,136,0.12);
-  color: var(--accent);
-}
-
-.dropdown-item.logout {
-  color: #ff3366;
-}
-
-/* Hamburger */
 .menu-toggle {
   display: none;
   background: none;
   border: none;
   color: var(--accent);
   font-size: 2rem;
-  cursor: pointer;
 }
 
-/* ======================================
-   MOBILE NAV
-   ====================================== */
-@media (max-width: 992px) {
-
-  .menu-toggle {
-    display: block;
-  }
-
-  nav {
-    position: absolute;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    background: rgba(0,0,0,0.96);
-    border-bottom: 1px solid var(--border);
-    display: none;
-    flex-direction: column;
-    padding: 1.5rem 0;
-  }
-
-  nav.open {
-    display: flex;
-  }
-
-  .nav-links,
-  .nav-right {
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-}
-
-/* ======================================
-   CONTENT
-   ====================================== */
-.container {
-  max-width: 1100px;
-  margin: 40px auto 80px;
+/* ===============================
+   HERO
+================================ */
+.hero {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   padding: 0 5%;
 }
 
-/* Sections */
-.bio, .stats-section, .discord-section, .twitch-section {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin: 4rem 0;
-  text-align: center;
+.hero-inner {
+  max-width: 900px;
 }
 
-.bio h2,
-.stats-section h2,
-.discord-section h2,
-.twitch-section h2 {
+.hero h1 {
+  font-size: 4.8rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
   color: var(--accent);
-  font-size: 2.2rem;
-  margin-bottom: 1.2rem;
+}
+
+.hero p {
+  font-size: 1.3rem;
+  opacity: 0.9;
+  margin-bottom: 2.5rem;
 }
 
 /* Buttons */
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.2rem;
+}
+
 .btn {
   background: var(--accent);
   color: #000;
   padding: 1rem 2.6rem;
   border-radius: 50px;
-  text-decoration: none;
   font-weight: 600;
-  font-size: 1.15rem;
-  display: inline-block;
-  transition: all 0.25s;
+  text-decoration: none;
+  transition: 0.25s;
+}
+
+.btn.secondary {
+  background: #1a1a1a;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.btn.discord {
+  background: var(--discord);
+  color: white;
 }
 
 .btn:hover {
-  background: var(--accent-hover);
   transform: translateY(-2px);
 }
 
-/* ======================================
-   FOOTER
-   ====================================== */
-footer {
-  text-align: center;
-  padding: 3rem 1rem 2rem;
-  color: #888;
-  font-size: 0.95rem;
-  border-top: 1px solid var(--border);
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(8px);
+/* ===============================
+   SECTIONS
+================================ */
+section {
+  padding: 5rem 5%;
 }
 
-.footer-content {
-  max-width: 1100px;
+.section-box {
+  max-width: 1000px;
   margin: 0 auto;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+}
+
+.section-box h2 {
+  font-size: 2.6rem;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+
+.section-box p {
+  max-width: 800px;
+  margin: 0 auto 1.2rem;
+  opacity: 0.9;
+}
+
+/* ===============================
+   FOOTER
+================================ */
+footer {
+  text-align: center;
+  padding: 3rem 1rem;
+  border-top: 1px solid var(--border);
+  color: #888;
 }
 
 .footer-links {
@@ -283,7 +203,24 @@ footer {
   text-decoration: none;
 }
 
-.footer-links a:hover {
-  color: var(--accent-hover);
-  text-decoration: underline;
+/* ===============================
+   MOBILE
+================================ */
+@media (max-width: 900px) {
+  .hero h1 {
+    font-size: 3.4rem;
+  }
+
+  nav {
+    display: none;
+  }
+
+  nav.open {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
 }
