@@ -2,9 +2,86 @@
   <div class="footer-content">
     <p>© 2026 echtlucky • Competitives Fortnite Journey</p>
     <div class="footer-links">
-      <a href="impressum.html">Impressum</a>
-      <a href="datenschutz.html">Datenschutz</a>
-      <a href="kontakt.html">Kontakt</a>
+      <a href="impressum.html" data-modal="impressum.html">Impressum</a>
+      <a href="datenschutz.html" data-modal="datenschutz.html">Datenschutz</a>
+      <a href="kontakt.html" data-modal="kontakt.html">Kontakt</a>
     </div>
   </div>
 </footer>
+
+<!-- Modal (global) -->
+<div class="legal-modal" id="legalModal" aria-hidden="true">
+  <div class="legal-modal__backdrop" data-close="1"></div>
+
+  <div class="legal-modal__panel" role="dialog" aria-modal="true" aria-labelledby="legalModalTitle">
+    <button class="legal-modal__close" id="legalModalClose" aria-label="Schließen">×</button>
+    <h2 class="legal-modal__title" id="legalModalTitle">Info</h2>
+    <div class="legal-modal__content" id="legalModalContent">
+      <!-- content wird per fetch geladen -->
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const modal = document.getElementById('legalModal');
+  const contentEl = document.getElementById('legalModalContent');
+  const titleEl = document.getElementById('legalModalTitle');
+  const closeBtn = document.getElementById('legalModalClose');
+
+  function openModal(title) {
+    titleEl.textContent = title || "Info";
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+  }
+
+  function closeModal() {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    contentEl.innerHTML = "";
+  }
+
+  async function loadIntoModal(url, title) {
+    contentEl.innerHTML = "<p style='opacity:.8'>Lade Inhalt...</p>";
+    openModal(title);
+
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+
+      const html = await res.text();
+
+      // Wir nehmen nur den <main>-Inhalt, falls vorhanden (sonst alles)
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+
+      const main = temp.querySelector('main');
+      contentEl.innerHTML = main ? main.innerHTML : temp.innerHTML;
+    } catch (err) {
+      contentEl.innerHTML = "<p style='color:#ff3366'>Fehler beim Laden: " + err.message + "</p>";
+    }
+  }
+
+  // Click Handler für alle Links mit data-modal (auch wenn Footer nachgeladen wurde)
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-modal]');
+    if (!a) return;
+
+    e.preventDefault();
+    const url = a.getAttribute('data-modal');
+    const title = a.textContent.trim();
+    loadIntoModal(url, title);
+  });
+
+  // Close
+  closeBtn?.addEventListener('click', closeModal);
+  modal?.addEventListener('click', (e) => {
+    if (e.target?.dataset?.close) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape" && modal.classList.contains('show')) closeModal();
+  });
+})();
+</script>

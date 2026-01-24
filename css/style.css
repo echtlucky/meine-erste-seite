@@ -501,3 +501,88 @@ body.loaded {
   opacity: 1;
   transform: translateX(0);
 }
+
+/* =========================
+   Legal Modal (Impressum/Datenschutz/Kontakt)
+   ========================= */
+body.modal-open {
+  overflow: hidden;
+}
+
+.legal-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+}
+
+.legal-modal.show {
+  display: block;
+}
+
+.legal-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+}
+
+.legal-modal__panel {
+  position: relative;
+  width: min(920px, calc(100% - 2rem));
+  max-height: 85vh;
+  margin: 6vh auto 0;
+  background: rgba(0,0,0,0.90);
+  border: 1px solid rgba(0,255,136,0.28);
+  border-radius: 22px;
+  box-shadow: 0 30px 90px rgba(0,255,136,0.12);
+  overflow: hidden;
+}
+
+.legal-modal__title {
+  padding: 1.6rem 2rem 0.7rem;
+  color: var(--accent);
+  font-size: 2rem;
+}
+
+.legal-modal__content {
+  padding: 0 2rem 2rem;
+  overflow: auto;
+  max-height: calc(85vh - 90px);
+  line-height: 1.8;
+  opacity: 0.95;
+}
+
+.legal-modal__content h1,
+.legal-modal__content h2,
+.legal-modal__content h3 {
+  color: var(--accent);
+  margin: 1.3rem 0 0.6rem;
+}
+
+.legal-modal__content p {
+  margin: 0.75rem 0;
+}
+
+.legal-modal__content a {
+  color: var(--accent);
+}
+
+.legal-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: rgba(0,255,136,0.08);
+  color: var(--accent);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.legal-modal__close:hover {
+  background: rgba(0,255,136,0.14);
+}
