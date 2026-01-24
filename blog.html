@@ -8,21 +8,54 @@
   <link rel="stylesheet" href="css/style.css" />
 
   <style>
-    /* ===== Blog Page Styles (page-specific) ===== */
+    /* ===== Blog Premium (page-specific) ===== */
 
-    .page-title {
+    .page-head {
       text-align: center;
-      margin: 2.2rem 0 0.6rem;
-      font-size: 3rem;
-      color: var(--accent);
-      text-shadow: 0 0 20px rgba(0,255,136,0.18);
+      margin: 2.6rem 0 1.4rem;
     }
 
-    .intro {
-      text-align: center;
+    .page-head h1 {
+      font-size: 3.2rem;
+      color: var(--accent);
+      text-shadow: 0 0 22px rgba(0,255,136,0.18);
+      margin-bottom: 0.6rem;
+    }
+
+    .page-head p {
       opacity: 0.85;
-      margin-bottom: 2.2rem;
       font-size: 1.15rem;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* Toolbar */
+    .blog-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin: 2.2rem 0 1rem;
+      flex-wrap: wrap;
+    }
+
+    .blog-toolbar .hint {
+      opacity: 0.75;
+      font-size: 0.98rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(0,255,136,0.22);
+      background: rgba(0,255,136,0.06);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
     }
 
     /* Loader */
@@ -31,18 +64,18 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 300px;
-      margin: 4rem auto;
+      height: 240px;
+      margin: 2.2rem auto;
     }
 
     .spinner {
-      width: 60px;
-      height: 60px;
-      border: 6px solid rgba(0,255,136,0.2);
+      width: 56px;
+      height: 56px;
+      border: 6px solid rgba(0,255,136,0.18);
       border-top: 6px solid var(--accent);
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
     }
 
     @keyframes spin {
@@ -50,56 +83,114 @@
       100% { transform: rotate(360deg); }
     }
 
-    .loading-text { font-size: 1.3rem; opacity: 0.8; }
+    .loading-text { font-size: 1.15rem; opacity: 0.78; }
 
     .no-posts {
       text-align: center;
-      font-size: 1.35rem;
-      opacity: 0.75;
-      margin: 6rem 0;
+      font-size: 1.25rem;
+      opacity: 0.78;
+      margin: 4rem 0 5rem;
       color: #aaa;
     }
 
-    /* Blog-Liste */
+    /* Grid */
     .blog-list {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2.2rem;
-      margin: 2.5rem 0 5rem;
-      min-height: 300px;
+      gap: 2rem;
+      margin: 1.6rem 0 2.2rem;
+      min-height: 200px;
     }
 
+    /* Premium Card */
     .blog-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 2rem;
-      text-align: left;
+      position: relative;
+      border-radius: 22px;
+      padding: 2rem 2rem 1.6rem;
+      border: 1px solid rgba(0,255,136,0.22);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(0,255,136,0.10) 0%, transparent 45%),
+        radial-gradient(circle at 90% 30%, rgba(0,255,136,0.06) 0%, transparent 55%),
+        rgba(0,0,0,0.55);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.55);
       transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      overflow: hidden;
+    }
+
+    .blog-card::after {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: radial-gradient(circle at 50% 0%, rgba(0,255,136,0.18), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
     }
 
     .blog-card:hover {
       transform: translateY(-8px);
       border-color: rgba(0,255,136,0.55);
-      box-shadow: 0 18px 55px rgba(0,255,136,0.12);
+      box-shadow: 0 28px 85px rgba(0,255,136,0.12), 0 18px 60px rgba(0,0,0,0.6);
+    }
+
+    .blog-card:hover::after { opacity: 1; }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(0,255,136,0.25);
+      background: rgba(0,255,136,0.08);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .meta {
+      opacity: 0.78;
+      font-size: 0.95rem;
+      white-space: nowrap;
     }
 
     .blog-card h2 {
+      font-size: 1.85rem;
+      line-height: 1.2;
+      margin-bottom: 0.85rem;
       color: var(--accent);
-      font-size: 1.8rem;
-      margin-bottom: 0.8rem;
     }
 
-    .blog-card .meta {
-      font-size: 0.95rem;
-      opacity: 0.75;
-      margin-bottom: 1.1rem;
-    }
-
-    .blog-card p {
+    .preview {
       font-size: 1.08rem;
       opacity: 0.92;
-      margin-bottom: 1.3rem;
+      margin-bottom: 1.35rem;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 0.8rem;
+    }
+
+    .readtime {
+      opacity: 0.78;
+      font-size: 0.95rem;
     }
 
     /* Modal */
@@ -107,32 +198,28 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(8px);
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(10px);
       z-index: 2000;
       align-items: center;
       justify-content: center;
+      padding: 1.5rem;
       opacity: 0;
       transition: opacity 0.25s ease;
-      padding: 1.5rem;
     }
 
-    .modal.show {
-      display: flex;
-      opacity: 1;
-    }
+    .modal.show { display: flex; opacity: 1; }
 
     .modal-content {
       width: 100%;
-      max-width: 900px;
-      background: rgba(0,0,0,0.85);
-      border: 1px solid rgba(0,255,136,0.35);
-      border-radius: 24px;
+      max-width: 920px;
+      background: rgba(0,0,0,0.86);
+      border: 1px solid rgba(0,255,136,0.32);
+      border-radius: 26px;
       padding: 3rem 2.6rem;
-      box-shadow: 0 20px 70px rgba(0,255,136,0.18);
+      box-shadow: 0 24px 90px rgba(0,255,136,0.18);
       position: relative;
-      text-align: left;
-      transform: scale(0.92);
+      transform: scale(0.94);
       transition: transform 0.25s ease;
       max-height: 85vh;
       overflow-y: auto;
@@ -153,36 +240,60 @@
 
     .modal h2 {
       color: var(--accent);
-      font-size: 2.4rem;
+      font-size: 2.55rem;
       margin-bottom: 0.9rem;
     }
 
     .modal .meta {
+      opacity: 0.78;
       font-size: 1.05rem;
-      opacity: 0.75;
-      margin-bottom: 1.8rem;
+      margin-bottom: 1.6rem;
+      white-space: normal;
     }
 
     .modal .post-content {
       font-size: 1.15rem;
-      line-height: 1.75;
-      opacity: 0.95;
-      white-space: pre-wrap; /* damit \n sauber angezeigt wird */
+      line-height: 1.8;
+      opacity: 0.96;
+      white-space: pre-wrap;
     }
 
     .delete-btn {
       background: #ff3366;
       color: white;
       padding: 1rem 1.6rem;
-      border-radius: 12px;
+      border-radius: 14px;
       margin-top: 2rem;
       display: none;
       cursor: pointer;
       border: none;
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: 0.2px;
     }
 
     .delete-btn:hover { background: #ff1a4d; }
+
+    /* Load more */
+    .load-more-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 1rem 0 4rem;
+    }
+
+    .load-more {
+      display: none;
+    }
+
+    .load-more[disabled] {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .page-head h1 { font-size: 2.7rem; }
+      .modal-content { padding: 2.4rem 1.8rem; }
+      .blog-card { padding: 1.7rem 1.6rem 1.4rem; }
+    }
   </style>
 </head>
 
@@ -192,14 +303,25 @@
   <div id="header-placeholder"></div>
 
   <main class="container">
-    <h1 class="page-title">Blog</h1>
-    <p class="intro">Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind.</p>
+    <div class="page-head">
+      <h1>Blog</h1>
+      <p>Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind – clean, kurz, auf den Punkt.</p>
+    </div>
+
+    <div class="blog-toolbar">
+      <div class="pill" id="postCountPill">📝 0 Posts</div>
+      <div class="hint">Tipp: Klick auf „Lesen“, um den Beitrag im Pop-Up zu öffnen.</div>
+    </div>
 
     <div id="blog-list" class="blog-list">
       <div class="loading-spinner">
         <div class="spinner"></div>
         <p class="loading-text">Posts werden geladen...</p>
       </div>
+    </div>
+
+    <div class="load-more-wrap">
+      <a href="#" class="btn load-more" id="loadMoreBtn">Mehr laden</a>
     </div>
   </main>
 
@@ -229,15 +351,14 @@
   <script src="js/menu.js"></script>
 
   <script>
-    // Page transition
     document.body.classList.add('loaded');
 
-    // ===== Header + Footer laden =====
+    // Header + Footer laden
     fetch('header.html')
       .then(r => r.text())
       .then(html => {
         document.getElementById('header-placeholder').innerHTML = html;
-        initHeaderScripts(); // ✅ nur das – keine doppelte Header-Logik hier
+        initHeaderScripts();
       });
 
     fetch('footer.html')
@@ -246,11 +367,30 @@
         document.getElementById('footer-placeholder').innerHTML = html;
       });
 
-    // ===== Helpers =====
+    // ===== Settings
     const ADMIN_EMAIL = "lucassteckel04@gmail.com";
+    const PAGE_SIZE = 6;
 
+    // ===== State
+    let lastDoc = null;
+    let hasMore = true;
+    let loading = false;
+    let currentPostId = null;
+    let canDelete = false;
+    let totalRendered = 0;
+
+    // ===== DOM
+    const blogList = document.getElementById('blog-list');
+    const postCountPill = document.getElementById('postCountPill');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+    const postModal = document.getElementById('postModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const deletePostBtn = document.getElementById('delete-post-btn');
+
+    // ===== Helpers
     function escapeHtml(str) {
-      return String(str)
+      return String(str ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -258,19 +398,38 @@
         .replaceAll("'", "&#039;");
     }
 
-    function formatPreview(text, len = 160) {
-      const clean = String(text || "").replace(/\s+/g, " ").trim();
+    function formatPreview(text, len = 170) {
+      const clean = String(text ?? "").replace(/\s+/g, " ").trim();
       return clean.length > len ? clean.slice(0, len) + "…" : clean;
     }
 
-    // ===== Modal Logic =====
-    const postModal = document.getElementById('postModal');
-    const modalCloseBtn = document.getElementById('modalCloseBtn');
-    const deletePostBtn = document.getElementById('delete-post-btn');
+    function estimateReadTime(text) {
+      const words = String(text ?? "").trim().split(/\s+/).filter(Boolean).length;
+      const minutes = Math.max(1, Math.round(words / 180)); // ~180 WPM
+      return `${minutes} Min. lesen`;
+    }
 
-    let currentPostId = null;
-    let canDelete = false;
+    function setPostCount() {
+      postCountPill.textContent = `📝 ${totalRendered} Post${totalRendered === 1 ? "" : "s"}`;
+    }
 
+    function renderLoading(isInitial = false) {
+      if (isInitial) {
+        blogList.innerHTML = `
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p class="loading-text">Posts werden geladen...</p>
+          </div>
+        `;
+      }
+    }
+
+    function setLoadMoreVisible() {
+      loadMoreBtn.style.display = hasMore ? 'inline-block' : 'none';
+      loadMoreBtn.toggleAttribute('disabled', loading);
+    }
+
+    // ===== Modal
     function openPostModal({ id, title, meta, content }) {
       document.getElementById('post-title').textContent = title || "";
       document.getElementById('post-meta').textContent = meta || "";
@@ -296,75 +455,7 @@
       if (e.target === postModal) closePostModal();
     });
 
-    // ===== Blog Posts laden =====
-    function renderLoading() {
-      const blogList = document.getElementById('blog-list');
-      blogList.innerHTML = `
-        <div class="loading-spinner">
-          <div class="spinner"></div>
-          <p class="loading-text">Posts werden geladen...</p>
-        </div>
-      `;
-    }
-
-    function loadBlogPosts() {
-      renderLoading();
-
-      db.collection('posts')
-        .orderBy('createdAt', 'desc')
-        .get()
-        .then((snapshot) => {
-          const blogList = document.getElementById('blog-list');
-          blogList.innerHTML = '';
-
-          if (snapshot.empty) {
-            blogList.innerHTML = '<p class="no-posts">Keine Beiträge vorhanden</p>';
-            return;
-          }
-
-          snapshot.forEach((doc) => {
-            const data = doc.data() || {};
-
-            const title = data.title || "Ohne Titel";
-            const date = data.date || "";
-            const author = data.author || "Unbekannt";
-            const content = data.content || "";
-
-            const card = document.createElement('div');
-            card.className = 'blog-card';
-
-            // Safe HTML (nur Text reingeben)
-            card.innerHTML = `
-              <h2>${escapeHtml(title)}</h2>
-              <p class="meta">${escapeHtml(date)}${date ? " • " : ""}von ${escapeHtml(author)}</p>
-              <p>${escapeHtml(formatPreview(content))}</p>
-              <a href="#" class="btn read-btn" style="display:inline-block;">Lesen</a>
-            `;
-
-            // Click handler ohne Inline-onclick (stabil + sicher)
-            card.querySelector('.read-btn').addEventListener('click', (e) => {
-              e.preventDefault();
-              openPostModal({
-                id: doc.id,
-                title,
-                meta: `${date}${date ? " • " : ""}von ${author}`,
-                content
-              });
-            });
-
-            blogList.appendChild(card);
-          });
-        })
-        .catch((err) => {
-          console.error(err);
-          document.getElementById('blog-list').innerHTML =
-            '<p style="color:#ff3366; text-align:center; margin:3rem 0;">Fehler beim Laden: ' +
-            escapeHtml(err.message) +
-            '</p>';
-        });
-    }
-
-    // ===== Admin Delete =====
+    // ===== Delete (Admin)
     function updateDeletePermission(user) {
       canDelete = !!user && user.email === ADMIN_EMAIL;
       deletePostBtn.style.display = (canDelete && currentPostId) ? 'inline-block' : 'none';
@@ -372,27 +463,153 @@
 
     deletePostBtn.addEventListener('click', () => {
       if (!canDelete || !currentPostId) return;
-
       if (!confirm('Post wirklich löschen?')) return;
 
       db.collection('posts').doc(currentPostId).delete()
         .then(() => {
           alert('Post gelöscht');
+
+          // UI Reset & reload first page
           closePostModal();
-          loadBlogPosts();
+          resetAndReload();
         })
         .catch((err) => alert('Fehler: ' + err.message));
     });
 
-    // ===== Init =====
-    // Posts können auch ohne Login geladen werden.
-    loadBlogPosts();
+    // ===== Cards (Premium)
+    function createCard(doc) {
+      const data = doc.data() || {};
 
-    // Admin-Rechte nur für Delete prüfen
-    if (typeof window.auth !== "undefined") {
-      auth.onAuthStateChanged((user) => {
-        updateDeletePermission(user);
+      const title = data.title || "Ohne Titel";
+      const date = data.date || "";
+      const author = data.author || "Unbekannt";
+      const content = data.content || "";
+      const badgeText = (data.badge || data.category || "Update");
+      const readTime = estimateReadTime(content);
+
+      const metaText = `${date}${date ? " • " : ""}von ${author}`;
+
+      const card = document.createElement('article');
+      card.className = 'blog-card';
+
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="badge">⚡ ${escapeHtml(badgeText)}</span>
+          <span class="meta">${escapeHtml(metaText)}</span>
+        </div>
+
+        <h2>${escapeHtml(title)}</h2>
+        <p class="preview">${escapeHtml(formatPreview(content))}</p>
+
+        <div class="card-actions">
+          <span class="readtime">⏱️ ${escapeHtml(readTime)}</span>
+          <a href="#" class="btn read-btn" style="display:inline-block;">Lesen</a>
+        </div>
+      `;
+
+      card.querySelector('.read-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        openPostModal({
+          id: doc.id,
+          title,
+          meta: metaText,
+          content
+        });
       });
+
+      // Optional: Klick auf ganze Card öffnet Modal
+      card.addEventListener('click', (e) => {
+        const isButton = e.target.closest('.read-btn');
+        if (isButton) return;
+        openPostModal({
+          id: doc.id,
+          title,
+          meta: metaText,
+          content
+        });
+      });
+
+      return card;
+    }
+
+    // ===== Pagination Query
+    function buildQuery() {
+      let q = db.collection('posts').orderBy('createdAt', 'desc').limit(PAGE_SIZE);
+      if (lastDoc) q = q.startAfter(lastDoc);
+      return q;
+    }
+
+    function loadNextPage({ initial = false } = {}) {
+      if (loading || !hasMore) return;
+
+      loading = true;
+      if (initial) renderLoading(true);
+      setLoadMoreVisible();
+
+      buildQuery().get()
+        .then((snapshot) => {
+          if (initial) blogList.innerHTML = "";
+
+          if (snapshot.empty) {
+            if (initial) blogList.innerHTML = '<p class="no-posts">Keine Beiträge vorhanden</p>';
+            hasMore = false;
+            setLoadMoreVisible();
+            return;
+          }
+
+          // Render cards
+          snapshot.forEach((doc) => {
+            blogList.appendChild(createCard(doc));
+            totalRendered += 1;
+          });
+
+          // Update cursor
+          lastDoc = snapshot.docs[snapshot.docs.length - 1];
+
+          // If less than page size, no more
+          if (snapshot.size < PAGE_SIZE) hasMore = false;
+
+          setPostCount();
+          setLoadMoreVisible();
+        })
+        .catch((err) => {
+          console.error(err);
+          if (initial) {
+            blogList.innerHTML =
+              '<p style="color:#ff3366; text-align:center; margin:3rem 0;">Fehler beim Laden: ' +
+              escapeHtml(err.message) +
+              '</p>';
+          } else {
+            alert('Fehler beim Nachladen: ' + err.message);
+          }
+        })
+        .finally(() => {
+          loading = false;
+          setLoadMoreVisible();
+        });
+    }
+
+    function resetAndReload() {
+      lastDoc = null;
+      hasMore = true;
+      loading = false;
+      currentPostId = null;
+      totalRendered = 0;
+      setPostCount();
+      loadNextPage({ initial: true });
+    }
+
+    loadMoreBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      loadNextPage({ initial: false });
+    });
+
+    // ===== Init
+    setPostCount();
+    resetAndReload();
+
+    if (typeof window.auth !== "undefined") {
+      auth.onAuthStateChanged((user) => updateDeletePermission(user));
     }
   </script>
 
