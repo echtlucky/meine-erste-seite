@@ -1,74 +1,81 @@
+// js/legal-modal.js – robust bei Footer via fetch (lazy DOM lookup)
+
 (function () {
-  function qs(id) { return document.getElementById(id); }
+  // globaler Click Handler (funktioniert auch wenn Footer erst später kommt)
+  document.addEventListener('click', async (e) => {
+    const a = e.target.closest('a[data-modal]');
+    if (!a) return;
 
-  function wireUpModal() {
-    const modal = qs('legalModal');
-    const contentEl = qs('legalModalContent');
-    const titleEl = qs('legalModalTitle');
-    const closeBtn = qs('legalModalClose');
+    // Nur Links mit data-modal abfangen
+    e.preventDefault();
 
-    if (!modal || !contentEl || !titleEl || !closeBtn) return;
+    // Modal-Elemente erst JETZT holen (Footer könnte gerade erst geladen worden sein)
+    const modal = document.getElementById('legalModal');
+    const contentEl = document.getElementById('legalModalContent');
+    const titleEl = document.getElementById('legalModalTitle');
+    const closeBtn = document.getElementById('legalModalClose');
 
-    function openModal(title) {
-      titleEl.textContent = title || "Info";
+    // Falls Modal-HTML noch nicht da ist: normal navigieren (kein Freeze)
+    if (!modal || !contentEl || !titleEl) {
+      window.location.href = a.getAttribute('href') || a.dataset.modal;
+      return;
+    }
+
+    const url = a.dataset.modal || a.getAttribute('href');
+    const title = a.textContent.trim() || "Info";
+
+    // UI helpers
+    const openModal = () => {
+      titleEl.textContent = title;
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('modal-open');
-    }
+    };
 
-    function closeModal() {
+    const closeModal = () => {
       modal.classList.remove('show');
       modal.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('modal-open');
       contentEl.innerHTML = "";
+    };
+
+    // Close Button (falls vorhanden)
+    if (closeBtn && !closeBtn.dataset.bound) {
+      closeBtn.dataset.bound = "1";
+      closeBtn.addEventListener('click', closeModal);
     }
 
-    async function loadIntoModal(url, title) {
-      contentEl.innerHTML = "<p style='opacity:.8'>Lade Inhalt...</p>";
-      openModal(title);
+    // Backdrop Click
+    if (!modal.dataset.bound) {
+      modal.dataset.bound = "1";
+      modal.addEventListener('click', (evt) => {
+        if (evt.target && evt.target.dataset && evt.target.dataset.close) closeModal();
+      });
 
-      try {
-        const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-
-        const html = await res.text();
-        const temp = document.createElement('div');
-        temp.innerHTML = html;
-
-        const main = temp.querySelector('main');
-        contentEl.innerHTML = main ? main.innerHTML : temp.innerHTML;
-      } catch (err) {
-        contentEl.innerHTML =
-          "<p style='color:#ff3366'>Fehler beim Laden: " + err.message + "</p>";
-      }
+      // ESC Close
+      document.addEventListener('keydown', (evt) => {
+        if (evt.key === 'Escape' && modal.classList.contains('show')) closeModal();
+      });
     }
 
-    // Footer-Links öffnen Modal
-    document.addEventListener('click', (e) => {
-      const a = e.target.closest('a[data-modal]');
-      if (!a) return;
+    // Öffnen + laden
+    contentEl.innerHTML = "<p style='opacity:.8'>Lade Inhalt...</p>";
+    openModal();
 
-      e.preventDefault();
-      loadIntoModal(a.dataset.modal, a.textContent.trim());
-    });
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
 
-    // X schließt Modal
-    closeBtn.addEventListener('click', closeModal);
+      const html = await res.text();
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
 
-    // Klick auf Backdrop schließt
-    modal.addEventListener('click', (e) => {
-      if (e.target?.dataset?.close) closeModal();
-    });
+      // nur main ziehen wenn vorhanden
+      const main = temp.querySelector('main');
+      contentEl.innerHTML = main ? main.innerHTML : temp.innerHTML;
 
-    // ESC schließt
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
-    });
-  }
-
-  // läuft nach DOM
-  document.addEventListener('DOMContentLoaded', wireUpModal);
-
-  // falls Footer später per fetch reinkommt: nochmal kurz nachziehen
-  setTimeout(wireUpModal, 500);
+    } catch (err) {
+      contentEl.innerHTML = "<p style='color:#ff3366'>Fehler beim Laden: " + err.message + "</p>";
+    }
+  });
 })();
