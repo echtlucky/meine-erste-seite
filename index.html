@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>echtlucky | Fortnite Competitive</title>
+
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <!-- optional, aber recommended für Feintuning -->
+  <link rel="stylesheet" href="css/pages/home.css">
 </head>
 
 <body class="page-transition">
@@ -132,27 +136,27 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script src="firebase.js"></script>
-<script src="js/menu.js"></script>
-<script src="js/legal-modal.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/legal-modal.js"></script>
 
-<script>
-  document.body.classList.add('loaded');
+  <script>
+    document.body.classList.add('loaded');
 
-  // Header laden + init
-  fetch('header.html')
-    .then(r => r.text())
-    .then(html => {
-      document.getElementById('header-placeholder').innerHTML = html;
-      initHeaderScripts();
-      if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-    });
+    // Header laden + init
+    fetch('header.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+        initHeaderScripts();
+        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+      });
 
-  // Footer laden (Modal HTML steckt im footer.html)
-  fetch('footer.html')
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById('footer-placeholder').innerHTML = html;
-    });
-</script>
+    // Footer laden (Modal HTML steckt im footer.html)
+    fetch('footer.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      });
+  </script>
 </body>
 </html>
