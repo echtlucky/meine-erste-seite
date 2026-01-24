@@ -132,40 +132,27 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script src="firebase.js"></script>
-  <script src="js/menu.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/legal-modal.js"></script>
 
-  <script>
-    document.body.classList.add('loaded');
+<script>
+  document.body.classList.add('loaded');
 
-    // Helper: Script dynamisch laden (nachdem Footer/Modal wirklich da ist)
-    function loadScript(src) {
-      return new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload = resolve;
-        s.onerror = reject;
-        document.body.appendChild(s);
-      });
-    }
+  // Header laden + init
+  fetch('header.html')
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById('header-placeholder').innerHTML = html;
+      initHeaderScripts();
+      if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+    });
 
-    // Header laden + init
-    fetch('header.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-        initHeaderScripts();
-        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-      })
-      .catch(err => console.error("Header load failed:", err));
-
-    // Footer laden, DANACH legal-modal.js laden (Fix fürs Freeze)
-    fetch('footer.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-        return loadScript('js/legal-modal.js');
-      })
-      .catch(err => console.error("Footer/Modal load failed:", err));
-  </script>
+  // Footer laden (Modal HTML steckt im footer.html)
+  fetch('footer.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('footer-placeholder').innerHTML = html;
+    });
+</script>
 </body>
 </html>
