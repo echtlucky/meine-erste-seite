@@ -12,24 +12,20 @@
   --discord-hover: #7289da;
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
   margin: 0;
   padding: 0;
-}
-
-body {
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
-  padding-top: 50px; /* Header-Höhe */
 }
 
 /* ======================================
-   Header – ausgereift, symmetrisch, modern
+   Smart Header
    ====================================== */
 header {
   position: fixed;
@@ -39,24 +35,27 @@ header {
   z-index: 1000;
   background: rgba(0, 0, 0, 0.92);
   backdrop-filter: blur(12px);
-  transition: transform 0.4s ease;
-  transform: translateY(0);
   height: 60px;
-  border-bottom: 1px solid rgba(0,255,136,0.2);
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.4s ease, box-shadow 0.3s ease;
+  transform: translateY(0);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-/* Header verstecken */
 header.hidden {
   transform: translateY(-100%);
 }
 
+header.scrolled {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
 .logo {
   color: var(--accent);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 1.8rem;
-  letter-spacing: -1px;
+  letter-spacing: -0.3px;
   text-decoration: none;
-  text-shadow: 0 0 10px rgba(0,255,136,0.3);
 }
 
 nav {
@@ -68,19 +67,17 @@ nav {
 
 .nav-links {
   display: flex;
-  align-items: center;
-  gap: 2.8rem;
+  gap: 3rem;
 }
 
 .nav-links a {
   color: var(--text);
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.05rem;
-  padding: 0.5rem 0.8rem;
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   transition: all 0.3s ease;
-  position: relative;
 }
 
 .nav-links a:hover {
@@ -89,12 +86,11 @@ nav {
 }
 
 .nav-links a.active {
+  background: rgba(0,255,136,0.15);
   color: var(--accent);
-  background: rgba(0,255,136,0.12);
   font-weight: 600;
 }
 
-/* Rechts: Anmelden oder Nutzername + Dropdown */
 .nav-right {
   display: flex;
   align-items: center;
@@ -114,7 +110,6 @@ nav {
   background: rgba(0,255,136,0.1);
 }
 
-/* Nutzername + Dropdown */
 .user-dropdown-wrapper {
   position: relative;
 }
@@ -125,7 +120,7 @@ nav {
   cursor: pointer;
   padding: 0.5rem 1.2rem;
   border-radius: 8px;
-  transition: all 0.3s;
+  transition: background 0.3s;
 }
 
 .user-name:hover {
@@ -143,7 +138,6 @@ nav {
   box-shadow: 0 12px 40px rgba(0,0,0,0.7);
   min-width: 180px;
   z-index: 1100;
-  overflow: hidden;
 }
 
 .dropdown-menu.show {
@@ -171,10 +165,7 @@ nav {
   color: #ff3366;
 }
 
-/* ======================================
-   Mobile: Hamburger-Menü (final)
-   ====================================== */
-
+/* Mobile Hamburger */
 .menu-toggle {
   display: none;
   background: none;
@@ -185,52 +176,37 @@ nav {
 }
 
 @media (max-width: 992px) {
-
   .menu-toggle {
     display: block;
   }
 
   nav {
-    position: relative;
-  }
-
-  #mainNav {
-    display: none;
     position: absolute;
     top: 100%;
     left: 0;
     width: 100%;
     background: rgba(0,0,0,0.96);
     flex-direction: column;
-    padding: 1.8rem 0;
+    padding: 1.5rem 0;
     border-bottom: 1px solid var(--border);
+    display: none;
   }
 
-  #mainNav.open {
+  nav.active {
     display: flex;
   }
 
-  .nav-links,
-  .nav-right {
-    display: flex;
+  .nav-links, .nav-right {
     flex-direction: column;
+    gap: 1.5rem;
     align-items: center;
-    gap: 1.4rem;
-  }
-
-  header {
-    height: 60px;
-  }
-
-  body {
-    padding-top: 60px;
   }
 }
 
 /* Hauptinhalt */
 .container {
   max-width: 1100px;
-  margin: 20px auto 80px;
+  margin: 40px auto 80px;
   padding: 0 5%;
 }
 
@@ -244,7 +220,6 @@ nav {
   text-align: center;
   padding: 0 5%;
   background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2000') center/cover no-repeat fixed;
-  position: relative;
 }
 
 .hero h1 {
@@ -255,7 +230,7 @@ nav {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 40px rgba(0,255,136,0.5);
+  text-shadow: 0 0 40px rgba(0,255,136,0.3);
 }
 
 .hero .tagline {
@@ -282,13 +257,13 @@ nav {
 
 .hero .btn:hover {
   transform: translateY(-6px) scale(1.05);
-  box-shadow: 0 20px 50px rgba(0,255,136,0.4);
+  box-shadow: 0 20px 50px rgba(0,255,136,0.3);
 }
 
 /* Community-Teaser */
 .community-teaser {
   background: linear-gradient(135deg, rgba(0,255,136,0.06) 0%, rgba(0,0,0,0.6) 100%);
-  border: 1px solid rgba(0,255,136,0.3);
+  border: 1px solid var(--border);
   border-radius: 24px;
   padding: 3.5rem 2.5rem;
   margin: 5rem auto;
@@ -342,7 +317,7 @@ nav {
   opacity: 0.85;
 }
 
-/* Bio, Stats, Discord, Twitch, Footer */
+/* Bio, Stats, Discord, Twitch */
 .bio, .stats-section, .discord-section, .twitch-section {
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -397,58 +372,7 @@ nav {
   box-shadow: 0 12px 40px rgba(88,101,242,0.6);
 }
 
-footer {
-  text-align: center;
-  padding: 4rem 1rem 2rem;
-  color: #888;
-  font-size: 0.95rem;
-  border-top: 1px solid var(--border);
-}
-
-/* Page Transition */
-.page-transition {
-  opacity: 1;
-  transform: translateX(0);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-body.page-transition {
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
-body.loaded {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* ======================================
-   Smart Header: Versteckt beim Runterscrollen, zeigt beim Hochscrollen
-   ====================================== */
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.92);
-  backdrop-filter: blur(12px);
-  transition: transform 0.3s ease-in-out;
-  transform: translateY(0);
-  height: 60px;
-  border-bottom: 1px solid rgba(0,255,136,0.2);
-}
-
-/* Header verstecken beim Runterscrollen */
-header.hidden {
-  transform: translateY(-100%);
-}
-
-/* Optional: Leichter Schatten beim Scrollen */
-header.scrolled {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-
+/* Footer */
 footer {
   text-align: center;
   padding: 3rem 1rem 2rem;
@@ -481,4 +405,21 @@ footer {
 .footer-links a:hover {
   color: var(--accent-hover);
   text-decoration: underline;
+}
+
+/* Page Transition */
+.page-transition {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+body.page-transition {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+body.loaded {
+  opacity: 1;
+  transform: translateX(0);
 }
