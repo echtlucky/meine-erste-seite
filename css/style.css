@@ -561,19 +561,41 @@ body.modal-open{ overflow:hidden; }
   backdrop-filter: blur(10px);
 }
 
-.legal-modal__panel{
-  position:relative;
-  z-index:2;
+.legal-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+}
+
+.legal-modal.show {
+  display: flex;                /* wichtig */
+  align-items: center;          /* vertikal zentrieren */
+  justify-content: center;      /* horizontal zentrieren */
+  padding: 24px;                /* Abstand am Rand */
+}
+
+.legal-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+}
+
+.legal-modal__panel {
+  position: relative;
+  z-index: 2;
+
   width: min(920px, calc(100% - 2rem));
-  max-height: 85vh;
-  margin: 6vh auto 0;
+  max-height: min(85vh, 780px);
 
+  margin: 0;                    /* ganz wichtig: kein margin-top mehr */
   background: rgba(0,0,0,0.90);
-  border: 1px solid rgba(0,255,136,0.20);
+  border: 1px solid rgba(0,255,136,0.28);
   border-radius: 22px;
-  box-shadow: 0 30px 90px rgba(0,255,136,0.10);
-
-  overflow:hidden;
+  box-shadow: 0 30px 90px rgba(0,255,136,0.12);
+  overflow: hidden;
 }
 
 .legal-modal__title{
