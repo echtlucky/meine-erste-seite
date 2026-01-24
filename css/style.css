@@ -36,9 +36,7 @@ body {
 }
 
 /* ✅ Main füllt den Platz und drückt Footer runter */
-main {
-  flex: 1;
-}
+main { flex: 1; }
 
 /* Subtle background texture */
 body::before {
@@ -64,7 +62,6 @@ body::after {
 
 /* ======================================
    HEADER (Premium + Hide on Scroll)
-   -> Nutzt .site-header für Smart Header
 ====================================== */
 .site-header {
   position: fixed;
@@ -82,27 +79,21 @@ body::after {
   align-items: center;
   justify-content: space-between;
   padding: 0.8rem 6%;
-}
 
-/* Smart Header: zuverlässig animierbar */
-.site-header{
+  /* Smart Header Animation */
   will-change: transform;
   transform: translate3d(0,0,0);
   transition: transform 0.35s ease;
 }
 
 /* Header wirklich raus schieben */
-.site-header.header-hidden{
+.site-header.header-hidden {
   transform: translate3d(0,-110%,0);
 }
 
 /* Fallback, falls irgendwo noch <header> ohne class existiert */
 header:not(.site-header) {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  height: 60px;
-  z-index: 1000;
+  position: relative; /* safer als fixed */
 }
 
 .logo {
@@ -265,7 +256,7 @@ nav {
 }
 
 /* ======================================
-   HERO (wie vorher: groß + background)
+   HERO
 ====================================== */
 .hero {
   min-height: 90vh;
@@ -349,7 +340,7 @@ nav {
 }
 
 /* ======================================
-   CARDS / BOXES (deine „Kästen“)
+   CARDS / BOXES
 ====================================== */
 .community-teaser {
   background: linear-gradient(135deg, rgba(0,255,136,0.07) 0%, rgba(0,0,0,0.62) 100%);
@@ -366,7 +357,6 @@ nav {
 .community-teaser h2 {
   font-size: 2.9rem;
   margin-bottom: 1.2rem;
-
   background: linear-gradient(90deg, #00ff88, #00cc66);
   -webkit-background-clip: text;
   background-clip: text;
@@ -504,10 +494,8 @@ body.loaded {
 
 /* =========================
    Legal Modal (Impressum/Datenschutz/Kontakt)
-   ========================= */
-body.modal-open {
-  overflow: hidden;
-}
+========================= */
+body.modal-open { overflow: hidden; }
 
 .legal-modal {
   display: none;
@@ -516,19 +504,19 @@ body.modal-open {
   z-index: 3000;
 }
 
-.legal-modal.show {
-  display: block;
-}
+.legal-modal.show { display: block; }
 
 .legal-modal__backdrop {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: rgba(0,0,0,0.75);
   backdrop-filter: blur(10px);
 }
 
 .legal-modal__panel {
   position: relative;
+  z-index: 2;
   width: min(920px, calc(100% - 2rem));
   max-height: 85vh;
   margin: 6vh auto 0;
@@ -560,78 +548,21 @@ body.modal-open {
   margin: 1.3rem 0 0.6rem;
 }
 
-.legal-modal__content p {
-  margin: 0.75rem 0;
-}
+.legal-modal__content p { margin: 0.75rem 0; }
 
-.legal-modal__content a {
-  color: var(--accent);
-}
+.legal-modal__content a { color: var(--accent); }
 
+/* ✅ EINMALIGES rotes X */
 .legal-modal__close {
   position: absolute;
-  top: 14px;
-  right: 18px;
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  background: rgba(0,255,136,0.08);
-  color: var(--accent);
-  font-size: 26px;
-  line-height: 1;
-}
-
-.legal-modal__close:hover {
-  background: rgba(0,255,136,0.14);
-}
-
-/* Close Button (rotes X oben rechts) */
-.legal-modal__close {
-  position: absolute;
-  top: 14px;
-  right: 16px;
-
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: none;
-
-  background: rgba(255, 51, 102, 0.15);
-  color: #ff3366;
-
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  transition: background 0.25s ease, transform 0.2s ease;
-}
-
-.legal-modal__close:hover {
-  background: rgba(255, 51, 102, 0.25);
-  transform: scale(1.05);
-}
-
-/* =========================
-   Modal Close Button (X)
-========================= */
-.legal-modal__close {
-  position: absolute;
-  top: 14px;
-  right: 16px;
-  z-index: 10000;
+  top: 12px;
+  right: 14px;
+  z-index: 9999;
 
   width: 44px;
   height: 44px;
   border-radius: 12px;
   border: 1px solid rgba(255, 51, 102, 0.35);
-
   background: rgba(255, 51, 102, 0.14);
   color: #ff3366;
 
