@@ -5,11 +5,109 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kontakt</title>
 </head>
+
 <body>
   <main>
-    <!-- NUR INHALT -->
-    <h1>Kontakt</h1>
-    ...
+    <section>
+      <h2>Kontakt</h2>
+      <p style="opacity:.88; margin-top:.6rem;">
+        Du willst mit mir connecten, Feedback geben oder bei der Community mitmachen?
+        Schreib mir easy – ich antworte so schnell ich kann.
+      </p>
+
+      <div style="margin-top:1.6rem; padding:1.2rem 1.2rem; border:1px solid rgba(0,255,136,0.18); border-radius:16px; background:rgba(255,255,255,0.03);">
+        <p style="margin:.2rem 0;"><strong>Name:</strong> Lucas Steckel</p>
+        <p style="margin:.2rem 0;"><strong>E-Mail:</strong>
+          <a href="mailto:lucassteckel03@gmail.com">lucassteckel03@gmail.com</a>
+        </p>
+      </div>
+
+      <hr style="margin:1.8rem 0; border:none; border-top:1px solid rgba(0,255,136,0.14);" />
+
+      <h3>Nachricht senden</h3>
+      <p style="opacity:.82; margin-top:.4rem;">
+        Das Formular nutzt einen <strong>Mail-Client-Fallback</strong> (öffnet dein E-Mail-Programm mit fertigem Text).
+        Wenn du später “richtiges Auto-Senden ohne Mailprogramm” willst, bauen wir Formspree/Netlify dazu.
+      </p>
+
+      <form id="contactForm" style="margin-top:1.2rem; display:grid; gap:0.9rem;">
+        <div style="display:grid; gap:.35rem;">
+          <label for="name" style="opacity:.9;">Dein Name</label>
+          <input id="name" name="name" type="text" required
+                 style="width:100%; padding:0.85rem 1rem; border-radius:14px; border:1px solid rgba(0,255,136,0.18); background:rgba(0,0,0,0.35); color:var(--text);" />
+        </div>
+
+        <div style="display:grid; gap:.35rem;">
+          <label for="email" style="opacity:.9;">Deine E-Mail</label>
+          <input id="email" name="email" type="email" required
+                 style="width:100%; padding:0.85rem 1rem; border-radius:14px; border:1px solid rgba(0,255,136,0.18); background:rgba(0,0,0,0.35); color:var(--text);" />
+        </div>
+
+        <div style="display:grid; gap:.35rem;">
+          <label for="subject" style="opacity:.9;">Betreff</label>
+          <input id="subject" name="subject" type="text" required
+                 value="Kontakt über echtlucky Website"
+                 style="width:100%; padding:0.85rem 1rem; border-radius:14px; border:1px solid rgba(0,255,136,0.18); background:rgba(0,0,0,0.35); color:var(--text);" />
+        </div>
+
+        <div style="display:grid; gap:.35rem;">
+          <label for="message" style="opacity:.9;">Deine Nachricht</label>
+          <textarea id="message" name="message" rows="6" required
+                    style="width:100%; padding:0.9rem 1rem; border-radius:14px; border:1px solid rgba(0,255,136,0.18); background:rgba(0,0,0,0.35); color:var(--text); resize:vertical;"></textarea>
+        </div>
+
+        <div style="display:flex; gap:0.8rem; flex-wrap:wrap; margin-top:.5rem;">
+          <button type="submit" class="btn">E-Mail öffnen</button>
+          <button type="button" id="copyBtn" class="btn btn-secondary">Text kopieren</button>
+        </div>
+
+        <p id="hint" style="opacity:.75; margin-top:.2rem;"></p>
+      </form>
+    </section>
+
+    <script>
+      (function () {
+        const form = document.getElementById('contactForm');
+        const hint = document.getElementById('hint');
+        const copyBtn = document.getElementById('copyBtn');
+
+        function buildMailto() {
+          const name = document.getElementById('name').value.trim();
+          const email = document.getElementById('email').value.trim();
+          const subject = document.getElementById('subject').value.trim();
+          const message = document.getElementById('message').value.trim();
+
+          const body =
+`Name: ${name}
+E-Mail: ${email}
+
+Nachricht:
+${message}
+`;
+
+          const to = "lucassteckel03@gmail.com";
+          const mailto = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+          return { mailto, body };
+        }
+
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const { mailto } = buildMailto();
+          window.location.href = mailto;
+          hint.textContent = "Wenn nichts passiert: Pop-up Blocker prüfen oder den Text kopieren und manuell schicken.";
+        });
+
+        copyBtn.addEventListener('click', async () => {
+          try {
+            const { body } = buildMailto();
+            await navigator.clipboard.writeText(body);
+            hint.textContent = "Copied ✅ — jetzt kannst du’s überall einfügen.";
+          } catch {
+            hint.textContent = "Copy ging nicht (Browser/Permission). Markier den Text im Feld und kopier manuell.";
+          }
+        });
+      })();
+    </script>
   </main>
 </body>
 </html>
