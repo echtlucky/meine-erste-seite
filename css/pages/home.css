@@ -1,86 +1,78 @@
 /* =========================
-   HOME • hard override (fix screenshots)
+   HOME • Apple clean + centered + full background
+   Fix:
+   - background image across whole page
+   - remove dark body overlays from style.css on home
+   - center everything
 ========================= */
 
-.home-page{
+/* Home base */
+body.home-page{
   position: relative;
   min-height: 100vh;
+
+  /* WICHTIG: echter Background am Body (stabiler als pseudo-layer) */
+  background:
+    linear-gradient(rgba(0,0,0,0.62), rgba(0,0,0,0.90)),
+    url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2400')
+    center/cover no-repeat fixed !important;
+
+  background-color: #000 !important;
 }
 
-/* 1) THINNER TEXT ON HOME (style.css ist zu fett) */
-.home-page *{
+/* Kill / neutralize global overlays from style.css (die machen’s „traurig“) */
+body.home-page::before,
+body.home-page::after{
+  content: none !important;
+  display: none !important;
+}
+
+/* Optional: grid + glow overlay (wie Login), aber subtil */
+body.home-page{
+  isolation: isolate;
+}
+body.home-page .home-bg-overlay{
+  display:none;
+}
+
+/* Thinner typography on home */
+body.home-page *{
   font-weight: 460;
 }
+body.home-page h1{ font-weight: 820; }
+body.home-page h2{ font-weight: 780; }
+body.home-page h3{ font-weight: 700; }
 
-/* Headings gezielt kräftiger */
-.home-page h1{ font-weight: 820; }
-.home-page h2{ font-weight: 780; }
-.home-page h3{ font-weight: 700; }
-
-/* 2) FULL PAGE BACKGROUND (wirklich überall) */
-.home-page::before{
-  content:"";
-  position: fixed;
-  inset: 0;
-  z-index: -5;
-  pointer-events: none;
-  background:
-    linear-gradient(rgba(0,0,0,0.62), rgba(0,0,0,0.88)),
-    url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2400')
-    center/cover no-repeat;
-}
-
-.home-page::after{
-  content:"";
-  position: fixed;
-  inset: 0;
-  z-index: -4;
-  pointer-events: none;
-  background:
-    linear-gradient(to right, rgba(0,255,136,0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0,255,136,0.07) 1px, transparent 1px),
-    radial-gradient(circle at 30% 20%, rgba(0,255,136,0.18), transparent 55%),
-    radial-gradient(circle at 78% 75%, rgba(88,101,242,0.18), transparent 60%);
-  background-size: 72px 72px, 72px 72px, cover, cover;
-  opacity: 0.85;
-  mix-blend-mode: screen;
-}
-
-/* 3) Container: style.css margins killen */
-.home-page .container{
+/* Container: remove style.css margin-top/bottom */
+body.home-page .container{
   max-width: 1180px;
   width: 100%;
   margin: 0 auto !important;
   padding: 0 clamp(1.1rem, 3vw, 2rem) !important;
 }
 
-/* spacing */
-.home-page main.container{
-  padding-top: clamp(1.6rem, 3vw, 2.2rem);
-  padding-bottom: clamp(2.6rem, 5vw, 4rem);
+/* Airy layout */
+body.home-page main.container{
+  padding-top: clamp(1.4rem, 3vw, 2.2rem);
+  padding-bottom: clamp(2.8rem, 5vw, 4.2rem);
 }
-.home-page main.container > section{
+body.home-page main.container > section{
   margin: clamp(1.6rem, 3.6vw, 3rem) 0;
 }
 
-/* 4) HERO FIX (dein Screenshot: nur Badge sichtbar)
-      -> wir resetten style.css hero komplett + z-index sauber
-*/
-.home-page .hero{
-  /* style.css hero reset */
+/* =========================
+   HERO (centered Apple card)
+========================= */
+body.home-page .hero{
+  /* reset old hero */
   min-height: unset !important;
   height: auto !important;
-  display: block !important;
-  align-items: initial !important;
-  justify-content: initial !important;
-  text-align: left !important;
-
   background: none !important;
   border-bottom: none !important;
 
-  width: min(1180px, calc(100% - 2rem));
-  margin: clamp(1.2rem, 2.6vw, 2rem) auto;
-  padding: clamp(2.0rem, 3.6vw, 3.0rem);
+  width: min(980px, calc(100% - 2rem));
+  margin: clamp(1.2rem, 2.8vw, 2rem) auto;
+  padding: clamp(2.2rem, 4vw, 3.3rem);
 
   border-radius: 28px;
   border: 1px solid rgba(0,255,136,0.18);
@@ -88,10 +80,13 @@
 
   position: relative;
   overflow: hidden;
+
+  /* center everything */
+  text-align: center !important;
 }
 
-/* Hero Background (wie Login Card) */
-.home-page .hero::before{
+/* hero glass background */
+body.home-page .hero::before{
   content:"";
   position:absolute;
   inset:0;
@@ -100,27 +95,34 @@
   background:
     radial-gradient(circle at 30% 20%, rgba(0,255,136,0.18), transparent 55%),
     radial-gradient(circle at 75% 70%, rgba(88,101,242,0.18), transparent 55%),
-    linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.74));
+    linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.74));
 }
 
-/* Wichtig: kein ::after mehr, das dir Text überdeckt. */
+/* subtle grid/glow on hero only (Apple-ish, nicht too much) */
+body.home-page .hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index: 1;
+  pointer-events:none;
+  background:
+    linear-gradient(to right, rgba(0,255,136,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,255,136,0.06) 1px, transparent 1px),
+    radial-gradient(circle at 50% 0%, rgba(0,255,136,0.14), transparent 55%);
+  background-size: 84px 84px, 84px 84px, cover;
+  opacity: 0.75;
+  mix-blend-mode: screen;
+}
 
-/* Inhalt MUSS über dem Background liegen */
-.home-page .hero-inner{
+body.home-page .hero-inner{
   position: relative;
   z-index: 2;
   display: grid;
   gap: 1.05rem;
+  place-items: center;
 }
 
-/* Notfall-Override: falls irgendwo display/opacity reinknallt */
-.home-page .hero-inner *{
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Badge */
-.home-page .hero-badge{
+body.home-page .hero-badge{
   display: inline-flex;
   align-items: center;
   gap: .6rem;
@@ -129,17 +131,15 @@
   border: 1px solid rgba(0,255,136,0.18);
   background: rgba(0,0,0,0.35);
   color: rgba(224,255,224,0.88);
-  font-weight: 760;
+  font-weight: 720;
   width: fit-content;
 }
 
-/* H1 sichtbar + nicht ultra fett */
-.home-page .hero h1{
-  margin: 0;
-  font-size: clamp(2.3rem, 4.2vw, 3.4rem);
+body.home-page .hero h1{
+  margin: .2rem 0 0;
+  font-size: clamp(2.4rem, 4.4vw, 3.5rem);
   letter-spacing: -1px;
   line-height: 1.05;
-  font-weight: 820 !important;
   text-shadow: none !important;
 
   background: linear-gradient(90deg, #00ff88, #00cc66);
@@ -148,43 +148,41 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* Tagline */
-.home-page .hero .tagline{
+body.home-page .hero .tagline{
   margin: 0;
-  max-width: 75ch;
-  color: rgba(224,255,224,0.86);
+  max-width: 70ch;
+  color: rgba(224,255,224,0.88);
   font-size: clamp(1.02rem, 1.7vw, 1.15rem);
-  line-height: 1.7;
+  line-height: 1.75;
+  opacity: .95;
 }
 
-/* Buttons (ruhiger, weniger pillig) */
-.home-page .btn-group{
+/* Buttons centered + less “fat pill” */
+body.home-page .btn-group{
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
   gap: .9rem;
-  margin-top: .2rem;
+  margin-top: .4rem;
 }
-.home-page .btn{
+
+body.home-page .btn,
+body.home-page .discord-btn{
   font-weight: 760 !important;
   font-size: 1.05rem !important;
-  padding: 1rem 1.35rem !important;
-  border-radius: 18px !important;
-}
-.home-page .discord-btn{
-  font-weight: 760 !important;
-  font-size: 1.05rem !important;
-  padding: 1rem 1.35rem !important;
+  padding: 1rem 1.4rem !important;
   border-radius: 18px !important;
 }
 
-/* Hero Pills */
-.home-page .hero-stats{
+/* hero pills centered */
+body.home-page .hero-stats{
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
   gap: .6rem;
   margin-top: .2rem;
 }
-.home-page .stat-pill{
+body.home-page .stat-pill{
   display: inline-flex;
   align-items: center;
   padding: .55rem .95rem;
@@ -192,31 +190,40 @@
   border: 1px solid rgba(0,255,136,0.16);
   background: rgba(0,0,0,0.38);
   color: rgba(224,255,224,0.86);
-  font-weight: 680;
+  font-weight: 660;
 }
 
-/* 5) SECTION CARDS */
-.home-page .community-teaser,
-.home-page .bio,
-.home-page .stats-section,
-.home-page .discord-section,
-.home-page .twitch-section{
+/* =========================
+   Sections as centered cards
+========================= */
+body.home-page .community-teaser,
+body.home-page .bio,
+body.home-page .stats-section,
+body.home-page .discord-section,
+body.home-page .twitch-section{
+  width: min(980px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+
   border-radius: 28px;
   border: 1px solid rgba(0,255,136,0.16);
-  background: rgba(0,0,0,0.56);
+  background: rgba(0,0,0,0.58);
   box-shadow: 0 22px 80px rgba(0,0,0,0.58);
-  padding: clamp(1.6rem, 2.9vw, 2.4rem);
+  padding: clamp(1.7rem, 3.1vw, 2.5rem);
+
   position: relative;
   overflow: hidden;
-  text-align: left;
+
+  /* center text */
+  text-align: center;
 }
 
-/* inner glow */
-.home-page .community-teaser::before,
-.home-page .bio::before,
-.home-page .stats-section::before,
-.home-page .discord-section::before,
-.home-page .twitch-section::before{
+/* subtle inner glow */
+body.home-page .community-teaser::before,
+body.home-page .bio::before,
+body.home-page .stats-section::before,
+body.home-page .discord-section::before,
+body.home-page .twitch-section::before{
   content:"";
   position:absolute;
   inset:-1px;
@@ -228,91 +235,102 @@
   opacity: .9;
 }
 
-.home-page .community-teaser > *,
-.home-page .bio > *,
-.home-page .stats-section > *,
-.home-page .discord-section > *,
-.home-page .twitch-section > *{
+body.home-page .community-teaser > *,
+body.home-page .bio > *,
+body.home-page .stats-section > *,
+body.home-page .discord-section > *,
+body.home-page .twitch-section > *{
   position: relative;
   z-index: 1;
 }
 
-/* section head */
-.home-page .section-head{
+body.home-page .section-head{
   display: grid;
   gap: .35rem;
   margin-bottom: 1.1rem;
 }
-.home-page h2{
+
+body.home-page h2{
   margin: 0;
-  font-size: clamp(1.55rem, 2.4vw, 2.05rem);
+  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
   letter-spacing: -0.6px;
   color: #00ff88;
 }
-.home-page .section-head p{
+
+body.home-page .section-head p{
   margin: 0;
   opacity: .92;
   color: rgba(224,255,224,0.86);
   line-height: 1.7;
 }
 
-/* features */
-.home-page .features{
+/* Features grid: centered + airy */
+body.home-page .features{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(1rem, 2vw, 1.4rem);
   margin: 1.4rem 0 1.6rem;
 }
-.home-page .feature{
+
+body.home-page .feature{
   border-radius: 22px;
   border: 1px solid rgba(0,255,136,0.14);
-  background: rgba(0,0,0,0.46);
+  background: rgba(0,0,0,0.48);
   padding: 1.35rem 1.35rem 1.2rem;
   box-shadow: 0 14px 50px rgba(0,0,0,0.45);
 }
-.home-page .feature h3{
+
+body.home-page .feature h3{
   margin: 0 0 .55rem;
-  color: rgba(224,255,224,0.92);
+  color: rgba(224,255,224,0.94);
   font-weight: 700;
 }
-.home-page .feature p{
+body.home-page .feature p{
   margin: 0;
   opacity: .88;
 }
 
-/* link row */
-.home-page .link-row{
+/* Actions row centered */
+body.home-page .section-actions{
+  margin-top: 1.2rem;
+}
+
+/* Stats links centered */
+body.home-page .link-row{
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
   gap: .9rem;
   margin-top: 1.2rem;
 }
 
-/* twitch */
-.home-page .embed{
+/* Twitch embed centered */
+body.home-page .embed{
   margin-top: 1.2rem;
   max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
 }
-.home-page .embed iframe{
+body.home-page .embed iframe{
   border-radius: 22px;
   border: 1px solid rgba(0,255,136,0.12);
   background: rgba(0,0,0,0.45);
   box-shadow: 0 18px 60px rgba(0,0,0,0.55);
 }
 
-/* prose */
-.home-page .prose{
+/* Prose spacing */
+body.home-page .prose{
   display: grid;
   gap: .9rem;
 }
-.home-page .prose p{
+body.home-page .prose p{
   margin: 0;
   color: rgba(224,255,224,0.86);
   line-height: 1.75;
 }
 
-/* responsive */
+/* Responsive */
 @media (max-width: 900px){
-  .home-page .features{ grid-template-columns: 1fr; }
-  .home-page .hero{ width: calc(100% - 1.4rem); }
+  body.home-page .features{ grid-template-columns: 1fr; }
+  body.home-page .hero{ width: calc(100% - 1.4rem); }
 }
