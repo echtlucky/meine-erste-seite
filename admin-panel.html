@@ -15,119 +15,122 @@
 </head>
 
 <body class="page-transition admin-page">
-
   <!-- Header (extern) -->
   <div id="header-placeholder"></div>
 
-  <div class="admin-shell">
-
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
-      <div class="admin-sidebar__top">
-        <div class="badge">⚡ echtlucky</div>
-        <h2 class="admin-sidebar__title">Admin Panel</h2>
-        <p class="admin-sidebar__sub">Manage Blog, User & Moderation</p>
+  <!-- Admin App -->
+  <main class="admin-wrap">
+    <section class="admin-hero">
+      <div class="admin-hero__left">
+        <div class="admin-badge">⚡ echtlucky</div>
+        <h1 class="admin-title">Admin Panel</h1>
+        <p class="admin-subtitle">Manage Blog, User & Moderation</p>
       </div>
 
-      <nav class="admin-nav" aria-label="Admin Navigation">
-        <button class="admin-nav__item is-active" type="button" data-tab="blog-tab">
-          <i class="fa-solid fa-blog"></i><span>Blog</span>
-        </button>
-        <button class="admin-nav__item" type="button" data-tab="users-tab">
-          <i class="fa-solid fa-users"></i><span>Benutzer</span>
-        </button>
-        <button class="admin-nav__item" type="button" data-tab="comments-tab">
-          <i class="fa-solid fa-comments"></i><span>Kommentare</span>
-        </button>
-        <button class="admin-nav__item" type="button" data-tab="bans-tab">
-          <i class="fa-solid fa-ban"></i><span>Bans</span>
-        </button>
-        <button class="admin-nav__item" type="button" data-tab="settings-tab">
-          <i class="fa-solid fa-gear"></i><span>Settings</span>
-        </button>
-        <button class="admin-nav__item" type="button" data-tab="stats-tab">
-          <i class="fa-solid fa-chart-line"></i><span>Statistiken</span>
-        </button>
-        <button class="admin-nav__item" type="button" data-tab="logs-tab">
-          <i class="fa-solid fa-file-lines"></i><span>Logs</span>
-        </button>
-      </nav>
-
-      <div class="admin-sidebar__bottom">
-        <div class="admin-whoami">
-          <span class="admin-whoami__label">Status</span>
-          <span id="adminBadge" class="admin-whoami__value">prüfe…</span>
+      <div class="admin-hero__right">
+        <div class="admin-statusline">
+          <span class="admin-statusline__label">Status</span>
+          <span id="adminBadge" class="admin-statusline__value">prüfe…</span>
         </div>
+
+        <div id="status" class="admin-status admin-status--info"></div>
       </div>
-    </aside>
+    </section>
 
-    <!-- Main -->
-    <main class="admin-main">
+    <!-- Horizontal Nav -->
+    <nav class="admin-tabs" aria-label="Admin Navigation">
+      <button class="admin-tabbtn is-active" type="button" data-tab="blog-tab">
+        <i class="fa-solid fa-blog"></i><span>Blog</span>
+      </button>
+      <button class="admin-tabbtn" type="button" data-tab="users-tab">
+        <i class="fa-solid fa-users"></i><span>Benutzer</span>
+      </button>
+      <button class="admin-tabbtn" type="button" data-tab="comments-tab">
+        <i class="fa-solid fa-comments"></i><span>Kommentare</span>
+      </button>
+      <button class="admin-tabbtn" type="button" data-tab="bans-tab">
+        <i class="fa-solid fa-ban"></i><span>Bans</span>
+      </button>
+      <button class="admin-tabbtn" type="button" data-tab="settings-tab">
+        <i class="fa-solid fa-gear"></i><span>Settings</span>
+      </button>
+      <button class="admin-tabbtn" type="button" data-tab="stats-tab">
+        <i class="fa-solid fa-chart-line"></i><span>Statistiken</span>
+      </button>
+      <button class="admin-tabbtn" type="button" data-tab="logs-tab">
+        <i class="fa-solid fa-file-lines"></i><span>Logs</span>
+      </button>
 
-      <!-- Top Bar -->
-      <header class="admin-topbar">
-        <div class="admin-topbar__left">
-          <h1 id="tab-title" class="admin-page-title">Blog verwalten</h1>
-          <p id="status" class="admin-status"></p>
-        </div>
+      <div class="admin-tabs__spacer"></div>
 
-        <div class="admin-topbar__right">
-          <button class="btn btn-primary" type="button" id="newPostBtn">
-            <i class="fa-solid fa-plus"></i> Neuer Beitrag
-          </button>
-        </div>
-      </header>
+      <!-- Action Button nur für Blog -->
+      <button class="admin-action btn btn-primary" type="button" id="newPostBtn">
+        <i class="fa-solid fa-plus"></i> Neuer Beitrag
+      </button>
+    </nav>
+
+    <!-- Content -->
+    <section class="admin-content">
 
       <!-- BLOG TAB -->
-      <section id="blog-tab" class="admin-tab is-active" aria-labelledby="tab-title">
-        <div class="admin-card">
-          <div class="admin-card__head">
-            <h3>Alle Beiträge</h3>
-            <p class="hint">Klick auf „Bearbeiten“, um den Beitrag im Pop-up zu öffnen.</p>
-          </div>
+      <div id="blog-tab" class="admin-tab is-active">
+        <article class="admin-card">
+          <header class="admin-card__head">
+            <div>
+              <h2 id="tab-title" class="admin-card__title">Blog verwalten</h2>
+              <p class="admin-card__hint">Klick auf „Bearbeiten“, um den Beitrag im Pop-up zu öffnen.</p>
+            </div>
+          </header>
 
           <div id="post-list" class="admin-list"></div>
-          <p id="posts-empty" class="empty" style="display:none;">Keine Beiträge vorhanden.</p>
-        </div>
-      </section>
+          <p id="posts-empty" class="admin-empty" style="display:none;">Keine Beiträge vorhanden.</p>
+        </article>
+      </div>
 
       <!-- USERS TAB -->
-      <section id="users-tab" class="admin-tab">
-        <div class="admin-card">
-          <div class="admin-card__head">
-            <h3>Registrierte Nutzer</h3>
-            <p class="hint">Rollen ändern oder Details ansehen.</p>
-          </div>
+      <div id="users-tab" class="admin-tab">
+        <article class="admin-card">
+          <header class="admin-card__head">
+            <div>
+              <h2 class="admin-card__title">Registrierte Nutzer</h2>
+              <p class="admin-card__hint">Rollen ändern oder Details ansehen.</p>
+            </div>
+          </header>
 
           <div id="user-list" class="admin-list"></div>
-          <p id="users-empty" class="empty" style="display:none;">Keine Nutzer gefunden.</p>
-        </div>
-      </section>
+          <p id="users-empty" class="admin-empty" style="display:none;">Keine Nutzer gefunden.</p>
+        </article>
+      </div>
 
       <!-- COMMENTS TAB -->
-      <section id="comments-tab" class="admin-tab">
-        <div class="admin-card">
-          <div class="admin-card__head">
-            <h3>Kommentare</h3>
-            <p class="hint">Kommt später – Platzhalter bleibt drin.</p>
-          </div>
-          <p class="empty">Noch keine Kommentare vorhanden (kommt später).</p>
-        </div>
-      </section>
+      <div id="comments-tab" class="admin-tab">
+        <article class="admin-card">
+          <header class="admin-card__head">
+            <div>
+              <h2 class="admin-card__title">Kommentare</h2>
+              <p class="admin-card__hint">Kommt später – Platzhalter bleibt drin.</p>
+            </div>
+          </header>
+
+          <p class="admin-empty">Noch keine Kommentare vorhanden (kommt später).</p>
+        </article>
+      </div>
 
       <!-- BANS TAB -->
-      <section id="bans-tab" class="admin-tab">
-        <div class="admin-card">
-          <div class="admin-card__head">
-            <h3>Gesperrte Nutzer</h3>
-            <p class="hint">E-Mail bannen oder Sperren verwalten.</p>
-          </div>
+      <div id="bans-tab" class="admin-tab">
+        <article class="admin-card">
+          <header class="admin-card__head">
+            <div>
+              <h2 class="admin-card__title">Gesperrte Nutzer</h2>
+              <p class="admin-card__hint">E-Mail bannen oder Sperren verwalten.</p>
+            </div>
+          </header>
 
           <div class="admin-inline">
-            <div class="field" style="flex: 1;">
-              <label for="ban-email">E-Mail</label>
-              <input type="email" id="ban-email" class="input" placeholder="user@email.de" />
-              <div class="hint">Tipp: Copy-Paste der E-Mail reicht.</div>
+            <div class="admin-field" style="flex:1;">
+              <label for="ban-email" class="admin-label">E-Mail</label>
+              <input type="email" id="ban-email" class="admin-input" placeholder="user@email.de" />
+              <div class="admin-hint">Tipp: Copy-Paste der E-Mail reicht.</div>
             </div>
 
             <button class="btn btn-danger" type="button" id="banAddBtn">
@@ -135,7 +138,7 @@
             </button>
           </div>
 
-          <div class="admin-table-wrap">
+          <div class="admin-tablewrap">
             <table class="admin-table">
               <thead>
                 <tr>
@@ -148,77 +151,82 @@
             </table>
           </div>
 
-          <p id="bans-empty" class="empty" style="display:none;">Keine Sperren aktiv.</p>
-        </div>
-      </section>
+          <p id="bans-empty" class="admin-empty" style="display:none;">Keine Sperren aktiv.</p>
+        </article>
+      </div>
 
       <!-- SETTINGS TAB -->
-      <section id="settings-tab" class="admin-tab">
-        <div class="admin-card">
-          <div class="admin-card__head">
-            <h3>Settings</h3>
-            <p class="hint">Zukünftige Einstellungen (Theme, Keys etc.).</p>
-          </div>
-          <p class="empty">Zukünftige Settings (kommt später).</p>
-        </div>
-      </section>
+      <div id="settings-tab" class="admin-tab">
+        <article class="admin-card">
+          <header class="admin-card__head">
+            <div>
+              <h2 class="admin-card__title">Settings</h2>
+              <p class="admin-card__hint">Zukünftige Einstellungen (Theme, Keys etc.).</p>
+            </div>
+          </header>
+          <p class="admin-empty">Zukünftige Settings (kommt später).</p>
+        </article>
+      </div>
 
       <!-- STATS TAB -->
-      <section id="stats-tab" class="admin-tab">
-        <div class="admin-card">
-          <div class="admin-card__head">
-            <h3>Statistiken</h3>
-            <p class="hint">Visits / Aktivität (kommt später).</p>
-          </div>
-          <p class="empty">Zukünftige Statistiken (kommt später).</p>
-        </div>
-      </section>
+      <div id="stats-tab" class="admin-tab">
+        <article class="admin-card">
+          <header class="admin-card__head">
+            <div>
+              <h2 class="admin-card__title">Statistiken</h2>
+              <p class="admin-card__hint">Visits / Aktivität (kommt später).</p>
+            </div>
+          </header>
+          <p class="admin-empty">Zukünftige Statistiken (kommt später).</p>
+        </article>
+      </div>
 
       <!-- LOGS TAB -->
-      <section id="logs-tab" class="admin-tab">
-        <div class="admin-card">
-          <div class="admin-card__head">
-            <h3>Logs</h3>
-            <p class="hint">Errors / User Actions (kommt später).</p>
-          </div>
-          <p class="empty">Zukünftige Logs (kommt später).</p>
-        </div>
-      </section>
+      <div id="logs-tab" class="admin-tab">
+        <article class="admin-card">
+          <header class="admin-card__head">
+            <div>
+              <h2 class="admin-card__title">Logs</h2>
+              <p class="admin-card__hint">Errors / User Actions (kommt später).</p>
+            </div>
+          </header>
+          <p class="admin-empty">Zukünftige Logs (kommt später).</p>
+        </article>
+      </div>
 
-    </main>
-  </div>
+    </section>
+  </main>
 
   <!-- NEW POST MODAL -->
-  <div id="newPostModal" class="modal" aria-hidden="true">
-    <div class="modal-content modal-lg">
-      <button class="modal-close" type="button" id="closeNewPostModal" aria-label="Schließen">×</button>
+  <div id="newPostModal" class="admin-modal" aria-hidden="true">
+    <div class="admin-modal__panel">
+      <button class="admin-modal__close" type="button" id="closeNewPostModal" aria-label="Schließen">×</button>
 
-      <div class="modal-head">
-        <h2 id="postModalTitle">Neuen Beitrag erstellen</h2>
-        <p class="hint">Markdown/Plaintext geht klar – wird im Blog sauber angezeigt.</p>
+      <header class="admin-modal__head">
+        <h2 class="admin-modal__title">Neuen Beitrag erstellen</h2>
+        <p class="admin-hint">Markdown/Plaintext geht klar – wird im Blog sauber angezeigt.</p>
+      </header>
+
+      <div class="admin-field">
+        <label for="new-title" class="admin-label">Titel</label>
+        <input type="text" id="new-title" class="admin-input" placeholder="Titel des Beitrags" />
       </div>
 
-      <div class="field">
-        <label for="new-title">Titel</label>
-        <input type="text" id="new-title" class="input" placeholder="Titel des Beitrags" />
-      </div>
-
-      <div class="field">
-        <label for="new-content">Inhalt</label>
-        <textarea id="new-content" class="input textarea" placeholder="Schreibe hier deinen Beitrag…"></textarea>
-        <div class="row row-between">
-          <span class="hint">Tipp: Absätze mit Leerzeile trennen.</span>
-          <span id="char-count" class="hint">0 Zeichen</span>
+      <div class="admin-field">
+        <label for="new-content" class="admin-label">Inhalt</label>
+        <textarea id="new-content" class="admin-input admin-textarea" placeholder="Schreibe hier deinen Beitrag…"></textarea>
+        <div class="admin-row admin-row--between">
+          <span class="admin-hint">Tipp: Absätze mit Leerzeile trennen.</span>
+          <span id="char-count" class="admin-hint">0 Zeichen</span>
         </div>
       </div>
 
-      <div class="field">
-        <label for="new-date">Datum</label>
-        <!-- bewusst native: modern + passt, kein Flatpickr -->
-        <input type="date" id="new-date" class="input" />
+      <div class="admin-field">
+        <label for="new-date" class="admin-label">Datum</label>
+        <input type="date" id="new-date" class="admin-input" />
       </div>
 
-      <div class="row row-gap">
+      <div class="admin-row admin-row--gap">
         <button class="btn btn-primary" type="button" id="publishBtn">
           <i class="fa-solid fa-paper-plane"></i> Veröffentlichen
         </button>
@@ -228,14 +236,14 @@
   </div>
 
   <!-- USER INFO MODAL -->
-  <div id="userInfoModal" class="modal" aria-hidden="true">
-    <div class="modal-content">
-      <button class="modal-close" type="button" id="closeUserInfoModal" aria-label="Schließen">×</button>
+  <div id="userInfoModal" class="admin-modal" aria-hidden="true">
+    <div class="admin-modal__panel">
+      <button class="admin-modal__close" type="button" id="closeUserInfoModal" aria-label="Schließen">×</button>
 
-      <div class="modal-head">
-        <h2>Benutzer-Informationen</h2>
-        <p class="hint">Details sind aktuell placeholder – kann später erweitert werden.</p>
-      </div>
+      <header class="admin-modal__head">
+        <h2 class="admin-modal__title">Benutzer-Informationen</h2>
+        <p class="admin-hint">Details sind aktuell placeholder – kann später erweitert werden.</p>
+      </header>
 
       <div id="user-info-content" class="admin-userinfo"></div>
     </div>
@@ -253,11 +261,11 @@
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/legal-modal.js"></script>
+  <script src="js/admin-panel.js"></script>
 
   <script>
     document.body.classList.add('loaded');
 
-    // Header + Footer
     fetch('header.html')
       .then(r => r.text())
       .then(html => {
@@ -271,384 +279,6 @@
       .then(html => {
         document.getElementById('footer-placeholder').innerHTML = html;
       });
-  </script>
-
-  <!-- Admin Logic (dein bestehender Code, nur sauber angebunden) -->
-  <script>
-    const db = firebase.firestore();
-
-    const ADMIN_EMAIL = "lucassteckel04@gmail.com";
-
-    // DOM
-    const statusEl = document.getElementById('status');
-    const adminBadge = document.getElementById('adminBadge');
-
-    const postList = document.getElementById('post-list');
-    const userList = document.getElementById('user-list');
-    const banList = document.getElementById('ban-list');
-
-    const postsEmpty = document.getElementById('posts-empty');
-    const usersEmpty = document.getElementById('users-empty');
-    const bansEmpty  = document.getElementById('bans-empty');
-
-    // Modal
-    const newPostModal = document.getElementById('newPostModal');
-    const closeNewPostModalBtn = document.getElementById('closeNewPostModal');
-    const publishBtn = document.getElementById('publishBtn');
-    const cancelPublishBtn = document.getElementById('cancelPublishBtn');
-    const newPostBtn = document.getElementById('newPostBtn');
-
-    const userInfoModal = document.getElementById('userInfoModal');
-    const closeUserInfoModalBtn = document.getElementById('closeUserInfoModal');
-
-    const charCount = document.getElementById('char-count');
-
-    // Inputs
-    const newTitle = document.getElementById('new-title');
-    const newContent = document.getElementById('new-content');
-    const newDate = document.getElementById('new-date');
-
-    const banEmail = document.getElementById('ban-email');
-    const banAddBtn = document.getElementById('banAddBtn');
-
-    // Tabs
-    const tabTitle = document.getElementById('tab-title');
-    const navItems = Array.from(document.querySelectorAll('.admin-nav__item'));
-    const tabs = Array.from(document.querySelectorAll('.admin-tab'));
-
-    function setStatus(text, type="info"){
-      statusEl.textContent = text;
-      statusEl.className = "admin-status " + type;
-    }
-
-    function openModal(modal){
-      modal.style.display = 'flex';
-      requestAnimationFrame(() => modal.classList.add('show'));
-      modal.setAttribute("aria-hidden", "false");
-      document.body.classList.add('modal-open');
-    }
-
-    function closeModal(modal){
-      modal.classList.remove('show');
-      modal.setAttribute("aria-hidden", "true");
-      document.body.classList.remove('modal-open');
-      setTimeout(() => { modal.style.display = 'none'; }, 220);
-    }
-
-    function wireTabs(){
-      navItems.forEach(btn => {
-        btn.addEventListener('click', () => {
-          navItems.forEach(b => b.classList.remove('is-active'));
-          btn.classList.add('is-active');
-
-          const tabId = btn.dataset.tab;
-          tabs.forEach(t => t.classList.remove('is-active'));
-          const active = document.getElementById(tabId);
-          if (active) active.classList.add('is-active');
-
-          const titleText = btn.innerText.trim();
-          tabTitle.textContent = titleText;
-
-          // „Neuer Beitrag“-Button nur im Blog Tab zeigen
-          document.querySelector('.admin-topbar__right').style.display =
-            (tabId === "blog-tab") ? "flex" : "none";
-        });
-      });
-    }
-
-    // Char Count
-    function updateCharCount(){
-      charCount.textContent = (newContent.value || "").length + " Zeichen";
-    }
-
-    newContent.addEventListener('input', updateCharCount);
-
-    // Modal Buttons
-    newPostBtn.addEventListener('click', () => {
-      newTitle.value = "";
-      newContent.value = "";
-      newDate.value = "";
-      updateCharCount();
-      openModal(newPostModal);
-    });
-
-    closeNewPostModalBtn.addEventListener('click', () => closeModal(newPostModal));
-    cancelPublishBtn.addEventListener('click', () => closeModal(newPostModal));
-
-    closeUserInfoModalBtn.addEventListener('click', () => closeModal(userInfoModal));
-
-    // Close modals on backdrop click
-    newPostModal.addEventListener('click', (e) => { if (e.target === newPostModal) closeModal(newPostModal); });
-    userInfoModal.addEventListener('click', (e) => { if (e.target === userInfoModal) closeModal(userInfoModal); });
-
-    // ===== AUTH GUARD
-    auth.onAuthStateChanged((user) => {
-      if (!user || user.email !== ADMIN_EMAIL) {
-        alert('Zugriff verweigert – nur Admin erlaubt');
-        auth.signOut();
-        window.location.href = 'index.html';
-        return;
-      }
-
-      adminBadge.textContent = "Admin ✓";
-      setStatus("Admin-Zugriff erteilt: " + user.email, "success");
-
-      wireTabs();
-      loadPosts();
-      loadUsers();
-      loadBans();
-    });
-
-    // ===== POSTS
-    publishBtn.addEventListener('click', saveNewPost);
-
-    function loadPosts(){
-      postList.innerHTML = "";
-      postsEmpty.style.display = "none";
-
-      db.collection('posts').orderBy('createdAt', 'desc').get()
-        .then((snapshot) => {
-          if (snapshot.empty){
-            postsEmpty.style.display = "block";
-            return;
-          }
-
-          snapshot.forEach((doc) => {
-            const data = doc.data() || {};
-            const item = document.createElement('div');
-            item.className = "admin-item";
-
-            item.innerHTML = `
-              <div class="admin-item__meta">
-                <div class="admin-item__title">${escapeHtml(data.title || "Ohne Titel")}</div>
-                <div class="admin-item__sub">
-                  ${escapeHtml(data.date || "")}${data.date ? " • " : ""}von ${escapeHtml(data.author || "Unbekannt")}
-                </div>
-              </div>
-
-              <div class="admin-item__actions">
-                <button class="btn btn-danger btn-sm" type="button" data-del="${doc.id}">
-                  <i class="fa-solid fa-trash"></i> Löschen
-                </button>
-              </div>
-            `;
-
-            item.querySelector('[data-del]').addEventListener('click', () => deletePost(doc.id));
-            postList.appendChild(item);
-          });
-        })
-        .catch((err) => setStatus("Fehler beim Laden der Posts: " + err.message, "error"));
-    }
-
-    function saveNewPost(){
-      const title = (newTitle.value || "").trim();
-      const content = (newContent.value || "").trim();
-      const date = (newDate.value || "").trim();
-
-      if (!title || !content || !date){
-        setStatus("Bitte alle Felder ausfüllen.", "error");
-        return;
-      }
-
-      const postData = {
-        title,
-        content,
-        date,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        author: auth.currentUser.email
-      };
-
-      setStatus("Post wird gespeichert…", "info");
-
-      db.collection('posts').add(postData)
-        .then(() => {
-          setStatus("Post veröffentlicht ✅", "success");
-          closeModal(newPostModal);
-          loadPosts();
-        })
-        .catch((err) => setStatus("Fehler: " + err.message, "error"));
-    }
-
-    function deletePost(id){
-      if (!confirm('Post wirklich löschen?')) return;
-
-      db.collection('posts').doc(id).delete()
-        .then(() => {
-          setStatus("Post gelöscht.", "success");
-          loadPosts();
-        })
-        .catch((err) => setStatus("Löschen fehlgeschlagen: " + err.message, "error"));
-    }
-
-    // ===== USERS
-    function loadUsers(){
-      userList.innerHTML = "";
-      usersEmpty.style.display = "none";
-
-      db.collection('users').get()
-        .then((snapshot) => {
-          if (snapshot.empty){
-            usersEmpty.style.display = "block";
-            return;
-          }
-
-          snapshot.forEach((doc) => {
-            const data = doc.data() || {};
-            const email = data.email || "(ohne Email)";
-            const role = data.role || "user";
-
-            const item = document.createElement('div');
-            item.className = "admin-item";
-
-            item.innerHTML = `
-              <div class="admin-item__meta">
-                <div class="admin-item__title">${escapeHtml(email)}</div>
-                <div class="admin-item__sub">Rolle: <strong>${escapeHtml(role)}</strong></div>
-              </div>
-
-              <div class="admin-item__actions">
-                <button class="btn btn-ghost btn-sm" type="button" data-details="${doc.id}">
-                  Details
-                </button>
-
-                <select class="select" data-role="${doc.id}">
-                  <option value="user" ${role === 'user' ? 'selected' : ''}>User</option>
-                  <option value="mod" ${role === 'mod' ? 'selected' : ''}>Mod</option>
-                  <option value="admin" ${role === 'admin' ? 'selected' : ''}>Admin</option>
-                </select>
-              </div>
-            `;
-
-            item.querySelector('[data-details]').addEventListener('click', () => showUserInfo(doc.id, email, role));
-            item.querySelector('[data-role]').addEventListener('change', (e) => changeRole(doc.id, e.target.value));
-
-            userList.appendChild(item);
-          });
-        })
-        .catch((err) => setStatus("Fehler beim Laden der Nutzer: " + err.message, "error"));
-    }
-
-    function changeRole(id, role){
-      db.collection('users').doc(id).update({ role })
-        .then(() => {
-          setStatus("Rolle aktualisiert ✅", "success");
-          loadUsers();
-        })
-        .catch((err) => setStatus("Fehler: " + err.message, "error"));
-    }
-
-    function showUserInfo(id, email, role){
-      const content = document.getElementById('user-info-content');
-      content.innerHTML = `
-        <div class="admin-userinfo__row"><span>E-Mail</span><strong>${escapeHtml(email)}</strong></div>
-        <div class="admin-userinfo__row"><span>Rolle</span><strong>${escapeHtml(role)}</strong></div>
-
-        <div class="admin-divider"></div>
-
-        <div class="admin-userinfo__row"><span>Registriert am</span><strong>Unbekannt</strong></div>
-        <div class="admin-userinfo__row"><span>Letzter Login</span><strong>Unbekannt</strong></div>
-        <div class="admin-userinfo__row"><span>Posts erstellt</span><strong>Unbekannt</strong></div>
-        <div class="admin-userinfo__row"><span>Kommentare</span><strong>Unbekannt</strong></div>
-
-        <div class="admin-divider"></div>
-
-        <button class="btn btn-danger" type="button" id="deleteUserBtn">
-          <i class="fa-solid fa-user-xmark"></i> Benutzer löschen
-        </button>
-      `;
-
-      content.querySelector('#deleteUserBtn').addEventListener('click', () => deleteUser(id, email));
-      openModal(userInfoModal);
-    }
-
-    function deleteUser(id, email){
-      if (!confirm('Benutzer ' + email + ' wirklich löschen?')) return;
-
-      db.collection('users').doc(id).delete()
-        .then(() => {
-          setStatus("Benutzer gelöscht.", "success");
-          closeModal(userInfoModal);
-          loadUsers();
-        })
-        .catch((err) => setStatus("Löschen fehlgeschlagen: " + err.message, "error"));
-    }
-
-    // ===== BANS
-    banAddBtn.addEventListener('click', addBan);
-
-    function loadBans(){
-      banList.innerHTML = "";
-      bansEmpty.style.display = "none";
-
-      db.collection('bans').get()
-        .then((snapshot) => {
-          if (snapshot.empty){
-            bansEmpty.style.display = "block";
-            return;
-          }
-
-          snapshot.forEach((doc) => {
-            const data = doc.data() || {};
-            const tr = document.createElement('tr');
-
-            const bannedAt = data.bannedAt?.toDate ? new Date(data.bannedAt.toDate()).toLocaleString() : "Unbekannt";
-
-            tr.innerHTML = `
-              <td>${escapeHtml(data.email || "")}</td>
-              <td>${escapeHtml(bannedAt)}</td>
-              <td class="col-actions">
-                <button class="btn btn-ghost btn-sm" type="button" data-unban="${doc.id}">
-                  Entsperren
-                </button>
-              </td>
-            `;
-
-            tr.querySelector('[data-unban]').addEventListener('click', () => removeBan(doc.id));
-            banList.appendChild(tr);
-          });
-        })
-        .catch((err) => setStatus("Fehler beim Laden der Sperren: " + err.message, "error"));
-    }
-
-    function addBan(){
-      const email = (banEmail.value || "").trim();
-      if (!email){
-        setStatus("Bitte E-Mail eingeben.", "error");
-        return;
-      }
-
-      db.collection('bans').add({
-        email,
-        bannedAt: firebase.firestore.FieldValue.serverTimestamp()
-      })
-        .then(() => {
-          setStatus("User gebannt ✅", "success");
-          banEmail.value = "";
-          loadBans();
-        })
-        .catch((err) => setStatus("Fehler: " + err.message, "error"));
-    }
-
-    function removeBan(id){
-      if (!confirm('Entsperren?')) return;
-
-      db.collection('bans').doc(id).delete()
-        .then(() => {
-          setStatus("Sperre entfernt ✅", "success");
-          loadBans();
-        })
-        .catch((err) => setStatus("Fehler: " + err.message, "error"));
-    }
-
-    // ===== Utils
-    function escapeHtml(str){
-      return String(str ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
   </script>
 </body>
 </html>
