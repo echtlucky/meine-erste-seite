@@ -5,13 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login | echtlucky</title>
 
-  <!-- Base -->
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- Components (Cards, Buttons, Inputs, Tabs, etc.) -->
   <link rel="stylesheet" href="css/components.css" />
-
-  <!-- Page-specific -->
   <link rel="stylesheet" href="css/pages/login.css" />
 </head>
 
@@ -22,13 +17,13 @@
   <main class="auth-shell">
     <div class="auth-wrap">
 
-      <!-- Cards -->
       <div class="auth-grid">
 
         <!-- Left: Visual / Content -->
         <section class="auth-visual">
           <div>
-            <div class="badge">⚡ echtlucky • Competitive</div>
+            <!-- WICHTIG: eigene Klasse statt .badge (verhindert Kollisionen) -->
+            <div class="auth-badge">⚡ echtlucky • Competitive</div>
 
             <h1>Willkommen zurück.</h1>
 
@@ -174,6 +169,7 @@
             </form>
           </div>
         </section>
+
       </div>
 
       <!-- Latest Blog (unten) -->
