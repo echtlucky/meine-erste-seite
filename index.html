@@ -10,29 +10,27 @@
 
 <body class="page-transition">
 
-  <!-- Header (extern) -->
+  <!-- Header wird dynamisch geladen -->
   <div id="header-placeholder"></div>
 
   <!-- HERO -->
   <section class="hero">
     <h1>echtlucky</h1>
     <p class="tagline">
-      Unreal Grind • Ballistic & Ranked • EU Competitive Scene <br>
-      Auf dem Weg nach ganz oben
+      Unreal Grind • Ballistic & Ranked • EU Competitive Scene • Auf dem Weg nach ganz oben
     </p>
 
     <div class="btn-group">
       <a href="blog.html" class="btn">Zum Blog</a>
       <a href="login.html" class="btn">Community beitreten</a>
-      <a href="https://discord.gg/c7jmXnBSv6" target="_blank" class="discord-btn">
-        Discord joinen
-      </a>
+      <a href="https://discord.gg/c7jmXnBSv6" target="_blank" class="discord-btn">Discord joinen</a>
     </div>
   </section>
 
   <!-- CONTENT -->
   <main class="container">
 
+    <!-- COMMUNITY -->
     <section class="community-teaser">
       <h2>Werde Teil der echten Grind-Community</h2>
       <p>Hier treffen sich ambitionierte Spieler, die mehr wollen als nur Casual-Ranked.</p>
@@ -40,42 +38,98 @@
       <div class="features">
         <div class="feature">
           <h3>Scrims & Customs</h3>
-          <p>Tägliche organisierte Matches, VOD-Reviews und 1v1s.</p>
+          <p>Tägliche organisierte Matches, VOD-Reviews und 1v1s gegen starke Gegner.</p>
         </div>
 
         <div class="feature">
           <h3>Trainingspläne & Tipps</h3>
-          <p>Mechanics-Guides, Challenges & Settings-Tuning.</p>
+          <p>Wöchentliche Challenges, Mechanics-Guides und Settings-Tuning von echten Grindern.</p>
         </div>
 
         <div class="feature">
-          <h3>Team-Suche</h3>
-          <p>IGLs, Fraggers, Coaches & Contender-Teams.</p>
+          <h3>Team-Suche & Networking</h3>
+          <p>Finde IGLs, Fraggers, Coaches und Contender-Teams – direkt und ohne Drama.</p>
         </div>
 
         <div class="feature">
           <h3>Exklusive Inhalte</h3>
-          <p>Private Streams, Insider-Tipps & Vorbereitung.</p>
+          <p>Nur für Mitglieder: Private Streams, Cash-Cup-Vorbereitung und Insider-Tipps.</p>
         </div>
       </div>
 
-      <a href="login.html" class="btn">Jetzt beitreten</a>
+      <a href="login.html" class="btn" style="font-size: 1.4rem; padding: 1.2rem 3.5rem;">
+        Jetzt beitreten
+      </a>
     </section>
 
+    <!-- ÜBER MICH -->
     <section class="bio">
       <h2>Über mich</h2>
       <p>
-        Ambitionierter Fortnite-Spieler aus Deutschland mit Fokus auf Ballistic & Ranked.
-        Ziel: konstantes Wachstum & kompetitives Level.
+        Ich bin ein ambitionierter Fortnite-Spieler aus Deutschland, der aktuell voll auf Ballistic und Ranked grindet.
+        Mein Ziel ist es, in den kommenden Monaten konstant in den höheren Divisionen zu landen und langfristig im
+        kompetitiven Bereich Fuß zu fassen.
       </p>
+      <p>
+        Täglich trainiere ich Mechanics, Game Sense, Rotations und Teamplay. Neben Solo-Ranked liegt mein Fokus besonders
+        auf 5v5 Ballistic – hier sehe ich das größte Potenzial für Wachstum und Turniere.
+      </p>
+      <p>
+        Ich suche aktuell aktive Mitspieler/Teams für Scrims, Customs und zukünftige Contests.
+        Wenn du ähnlich ambitioniert bist – melde dich gerne!
+      </p>
+    </section>
+
+    <!-- STATS -->
+    <section id="stats" class="stats-section">
+      <h2>Ballistic Statistiken</h2>
+      <p>Aktueller Rank, Divisionsfortschritt und Performance-Metriken – werden in Echtzeit aktualisiert.</p>
+
+      <div style="margin: 2rem 0;">
+        <a href="https://fortnitetracker.com/profile/all/mr.%20z00m" target="_blank" class="btn">
+          Fortnite Tracker
+        </a>
+        <a href="https://fortnite.gg/ballistic-stats?player=mr.%20z00m" target="_blank" class="btn" style="background: #00cc66; color: white;">
+          fortnite.gg
+        </a>
+      </div>
+    </section>
+
+    <!-- DISCORD -->
+    <section id="discord" class="discord-section">
+      <h2>Discord Community</h2>
+      <p>Trete bei für Scrims, VOD-Reviews, Strategie-Diskussionen und kompetitives Fortnite-Netzwerken.</p>
+
+      <div class="discord-btn-wrapper">
+        <a href="https://discord.gg/c7jmXnBSv6" target="_blank" class="discord-btn">
+          Discord beitreten
+        </a>
+      </div>
+    </section>
+
+    <!-- TWITCH -->
+    <section id="twitch" class="twitch-section">
+      <h2>Twitch Stream</h2>
+      <p>Live dabei, wenn ich Ballistic & Ranked grinde – oder schau dir VODs an.</p>
+
+      <div style="margin: 2.5rem auto; max-width: 900px;">
+        <iframe
+          src="https://player.twitch.tv/?channel=echtlucky&parent=echtlucky.github.io&muted=true&autoplay=false"
+          frameborder="0"
+          allowfullscreen="false"
+          scrolling="no"
+          height="506"
+          width="100%">
+        </iframe>
+      </div>
     </section>
 
   </main>
 
-  <!-- Footer (extern) -->
+  <!-- Footer wird dynamisch geladen -->
   <div id="footer-placeholder"></div>
 
-  <!-- Firebase -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -83,17 +137,18 @@
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>
 
-  <!-- Header / Footer Loader -->
   <script>
     document.body.classList.add('loaded');
 
+    // Header laden + init
     fetch('header.html')
       .then(res => res.text())
       .then(html => {
         document.getElementById('header-placeholder').innerHTML = html;
-        initHeaderScripts();
+        initHeaderScripts(); // ✅ nur noch das – kein doppeltes JS
       });
 
+    // Footer laden
     fetch('footer.html')
       .then(res => res.text())
       .then(html => {
