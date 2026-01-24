@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>echtlucky | Fortnite Competitive</title>
-
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -23,7 +22,7 @@
     <div class="btn-group">
       <a href="blog.html" class="btn">Zum Blog</a>
       <a href="login.html" class="btn">Community beitreten</a>
-      <a href="https://discord.gg/c7jmXnBSv6" target="_blank" class="discord-btn">Discord joinen</a>
+      <a href="https://discord.gg/c7jmXnBSv6" target="_blank" rel="noopener" class="discord-btn">Discord joinen</a>
     </div>
   </section>
 
@@ -57,9 +56,7 @@
         </div>
       </div>
 
-      <a href="login.html" class="btn" style="font-size: 1.4rem; padding: 1.2rem 3.5rem;">
-        Jetzt beitreten
-      </a>
+      <a href="login.html" class="btn">Jetzt beitreten</a>
     </section>
 
     <!-- ÜBER MICH -->
@@ -86,10 +83,10 @@
       <p>Aktueller Rank, Divisionsfortschritt und Performance-Metriken – werden in Echtzeit aktualisiert.</p>
 
       <div style="margin: 2rem 0;">
-        <a href="https://fortnitetracker.com/profile/all/mr.%20z00m" target="_blank" class="btn">
+        <a href="https://fortnitetracker.com/profile/all/mr.%20z00m" target="_blank" rel="noopener" class="btn">
           Fortnite Tracker
         </a>
-        <a href="https://fortnite.gg/ballistic-stats?player=mr.%20z00m" target="_blank" class="btn" style="background: #00cc66; color: white;">
+        <a href="https://fortnite.gg/ballistic-stats?player=mr.%20z00m" target="_blank" rel="noopener" class="btn btn-secondary">
           fortnite.gg
         </a>
       </div>
@@ -101,7 +98,7 @@
       <p>Trete bei für Scrims, VOD-Reviews, Strategie-Diskussionen und kompetitives Fortnite-Netzwerken.</p>
 
       <div class="discord-btn-wrapper">
-        <a href="https://discord.gg/c7jmXnBSv6" target="_blank" class="discord-btn">
+        <a href="https://discord.gg/c7jmXnBSv6" target="_blank" rel="noopener" class="discord-btn">
           Discord beitreten
         </a>
       </div>
@@ -136,27 +133,39 @@
 
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>
-  <script src="js/legal-modal.js"></script>
 
   <script>
     document.body.classList.add('loaded');
 
+    // Helper: Script dynamisch laden (nachdem Footer/Modal wirklich da ist)
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.body.appendChild(s);
+      });
+    }
+
     // Header laden + init
     fetch('header.html')
-  .then(r => r.text())
-  .then(html => {
-    document.getElementById('header-placeholder').innerHTML = html;
-    initHeaderScripts();
-    initSmartHeaderScroll();
-  });
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+        initHeaderScripts();
+        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+      })
+      .catch(err => console.error("Header load failed:", err));
 
-
-    // Footer laden
+    // Footer laden, DANACH legal-modal.js laden (Fix fürs Freeze)
     fetch('footer.html')
       .then(res => res.text())
       .then(html => {
         document.getElementById('footer-placeholder').innerHTML = html;
-      });
+        return loadScript('js/legal-modal.js');
+      })
+      .catch(err => console.error("Footer/Modal load failed:", err));
   </script>
 </body>
 </html>
