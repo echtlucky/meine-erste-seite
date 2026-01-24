@@ -5,446 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login | echtlucky</title>
 
+  <!-- Base -->
   <link rel="stylesheet" href="css/style.css" />
 
-  <style>
-    /* ===========================
-       LOGIN PAGE: Apple x Riot clean
-       - mehr Höhe, mehr Luft
-       - nicht gequetscht
-       - Blog Card UNTEN
-    ============================ */
+  <!-- Components (Cards, Buttons, Inputs, Tabs, etc.) -->
+  <link rel="stylesheet" href="css/components.css" />
 
-    /* Wichtig: body class = login-page */
-    .login-page .auth-shell{
-      min-height: calc(100vh - 60px);
-      width: 100%;
-      padding: clamp(2rem, 4vw, 3.6rem);
-      position: relative;
-      isolation: isolate;
-
-      /* NICHT mehr alles "gequetscht mittig" */
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      gap: clamp(1.8rem, 3vw, 2.6rem);
-    }
-
-    /* Background (safe an auth-shell) */
-    .login-page .auth-shell::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      z-index:-2;
-      pointer-events:none;
-      background:
-        linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.88)),
-        url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2400')
-        center/cover no-repeat fixed;
-    }
-
-    .login-page .auth-shell::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      z-index:-1;
-      pointer-events:none;
-      background:
-        linear-gradient(to right, rgba(0,255,136,0.07) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0,255,136,0.07) 1px, transparent 1px),
-        radial-gradient(circle at 30% 20%, rgba(0,255,136,0.18), transparent 55%),
-        radial-gradient(circle at 78% 75%, rgba(88,101,242,0.18), transparent 60%);
-      background-size: 72px 72px, 72px 72px, cover, cover;
-      opacity: 0.9;
-      mix-blend-mode: screen;
-    }
-
-    /* Wrapper damit alles "centered" ist, aber nicht gequetscht */
-    .auth-wrap{
-      width: min(1180px, 100%);
-      margin: 0 auto;
-      display: grid;
-      gap: clamp(1.6rem, 2.5vw, 2.4rem);
-    }
-
-    /* ===== Layout Grid (2 Cards) ===== */
-    .auth-grid{
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: clamp(1.8rem, 3.2vw, 2.8rem);
-      align-items: stretch;
-    }
-
-    /* Typo insgesamt leicht "dünner" (aber premium) */
-    .login-page .auth-shell,
-    .login-page .auth-shell *{
-      font-weight: 560;
-    }
-
-    /* Headlines weiterhin stark, aber nicht "Brett" */
-    .auth-visual h1{
-      font-weight: 850;
-    }
-    .auth-latest__title{
-      font-weight: 820;
-    }
-    .tab{
-      font-weight: 820;
-    }
-    .btn-full,
-    .btn-ghost,
-    .auth-latest__cta{
-      font-weight: 900;
-    }
-    .field label{
-      font-weight: 780;
-    }
-
-    /* ===== LEFT VISUAL ===== */
-    .auth-visual{
-      border-radius: 28px;
-      border: 1px solid rgba(0,255,136,0.16);
-      background:
-        radial-gradient(circle at 30% 20%, rgba(0,255,136,0.18), transparent 55%),
-        radial-gradient(circle at 75% 70%, rgba(88,101,242,0.18), transparent 55%),
-        linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.72));
-      box-shadow: 0 26px 90px rgba(0,0,0,0.55);
-      overflow: hidden;
-      position: relative;
-
-      padding: clamp(2.2rem, 3.2vw, 3.2rem);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-
-      /* mehr Höhe -> mehr Übersicht */
-      min-height: 720px;
-    }
-
-    .auth-visual .badge{
-      display: inline-flex;
-      align-items: center;
-      gap: .6rem;
-      padding: .65rem 1.05rem;
-      border-radius: 999px;
-      border: 1px solid rgba(0,255,136,0.18);
-      background: rgba(0,0,0,0.35);
-      color: rgba(224,255,224,0.88);
-      font-weight: 850;
-      width: fit-content;
-    }
-
-    .auth-visual h1{
-      margin-top: 1.6rem;
-      font-size: clamp(2.35rem, 3.4vw, 3.3rem);
-      letter-spacing: -1px;
-      line-height: 1.10;
-      background: linear-gradient(90deg, #00ff88, #00cc66);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .auth-visual p{
-      margin-top: 1.2rem;
-      color: rgba(224,255,224,0.88);
-      max-width: 60ch;
-      font-size: 1.08rem;
-      line-height: 1.7;
-    }
-
-    .auth-visual .bullets{
-      margin-top: 2.2rem;
-      display: grid;
-      gap: 1.1rem;
-      color: rgba(224,255,224,0.88);
-    }
-
-    .auth-visual .bullet{
-      display:flex;
-      gap: 1rem;
-      align-items:flex-start;
-      padding: 1.25rem 1.35rem;
-      border-radius: 18px;
-      border: 1px solid rgba(0,255,136,0.12);
-      background: rgba(0,0,0,0.42);
-    }
-
-    .auth-visual .dot{
-      width: 10px;
-      height: 10px;
-      margin-top: .48rem;
-      border-radius: 50%;
-      background: #00ff88;
-      box-shadow: 0 0 18px rgba(0,255,136,0.35);
-      flex-shrink: 0;
-    }
-
-    .hint{
-      color: rgba(224,255,224,0.74);
-      font-size: .98rem;
-      line-height: 1.55;
-    }
-
-    /* ===== RIGHT CARD ===== */
-    .auth-card{
-      border-radius: 28px;
-      border: 1px solid rgba(0,255,136,0.18);
-      background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.72));
-      box-shadow: 0 26px 90px rgba(0,0,0,0.55);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-
-      /* auch etwas höher */
-      min-height: 720px;
-    }
-
-    .auth-card__top{
-      padding: 1.9rem 2rem 1.4rem;
-      border-bottom: 1px solid rgba(0,255,136,0.12);
-      background: rgba(0,0,0,0.32);
-    }
-
-    .tabs{
-      display:flex;
-      gap:.7rem;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(0,255,136,0.14);
-      padding: .5rem;
-      border-radius: 999px;
-      width: fit-content;
-    }
-
-    .tab{
-      appearance: none;
-      border: 0;
-      cursor: pointer;
-      padding: .78rem 1.25rem;
-      border-radius: 999px;
-      background: transparent;
-      color: rgba(224,255,224,0.80);
-      letter-spacing: -0.25px;
-      opacity: .9;
-      transition: all .18s ease;
-    }
-
-    .tab.active{
-      background: rgba(0,255,136,0.14);
-      color: #00ff88;
-      box-shadow: 0 0 0 1px rgba(0,255,136,0.14) inset;
-      opacity: 1;
-    }
-
-    .auth-card__body{
-      padding: 2.2rem 2rem 2.6rem;
-      display: grid;
-      gap: 1.9rem; /* MEHR luft */
-    }
-
-    .field{
-      display: grid;
-      gap: .85rem;
-    }
-
-    .field label{
-      color: rgba(224,255,224,0.90);
-      font-size: .98rem;
-      letter-spacing: -0.2px;
-    }
-
-    .input{
-      width: 100%;
-      padding: 1.25rem 1.2rem;
-      border-radius: 18px;
-      border: 1px solid rgba(0,255,136,0.16);
-      background: rgba(0,0,0,0.55);
-      color: #e0ffe0;
-      outline: none;
-      transition: border-color .18s ease, box-shadow .18s ease;
-    }
-
-    .input::placeholder{ color: rgba(224,255,224,0.55); }
-
-    .input:focus{
-      border-color: rgba(0,255,136,0.35);
-      box-shadow: 0 0 0 4px rgba(0,255,136,0.10);
-    }
-
-    .row{
-      display:flex;
-      gap: 1.2rem;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: .25rem;
-    }
-
-    .small-link{
-      color: #00ff88;
-      text-decoration: none;
-      font-weight: 820;
-      opacity: .95;
-    }
-    .small-link:hover{ text-decoration: underline; }
-
-    .divider{
-      display:flex;
-      align-items:center;
-      gap: 1rem;
-      color: rgba(224,255,224,0.55);
-      font-weight: 820;
-      margin: .5rem 0 .2rem;
-    }
-    .divider::before,
-    .divider::after{
-      content:"";
-      height:1px;
-      flex:1;
-      background: rgba(0,255,136,0.12);
-    }
-
-    .btn-full{
-      width: 100%;
-      text-align: center;
-      border-radius: 18px;
-      border: 1px solid rgba(0,255,136,0.18);
-      background: linear-gradient(180deg, rgba(0,255,136,0.92), rgba(0,204,102,0.85));
-      color: #000;
-      padding: 1.25rem 1rem;
-      letter-spacing: -0.3px;
-      cursor: pointer;
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-      box-shadow: 0 14px 40px rgba(0,0,0,0.55);
-    }
-    .btn-full:hover{
-      transform: translateY(-3px);
-      filter: saturate(1.05);
-      box-shadow: 0 20px 65px rgba(0,255,136,0.12), 0 14px 40px rgba(0,0,0,0.55);
-    }
-
-    .btn-ghost{
-      width: 100%;
-      border-radius: 18px;
-      border: 1px solid rgba(0,255,136,0.16);
-      background: rgba(255,255,255,0.04);
-      color: #e0ffe0;
-      padding: 1.18rem 1rem;
-      cursor: pointer;
-      transition: background .18s ease, transform .18s ease;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:.7rem;
-    }
-    .btn-ghost:hover{
-      background: rgba(0,255,136,0.08);
-      transform: translateY(-2px);
-    }
-
-    .msg{
-      padding: 1.1rem 1.15rem;
-      border-radius: 18px;
-      border: 1px solid rgba(0,255,136,0.16);
-      background: rgba(0,0,0,0.45);
-      color: rgba(224,255,224,0.88);
-      display:none;
-    }
-    .msg.error{
-      border-color: rgba(255,51,102,0.35);
-      background: rgba(255,51,102,0.10);
-      color: #ffb6c8;
-    }
-    .msg.success{
-      border-color: rgba(0,255,136,0.28);
-      background: rgba(0,255,136,0.08);
-      color: #e0ffe0;
-    }
-
-    .hidden{ display:none !important; }
-
-    /* ===== Blog Card UNTEN ===== */
-    .auth-latest{
-      width: 100%;
-      margin: 0;
-      border-radius: 28px;
-      border: 1px solid rgba(0,255,136,0.18);
-      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.70));
-      box-shadow: 0 26px 90px rgba(0,0,0,0.55);
-      padding: clamp(1.5rem, 2.2vw, 2.2rem);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .auth-latest::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      background:
-        radial-gradient(circle at 15% 20%, rgba(0,255,136,0.16), transparent 55%),
-        radial-gradient(circle at 85% 70%, rgba(88,101,242,0.14), transparent 60%);
-      pointer-events:none;
-    }
-
-    .auth-latest__meta{
-      position: relative;
-      display:inline-flex;
-      width: fit-content;
-      padding: .55rem 1rem;
-      border-radius: 999px;
-      border: 1px solid rgba(0,255,136,0.18);
-      background: rgba(0,0,0,0.35);
-      color: rgba(224,255,224,0.85);
-      font-weight: 820;
-      letter-spacing: -0.2px;
-      margin-bottom: 1rem;
-    }
-
-    .auth-latest__title{
-      position: relative;
-      font-size: clamp(1.35rem, 2.2vw, 1.95rem);
-      letter-spacing: -0.8px;
-      margin: 0 0 .65rem;
-      color: #00ff88;
-    }
-
-    .auth-latest__text{
-      position: relative;
-      color: rgba(224,255,224,0.86);
-      max-width: 95ch;
-      line-height: 1.7;
-      margin: 0 0 1.1rem;
-    }
-
-    .auth-latest__cta{
-      position: relative;
-      display:inline-flex;
-      align-items:center;
-      gap:.6rem;
-      text-decoration:none;
-      color:#000;
-      background: linear-gradient(180deg, rgba(0,255,136,0.92), rgba(0,204,102,0.85));
-      border: 1px solid rgba(0,255,136,0.18);
-      border-radius: 16px;
-      padding: .9rem 1.2rem;
-      box-shadow: 0 14px 40px rgba(0,0,0,0.55);
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-    }
-
-    .auth-latest__cta:hover{
-      transform: translateY(-2px);
-      filter: saturate(1.05);
-      box-shadow: 0 20px 65px rgba(0,255,136,0.12), 0 14px 40px rgba(0,0,0,0.55);
-    }
-
-    /* Responsive */
-    @media (max-width: 980px){
-      .auth-grid{ grid-template-columns: 1fr; }
-      .auth-visual{ display:none; }
-      .auth-card{ min-height: unset; }
-    }
-  </style>
+  <!-- Page-specific -->
+  <link rel="stylesheet" href="css/pages/login.css" />
 </head>
 
 <body class="page-transition login-page">
@@ -461,7 +29,9 @@
         <section class="auth-visual">
           <div>
             <div class="badge">⚡ echtlucky • Competitive</div>
+
             <h1>Willkommen zurück.</h1>
+
             <p>
               Log dich ein, join den Grind und bleib up-to-date bei Ballistic & Ranked.
               Clean, schnell, ohne Drama.
@@ -470,21 +40,32 @@
             <div class="bullets">
               <div class="bullet">
                 <span class="dot"></span>
-                <div><strong style="font-weight:820;">Community</strong><br><span class="hint">Scrims, Customs, VOD-Talk, Team-Suche.</span></div>
+                <div>
+                  <strong class="fw-820">Community</strong><br />
+                  <span class="hint">Scrims, Customs, VOD-Talk, Team-Suche.</span>
+                </div>
               </div>
+
               <div class="bullet">
                 <span class="dot"></span>
-                <div><strong style="font-weight:820;">Blog</strong><br><span class="hint">Updates, Guides, Insights — alles an einem Ort.</span></div>
+                <div>
+                  <strong class="fw-820">Blog</strong><br />
+                  <span class="hint">Updates, Guides, Insights — alles an einem Ort.</span>
+                </div>
               </div>
+
               <div class="bullet">
                 <span class="dot"></span>
-                <div><strong style="font-weight:820;">Account</strong><br><span class="hint">Username, Admin-Features (wenn freigeschaltet).</span></div>
+                <div>
+                  <strong class="fw-820">Account</strong><br />
+                  <span class="hint">Username, Admin-Features (wenn freigeschaltet).</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <p class="hint" style="opacity:.92">
-            Tipp: Du kannst dich auch mit <strong style="font-weight:820;">Username</strong> anmelden, wenn du einen gesetzt hast.
+          <p class="hint hint--strong">
+            Tipp: Du kannst dich auch mit <strong class="fw-820">Username</strong> anmelden, wenn du einen gesetzt hast.
           </p>
         </section>
 
@@ -504,15 +85,27 @@
             <form id="loginForm">
               <div class="field">
                 <label for="loginIdentifier">E-Mail oder Username</label>
-                <input id="loginIdentifier" class="input" type="text" autocomplete="username"
-                       placeholder="Nutzername: max1234 oder Email: maxmustermann@gmail.com" required />
+                <input
+                  id="loginIdentifier"
+                  class="input"
+                  type="text"
+                  autocomplete="username"
+                  placeholder="Nutzername: max1234 oder Email: maxmustermann@gmail.com"
+                  required
+                />
                 <div class="hint">Wenn du Username nutzt, wird er automatisch zu deiner E-Mail aufgelöst.</div>
               </div>
 
               <div class="field">
                 <label for="loginPassword">Passwort</label>
-                <input id="loginPassword" class="input" type="password" autocomplete="current-password"
-                       placeholder="••••••••" required />
+                <input
+                  id="loginPassword"
+                  class="input"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="••••••••"
+                  required
+                />
               </div>
 
               <div class="row">
@@ -524,7 +117,7 @@
               <div class="divider">oder</div>
 
               <button class="btn-ghost" type="button" id="googleLoginBtn">
-                <span style="font-weight:900;">G</span> Mit Google anmelden
+                <span class="google-g">G</span> Mit Google anmelden
               </button>
             </form>
 
@@ -532,21 +125,39 @@
             <form id="registerForm" class="hidden">
               <div class="field">
                 <label for="regUsername">Username</label>
-                <input id="regUsername" class="input" type="text" autocomplete="nickname"
-                       placeholder="z.B. echtlucky" required />
+                <input
+                  id="regUsername"
+                  class="input"
+                  type="text"
+                  autocomplete="nickname"
+                  placeholder="z.B. echtlucky"
+                  required
+                />
                 <div class="hint">A-Z / 0-9 / _ / . / - • 3–20 Zeichen</div>
               </div>
 
               <div class="field">
                 <label for="regEmail">E-Mail</label>
-                <input id="regEmail" class="input" type="email" autocomplete="email"
-                       placeholder="name@email.de" required />
+                <input
+                  id="regEmail"
+                  class="input"
+                  type="email"
+                  autocomplete="email"
+                  placeholder="name@email.de"
+                  required
+                />
               </div>
 
               <div class="field">
                 <label for="regPassword">Passwort</label>
-                <input id="regPassword" class="input" type="password" autocomplete="new-password"
-                       placeholder="mind. 6 Zeichen" required />
+                <input
+                  id="regPassword"
+                  class="input"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="mind. 6 Zeichen"
+                  required
+                />
               </div>
 
               <button class="btn-full" type="submit">Account erstellen</button>
@@ -554,10 +165,10 @@
               <div class="divider">oder</div>
 
               <button class="btn-ghost" type="button" id="googleRegisterBtn">
-                <span style="font-weight:900;">G</span> Mit Google starten
+                <span class="google-g">G</span> Mit Google starten
               </button>
 
-              <p class="hint" style="margin-top:.2rem;">
+              <p class="hint hint--compact">
                 Mit Registrierung akzeptierst du die Inhalte als privat & nicht-kommerziell.
               </p>
             </form>
@@ -565,7 +176,7 @@
         </section>
       </div>
 
-      <!-- ✅ Latest Blog (JETZT UNTEN) -->
+      <!-- Latest Blog (unten) -->
       <section class="auth-latest" id="latestPostCard" aria-live="polite">
         <div class="auth-latest__meta">Letzter Blog</div>
         <h2 class="auth-latest__title" id="latestPostTitle">Lädt...</h2>
@@ -693,8 +304,6 @@
     tabRegister.addEventListener('click', () => setTab("register"));
 
     // ====== Username → Email resolver ======
-    // Collection: usernames (docId = usernameLower)
-    // doc: { email: "..." }
     async function resolveEmailFromIdentifier(identifierRaw){
       const identifier = (identifierRaw || "").trim();
       if (!identifier) throw new Error("Bitte E-Mail oder Username eingeben.");
