@@ -112,41 +112,64 @@ function logout() {
 }
 
 /* =========================
-   🧠 Smart Header Scroll (FIXED)
-   - Runter scrollen => verstecken
-   - Schon bei kleinem Hochscroll => sofort zeigen
+   🧠 Smart Header Scroll (SNAPPY + STABIL)
+   - Runter: nach kurzer Strecke hide
+   - Hoch: schon bei minimaler Bewegung show
    ========================= */
+
 let lastScrollY = window.scrollY;
 let headerVisible = true;
+
+// Accumulator, damit’s nicht flackert
+let downAcc = 0;
+let upAcc = 0;
 
 function initSmartHeaderScroll() {
   const header = document.querySelector('.site-header');
   if (!header) return;
 
-  window.addEventListener('scroll', () => {
-    const currentY = window.scrollY;
-    const diff = currentY - lastScrollY;
+  // Reset falls Funktion aus Versehen mehrfach init wird
+  if (window.__smartHeaderInitialized) return;
+  window.__smartHeaderInitialized = true;
 
-    // Ganz oben => immer sichtbar
-    if (currentY <= 10) {
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    const diff = y - lastScrollY;
+
+    // Ganz oben: immer sichtbar + reset
+    if (y <= 10) {
       header.classList.remove('header-hidden');
       headerVisible = true;
-      lastScrollY = currentY;
+      downAcc = 0;
+      upAcc = 0;
+      lastScrollY = y;
       return;
     }
 
-    // Scroll runter => ausblenden
-    if (diff > 5 && headerVisible && currentY > 80) {
-      header.classList.add('header-hidden');
-      headerVisible = false;
+    // Scroll runter
+    if (diff > 0) {
+      downAcc += diff;
+      upAcc = 0;
+
+      // erst nach etwas Strecke verstecken (verhindert nerviges Flackern)
+      if (downAcc > 25 && headerVisible) {
+        header.classList.add('header-hidden');
+        headerVisible = false;
+      }
     }
 
-    // Scroll hoch => einblenden (auch minimal!)
-    if (diff < -5 && !headerVisible) {
-      header.classList.remove('header-hidden');
-      headerVisible = true;
+    // Scroll hoch (auch minimal!)
+    if (diff < 0) {
+      upAcc += Math.abs(diff);
+      downAcc = 0;
+
+      // super schnell wieder einblenden
+      if (upAcc > 1 && !headerVisible) {
+        header.classList.remove('header-hidden');
+        headerVisible = true;
+      }
     }
 
-    lastScrollY = currentY;
+    lastScrollY = y;
   }, { passive: true });
 }
