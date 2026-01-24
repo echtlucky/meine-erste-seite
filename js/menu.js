@@ -2,6 +2,9 @@
 
 let authListenerInitialized = false;
 
+/* =========================
+   Header: Menü, Dropdown, Active-Link, Auth
+   ========================= */
 function initHeaderScripts() {
   // Header-Elemente (existieren erst nach fetch(header.html))
   const userNameDisplay = document.getElementById('user-name-display');
@@ -108,43 +111,42 @@ function logout() {
     });
 }
 
+/* =========================
+   🧠 Smart Header Scroll (FIXED)
+   - Runter scrollen => verstecken
+   - Schon bei kleinem Hochscroll => sofort zeigen
+   ========================= */
 let lastScrollY = window.scrollY;
-let ticking = false;
+let headerVisible = true;
 
 function initSmartHeaderScroll() {
   const header = document.querySelector('.site-header');
   if (!header) return;
 
-  function handleScroll() {
+  window.addEventListener('scroll', () => {
     const currentY = window.scrollY;
+    const diff = currentY - lastScrollY;
 
-    // ganz oben: header immer sichtbar
+    // Ganz oben => immer sichtbar
     if (currentY <= 10) {
       header.classList.remove('header-hidden');
+      headerVisible = true;
       lastScrollY = currentY;
       return;
     }
 
-    // runter scrollen => ausblenden
-    if (currentY > lastScrollY && currentY > 80) {
+    // Scroll runter => ausblenden
+    if (diff > 5 && headerVisible && currentY > 80) {
       header.classList.add('header-hidden');
+      headerVisible = false;
     }
 
-    // hoch scrollen => einblenden (auch minimal!)
-    if (currentY < lastScrollY) {
+    // Scroll hoch => einblenden (auch minimal!)
+    if (diff < -5 && !headerVisible) {
       header.classList.remove('header-hidden');
+      headerVisible = true;
     }
 
     lastScrollY = currentY;
-  }
-
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      window.requestAnimationFrame(() => {
-        handleScroll();
-        ticking = false;
-      });
-      ticking = true;
-    }
-  });
+  }, { passive: true });
 }
