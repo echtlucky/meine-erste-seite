@@ -1,0 +1,178 @@
+/* =========================
+   HOME • page-specific
+   airy + premium + consistent
+========================= */
+
+:root{
+  --home-max: 1180px;
+}
+
+/* Typo insgesamt etwas „schmaler“ wie Login */
+body.page-transition{
+  font-weight: 520;
+}
+
+/* Container etwas luftiger (ohne alles umzubauen) */
+.container{
+  width: min(var(--home-max), 100%);
+  margin: 0 auto;
+  padding: 0 clamp(1.2rem, 3vw, 2rem);
+}
+
+/* ===== HERO ===== */
+.hero{
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(0,255,136,0.16);
+  background:
+    radial-gradient(circle at 30% 20%, rgba(0,255,136,0.18), transparent 55%),
+    radial-gradient(circle at 75% 70%, rgba(88,101,242,0.18), transparent 55%),
+    linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.72));
+  box-shadow: 0 26px 90px rgba(0,0,0,0.55);
+  padding: clamp(2.2rem, 4.2vw, 3.4rem);
+  margin: clamp(1.4rem, 3vw, 2.2rem) auto;
+  width: min(var(--home-max), calc(100% - 2rem));
+}
+
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(to right, rgba(0,255,136,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,255,136,0.06) 1px, transparent 1px),
+    radial-gradient(circle at 30% 20%, rgba(0,255,136,0.14), transparent 55%),
+    radial-gradient(circle at 78% 75%, rgba(88,101,242,0.14), transparent 60%);
+  background-size: 72px 72px, 72px 72px, cover, cover;
+  opacity: .9;
+  mix-blend-mode: screen;
+  z-index: 0;
+}
+
+.hero > *{
+  position: relative;
+  z-index: 1;
+}
+
+.hero h1{
+  margin: 0 0 .7rem;
+  font-size: clamp(2.4rem, 4.4vw, 3.6rem);
+  letter-spacing: -1px;
+  line-height: 1.05;
+  font-weight: 860;
+  background: linear-gradient(90deg, #00ff88, #00cc66);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero .tagline{
+  margin: 0 0 1.6rem;
+  max-width: 70ch;
+  color: rgba(224,255,224,0.86);
+  font-size: clamp(1.02rem, 1.6vw, 1.15rem);
+  line-height: 1.7;
+  opacity: .95;
+}
+
+/* Buttons im Hero: mehr Luft */
+.btn-group{
+  display: flex;
+  flex-wrap: wrap;
+  gap: .9rem;
+  margin-top: 1.2rem;
+}
+
+/* ===== SECTIONS: airy spacing ===== */
+main.container{
+  padding-top: clamp(1.2rem, 2.4vw, 1.8rem);
+  padding-bottom: clamp(2.2rem, 4vw, 3.2rem);
+}
+
+main.container > section{
+  margin: clamp(2.2rem, 4vw, 3.6rem) 0;
+}
+
+/* Headings allgemein bisschen cleaner */
+main.container h2{
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  letter-spacing: -0.6px;
+  margin-bottom: .8rem;
+  font-weight: 840;
+}
+
+main.container p{
+  line-height: 1.75;
+  color: rgba(224,255,224,0.86);
+}
+
+/* ===== COMMUNITY TEASER CARD ===== */
+.community-teaser,
+.bio,
+.stats-section,
+.discord-section,
+.twitch-section{
+  border-radius: 28px;
+  border: 1px solid rgba(0,255,136,0.14);
+  background: rgba(0,0,0,0.45);
+  box-shadow: 0 20px 70px rgba(0,0,0,0.55);
+  padding: clamp(1.6rem, 2.8vw, 2.4rem);
+}
+
+/* ===== FEATURES GRID (Cards) ===== */
+.features{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.4rem);
+  margin: 1.6rem 0 1.8rem;
+}
+
+.feature{
+  border-radius: 22px;
+  border: 1px solid rgba(0,255,136,0.12);
+  background: rgba(0,0,0,0.42);
+  padding: 1.35rem 1.35rem 1.2rem;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.feature:hover{
+  transform: translateY(-4px);
+  border-color: rgba(0,255,136,0.26);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.6);
+}
+
+.feature h3{
+  margin: 0 0 .55rem;
+  color: #00ff88;
+  font-weight: 840;
+  letter-spacing: -0.4px;
+}
+
+.feature p{
+  margin: 0;
+  opacity: .9;
+}
+
+/* ===== Stats Buttons spacing ===== */
+#stats > div[style]{
+  margin: 1.6rem 0 !important;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .9rem;
+}
+
+/* ===== Twitch Embed: mehr Abstand + nicer frame ===== */
+.twitch-section iframe{
+  border-radius: 22px;
+  border: 1px solid rgba(0,255,136,0.12);
+  background: rgba(0,0,0,0.45);
+  box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px){
+  .features{ grid-template-columns: 1fr; }
+  .hero{ width: calc(100% - 1.4rem); }
+}
