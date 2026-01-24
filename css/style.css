@@ -244,8 +244,16 @@ nav{
 .menu-toggle:hover{ background:rgba(0,255,136,0.08); }
 
 /* Mobile nav */
-@media (max-width: 992px){
-  .menu-toggle{ display:block; }
+@media (max-width: 600px) {
+  .legal-modal__panel {
+    margin: 3vh auto;
+    max-height: 94vh;
+  }
+
+  .legal-modal__content {
+    padding: 0 1.4rem 2rem;
+  }
+}
 
   nav{
     position:absolute;
@@ -266,7 +274,6 @@ nav{
     flex-direction:column;
     align-items:center;
     gap:1.05rem;
-  }
 }
 
 /* ======================================
@@ -583,16 +590,20 @@ body.modal-open{ overflow:hidden; }
 .legal-modal__panel {
   position: relative;
   z-index: 2;
-
   width: min(920px, calc(100% - 2rem));
-  max-height: min(85vh, 780px);
 
-  margin: 0;                    /* ganz wichtig: kein margin-top mehr */
-  background: rgba(0,0,0,0.90);
+  /* 🔥 NEU */
+  height: auto;
+  max-height: 90vh;
+
+  margin: 5vh auto;
+  background: rgba(0,0,0,0.92);
   border: 1px solid rgba(0,255,136,0.28);
   border-radius: 22px;
   box-shadow: 0 30px 90px rgba(0,255,136,0.12);
-  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .legal-modal__title{
@@ -602,12 +613,13 @@ body.modal-open{ overflow:hidden; }
   letter-spacing:-0.6px;
 }
 
-.legal-modal__content{
-  padding: 0 2rem 2rem;
-  overflow:auto;
-  max-height: calc(85vh - 90px);
-  line-height:1.8;
-  color: var(--text-soft);
+.legal-modal__content {
+  padding: 0 2rem 2.4rem;
+  overflow-y: auto;
+  flex: 1;
+
+  line-height: 1.8;
+  opacity: 0.95;
 }
 
 .legal-modal__content h1,
