@@ -1,14 +1,16 @@
 /* =========================
-   HOME • page-specific
-   Login-style background + airy spacing
+   HOME • override style.css cleanly
+   - full-page background image
+   - thinner typography
+   - consistent spacing + cards
 ========================= */
 
 .home-page{
-  /* Schrift schlanker (ohne zu dünn) */
-  font-weight: 500;
+  /* dünner als style.css default */
+  font-weight: 460;
 }
 
-/* ===== Full-page Background (wie Login, nur global) ===== */
+/* ===== Full-page Background (über ALLES) ===== */
 .home-page{
   position: relative;
   min-height: 100vh;
@@ -42,25 +44,30 @@
   mix-blend-mode: screen;
 }
 
-/* ===== Layout / Container ===== */
-.home-page .container{
-  width: min(1180px, 100%);
+/* ===== Fix: style.css Container-Margins raus für Home ===== */
+.home-page .home-container{
+  max-width: 1180px;
   margin: 0 auto;
   padding: 0 clamp(1.1rem, 3vw, 2rem);
 }
 
-/* Global Section spacing – airy, aber nicht lost */
-.home-page main.container{
+/* Mehr Luft zwischen Sections, aber kontrolliert */
+.home-page main.home-container{
   padding-top: clamp(1.6rem, 3vw, 2.2rem);
   padding-bottom: clamp(2.6rem, 5vw, 4rem);
 }
 
-.home-page main.container > section{
+.home-page main.home-container > section{
   margin: clamp(1.6rem, 3.6vw, 3rem) 0;
 }
 
-/* ===== HERO ===== */
-.home-page .hero{
+/* ===== HERO: style.css hero überschreiben (kein 90vh, kein eigenes BG) ===== */
+.home-page .hero.home-hero{
+  min-height: unset !important;
+  height: auto !important;
+  background: none !important;
+  border-bottom: none !important;
+
   width: min(1180px, calc(100% - 2rem));
   margin: clamp(1.2rem, 2.6vw, 2rem) auto;
   padding: clamp(2.1rem, 3.8vw, 3.2rem);
@@ -71,14 +78,18 @@
   background:
     radial-gradient(circle at 30% 20%, rgba(0,255,136,0.18), transparent 55%),
     radial-gradient(circle at 75% 70%, rgba(88,101,242,0.18), transparent 55%),
-    linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.74));
+    linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.74)) !important;
 
   box-shadow: 0 26px 90px rgba(0,0,0,0.55);
   position: relative;
   overflow: hidden;
+  text-align: left; /* wirkt premium/ruhiger */
+  display: block !important;
+  align-items: initial !important;
+  justify-content: initial !important;
 }
 
-.home-page .hero::after{
+.home-page .hero.home-hero::after{
   content:"";
   position:absolute;
   inset:0;
@@ -87,12 +98,35 @@
   opacity: .85;
 }
 
-.home-page .hero h1{
-  margin: 0 0 .75rem;
-  font-size: clamp(2.3rem, 4.2vw, 3.5rem);
+.home-page .hero-inner{
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1.1rem;
+}
+
+/* Badge */
+.home-page .hero-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .65rem 1.05rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0,255,136,0.18);
+  background: rgba(0,0,0,0.35);
+  color: rgba(224,255,224,0.88);
+  font-weight: 820;
+  width: fit-content;
+}
+
+/* ===== Headline: style.css (950) überschreiben ===== */
+.home-page .hero.home-hero h1{
+  margin: 0;
+  font-size: clamp(2.3rem, 4.2vw, 3.4rem);
   letter-spacing: -1px;
   line-height: 1.05;
-  font-weight: 850;
+  font-weight: 820 !important;
+  text-shadow: none !important;
 
   background: linear-gradient(90deg, #00ff88, #00cc66);
   -webkit-background-clip: text;
@@ -100,24 +134,62 @@
   -webkit-text-fill-color: transparent;
 }
 
-.home-page .hero .tagline{
-  margin: 0 0 1.5rem;
-  max-width: 72ch;
+/* Tagline */
+.home-page .hero.home-hero .tagline{
+  margin: 0;
+  max-width: 75ch;
   color: rgba(224,255,224,0.86);
   font-size: clamp(1.02rem, 1.7vw, 1.15rem);
   line-height: 1.7;
   opacity: .95;
 }
 
-/* Buttons im Hero: konsistente Luft */
+/* Buttons: weniger “fett” als style.css */
 .home-page .btn-group{
   display: flex;
   flex-wrap: wrap;
   gap: .9rem;
-  margin-top: 1rem;
+  margin-top: .3rem;
 }
 
-/* ===== CARDS (Abschnitte als „Glas Cards“) ===== */
+/* Überschreibt style.css .btn für Home */
+.home-page .btn{
+  font-weight: 780 !important;
+  font-size: 1.05rem !important;
+  padding: 1rem 1.4rem !important;
+  border-radius: 18px !important;
+  letter-spacing: -0.2px;
+}
+
+/* Discord Button etwas ruhiger (nicht so riesig) */
+.home-page .discord-btn{
+  font-weight: 780 !important;
+  font-size: 1.05rem !important;
+  padding: 1rem 1.4rem !important;
+  border-radius: 18px !important;
+}
+
+/* Hero pills */
+.home-page .hero-stats{
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: .2rem;
+}
+
+.home-page .stat-pill{
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .55rem .95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0,255,136,0.16);
+  background: rgba(0,0,0,0.38);
+  color: rgba(224,255,224,0.86);
+  font-weight: 700;
+}
+
+/* ===== Section Cards (Kontrast + Luft) ===== */
 .home-page .community-teaser,
 .home-page .bio,
 .home-page .stats-section,
@@ -125,14 +197,14 @@
 .home-page .twitch-section{
   border-radius: 28px;
   border: 1px solid rgba(0,255,136,0.16);
-  background: rgba(0,0,0,0.54);
+  background: rgba(0,0,0,0.56);
   box-shadow: 0 22px 80px rgba(0,0,0,0.58);
   padding: clamp(1.6rem, 2.9vw, 2.4rem);
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
+  text-align: left; /* weniger “kreischend” als center */
 }
 
-/* subtiler inner glow wie Login */
 .home-page .community-teaser::before,
 .home-page .bio::before,
 .home-page .stats-section::before,
@@ -156,34 +228,34 @@
   position: relative;
 }
 
-/* Headings + Text: etwas cleaner & weniger „fett“ */
+/* Section heading wrapper */
+.home-page .section-head{
+  display: grid;
+  gap: .35rem;
+  margin-bottom: 1.1rem;
+}
+
 .home-page h2{
-  margin: 0 0 .75rem;
+  margin: 0;
   font-size: clamp(1.55rem, 2.4vw, 2.05rem);
   letter-spacing: -0.6px;
-  font-weight: 820;
+  font-weight: 800;
+  color: #00ff88;
 }
 
-.home-page p{
-  color: rgba(224,255,224,0.86);
-  line-height: 1.75;
-}
-
-.home-page .community-teaser > p,
-.home-page .bio > p,
-.home-page .stats-section > p,
-.home-page .discord-section > p,
-.home-page .twitch-section > p{
-  margin-top: .35rem;
+.home-page .section-head p{
+  margin: 0;
   opacity: .92;
+  color: rgba(224,255,224,0.86);
+  line-height: 1.7;
 }
 
-/* ===== FEATURES GRID ===== */
+/* ===== Features Grid ===== */
 .home-page .features{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(1rem, 2vw, 1.4rem);
-  margin: 1.6rem 0 1.8rem;
+  margin: 1.4rem 0 1.6rem;
 }
 
 .home-page .feature{
@@ -191,6 +263,7 @@
   border: 1px solid rgba(0,255,136,0.14);
   background: rgba(0,0,0,0.46);
   padding: 1.35rem 1.35rem 1.2rem;
+  box-shadow: 0 14px 50px rgba(0,0,0,0.45);
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
@@ -202,39 +275,56 @@
 
 .home-page .feature h3{
   margin: 0 0 .55rem;
-  color: #00ff88;
-  font-weight: 820;
-  letter-spacing: -0.4px;
+  color: rgba(224,255,224,0.92);
+  font-weight: 760;
+  letter-spacing: -0.35px;
 }
 
 .home-page .feature p{
   margin: 0;
-  opacity: .9;
+  opacity: .88;
 }
 
-/* ===== Stats Links: Inline-style raus „auffangen“ ===== */
-.home-page #stats > div[style]{
-  margin: 1.6rem 0 !important;
+/* Actions rows */
+.home-page .section-actions{
+  margin-top: 1.2rem;
+}
+
+/* Links row */
+.home-page .link-row{
   display: flex;
   flex-wrap: wrap;
   gap: .9rem;
+  margin-top: 1.2rem;
 }
 
-/* ===== Twitch Embed ===== */
-.home-page .twitch-section iframe{
+/* Twitch embed wrapper */
+.home-page .embed{
+  margin-top: 1.2rem;
+  max-width: 980px;
+}
+
+.home-page .embed iframe{
   border-radius: 22px;
   border: 1px solid rgba(0,255,136,0.12);
   background: rgba(0,0,0,0.45);
   box-shadow: 0 18px 60px rgba(0,0,0,0.55);
 }
 
+/* Prose spacing */
+.home-page .prose{
+  display: grid;
+  gap: .9rem;
+}
+
+.home-page .prose p{
+  margin: 0;
+  color: rgba(224,255,224,0.86);
+  line-height: 1.75;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 900px){
-  .home-page .features{
-    grid-template-columns: 1fr;
-  }
-
-  .home-page .hero{
-    width: calc(100% - 1.4rem);
-  }
+  .home-page .features{ grid-template-columns: 1fr; }
+  .home-page .hero.home-hero{ width: calc(100% - 1.4rem); }
 }

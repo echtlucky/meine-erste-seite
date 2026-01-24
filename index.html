@@ -11,12 +11,11 @@
 </head>
 
 <body class="page-transition home-page">
-
   <!-- Header wird dynamisch geladen -->
   <div id="header-placeholder"></div>
 
-  <!-- HERO -->
-  <section class="hero">
+  <!-- HERO (als Card wie Login) -->
+  <section class="hero home-hero">
     <div class="hero-inner">
       <div class="hero-badge">⚡ echtlucky • Competitive</div>
 
@@ -41,7 +40,7 @@
   </section>
 
   <!-- CONTENT -->
-  <main class="container">
+  <main class="container home-container">
 
     <!-- COMMUNITY -->
     <section class="community-teaser">
@@ -168,7 +167,6 @@
   <script>
     document.body.classList.add('loaded');
 
-    // Header laden + init
     fetch('header.html')
       .then(r => r.text())
       .then(html => {
@@ -177,7 +175,6 @@
         if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
       });
 
-    // Footer laden (Modal HTML steckt im footer.html)
     fetch('footer.html')
       .then(res => res.text())
       .then(html => {
