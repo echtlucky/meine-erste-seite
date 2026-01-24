@@ -7,26 +7,36 @@
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/components.css">
-  <!-- optional, aber recommended für Feintuning -->
   <link rel="stylesheet" href="css/pages/home.css">
 </head>
 
-<body class="page-transition">
+<body class="page-transition home-page">
 
   <!-- Header wird dynamisch geladen -->
   <div id="header-placeholder"></div>
 
   <!-- HERO -->
   <section class="hero">
-    <h1>echtlucky</h1>
-    <p class="tagline">
-      Unreal Grind • Ballistic & Ranked • EU Competitive Scene • Auf dem Weg nach ganz oben
-    </p>
+    <div class="hero-inner">
+      <div class="hero-badge">⚡ echtlucky • Competitive</div>
 
-    <div class="btn-group">
-      <a href="blog.html" class="btn">Zum Blog</a>
-      <a href="login.html" class="btn">Community beitreten</a>
-      <a href="https://discord.gg/c7jmXnBSv6" target="_blank" rel="noopener" class="discord-btn">Discord joinen</a>
+      <h1>echtlucky</h1>
+
+      <p class="tagline">
+        Unreal Grind • Ballistic & Ranked • EU Competitive Scene • Auf dem Weg nach ganz oben
+      </p>
+
+      <div class="btn-group">
+        <a href="blog.html" class="btn">Zum Blog</a>
+        <a href="login.html" class="btn">Community beitreten</a>
+        <a href="https://discord.gg/c7jmXnBSv6" target="_blank" rel="noopener" class="discord-btn">Discord joinen</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-pill">⚔️ Ballistic</div>
+        <div class="stat-pill">🏆 Ranked</div>
+        <div class="stat-pill">🌍 EU</div>
+      </div>
     </div>
   </section>
 
@@ -35,8 +45,10 @@
 
     <!-- COMMUNITY -->
     <section class="community-teaser">
-      <h2>Werde Teil der echten Grind-Community</h2>
-      <p>Hier treffen sich ambitionierte Spieler, die mehr wollen als nur Casual-Ranked.</p>
+      <div class="section-head">
+        <h2>Werde Teil der echten Grind-Community</h2>
+        <p>Hier treffen sich ambitionierte Spieler, die mehr wollen als nur Casual-Ranked.</p>
+      </div>
 
       <div class="features">
         <div class="feature">
@@ -60,33 +72,43 @@
         </div>
       </div>
 
-      <a href="login.html" class="btn">Jetzt beitreten</a>
+      <div class="section-actions">
+        <a href="login.html" class="btn">Jetzt beitreten</a>
+      </div>
     </section>
 
     <!-- ÜBER MICH -->
     <section class="bio">
-      <h2>Über mich</h2>
-      <p>
-        Ich bin ein ambitionierter Fortnite-Spieler aus Deutschland, der aktuell voll auf Ballistic und Ranked grindet.
-        Mein Ziel ist es, in den kommenden Monaten konstant in den höheren Divisionen zu landen und langfristig im
-        kompetitiven Bereich Fuß zu fassen.
-      </p>
-      <p>
-        Täglich trainiere ich Mechanics, Game Sense, Rotations und Teamplay. Neben Solo-Ranked liegt mein Fokus besonders
-        auf 5v5 Ballistic – hier sehe ich das größte Potenzial für Wachstum und Turniere.
-      </p>
-      <p>
-        Ich suche aktuell aktive Mitspieler/Teams für Scrims, Customs und zukünftige Contests.
-        Wenn du ähnlich ambitioniert bist – melde dich gerne!
-      </p>
+      <div class="section-head">
+        <h2>Über mich</h2>
+        <p>Kurzer Kontext – damit klar ist, wofür echtlucky steht.</p>
+      </div>
+
+      <div class="prose">
+        <p>
+          Ich bin ein ambitionierter Fortnite-Spieler aus Deutschland, der aktuell voll auf Ballistic und Ranked grindet.
+          Mein Ziel ist es, in den kommenden Monaten konstant in den höheren Divisionen zu landen und langfristig im
+          kompetitiven Bereich Fuß zu fassen.
+        </p>
+        <p>
+          Täglich trainiere ich Mechanics, Game Sense, Rotations und Teamplay. Neben Solo-Ranked liegt mein Fokus besonders
+          auf 5v5 Ballistic – hier sehe ich das größte Potenzial für Wachstum und Turniere.
+        </p>
+        <p>
+          Ich suche aktuell aktive Mitspieler/Teams für Scrims, Customs und zukünftige Contests.
+          Wenn du ähnlich ambitioniert bist – melde dich gerne!
+        </p>
+      </div>
     </section>
 
     <!-- STATS -->
     <section id="stats" class="stats-section">
-      <h2>Ballistic Statistiken</h2>
-      <p>Aktueller Rank, Divisionsfortschritt und Performance-Metriken – werden in Echtzeit aktualisiert.</p>
+      <div class="section-head">
+        <h2>Ballistic Statistiken</h2>
+        <p>Aktueller Rank, Divisionsfortschritt und Performance-Metriken – werden in Echtzeit aktualisiert.</p>
+      </div>
 
-      <div style="margin: 2rem 0;">
+      <div class="link-row">
         <a href="https://fortnitetracker.com/profile/all/mr.%20z00m" target="_blank" rel="noopener" class="btn">
           Fortnite Tracker
         </a>
@@ -98,10 +120,12 @@
 
     <!-- DISCORD -->
     <section id="discord" class="discord-section">
-      <h2>Discord Community</h2>
-      <p>Trete bei für Scrims, VOD-Reviews, Strategie-Diskussionen und kompetitives Fortnite-Netzwerken.</p>
+      <div class="section-head">
+        <h2>Discord Community</h2>
+        <p>Trete bei für Scrims, VOD-Reviews, Strategie-Diskussionen und kompetitives Fortnite-Netzwerken.</p>
+      </div>
 
-      <div class="discord-btn-wrapper">
+      <div class="section-actions">
         <a href="https://discord.gg/c7jmXnBSv6" target="_blank" rel="noopener" class="discord-btn">
           Discord beitreten
         </a>
@@ -110,10 +134,12 @@
 
     <!-- TWITCH -->
     <section id="twitch" class="twitch-section">
-      <h2>Twitch Stream</h2>
-      <p>Live dabei, wenn ich Ballistic & Ranked grinde – oder schau dir VODs an.</p>
+      <div class="section-head">
+        <h2>Twitch Stream</h2>
+        <p>Live dabei, wenn ich Ballistic & Ranked grinde – oder schau dir VODs an.</p>
+      </div>
 
-      <div style="margin: 2.5rem auto; max-width: 900px;">
+      <div class="embed">
         <iframe
           src="https://player.twitch.tv/?channel=echtlucky&parent=echtlucky.github.io&parent=localhost&muted=true&autoplay=false"
           frameborder="0"
