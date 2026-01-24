@@ -1,12 +1,31 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blog | echtlucky</title>
-  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="stylesheet" href="css/style.css" />
+
   <style>
-    /* Laderad (Spinner) */
+    /* ===== Blog Page Styles (page-specific) ===== */
+
+    .page-title {
+      text-align: center;
+      margin: 2.2rem 0 0.6rem;
+      font-size: 3rem;
+      color: var(--accent);
+      text-shadow: 0 0 20px rgba(0,255,136,0.18);
+    }
+
+    .intro {
+      text-align: center;
+      opacity: 0.85;
+      margin-bottom: 2.2rem;
+      font-size: 1.15rem;
+    }
+
+    /* Loader */
     .loading-spinner {
       display: flex;
       flex-direction: column;
@@ -31,15 +50,12 @@
       100% { transform: rotate(360deg); }
     }
 
-    .loading-text {
-      font-size: 1.3rem;
-      opacity: 0.8;
-    }
+    .loading-text { font-size: 1.3rem; opacity: 0.8; }
 
     .no-posts {
       text-align: center;
-      font-size: 1.4rem;
-      opacity: 0.7;
+      font-size: 1.35rem;
+      opacity: 0.75;
       margin: 6rem 0;
       color: #aaa;
     }
@@ -48,8 +64,8 @@
     .blog-list {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2.5rem;
-      margin-top: 3rem;
+      gap: 2.2rem;
+      margin: 2.5rem 0 5rem;
       min-height: 300px;
     }
 
@@ -59,45 +75,46 @@
       border-radius: 20px;
       padding: 2rem;
       text-align: left;
-      transition: all 0.3s;
-      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     }
 
     .blog-card:hover {
       transform: translateY(-8px);
-      box-shadow: 0 15px 40px rgba(0,255,136,0.15);
+      border-color: rgba(0,255,136,0.55);
+      box-shadow: 0 18px 55px rgba(0,255,136,0.12);
     }
 
     .blog-card h2 {
       color: var(--accent);
-      font-size: 2rem;
+      font-size: 1.8rem;
       margin-bottom: 0.8rem;
     }
 
     .blog-card .meta {
       font-size: 0.95rem;
-      opacity: 0.7;
-      margin-bottom: 1.2rem;
+      opacity: 0.75;
+      margin-bottom: 1.1rem;
     }
 
     .blog-card p {
-      font-size: 1.1rem;
-      opacity: 0.9;
-      margin-bottom: 1.5rem;
+      font-size: 1.08rem;
+      opacity: 0.92;
+      margin-bottom: 1.3rem;
     }
 
-    /* Pop-up für Post-Inhalt */
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.75);
       backdrop-filter: blur(8px);
-      z-index: 200;
+      z-index: 2000;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transition: opacity 0.4s ease;
+      transition: opacity 0.25s ease;
+      padding: 1.5rem;
     }
 
     .modal.show {
@@ -106,103 +123,76 @@
     }
 
     .modal-content {
-      width: 90%;
+      width: 100%;
       max-width: 900px;
-      background: var(--card-bg);
-      border: 1px solid rgba(0,255,136,0.3);
+      background: rgba(0,0,0,0.85);
+      border: 1px solid rgba(0,255,136,0.35);
       border-radius: 24px;
-      padding: 3.5rem 3rem;
-      box-shadow: 0 15px 50px rgba(0,255,136,0.2);
+      padding: 3rem 2.6rem;
+      box-shadow: 0 20px 70px rgba(0,255,136,0.18);
       position: relative;
       text-align: left;
-      transform: scale(0.85);
-      opacity: 0;
-      transition: transform 0.4s ease, opacity 0.4s ease;
+      transform: scale(0.92);
+      transition: transform 0.25s ease;
       max-height: 85vh;
       overflow-y: auto;
     }
 
-    .modal.show .modal-content {
-      transform: scale(1);
-      opacity: 1;
-    }
+    .modal.show .modal-content { transform: scale(1); }
 
     .modal-close {
       position: absolute;
-      top: 1.5rem;
-      right: 2rem;
-      font-size: 2.5rem;
+      top: 1.1rem;
+      right: 1.6rem;
+      font-size: 2.4rem;
       color: var(--accent);
       cursor: pointer;
+      user-select: none;
+      line-height: 1;
     }
 
     .modal h2 {
       color: var(--accent);
-      font-size: 2.8rem;
-      margin-bottom: 1rem;
+      font-size: 2.4rem;
+      margin-bottom: 0.9rem;
     }
 
     .modal .meta {
-      font-size: 1.1rem;
-      opacity: 0.7;
-      margin-bottom: 2rem;
+      font-size: 1.05rem;
+      opacity: 0.75;
+      margin-bottom: 1.8rem;
     }
 
     .modal .post-content {
-      font-size: 1.2rem;
-      line-height: 1.7;
+      font-size: 1.15rem;
+      line-height: 1.75;
       opacity: 0.95;
+      white-space: pre-wrap; /* damit \n sauber angezeigt wird */
     }
 
-    .modal .delete-btn {
+    .delete-btn {
       background: #ff3366;
       color: white;
-      padding: 1rem 2rem;
+      padding: 1rem 1.6rem;
       border-radius: 12px;
-      margin-top: 3rem;
-      display: inline-block;
+      margin-top: 2rem;
+      display: none;
       cursor: pointer;
       border: none;
+      font-weight: 700;
     }
 
-    .modal .delete-btn:hover {
-      background: #ff1a4d;
-    }
+    .delete-btn:hover { background: #ff1a4d; }
   </style>
 </head>
+
 <body class="page-transition">
 
-  <!-- Header – identisch zu index.html -->
-  <header>
-    <a href="index.html" class="logo">echtlucky</a>
+  <!-- Header (extern) -->
+  <div id="header-placeholder"></div>
 
-    <button class="menu-toggle" id="menuToggle">☰</button>
-
-    <nav id="mainNav">
-      <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="blog.html" class="active">Blog</a>
-        <a href="index.html#stats">Stats</a>
-        <a href="index.html#discord">Discord</a>
-        <a href="index.html#twitch">Twitch</a>
-      </div>
-
-      <div class="nav-right">
-        <a href="login.html" id="login-link" style="color: var(--accent); font-weight: 600;">Anmelden</a>
-
-        <div class="user-dropdown-wrapper">
-          <span id="user-name-display" class="user-name" style="display:none;"></span>
-          <div id="dropdown-menu" class="dropdown-menu">
-            <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">Admin Panel</a>
-            <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
-          </div>
-        </div>
-      </div>
-    </nav>
-  </header>
-
-  <div class="container">
-    <h1>Blog</h1>
+  <main class="container">
+    <h1 class="page-title">Blog</h1>
     <p class="intro">Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind.</p>
 
     <div id="blog-list" class="blog-list">
@@ -211,100 +201,103 @@
         <p class="loading-text">Posts werden geladen...</p>
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Pop-up für Post-Inhalt -->
-  <div id="postModal" class="modal">
+  <!-- Modal -->
+  <div id="postModal" class="modal" aria-hidden="true">
     <div class="modal-content">
-      <span class="modal-close" onclick="closePostModal()">×</span>
+      <span class="modal-close" id="modalCloseBtn">×</span>
       <h2 id="post-title"></h2>
       <p class="meta" id="post-meta"></p>
       <div class="post-content" id="post-content"></div>
-
-      <button class="delete-btn" id="delete-post-btn" style="display:none;" onclick="deletePost()">Post löschen</button>
+      <button class="delete-btn" id="delete-post-btn">Post löschen</button>
     </div>
   </div>
 
-  <footer>
-    <div class="footer-content">
-      <p>© 2026 echtlucky • Competitives Fortnite Journey</p>
-      <div class="footer-links">
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a>
-        <a href="kontakt.html">Kontakt</a>
-      </div>
-    </div>
-  </footer>
+  <!-- Footer (extern) -->
+  <div id="footer-placeholder"></div>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
+  <!-- Dein Firebase Setup -->
   <script src="firebase.js"></script>
+
+  <!-- Header/Dropdown/Mobile Menü Logik -->
   <script src="js/menu.js"></script>
 
   <script>
+    // Page transition
     document.body.classList.add('loaded');
 
-    function logout() {
-      auth.signOut()
-        .then(() => {
-          alert('Erfolgreich ausgeloggt!');
-          window.location.href = 'index.html';
-        })
-        .catch((err) => {
-          alert('Ausloggen fehlgeschlagen: ' + err.message);
-        });
+    // ===== Header + Footer laden =====
+    fetch('header.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+        initHeaderScripts(); // ✅ nur das – keine doppelte Header-Logik hier
+      });
+
+    fetch('footer.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      });
+
+    // ===== Helpers =====
+    const ADMIN_EMAIL = "lucassteckel04@gmail.com";
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
-    // Header-Logik (Nutzername, Dropdown, Admin-Link)
-    auth.onAuthStateChanged((user) => {
-      const loginLink = document.getElementById('login-link');
-      const userNameDisplay = document.getElementById('user-name-display');
-      const dropdownMenu = document.getElementById('dropdown-menu');
-      const adminPanelLink = document.getElementById('admin-panel-link');
-      const deletePostBtn = document.getElementById('delete-post-btn');
+    function formatPreview(text, len = 160) {
+      const clean = String(text || "").replace(/\s+/g, " ").trim();
+      return clean.length > len ? clean.slice(0, len) + "…" : clean;
+    }
 
-      if (user) {
-        loginLink.style.display = 'none';
-        userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
-        userNameDisplay.style.display = 'inline-block';
+    // ===== Modal Logic =====
+    const postModal = document.getElementById('postModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const deletePostBtn = document.getElementById('delete-post-btn');
 
-        const ADMIN_EMAIL = "lucassteckel04@gmail.com";
-        if (user.email === ADMIN_EMAIL && adminPanelLink) {
-          adminPanelLink.style.display = 'block';
-        }
+    let currentPostId = null;
+    let canDelete = false;
 
-        if (user.email === ADMIN_EMAIL && deletePostBtn) {
-          deletePostBtn.style.display = 'inline-block';
-        }
-      } else {
-        loginLink.style.display = 'inline-block';
-        userNameDisplay.style.display = 'none';
-        dropdownMenu.classList.remove('show');
-        adminPanelLink.style.display = 'none';
-        deletePostBtn.style.display = 'none';
-      }
+    function openPostModal({ id, title, meta, content }) {
+      document.getElementById('post-title').textContent = title || "";
+      document.getElementById('post-meta').textContent = meta || "";
+      document.getElementById('post-content').textContent = content || "";
 
-      loadBlogPosts();
+      currentPostId = id;
+      deletePostBtn.style.display = (canDelete && currentPostId) ? 'inline-block' : 'none';
+
+      postModal.style.display = 'flex';
+      requestAnimationFrame(() => postModal.classList.add('show'));
+      postModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closePostModal() {
+      postModal.classList.remove('show');
+      postModal.setAttribute("aria-hidden", "true");
+      setTimeout(() => { postModal.style.display = 'none'; }, 250);
+      currentPostId = null;
+    }
+
+    modalCloseBtn.addEventListener('click', closePostModal);
+    postModal.addEventListener('click', (e) => {
+      if (e.target === postModal) closePostModal();
     });
 
-    // Hover → Dropdown
-    const userNameDisplay = document.getElementById('user-name-display');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-
-    if (userNameDisplay && dropdownMenu) {
-      userNameDisplay.addEventListener('mouseenter', () => dropdownMenu.classList.add('show'));
-      document.addEventListener('click', (e) => {
-        if (!userNameDisplay.contains(e.target) && !dropdownMenu.contains(e.target)) {
-          dropdownMenu.classList.remove('show');
-        }
-      });
-    }
-
-    // Posts aus Firestore laden
-    function loadBlogPosts() {
+    // ===== Blog Posts laden =====
+    function renderLoading() {
       const blogList = document.getElementById('blog-list');
       blogList.innerHTML = `
         <div class="loading-spinner">
@@ -312,11 +305,16 @@
           <p class="loading-text">Posts werden geladen...</p>
         </div>
       `;
+    }
+
+    function loadBlogPosts() {
+      renderLoading();
 
       db.collection('posts')
         .orderBy('createdAt', 'desc')
         .get()
         .then((snapshot) => {
+          const blogList = document.getElementById('blog-list');
           blogList.innerHTML = '';
 
           if (snapshot.empty) {
@@ -325,109 +323,78 @@
           }
 
           snapshot.forEach((doc) => {
-            const data = doc.data();
+            const data = doc.data() || {};
+
+            const title = data.title || "Ohne Titel";
+            const date = data.date || "";
+            const author = data.author || "Unbekannt";
+            const content = data.content || "";
+
             const card = document.createElement('div');
-            card.classList.add('blog-card');
+            card.className = 'blog-card';
+
+            // Safe HTML (nur Text reingeben)
             card.innerHTML = `
-              <h2>${data.title}</h2>
-              <p class="meta">${data.date} • von ${data.author}</p>
-              <p>${data.content.substring(0, 150)}...</p>
-              <button class="btn" onclick="showPostModal('${doc.id}', '${data.title.replace(/'/g, "\\'")}', '${data.date} • von ${data.author}', '${data.content.replace(/'/g, "\\'")}')">Lesen</button>
+              <h2>${escapeHtml(title)}</h2>
+              <p class="meta">${escapeHtml(date)}${date ? " • " : ""}von ${escapeHtml(author)}</p>
+              <p>${escapeHtml(formatPreview(content))}</p>
+              <a href="#" class="btn read-btn" style="display:inline-block;">Lesen</a>
             `;
+
+            // Click handler ohne Inline-onclick (stabil + sicher)
+            card.querySelector('.read-btn').addEventListener('click', (e) => {
+              e.preventDefault();
+              openPostModal({
+                id: doc.id,
+                title,
+                meta: `${date}${date ? " • " : ""}von ${author}`,
+                content
+              });
+            });
+
             blogList.appendChild(card);
           });
         })
         .catch((err) => {
-          blogList.innerHTML = '<p style="color: red; text-align: center;">Fehler beim Laden: ' + err.message + '</p>';
           console.error(err);
+          document.getElementById('blog-list').innerHTML =
+            '<p style="color:#ff3366; text-align:center; margin:3rem 0;">Fehler beim Laden: ' +
+            escapeHtml(err.message) +
+            '</p>';
         });
     }
 
-    // Pop-up für Post-Inhalt
-    const postModal = document.getElementById('postModal');
-    let currentPostId = null;
-
-    function showPostModal(id, title, meta, content) {
-      document.getElementById('post-title').textContent = title;
-      document.getElementById('post-meta').textContent = meta;
-      document.getElementById('post-content').innerHTML = content.replace(/\n/g, '<br>');
-
-      currentPostId = id;
-
-      postModal.style.display = 'flex';
-      setTimeout(() => postModal.classList.add('show'), 10);
+    // ===== Admin Delete =====
+    function updateDeletePermission(user) {
+      canDelete = !!user && user.email === ADMIN_EMAIL;
+      deletePostBtn.style.display = (canDelete && currentPostId) ? 'inline-block' : 'none';
     }
 
-    function closePostModal() {
-      postModal.classList.remove('show');
-      setTimeout(() => postModal.style.display = 'none', 400);
-      currentPostId = null;
-    }
+    deletePostBtn.addEventListener('click', () => {
+      if (!canDelete || !currentPostId) return;
 
-    postModal.addEventListener('click', (e) => {
-      if (e.target === postModal) closePostModal();
+      if (!confirm('Post wirklich löschen?')) return;
+
+      db.collection('posts').doc(currentPostId).delete()
+        .then(() => {
+          alert('Post gelöscht');
+          closePostModal();
+          loadBlogPosts();
+        })
+        .catch((err) => alert('Fehler: ' + err.message));
     });
 
-    // Post löschen (aus Pop-up, nur Admin)
-    function deletePost() {
-      if (currentPostId && confirm('Post wirklich löschen?')) {
-        db.collection('posts').doc(currentPostId).delete()
-          .then(() => {
-            alert('Post gelöscht');
-            closePostModal();
-            loadBlogPosts();
-          })
-          .catch((err) => {
-            alert('Fehler: ' + err.message);
-          });
-      }
-    }
-
-    // Seite laden → Posts anzeigen
+    // ===== Init =====
+    // Posts können auch ohne Login geladen werden.
     loadBlogPosts();
+
+    // Admin-Rechte nur für Delete prüfen
+    if (typeof window.auth !== "undefined") {
+      auth.onAuthStateChanged((user) => {
+        updateDeletePermission(user);
+      });
+    }
   </script>
-
-  <script>
-  fetch('header.html')
-    .then(response => response.text())
-    .then(html => {
-      document.getElementById('header-placeholder').innerHTML = html;
-      setupMenuToggle();  // Menü-Button nachladen
-      setupUserDropdown(); // Nutzer-Dropdown nachladen
-    });
-
-  function setupMenuToggle() {
-    const menuToggle = document.getElementById('menuToggle');
-    const mainNav = document.getElementById('mainNav');
-    if (menuToggle && mainNav) {
-      menuToggle.addEventListener('click', () => {
-        mainNav.classList.toggle('open');
-      });
-    }
-  }
-
-  function setupUserDropdown() {
-    const userNameDisplay = document.getElementById('user-name-display');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    if (!userNameDisplay || !dropdownMenu) return;
-
-    userNameDisplay.addEventListener('click', () => {
-      dropdownMenu.classList.toggle('show');
-    });
-
-    // Hier könntest du auch Auth-Status abfragen und UI anpassen
-    // z.B. login-link ausblenden wenn User eingeloggt
-  }
-
-  function logout() {
-    // Beispiel-Logout-Funktion mit Firebase Auth
-    if (window.auth) {
-      window.auth.signOut().then(() => {
-        window.location.href = 'index.html';
-      });
-    }
-  }
-</script>
 
 </body>
 </html>
