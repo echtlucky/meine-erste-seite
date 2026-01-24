@@ -1,8 +1,8 @@
 /* ======================================
-   Farbschema: Grün, Weiß, Schwarz
+   Farbschema
    ====================================== */
 :root {
-  --bg: #000000;
+  --bg: #000;
   --text: #e0ffe0;
   --accent: #00ff88;
   --accent-hover: #00cc66;
@@ -12,11 +12,13 @@
   --discord-hover: #7289da;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-html, body {
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
   font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
@@ -24,47 +26,48 @@ html, body {
   line-height: 1.6;
 }
 
+body {
+  padding-top: 60px; /* Platz für Fixed Header */
+}
+
 /* ======================================
-   Smart Header
+   HEADER
    ====================================== */
 header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.92);
-  backdrop-filter: blur(12px);
   height: 60px;
+  z-index: 1000;
+
+  background: rgba(0,0,0,0.92);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  transition: transform 0.4s ease, box-shadow 0.3s ease;
-  transform: translateY(0);
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5%;
 }
 
-header.hidden {
-  transform: translateY(-100%);
-}
-
-header.scrolled {
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-}
-
+/* Logo */
 .logo {
   color: var(--accent);
-  font-weight: 700;
+  font-weight: 800;
   font-size: 1.8rem;
-  letter-spacing: -0.3px;
   text-decoration: none;
 }
 
+/* Navigation */
 nav {
-  flex: 1;
   display: flex;
-  justify-content: center;
   align-items: center;
+  gap: 3rem;
 }
 
+/* Nav Links */
 .nav-links {
   display: flex;
   gap: 3rem;
@@ -74,8 +77,8 @@ nav {
   color: var(--text);
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.1rem;
-  padding: 0.5rem 1rem;
+  font-size: 1.05rem;
+  padding: 0.5rem 0.9rem;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
@@ -91,10 +94,11 @@ nav {
   font-weight: 600;
 }
 
+/* Rechts */
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 1.8rem;
+  gap: 1.6rem;
 }
 
 .nav-auth {
@@ -103,13 +107,13 @@ nav {
   text-decoration: none;
   padding: 0.5rem 1.2rem;
   border-radius: 8px;
-  transition: all 0.3s;
 }
 
 .nav-auth:hover {
   background: rgba(0,255,136,0.1);
 }
 
+/* User Dropdown */
 .user-dropdown-wrapper {
   position: relative;
 }
@@ -120,7 +124,6 @@ nav {
   cursor: pointer;
   padding: 0.5rem 1.2rem;
   border-radius: 8px;
-  transition: background 0.3s;
 }
 
 .user-name:hover {
@@ -132,11 +135,12 @@ nav {
   position: absolute;
   top: 100%;
   right: 0;
+  min-width: 180px;
   background: rgba(0,0,0,0.96);
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.7);
-  min-width: 180px;
+  overflow: hidden;
   z-index: 1100;
 }
 
@@ -145,11 +149,10 @@ nav {
 }
 
 .dropdown-item {
+  display: block;
   padding: 0.8rem 1.5rem;
   color: var(--text);
   text-decoration: none;
-  display: block;
-  transition: all 0.2s;
 }
 
 .dropdown-item:hover {
@@ -157,15 +160,11 @@ nav {
   color: var(--accent);
 }
 
-.dropdown-item.admin-panel {
-  color: #00ff88;
-}
-
 .dropdown-item.logout {
   color: #ff3366;
 }
 
-/* Mobile Hamburger */
+/* Hamburger */
 .menu-toggle {
   display: none;
   background: none;
@@ -175,149 +174,49 @@ nav {
   cursor: pointer;
 }
 
+/* ======================================
+   MOBILE NAV
+   ====================================== */
 @media (max-width: 992px) {
+
   .menu-toggle {
     display: block;
   }
 
   nav {
     position: absolute;
-    top: 100%;
+    top: 60px;
     left: 0;
     width: 100%;
     background: rgba(0,0,0,0.96);
-    flex-direction: column;
-    padding: 1.5rem 0;
     border-bottom: 1px solid var(--border);
     display: none;
+    flex-direction: column;
+    padding: 1.5rem 0;
   }
 
-  nav.active {
+  nav.open {
     display: flex;
   }
 
-  .nav-links, .nav-right {
+  .nav-links,
+  .nav-right {
     flex-direction: column;
-    gap: 1.5rem;
     align-items: center;
+    gap: 1.5rem;
   }
 }
 
-/* Hauptinhalt */
+/* ======================================
+   CONTENT
+   ====================================== */
 .container {
   max-width: 1100px;
   margin: 40px auto 80px;
   padding: 0 5%;
 }
 
-/* Hero */
-.hero {
-  min-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 0 5%;
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2000') center/cover no-repeat fixed;
-}
-
-.hero h1 {
-  font-size: 5.5rem;
-  font-weight: 900;
-  margin: 0 0 1.5rem;
-  background: linear-gradient(90deg, #00ff88, #00cc66, #00ff88);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 40px rgba(0,255,136,0.3);
-}
-
-.hero .tagline {
-  font-size: 1.6rem;
-  margin: 0 0 3rem;
-  max-width: 900px;
-  opacity: 0.9;
-}
-
-.hero .btn-group {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5rem;
-}
-
-.hero .btn {
-  font-size: 1.3rem;
-  padding: 1.1rem 2.8rem;
-  border-radius: 50px;
-  transition: all 0.4s;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-}
-
-.hero .btn:hover {
-  transform: translateY(-6px) scale(1.05);
-  box-shadow: 0 20px 50px rgba(0,255,136,0.3);
-}
-
-/* Community-Teaser */
-.community-teaser {
-  background: linear-gradient(135deg, rgba(0,255,136,0.06) 0%, rgba(0,0,0,0.6) 100%);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 3.5rem 2.5rem;
-  margin: 5rem auto;
-  max-width: 1000px;
-  text-align: center;
-  backdrop-filter: blur(8px);
-}
-
-.community-teaser h2 {
-  font-size: 2.8rem;
-  margin-bottom: 1.2rem;
-  background: linear-gradient(90deg, #00ff88, #00cc66);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.community-teaser p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-.community-teaser .features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 2rem;
-  margin: 2.5rem 0;
-}
-
-.feature {
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(0,255,136,0.2);
-  border-radius: 16px;
-  padding: 1.8rem 1.5rem;
-  transition: all 0.3s;
-}
-
-.feature:hover {
-  transform: translateY(-8px);
-  border-color: var(--accent);
-  box-shadow: 0 10px 30px rgba(0,255,136,0.15);
-}
-
-.feature h3 {
-  color: var(--accent);
-  margin-bottom: 1rem;
-}
-
-.feature p {
-  opacity: 0.85;
-}
-
-/* Bio, Stats, Discord, Twitch */
+/* Sections */
 .bio, .stats-section, .discord-section, .twitch-section {
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -327,12 +226,16 @@ nav {
   text-align: center;
 }
 
-.bio h2, .stats-section h2, .discord-section h2, .twitch-section h2 {
+.bio h2,
+.stats-section h2,
+.discord-section h2,
+.twitch-section h2 {
   color: var(--accent);
   font-size: 2.2rem;
   margin-bottom: 1.2rem;
 }
 
+/* Buttons */
 .btn {
   background: var(--accent);
   color: #000;
@@ -341,7 +244,6 @@ nav {
   text-decoration: none;
   font-weight: 600;
   font-size: 1.15rem;
-  margin: 1rem;
   display: inline-block;
   transition: all 0.25s;
 }
@@ -351,28 +253,9 @@ nav {
   transform: translateY(-2px);
 }
 
-.discord-btn-wrapper {
-  margin: 4rem auto;
-  text-align: center;
-}
-
-.discord-btn {
-  background: var(--discord);
-  color: white;
-  padding: 1.1rem 3.2rem;
-  font-size: 1.25rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 25px rgba(88,101,242,0.4);
-  transition: all 0.3s;
-}
-
-.discord-btn:hover {
-  background: var(--discord-hover);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(88,101,242,0.6);
-}
-
-/* Footer */
+/* ======================================
+   FOOTER
+   ====================================== */
 footer {
   text-align: center;
   padding: 3rem 1rem 2rem;
@@ -398,28 +281,9 @@ footer {
 .footer-links a {
   color: var(--accent);
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.25s;
 }
 
 .footer-links a:hover {
   color: var(--accent-hover);
   text-decoration: underline;
-}
-
-/* Page Transition */
-.page-transition {
-  opacity: 1;
-  transform: translateX(0);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-body.page-transition {
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
-body.loaded {
-  opacity: 1;
-  transform: translateX(0);
 }
