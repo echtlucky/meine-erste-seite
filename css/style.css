@@ -84,19 +84,17 @@ body::after {
   padding: 0.8rem 6%;
 }
 
-#header-placeholder {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
+/* Smart Header: zuverlässig animierbar */
+.site-header{
+  will-change: transform;
+  transform: translate3d(0,0,0);
   transition: transform 0.35s ease;
 }
 
-#header-placeholder.header-hidden {
-  transform: translateY(-100%);
+/* Header wirklich raus schieben */
+.site-header.header-hidden{
+  transform: translate3d(0,-110%,0);
 }
-
 
 /* Fallback, falls irgendwo noch <header> ohne class existiert */
 header:not(.site-header) {

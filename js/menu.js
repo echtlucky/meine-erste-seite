@@ -112,64 +112,44 @@ function logout() {
 }
 
 /* =========================
-   🧠 Smart Header Scroll (SNAPPY + STABIL)
-   - Runter: nach kurzer Strecke hide
-   - Hoch: schon bei minimaler Bewegung show
+   🧠 Smart Header Scroll (BOMBENFEST)
    ========================= */
-
-let lastScrollY = window.scrollY;
-let headerVisible = true;
-
-// Accumulator, damit’s nicht flackert
-let downAcc = 0;
-let upAcc = 0;
+let __smartHeaderInited = false;
 
 function initSmartHeaderScroll() {
-  const header = document.getElementById('header-placeholder');
+  if (__smartHeaderInited) return;
+  __smartHeaderInited = true;
+
+  const header = document.querySelector('header.site-header');
   if (!header) return;
 
-  // Reset falls Funktion aus Versehen mehrfach init wird
-  if (window.__smartHeaderInitialized) return;
-  window.__smartHeaderInitialized = true;
+  let lastY = window.scrollY;
+  let downAcc = 0;
 
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
-    const diff = y - lastScrollY;
+    const diff = y - lastY;
 
-    // Ganz oben: immer sichtbar + reset
+    // ganz oben immer sichtbar
     if (y <= 10) {
       header.classList.remove('header-hidden');
-      headerVisible = true;
       downAcc = 0;
-      upAcc = 0;
-      lastScrollY = y;
+      lastY = y;
       return;
     }
 
-    // Scroll runter
+    // runter scrollen -> nach etwas Strecke ausblenden
     if (diff > 0) {
       downAcc += diff;
-      upAcc = 0;
-
-      // erst nach etwas Strecke verstecken (verhindert nerviges Flackern)
-      if (downAcc > 25 && headerVisible) {
-        header.classList.add('header-hidden');
-        headerVisible = false;
-      }
+      if (downAcc > 25) header.classList.add('header-hidden');
     }
 
-    // Scroll hoch (auch minimal!)
+    // hoch scrollen -> sofort einblenden
     if (diff < 0) {
-      upAcc += Math.abs(diff);
+      header.classList.remove('header-hidden');
       downAcc = 0;
-
-      // super schnell wieder einblenden
-      if (upAcc > 1 && !headerVisible) {
-        header.classList.remove('header-hidden');
-        headerVisible = true;
-      }
     }
 
-    lastScrollY = y;
+    lastY = y;
   }, { passive: true });
 }
