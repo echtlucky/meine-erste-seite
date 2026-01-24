@@ -359,6 +359,7 @@
       .then(html => {
         document.getElementById('header-placeholder').innerHTML = html;
         initHeaderScripts();
+        initSmartHeaderScroll();
       });
 
     fetch('footer.html')

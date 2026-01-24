@@ -107,3 +107,44 @@ function logout() {
       alert('Ausloggen fehlgeschlagen: ' + err.message);
     });
 }
+
+let lastScrollY = window.scrollY;
+let ticking = false;
+
+function initSmartHeaderScroll() {
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+
+  function handleScroll() {
+    const currentY = window.scrollY;
+
+    // ganz oben: header immer sichtbar
+    if (currentY <= 10) {
+      header.classList.remove('header-hidden');
+      lastScrollY = currentY;
+      return;
+    }
+
+    // runter scrollen => ausblenden
+    if (currentY > lastScrollY && currentY > 80) {
+      header.classList.add('header-hidden');
+    }
+
+    // hoch scrollen => einblenden (auch minimal!)
+    if (currentY < lastScrollY) {
+      header.classList.remove('header-hidden');
+    }
+
+    lastScrollY = currentY;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        handleScroll();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+}

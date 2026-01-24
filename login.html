@@ -702,57 +702,25 @@ auth.createUserWithEmailAndPassword(emailInput.value.trim(), pwInput.value)
   }
 </script>
 
-<script>
-  // Header laden
-  fetch('header.html')
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById('header-placeholder').innerHTML = html;
-      initHeaderScripts(); // Dropdown & Firebase Auth initialisieren
-    });
-</script>
+  <script>
+    document.body.classList.add('loaded');
 
-<script>
-  fetch('header.html')
-    .then(response => response.text())
-    .then(html => {
-      document.getElementById('header-placeholder').innerHTML = html;
-      setupMenuToggle();  // Menü-Button nachladen
-      setupUserDropdown(); // Nutzer-Dropdown nachladen
-    });
+    // Header laden + init
+    fetch('header.html')
+  .then(r => r.text())
+  .then(html => {
+    document.getElementById('header-placeholder').innerHTML = html;
+    initHeaderScripts();
+    initSmartHeaderScroll();
+  });
 
-  function setupMenuToggle() {
-    const menuToggle = document.getElementById('menuToggle');
-    const mainNav = document.getElementById('mainNav');
-    if (menuToggle && mainNav) {
-      menuToggle.addEventListener('click', () => {
-        mainNav.classList.toggle('open');
+
+    // Footer laden
+    fetch('footer.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
       });
-    }
-  }
-
-  function setupUserDropdown() {
-    const userNameDisplay = document.getElementById('user-name-display');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    if (!userNameDisplay || !dropdownMenu) return;
-
-    userNameDisplay.addEventListener('click', () => {
-      dropdownMenu.classList.toggle('show');
-    });
-
-    // Hier könntest du auch Auth-Status abfragen und UI anpassen
-    // z.B. login-link ausblenden wenn User eingeloggt
-  }
-
-  function logout() {
-    // Beispiel-Logout-Funktion mit Firebase Auth
-    if (window.auth) {
-      window.auth.signOut().then(() => {
-        window.location.href = 'index.html';
-      });
-    }
-  }
-</script>
-
+  </script>
 </body>
 </html>

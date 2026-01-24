@@ -70,6 +70,14 @@ header {
   padding: 0.8rem 6%;
 }
 
+.site-header {
+  transition: transform 0.35s ease;
+}
+
+.site-header.header-hidden {
+  transform: translateY(-100%);
+}
+
 .logo {
   color: var(--accent);
   font-weight: 800;
