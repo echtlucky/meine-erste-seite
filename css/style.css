@@ -575,7 +575,6 @@ body.modal-open { overflow: hidden; }
   justify-content: center;
 
   cursor: pointer;
-  transition: background 0.25s ease, transform 0.2s ease;
 }
 
 .legal-modal__close:hover {
