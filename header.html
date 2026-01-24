@@ -1,54 +1,33 @@
-<header>
-  <!-- Logo -->
-  <a href="index.html" class="logo">echtlucky</a>
+<header class="site-header">
+  <!-- Links -->
+  <div class="header-left">
+    <a href="index.html" class="logo">echtlucky</a>
+  </div>
 
-  <!-- Hamburger (nur Mobile sichtbar via CSS) -->
-  <button class="menu-toggle" id="menuToggle" aria-label="Menü öffnen">
-    ☰
-  </button>
-
-  <!-- Navigation -->
-  <nav id="mainNav">
-    <!-- Links -->
+  <!-- Mitte (Navigation) -->
+  <nav id="mainNav" class="header-nav">
     <div class="nav-links">
       <a href="index.html">Home</a>
       <a href="blog.html">Blog</a>
-      <!--
-      <a href="about.html">About</a>
-      <a href="shop.html">Shop</a>
-      -->
-    </div>
-
-    <!-- Rechts: Login / User -->
-    <div class="nav-right">
-      <a href="login.html" id="login-link" class="nav-auth">Anmelden</a>
-
-      <div class="user-dropdown-wrapper">
-        <span
-          id="user-name-display"
-          class="user-name"
-          style="display: none;"
-        ></span>
-
-        <div id="dropdown-menu" class="dropdown-menu">
-          <a
-            href="admin-panel.html"
-            id="admin-panel-link"
-            class="dropdown-item admin-panel"
-            style="display: none;"
-          >
-            Admin Panel
-          </a>
-
-          <a
-            href="#"
-            class="dropdown-item logout"
-            onclick="logout()"
-          >
-            Ausloggen
-          </a>
-        </div>
-      </div>
     </div>
   </nav>
+
+  <!-- Rechts (Account) -->
+  <div class="header-right">
+    <a href="login.html" id="login-link" class="nav-auth">Anmelden</a>
+
+    <div class="user-dropdown-wrapper">
+      <span id="user-name-display" class="user-name" style="display:none;"></span>
+
+      <div id="dropdown-menu" class="dropdown-menu">
+        <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">
+          Admin Panel
+        </a>
+        <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+      </div>
+    </div>
+
+    <!-- Hamburger nur Mobile -->
+    <button class="menu-toggle" id="menuToggle" aria-label="Menü öffnen">☰</button>
+  </div>
 </header>
