@@ -586,3 +586,34 @@ body.modal-open {
 .legal-modal__close:hover {
   background: rgba(0,255,136,0.14);
 }
+
+/* Close Button (rotes X oben rechts) */
+.legal-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+
+  background: rgba(255, 51, 102, 0.15);
+  color: #ff3366;
+
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.legal-modal__close:hover {
+  background: rgba(255, 51, 102, 0.25);
+  transform: scale(1.05);
+}
