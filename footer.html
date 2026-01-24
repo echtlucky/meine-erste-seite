@@ -14,23 +14,11 @@
   <div class="legal-modal__backdrop" data-close="1"></div>
 
   <div class="legal-modal__panel" role="dialog" aria-modal="true" aria-labelledby="legalModalTitle">
-    <button class="legal-modal__close" id="legalModalClose" aria-label="Schließen">×</button>
+    <!-- ✅ Close X (ROT) -->
+    <button class="legal-modal__close" id="legalModalClose" aria-label="Schließen" type="button">×</button>
+
     <h2 class="legal-modal__title" id="legalModalTitle">Info</h2>
     <div class="legal-modal__content" id="legalModalContent"></div>
-  </div>
-
-    <!-- ❌❌❌ EINZIGER Close-Button -->
-    <button class="legal-modal__close"
-            id="legalModalClose"
-            aria-label="Schließen">
-      ×
-    </button>
-
-    <h2 class="legal-modal__title" id="legalModalTitle">Info</h2>
-
-    <div class="legal-modal__content" id="legalModalContent">
-      <!-- content wird per fetch geladen -->
-    </div>
   </div>
 </div>
 
@@ -75,7 +63,7 @@
     }
   }
 
-  // Footer-Links öffnen Modal
+  // Links öffnen Modal (Impressum/Datenschutz/Kontakt)
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[data-modal]');
     if (!a) return;
@@ -84,13 +72,15 @@
     loadIntoModal(a.dataset.modal, a.textContent.trim());
   });
 
-  // ❌ Close-Logik
+  // X schließt Modal
   closeBtn.addEventListener('click', closeModal);
 
+  // Klick auf Backdrop schließt Modal
   modal.addEventListener('click', (e) => {
     if (e.target.dataset.close) closeModal();
   });
 
+  // ESC schließt Modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modal.classList.contains('show')) {
       closeModal();
