@@ -82,13 +82,21 @@ body::after {
   align-items: center;
   justify-content: space-between;
   padding: 0.8rem 6%;
+}
 
+#header-placeholder {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
   transition: transform 0.35s ease;
 }
 
-.site-header.header-hidden {
+#header-placeholder.header-hidden {
   transform: translateY(-100%);
 }
+
 
 /* Fallback, falls irgendwo noch <header> ohne class existiert */
 header:not(.site-header) {

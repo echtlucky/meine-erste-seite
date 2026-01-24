@@ -125,7 +125,7 @@ let downAcc = 0;
 let upAcc = 0;
 
 function initSmartHeaderScroll() {
-  const header = document.querySelector('.site-header');
+  const header = document.getElementById('header-placeholder');
   if (!header) return;
 
   // Reset falls Funktion aus Versehen mehrfach init wird
