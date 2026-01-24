@@ -5,54 +5,133 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login | echtlucky</title>
   <link rel="stylesheet" href="css/style.css" />
-  <style>
-  /* ========== Login Page Layout (Premium, airy, higher) ========== */
+  
+<style>
+  /* ===== LOGIN PAGE: premium background + airy spacing ===== */
 
-  /* Extra Background Layer nur für Login */
-  body::before{
-    content:"";
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-
-    /* Tile/Pattern + soft glow */
-    background:
-      /* Kachel-Muster */
-      linear-gradient(to right, rgba(0,255,136,0.06) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0,255,136,0.06) 1px, transparent 1px),
-      /* Glow blobs */
-      radial-gradient(circle at 30% 20%, rgba(0,255,136,0.16), transparent 55%),
-      radial-gradient(circle at 80% 75%, rgba(88,101,242,0.16), transparent 60%);
-    background-size:
-      64px 64px,
-      64px 64px,
-      cover,
-      cover;
-    opacity: 0.9;
-  }
-
-  body::after{
-    content:"";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.82));
-  }
-
-  .auth-shell{
+  .login-page .auth-shell{
     min-height: calc(100vh - 60px);
     display: grid;
     place-items: center;
-    padding: clamp(1.6rem, 3vw, 2.8rem);
+    padding: clamp(1.8rem, 3.4vw, 3.2rem);
+    position: relative;
+    isolation: isolate;
   }
 
+  /* ✅ Background (Image + Tiles + Glow) - safe, weil an auth-shell */
+  .login-page .auth-shell::before{
+    content:"";
+    position:absolute;
+    inset:-2px;
+    z-index:-2;
+    pointer-events:none;
+
+    background:
+      linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.86)),
+      url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2400')
+      center/cover no-repeat fixed;
+  }
+
+  .login-page .auth-shell::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:-1;
+    pointer-events:none;
+
+    background:
+      /* Tile / Grid */
+      linear-gradient(to right, rgba(0,255,136,0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0,255,136,0.07) 1px, transparent 1px),
+      /* Glow blobs */
+      radial-gradient(circle at 30% 20%, rgba(0,255,136,0.18), transparent 55%),
+      radial-gradient(circle at 78% 75%, rgba(88,101,242,0.18), transparent 60%);
+    background-size: 72px 72px, 72px 72px, cover, cover;
+    opacity: 0.9;
+    mix-blend-mode: screen;
+  }
+
+  /* ===== Top Card (Latest Blog) ===== */
+  .auth-latest{
+    width: min(1180px, 100%);
+    margin: 0 auto clamp(1.4rem, 2.6vw, 2.2rem);
+    border-radius: 28px;
+    border: 1px solid rgba(0,255,136,0.18);
+    background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.70));
+    box-shadow: 0 26px 90px rgba(0,0,0,0.55);
+    padding: clamp(1.5rem, 2.2vw, 2.2rem);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-latest::before{
+    content:"";
+    position:absolute;
+    inset:-1px;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(0,255,136,0.16), transparent 55%),
+      radial-gradient(circle at 85% 70%, rgba(88,101,242,0.14), transparent 60%);
+    pointer-events:none;
+  }
+
+  .auth-latest__meta{
+    position: relative;
+    display:inline-flex;
+    width: fit-content;
+    padding: .55rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(0,255,136,0.18);
+    background: rgba(0,0,0,0.35);
+    color: rgba(224,255,224,0.85);
+    font-weight: 850;
+    letter-spacing: -0.2px;
+    margin-bottom: 1rem;
+  }
+
+  .auth-latest__title{
+    position: relative;
+    font-size: clamp(1.4rem, 2.3vw, 2rem);
+    letter-spacing: -0.8px;
+    margin: 0 0 .65rem;
+    color: #00ff88;
+  }
+
+  .auth-latest__text{
+    position: relative;
+    color: rgba(224,255,224,0.86);
+    max-width: 95ch;
+    line-height: 1.65;
+    margin: 0 0 1.1rem;
+  }
+
+  .auth-latest__cta{
+    position: relative;
+    display:inline-flex;
+    align-items:center;
+    gap:.6rem;
+    text-decoration:none;
+    font-weight: 900;
+    color:#000;
+    background: linear-gradient(180deg, rgba(0,255,136,0.92), rgba(0,204,102,0.85));
+    border: 1px solid rgba(0,255,136,0.18);
+    border-radius: 16px;
+    padding: .85rem 1.2rem;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.55);
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  }
+
+  .auth-latest__cta:hover{
+    transform: translateY(-2px);
+    filter: saturate(1.05);
+    box-shadow: 0 20px 65px rgba(0,255,136,0.12), 0 14px 40px rgba(0,0,0,0.55);
+  }
+
+  /* ===== Layout Grid ===== */
   .auth-grid{
     width: min(1180px, 100%);
     display: grid;
     grid-template-columns: 1.15fr 0.85fr;
-    gap: clamp(1.6rem, 3.2vw, 2.6rem);
+    gap: clamp(1.8rem, 3.2vw, 2.8rem);
     align-items: stretch;
   }
 
@@ -67,22 +146,11 @@
     box-shadow: 0 26px 90px rgba(0,0,0,0.55);
     overflow: hidden;
     position: relative;
-    padding: clamp(2rem, 3.2vw, 3.1rem);
+    padding: clamp(2.1rem, 3.2vw, 3.2rem);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 620px; /* höher */
-  }
-
-  .auth-visual::before{
-    content:"";
-    position:absolute;
-    inset:-1px;
-    background:
-      radial-gradient(circle at 10% 10%, rgba(0,255,136,0.08), transparent 45%),
-      radial-gradient(circle at 90% 80%, rgba(88,101,242,0.08), transparent 50%);
-    pointer-events:none;
-    filter: blur(2px);
+    min-height: 660px; /* höher */
   }
 
   .auth-visual .badge{
@@ -94,13 +162,12 @@
     border: 1px solid rgba(0,255,136,0.18);
     background: rgba(0,0,0,0.35);
     color: rgba(224,255,224,0.88);
-    font-weight: 800;
+    font-weight: 900;
     width: fit-content;
-    position: relative;
   }
 
   .auth-visual h1{
-    margin-top: 1.2rem;
+    margin-top: 1.35rem;
     font-size: clamp(2.2rem, 3.2vw, 3.2rem);
     letter-spacing: -1px;
     line-height: 1.12;
@@ -108,31 +175,27 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    position: relative;
   }
 
   .auth-visual p{
-    margin-top: 1rem;
-    color: rgba(224,255,224,0.86);
-    opacity: .96;
+    margin-top: 1.1rem;
+    color: rgba(224,255,224,0.88);
     max-width: 56ch;
     font-size: 1.08rem;
-    position: relative;
   }
 
   .auth-visual .bullets{
-    margin-top: 1.7rem;
+    margin-top: 1.9rem;
     display: grid;
-    gap: .95rem;
+    gap: 1.05rem;
     color: rgba(224,255,224,0.88);
-    position: relative;
   }
 
   .auth-visual .bullet{
     display:flex;
     gap: 1rem;
     align-items:flex-start;
-    padding: 1.05rem 1.15rem;
+    padding: 1.15rem 1.25rem;
     border-radius: 16px;
     border: 1px solid rgba(0,255,136,0.12);
     background: rgba(0,0,0,0.42);
@@ -141,7 +204,7 @@
   .auth-visual .dot{
     width: 10px;
     height: 10px;
-    margin-top: .4rem;
+    margin-top: .42rem;
     border-radius: 50%;
     background: #00ff88;
     box-shadow: 0 0 18px rgba(0,255,136,0.35);
@@ -157,11 +220,11 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 620px; /* höher */
+    min-height: 660px; /* höher */
   }
 
   .auth-card__top{
-    padding: 1.6rem 1.7rem 1.2rem;
+    padding: 1.75rem 1.85rem 1.35rem;
     border-bottom: 1px solid rgba(0,255,136,0.12);
     background: rgba(0,0,0,0.32);
   }
@@ -171,7 +234,7 @@
     gap:.7rem;
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(0,255,136,0.14);
-    padding: .4rem;
+    padding: .45rem;
     border-radius: 999px;
     width: fit-content;
   }
@@ -180,11 +243,11 @@
     appearance: none;
     border: 0;
     cursor: pointer;
-    padding: .7rem 1.15rem;
+    padding: .75rem 1.2rem;
     border-radius: 999px;
     background: transparent;
     color: rgba(224,255,224,0.82);
-    font-weight: 900;
+    font-weight: 950;
     letter-spacing: -0.25px;
     opacity: .9;
     transition: all .18s ease;
@@ -197,27 +260,28 @@
     opacity: 1;
   }
 
+  /* ✅ mehr Abstand innen */
   .auth-card__body{
-    padding: 1.7rem 1.7rem 2rem;
+    padding: 2rem 1.85rem 2.2rem;
     display: grid;
-    gap: 1.25rem;
+    gap: 1.6rem; /* mehr Luft */
   }
 
   .field{
     display: grid;
-    gap: .55rem;
+    gap: .7rem; /* label-input Abstand */
   }
 
   .field label{
-    color: rgba(224,255,224,0.88);
-    font-weight: 800;
+    color: rgba(224,255,224,0.90);
+    font-weight: 900;
     font-size: .95rem;
     letter-spacing: -0.2px;
   }
 
   .input{
     width: 100%;
-    padding: 1.05rem 1.05rem;
+    padding: 1.15rem 1.1rem; /* höher */
     border-radius: 16px;
     border: 1px solid rgba(0,255,136,0.16);
     background: rgba(0,0,0,0.55);
@@ -235,15 +299,15 @@
 
   .row{
     display:flex;
-    gap: 1.1rem;
+    gap: 1.2rem;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    margin-top: .15rem;
+    margin-top: .2rem;
   }
 
   .hint{
-    color: rgba(224,255,224,0.72);
+    color: rgba(224,255,224,0.74);
     font-size: .95rem;
     line-height: 1.45;
   }
@@ -251,7 +315,7 @@
   .small-link{
     color: #00ff88;
     text-decoration: none;
-    font-weight: 800;
+    font-weight: 900;
     opacity: .95;
   }
   .small-link:hover{ text-decoration: underline; }
@@ -259,9 +323,9 @@
   .divider{
     display:flex;
     align-items:center;
-    gap: .9rem;
+    gap: 1rem;
     color: rgba(224,255,224,0.55);
-    font-weight: 800;
+    font-weight: 900;
     margin: .35rem 0;
   }
   .divider::before,
@@ -279,8 +343,8 @@
     border: 1px solid rgba(0,255,136,0.18);
     background: linear-gradient(180deg, rgba(0,255,136,0.92), rgba(0,204,102,0.85));
     color: #000;
-    padding: 1.05rem 1rem;
-    font-weight: 950;
+    padding: 1.15rem 1rem;
+    font-weight: 1000;
     letter-spacing: -0.3px;
     cursor: pointer;
     transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
@@ -298,8 +362,8 @@
     border: 1px solid rgba(0,255,136,0.16);
     background: rgba(255,255,255,0.04);
     color: #e0ffe0;
-    padding: 1rem 1rem;
-    font-weight: 900;
+    padding: 1.05rem 1rem;
+    font-weight: 950;
     cursor: pointer;
     transition: background .18s ease, transform .18s ease;
     display:flex;
@@ -340,13 +404,23 @@
     .auth-card{ min-height: unset; }
   }
 </style>
+
 </head>
 
-<body class="page-transition">
+<body class="page-transition login page">
   <!-- Header via fetch -->
   <div id="header-placeholder"></div>
 
   <main class="auth-shell">
+
+      <!-- ✅ Latest Blog (spannt über beide Cards) -->
+      <section class="auth-latest" id="latestPostCard" aria-live="polite">
+        <div class="auth-latest__meta">Letzter Blog</div>
+          <h2 class="auth-latest__title" id="latestPostTitle">Lädt...</h2>
+          <p class="auth-latest__text" id="latestPostText">Bitte einen Moment.</p>
+          <a class="auth-latest__cta" id="latestPostLink" href="blog.html">Zum Blog →</a>
+      </section>
+
     <div class="auth-grid">
 
       <!-- Left: Visual / Content -->
@@ -460,6 +534,59 @@
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/legal-modal.js"></script>
+
+  <script>
+  async function loadLatestPostIntoLogin() {
+    const titleEl = document.getElementById("latestPostTitle");
+    const textEl = document.getElementById("latestPostText");
+    const linkEl = document.getElementById("latestPostLink");
+
+    if (!titleEl || !textEl || !linkEl) return;
+
+    // Falls Firestore noch nicht ready ist:
+    if (typeof window.db === "undefined") {
+      titleEl.textContent = "Aktuell kein Blog vorhanden";
+      textEl.textContent = "Firestore ist noch nicht bereit.";
+      return;
+    }
+
+    try {
+      const snap = await window.db
+        .collection("posts")
+        .orderBy("createdAt", "desc")
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
+        titleEl.textContent = "Aktuell kein Blog vorhanden";
+        textEl.textContent = "Sobald ein Beitrag online ist, wird er hier angezeigt.";
+        linkEl.href = "blog.html";
+        linkEl.textContent = "Zum Blog →";
+        return;
+      }
+
+      const doc = snap.docs[0];
+      const data = doc.data() || {};
+      const title = data.title || "Neuer Beitrag";
+      const content = (data.content || "").toString().trim();
+      const excerpt = content.length > 220 ? content.slice(0, 220) + "…" : (content || "Beitrag ansehen.");
+
+      titleEl.textContent = title;
+      textEl.textContent = excerpt;
+
+      // Link geht einfach zum Blog (Modal/Single wäre später möglich)
+      linkEl.href = "blog.html";
+      linkEl.textContent = "Beitrag lesen →";
+    } catch (err) {
+      titleEl.textContent = "Aktuell kein Blog vorhanden";
+      textEl.textContent = "Konnte den Blog nicht laden: " + err.message;
+      linkEl.href = "blog.html";
+      linkEl.textContent = "Zum Blog →";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadLatestPostIntoLogin);
+</script>
 
   <script>
     document.body.classList.add('loaded');
