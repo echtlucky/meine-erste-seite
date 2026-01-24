@@ -1,12 +1,73 @@
+/* ======================================
+   Admin Panel Logic — echtlucky
+   File: js/admin-panel.js
+====================================== */
 (() => {
   "use strict";
 
-  // ===== Config
+  // --- Config
   const ADMIN_EMAIL = "lucassteckel04@gmail.com";
 
-  // ===== Helpers
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  // --- Firebase (kommt aus firebase.js)
+  // Erwartet: window.firebase + window.auth (oder firebase.auth())
+  const db = firebase.firestore();
+  const authRef = window.auth || firebase.auth();
+
+  // --- DOM
+  const adminBadge = document.getElementById("adminBadge");
+  const statusEl = document.getElementById("status");
+
+  const tabButtons = Array.from(document.querySelectorAll(".admin-tabbtn"));
+  const tabs = Array.from(document.querySelectorAll(".admin-tab"));
+  const tabTitle = document.getElementById("tab-title");
+
+  const newPostBtn = document.getElementById("newPostBtn");
+  const newPostModal = document.getElementById("newPostModal");
+  const closeNewPostModal = document.getElementById("closeNewPostModal");
+  const cancelPublishBtn = document.getElementById("cancelPublishBtn");
+  const publishBtn = document.getElementById("publishBtn");
+
+  const userInfoModal = document.getElementById("userInfoModal");
+  const closeUserInfoModal = document.getElementById("closeUserInfoModal");
+  const userInfoContent = document.getElementById("user-info-content");
+
+  const newTitle = document.getElementById("new-title");
+  const newContent = document.getElementById("new-content");
+  const newDate = document.getElementById("new-date");
+  const charCount = document.getElementById("char-count");
+
+  const postList = document.getElementById("post-list");
+  const postsEmpty = document.getElementById("posts-empty");
+
+  const userList = document.getElementById("user-list");
+  const usersEmpty = document.getElementById("users-empty");
+
+  const banEmail = document.getElementById("ban-email");
+  const banAddBtn = document.getElementById("banAddBtn");
+  const banList = document.getElementById("ban-list");
+  const bansEmpty = document.getElementById("bans-empty");
+
+  // --- Helpers UI
+  function setStatus(msg, type = "info") {
+    if (!statusEl) return;
+    statusEl.textContent = msg || "";
+    statusEl.classList.remove("admin-status--info", "admin-status--success", "admin-status--error");
+    statusEl.classList.add(`admin-status--${type}`);
+  }
+
+  function openModal(modal) {
+    if (!modal) return;
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+  }
+
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+  }
 
   function escapeHtml(str) {
     return String(str ?? "")
@@ -17,466 +78,367 @@
       .replaceAll("'", "&#039;");
   }
 
-  function formatDateMaybe(ts) {
+  function fmtDateTime(ts) {
     try {
-      if (ts?.toDate) return new Date(ts.toDate()).toLocaleString();
-      if (ts instanceof Date) return ts.toLocaleString();
-      return "Unbekannt";
+      const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
+      if (!d) return "Unbekannt";
+      return d.toLocaleString();
     } catch {
       return "Unbekannt";
     }
   }
 
-  function setStatus(el, text, type = "info") {
-    if (!el) return;
-    el.textContent = text || "";
-    el.className = `admin-status ${type}`;
+  // --- Tabs
+  function setActiveTab(tabId) {
+    tabButtons.forEach(b => b.classList.toggle("is-active", b.dataset.tab === tabId));
+    tabs.forEach(t => t.classList.toggle("is-active", t.id === tabId));
+
+    // Title + action button visibility
+    const activeBtn = tabButtons.find(b => b.dataset.tab === tabId);
+    if (tabTitle && activeBtn && tabId === "blog-tab") tabTitle.textContent = "Blog verwalten";
+    if (newPostBtn) newPostBtn.style.display = (tabId === "blog-tab") ? "inline-flex" : "none";
   }
 
-  function openModal(modal) {
-    if (!modal) return;
-    modal.style.display = "flex";
-    requestAnimationFrame(() => modal.classList.add("show"));
-    modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-open");
-  }
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+  });
 
-  function closeModal(modal) {
-    if (!modal) return;
-    modal.classList.remove("show");
-    modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-open");
-    setTimeout(() => {
-      modal.style.display = "none";
-    }, 220);
-  }
-
-  // ===== Header/Footer loader (connects to menu.js / legal-modal.js)
-  async function loadSharedChrome() {
-    // Header
-    try {
-      const headerPH = $("#header-placeholder");
-      if (headerPH) {
-        const html = await fetch("header.html").then(r => r.text());
-        headerPH.innerHTML = html;
-
-        if (typeof window.initHeaderScripts === "function") window.initHeaderScripts();
-        if (typeof window.initSmartHeaderScroll === "function") window.initSmartHeaderScroll();
-      }
-    } catch (e) {
-      // silently ignore; page should still work
-      console.warn("Header load failed:", e);
-    }
-
-    // Footer
-    try {
-      const footerPH = $("#footer-placeholder");
-      if (footerPH) {
-        const html = await fetch("footer.html").then(r => r.text());
-        footerPH.innerHTML = html;
-      }
-    } catch (e) {
-      console.warn("Footer load failed:", e);
-    }
-  }
-
-  // ===== Main
-  async function init() {
-    document.body.classList.add("loaded");
-
-    await loadSharedChrome();
-
-    // Firebase guard
-    if (typeof window.firebase === "undefined") {
-      alert("Firebase nicht geladen. Prüfe firebase.js + SDKs.");
-      return;
-    }
-    if (typeof window.auth === "undefined") {
-      alert("Auth nicht verfügbar. Prüfe firebase.js (auth global).");
-      return;
-    }
-
-    const db = firebase.firestore();
-
-    // ===== DOM
-    const statusEl = $("#status");
-    const adminBadge = $("#adminBadge");
-
-    const postList = $("#post-list");
-    const userList = $("#user-list");
-    const banList = $("#ban-list");
-
-    const postsEmpty = $("#posts-empty");
-    const usersEmpty = $("#users-empty");
-    const bansEmpty = $("#bans-empty");
-
-    const tabTitle = $("#tab-title");
-    const navItems = $$(".admin-nav__item");
-    const tabs = $$(".admin-tab");
-
-    const topbarRight = $(".admin-topbar__right");
-
-    // Modals
-    const newPostModal = $("#newPostModal");
-    const closeNewPostModalBtn = $("#closeNewPostModal");
-    const publishBtn = $("#publishBtn");
-    const cancelPublishBtn = $("#cancelPublishBtn");
-    const newPostBtn = $("#newPostBtn");
-
-    const userInfoModal = $("#userInfoModal");
-    const closeUserInfoModalBtn = $("#closeUserInfoModal");
-
-    // Inputs
-    const newTitle = $("#new-title");
-    const newContent = $("#new-content");
-    const newDate = $("#new-date");
-    const charCount = $("#char-count");
-
-    const banEmail = $("#ban-email");
-    const banAddBtn = $("#banAddBtn");
-
-    // ===== Tabs
-    function setActiveTab(tabId) {
-      navItems.forEach(b => b.classList.remove("is-active"));
-      tabs.forEach(t => t.classList.remove("is-active"));
-
-      const btn = navItems.find(b => b.dataset.tab === tabId);
-      if (btn) btn.classList.add("is-active");
-
-      const panel = $("#" + tabId);
-      if (panel) panel.classList.add("is-active");
-
-      const titleText = (btn?.innerText || "").trim();
-      if (tabTitle) tabTitle.textContent = titleText || "Admin";
-
-      // show top right CTA only on blog
-      if (topbarRight) topbarRight.style.display = (tabId === "blog-tab") ? "flex" : "none";
-    }
-
-    navItems.forEach(btn => {
-      btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+  // --- Modal wiring
+  if (newPostBtn) {
+    newPostBtn.addEventListener("click", () => {
+      newTitle.value = "";
+      newContent.value = "";
+      newDate.value = "";
+      updateCharCount();
+      openModal(newPostModal);
     });
+  }
 
-    // ===== Char count
-    function updateCharCount() {
-      if (!charCount || !newContent) return;
-      charCount.textContent = `${(newContent.value || "").length} Zeichen`;
-    }
-    if (newContent) newContent.addEventListener("input", updateCharCount);
+  function updateCharCount() {
+    if (charCount) charCount.textContent = `${(newContent.value || "").length} Zeichen`;
+  }
+  if (newContent) newContent.addEventListener("input", updateCharCount);
 
-    // ===== Modals wiring
-    if (newPostBtn) {
-      newPostBtn.addEventListener("click", () => {
-        if (newTitle) newTitle.value = "";
-        if (newContent) newContent.value = "";
-        if (newDate) newDate.value = "";
-        updateCharCount();
-        openModal(newPostModal);
-      });
-    }
+  if (closeNewPostModal) closeNewPostModal.addEventListener("click", () => closeModal(newPostModal));
+  if (cancelPublishBtn) cancelPublishBtn.addEventListener("click", () => closeModal(newPostModal));
+  if (closeUserInfoModal) closeUserInfoModal.addEventListener("click", () => closeModal(userInfoModal));
 
-    if (closeNewPostModalBtn) closeNewPostModalBtn.addEventListener("click", () => closeModal(newPostModal));
-    if (cancelPublishBtn) cancelPublishBtn.addEventListener("click", () => closeModal(newPostModal));
+  // close on backdrop click
+  if (newPostModal) newPostModal.addEventListener("click", (e) => { if (e.target === newPostModal) closeModal(newPostModal); });
+  if (userInfoModal) userInfoModal.addEventListener("click", (e) => { if (e.target === userInfoModal) closeModal(userInfoModal); });
 
-    if (closeUserInfoModalBtn) closeUserInfoModalBtn.addEventListener("click", () => closeModal(userInfoModal));
+  // --- Firestore actions
+  async function loadPosts() {
+    postList.innerHTML = "";
+    postsEmpty.style.display = "none";
 
-    if (newPostModal) {
-      newPostModal.addEventListener("click", (e) => {
-        if (e.target === newPostModal) closeModal(newPostModal);
-      });
-    }
-    if (userInfoModal) {
-      userInfoModal.addEventListener("click", (e) => {
-        if (e.target === userInfoModal) closeModal(userInfoModal);
-      });
-    }
-
-    // ===== Data: Posts
-    async function loadPosts() {
-      if (!postList) return;
-      postList.innerHTML = "";
-      if (postsEmpty) postsEmpty.style.display = "none";
-
-      try {
-        const snap = await db.collection("posts").orderBy("createdAt", "desc").get();
-
-        if (snap.empty) {
-          if (postsEmpty) postsEmpty.style.display = "block";
-          return;
-        }
-
-        snap.forEach(doc => {
-          const data = doc.data() || {};
-
-          const item = document.createElement("div");
-          item.className = "admin-item";
-
-          item.innerHTML = `
-            <div class="admin-item__meta">
-              <div class="admin-item__title">${escapeHtml(data.title || "Ohne Titel")}</div>
-              <div class="admin-item__sub">
-                ${escapeHtml(data.date || "")}${data.date ? " • " : ""}von ${escapeHtml(data.author || "Unbekannt")}
-              </div>
-            </div>
-
-            <div class="admin-item__actions">
-              <button class="btn btn-danger btn-sm" type="button" data-del="${doc.id}">
-                <i class="fa-solid fa-trash"></i> Löschen
-              </button>
-            </div>
-          `;
-
-          item.querySelector("[data-del]")?.addEventListener("click", () => deletePost(doc.id));
-          postList.appendChild(item);
-        });
-      } catch (err) {
-        setStatus(statusEl, "Fehler beim Laden der Posts: " + (err?.message || err), "error");
-      }
-    }
-
-    async function saveNewPost() {
-      const title = (newTitle?.value || "").trim();
-      const content = (newContent?.value || "").trim();
-      const date = (newDate?.value || "").trim();
-
-      if (!title || !content || !date) {
-        setStatus(statusEl, "Bitte alle Felder ausfüllen.", "error");
+    try {
+      const snap = await db.collection("posts").orderBy("createdAt", "desc").get();
+      if (snap.empty) {
+        postsEmpty.style.display = "block";
         return;
       }
 
-      setStatus(statusEl, "Post wird gespeichert…", "info");
+      snap.forEach(doc => {
+        const data = doc.data() || {};
+        const item = document.createElement("div");
+        item.className = "admin-item";
 
-      const postData = {
+        item.innerHTML = `
+          <div class="admin-item__meta">
+            <div class="admin-item__title">${escapeHtml(data.title || "Ohne Titel")}</div>
+            <div class="admin-item__sub">
+              ${escapeHtml(data.date || "")}${data.date ? " • " : ""}von ${escapeHtml(data.author || "Unbekannt")}
+            </div>
+          </div>
+
+          <div class="admin-item__actions">
+            <button class="btn btn-ghost btn-sm" type="button" data-edit="${doc.id}">
+              Bearbeiten
+            </button>
+            <button class="btn btn-danger btn-sm" type="button" data-del="${doc.id}">
+              <i class="fa-solid fa-trash"></i> Löschen
+            </button>
+          </div>
+        `;
+
+        item.querySelector(`[data-del="${doc.id}"]`).addEventListener("click", () => deletePost(doc.id));
+        item.querySelector(`[data-edit="${doc.id}"]`).addEventListener("click", () => editPost(doc.id, data));
+        postList.appendChild(item);
+      });
+    } catch (err) {
+      setStatus(`Fehler beim Laden der Posts: ${err.message}`, "error");
+    }
+  }
+
+  async function saveNewPost() {
+    const title = (newTitle.value || "").trim();
+    const content = (newContent.value || "").trim();
+    const date = (newDate.value || "").trim();
+
+    if (!title || !content || !date) {
+      setStatus("Bitte alle Felder ausfüllen.", "error");
+      return;
+    }
+
+    setStatus("Post wird gespeichert…", "info");
+
+    try {
+      await db.collection("posts").add({
         title,
         content,
         date,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        author: auth.currentUser?.email || "admin"
-      };
+        author: authRef.currentUser?.email || "unknown"
+      });
+
+      setStatus("Post veröffentlicht ✅", "success");
+      closeModal(newPostModal);
+      await loadPosts();
+    } catch (err) {
+      setStatus(`Fehler beim Speichern: ${err.message}`, "error");
+    }
+  }
+
+  async function editPost(id, data) {
+    // Minimal: Modal als Editor wiederverwenden
+    newTitle.value = data.title || "";
+    newContent.value = data.content || "";
+    newDate.value = data.date || "";
+    updateCharCount();
+
+    // UI: Titel ändern
+    const modalTitle = document.getElementById("postModalTitle");
+    if (modalTitle) modalTitle.textContent = "Beitrag bearbeiten";
+
+    openModal(newPostModal);
+
+    // Einmal-Update Handler
+    const handler = async () => {
+      const title = (newTitle.value || "").trim();
+      const content = (newContent.value || "").trim();
+      const date = (newDate.value || "").trim();
+
+      if (!title || !content || !date) {
+        setStatus("Bitte alle Felder ausfüllen.", "error");
+        return;
+      }
+
+      setStatus("Update wird gespeichert…", "info");
 
       try {
-        await db.collection("posts").add(postData);
-        setStatus(statusEl, "Post veröffentlicht ✅", "success");
+        await db.collection("posts").doc(id).update({
+          title, content, date,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        setStatus("Beitrag aktualisiert ✅", "success");
         closeModal(newPostModal);
         await loadPosts();
       } catch (err) {
-        setStatus(statusEl, "Fehler: " + (err?.message || err), "error");
+        setStatus(`Fehler beim Update: ${err.message}`, "error");
+      } finally {
+        publishBtn.removeEventListener("click", handler);
       }
-    }
+    };
 
-    async function deletePost(id) {
-      if (!confirm("Post wirklich löschen?")) return;
+    // publishBtn temporär als "Update"
+    publishBtn.addEventListener("click", handler);
+  }
 
-      try {
-        await db.collection("posts").doc(id).delete();
-        setStatus(statusEl, "Post gelöscht.", "success");
-        await loadPosts();
-      } catch (err) {
-        setStatus(statusEl, "Löschen fehlgeschlagen: " + (err?.message || err), "error");
-      }
-    }
+  async function deletePost(id) {
+    if (!confirm("Post wirklich löschen?")) return;
 
-    if (publishBtn) publishBtn.addEventListener("click", saveNewPost);
-
-    // ===== Data: Users
-    async function loadUsers() {
-      if (!userList) return;
-      userList.innerHTML = "";
-      if (usersEmpty) usersEmpty.style.display = "none";
-
-      try {
-        const snap = await db.collection("users").get();
-
-        if (snap.empty) {
-          if (usersEmpty) usersEmpty.style.display = "block";
-          return;
-        }
-
-        snap.forEach(doc => {
-          const data = doc.data() || {};
-          const email = data.email || "(ohne Email)";
-          const role = data.role || "user";
-
-          const item = document.createElement("div");
-          item.className = "admin-item";
-
-          item.innerHTML = `
-            <div class="admin-item__meta">
-              <div class="admin-item__title">${escapeHtml(email)}</div>
-              <div class="admin-item__sub">Rolle: <strong>${escapeHtml(role)}</strong></div>
-            </div>
-
-            <div class="admin-item__actions">
-              <button class="btn btn-ghost btn-sm" type="button" data-details="${doc.id}">
-                Details
-              </button>
-
-              <select class="select" data-role="${doc.id}">
-                <option value="user" ${role === "user" ? "selected" : ""}>User</option>
-                <option value="mod" ${role === "mod" ? "selected" : ""}>Mod</option>
-                <option value="admin" ${role === "admin" ? "selected" : ""}>Admin</option>
-              </select>
-            </div>
-          `;
-
-          item.querySelector("[data-details]")?.addEventListener("click", () => showUserInfo(doc.id, email, role));
-
-          item.querySelector("[data-role]")?.addEventListener("change", (e) => {
-            changeRole(doc.id, e.target.value);
-          });
-
-          userList.appendChild(item);
-        });
-      } catch (err) {
-        setStatus(statusEl, "Fehler beim Laden der Nutzer: " + (err?.message || err), "error");
-      }
-    }
-
-    async function changeRole(id, role) {
-      try {
-        await db.collection("users").doc(id).update({ role });
-        setStatus(statusEl, "Rolle aktualisiert ✅", "success");
-        await loadUsers();
-      } catch (err) {
-        setStatus(statusEl, "Fehler: " + (err?.message || err), "error");
-      }
-    }
-
-    function showUserInfo(id, email, role) {
-      const content = $("#user-info-content");
-      if (!content) return;
-
-      content.innerHTML = `
-        <div class="admin-userinfo__row"><span>E-Mail</span><strong>${escapeHtml(email)}</strong></div>
-        <div class="admin-userinfo__row"><span>Rolle</span><strong>${escapeHtml(role)}</strong></div>
-
-        <div class="admin-divider"></div>
-
-        <div class="admin-userinfo__row"><span>Registriert am</span><strong>Unbekannt</strong></div>
-        <div class="admin-userinfo__row"><span>Letzter Login</span><strong>Unbekannt</strong></div>
-        <div class="admin-userinfo__row"><span>Posts erstellt</span><strong>Unbekannt</strong></div>
-        <div class="admin-userinfo__row"><span>Kommentare</span><strong>Unbekannt</strong></div>
-
-        <div class="admin-divider"></div>
-
-        <button class="btn btn-danger" type="button" id="deleteUserBtn">
-          <i class="fa-solid fa-user-xmark"></i> Benutzer löschen
-        </button>
-      `;
-
-      $("#deleteUserBtn", content)?.addEventListener("click", () => deleteUser(id, email));
-      openModal(userInfoModal);
-    }
-
-    async function deleteUser(id, email) {
-      if (!confirm("Benutzer " + email + " wirklich löschen?")) return;
-
-      try {
-        await db.collection("users").doc(id).delete();
-        setStatus(statusEl, "Benutzer gelöscht.", "success");
-        closeModal(userInfoModal);
-        await loadUsers();
-      } catch (err) {
-        setStatus(statusEl, "Löschen fehlgeschlagen: " + (err?.message || err), "error");
-      }
-    }
-
-    // ===== Data: Bans
-    async function loadBans() {
-      if (!banList) return;
-      banList.innerHTML = "";
-      if (bansEmpty) bansEmpty.style.display = "none";
-
-      try {
-        const snap = await db.collection("bans").get();
-
-        if (snap.empty) {
-          if (bansEmpty) bansEmpty.style.display = "block";
-          return;
-        }
-
-        snap.forEach(doc => {
-          const data = doc.data() || {};
-          const tr = document.createElement("tr");
-
-          tr.innerHTML = `
-            <td>${escapeHtml(data.email || "")}</td>
-            <td>${escapeHtml(formatDateMaybe(data.bannedAt))}</td>
-            <td class="col-actions">
-              <button class="btn btn-ghost btn-sm" type="button" data-unban="${doc.id}">
-                Entsperren
-              </button>
-            </td>
-          `;
-
-          tr.querySelector("[data-unban]")?.addEventListener("click", () => removeBan(doc.id));
-          banList.appendChild(tr);
-        });
-      } catch (err) {
-        setStatus(statusEl, "Fehler beim Laden der Sperren: " + (err?.message || err), "error");
-      }
-    }
-
-    async function addBan() {
-      const email = (banEmail?.value || "").trim();
-      if (!email) {
-        setStatus(statusEl, "Bitte E-Mail eingeben.", "error");
-        return;
-      }
-
-      try {
-        await db.collection("bans").add({
-          email,
-          bannedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        setStatus(statusEl, "User gebannt ✅", "success");
-        if (banEmail) banEmail.value = "";
-        await loadBans();
-      } catch (err) {
-        setStatus(statusEl, "Fehler: " + (err?.message || err), "error");
-      }
-    }
-
-    async function removeBan(id) {
-      if (!confirm("Entsperren?")) return;
-
-      try {
-        await db.collection("bans").doc(id).delete();
-        setStatus(statusEl, "Sperre entfernt ✅", "success");
-        await loadBans();
-      } catch (err) {
-        setStatus(statusEl, "Fehler: " + (err?.message || err), "error");
-      }
-    }
-
-    if (banAddBtn) banAddBtn.addEventListener("click", addBan);
-
-    // ===== Auth Guard + Boot
-    auth.onAuthStateChanged(async (user) => {
-      if (!user || user.email !== ADMIN_EMAIL) {
-        alert("Zugriff verweigert – nur Admin erlaubt");
-        try { await auth.signOut(); } catch {}
-        window.location.href = "index.html";
-        return;
-      }
-
-      if (adminBadge) adminBadge.textContent = "Admin ✓";
-      setStatus(statusEl, "Admin-Zugriff erteilt: " + user.email, "success");
-
-      // Default tab
-      setActiveTab("blog-tab");
-
-      // Initial load
+    try {
+      await db.collection("posts").doc(id).delete();
+      setStatus("Post gelöscht ✅", "success");
       await loadPosts();
-      await loadUsers();
-      await loadBans();
-    });
+    } catch (err) {
+      setStatus(`Löschen fehlgeschlagen: ${err.message}`, "error");
+    }
   }
 
-  // DOM Ready
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
+  async function loadUsers() {
+    userList.innerHTML = "";
+    usersEmpty.style.display = "none";
+
+    try {
+      const snap = await db.collection("users").get();
+      if (snap.empty) {
+        usersEmpty.style.display = "block";
+        return;
+      }
+
+      snap.forEach(doc => {
+        const data = doc.data() || {};
+        const email = data.email || "(ohne Email)";
+        const role = data.role || "user";
+
+        const item = document.createElement("div");
+        item.className = "admin-item";
+
+        item.innerHTML = `
+          <div class="admin-item__meta">
+            <div class="admin-item__title">${escapeHtml(email)}</div>
+            <div class="admin-item__sub">Rolle: <strong>${escapeHtml(role)}</strong></div>
+          </div>
+
+          <div class="admin-item__actions">
+            <button class="btn btn-ghost btn-sm" type="button" data-details="${doc.id}">
+              Details
+            </button>
+
+            <select class="select" data-role="${doc.id}">
+              <option value="user" ${role === "user" ? "selected" : ""}>User</option>
+              <option value="mod" ${role === "mod" ? "selected" : ""}>Mod</option>
+              <option value="admin" ${role === "admin" ? "selected" : ""}>Admin</option>
+            </select>
+          </div>
+        `;
+
+        item.querySelector(`[data-details="${doc.id}"]`).addEventListener("click", () => showUserInfo(doc.id, email, role));
+        item.querySelector(`[data-role="${doc.id}"]`).addEventListener("change", (e) => changeRole(doc.id, e.target.value));
+
+        userList.appendChild(item);
+      });
+    } catch (err) {
+      setStatus(`Fehler beim Laden der Nutzer: ${err.message}`, "error");
+    }
   }
+
+  async function changeRole(uidDocId, role) {
+    try {
+      await db.collection("users").doc(uidDocId).update({ role });
+      setStatus("Rolle aktualisiert ✅", "success");
+      await loadUsers();
+    } catch (err) {
+      setStatus(`Fehler: ${err.message}`, "error");
+    }
+  }
+
+  function showUserInfo(uidDocId, email, role) {
+    userInfoContent.innerHTML = `
+      <div class="admin-userinfo__row"><span>E-Mail</span><strong>${escapeHtml(email)}</strong></div>
+      <div class="admin-userinfo__row"><span>Rolle</span><strong>${escapeHtml(role)}</strong></div>
+
+      <div class="admin-divider"></div>
+
+      <div class="admin-userinfo__row"><span>Registriert am</span><strong>Unbekannt</strong></div>
+      <div class="admin-userinfo__row"><span>Letzter Login</span><strong>Unbekannt</strong></div>
+
+      <div class="admin-divider"></div>
+
+      <button class="btn btn-danger" type="button" id="deleteUserBtn">
+        <i class="fa-solid fa-user-xmark"></i> Benutzer löschen
+      </button>
+    `;
+
+    userInfoContent.querySelector("#deleteUserBtn").addEventListener("click", () => deleteUser(uidDocId, email));
+    openModal(userInfoModal);
+  }
+
+  async function deleteUser(uidDocId, email) {
+    if (!confirm(`Benutzer ${email} wirklich löschen?`)) return;
+
+    try {
+      await db.collection("users").doc(uidDocId).delete();
+      setStatus("Benutzer gelöscht ✅", "success");
+      closeModal(userInfoModal);
+      await loadUsers();
+    } catch (err) {
+      setStatus(`Löschen fehlgeschlagen: ${err.message}`, "error");
+    }
+  }
+
+  async function loadBans() {
+    banList.innerHTML = "";
+    bansEmpty.style.display = "none";
+
+    try {
+      const snap = await db.collection("bans").orderBy("bannedAt", "desc").get();
+      if (snap.empty) {
+        bansEmpty.style.display = "block";
+        return;
+      }
+
+      snap.forEach(doc => {
+        const data = doc.data() || {};
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${escapeHtml(data.email || "")}</td>
+          <td>${escapeHtml(fmtDateTime(data.bannedAt))}</td>
+          <td class="col-actions">
+            <button class="btn btn-ghost btn-sm" type="button" data-unban="${doc.id}">
+              Entsperren
+            </button>
+          </td>
+        `;
+
+        tr.querySelector(`[data-unban="${doc.id}"]`).addEventListener("click", () => removeBan(doc.id));
+        banList.appendChild(tr);
+      });
+    } catch (err) {
+      setStatus(`Fehler beim Laden der Sperren: ${err.message}`, "error");
+    }
+  }
+
+  async function addBan() {
+    const email = (banEmail.value || "").trim();
+    if (!email) {
+      setStatus("Bitte E-Mail eingeben.", "error");
+      return;
+    }
+
+    try {
+      await db.collection("bans").add({
+        email,
+        bannedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      banEmail.value = "";
+      setStatus("User gebannt ✅", "success");
+      await loadBans();
+    } catch (err) {
+      setStatus(`Fehler: ${err.message}`, "error");
+    }
+  }
+
+  async function removeBan(id) {
+    if (!confirm("Entsperren?")) return;
+
+    try {
+      await db.collection("bans").doc(id).delete();
+      setStatus("Sperre entfernt ✅", "success");
+      await loadBans();
+    } catch (err) {
+      setStatus(`Fehler: ${err.message}`, "error");
+    }
+  }
+
+  // --- Events
+  if (publishBtn) publishBtn.addEventListener("click", saveNewPost);
+  if (banAddBtn) banAddBtn.addEventListener("click", addBan);
+
+  // --- Auth Guard + Init
+  authRef.onAuthStateChanged(async (user) => {
+    if (!user || user.email !== ADMIN_EMAIL) {
+      alert("Zugriff verweigert – nur Admin erlaubt");
+      await authRef.signOut();
+      window.location.href = "index.html";
+      return;
+    }
+
+    adminBadge.textContent = "Admin ✓";
+    setStatus(`Admin-Zugriff erteilt: ${user.email}`, "success");
+
+    // default tab
+    setActiveTab("blog-tab");
+
+    // load data
+    await loadPosts();
+    await loadUsers();
+    await loadBans();
+  });
+
 })();
