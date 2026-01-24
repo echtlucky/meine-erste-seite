@@ -90,7 +90,7 @@ body::after{
 
 /* ======================================
    HEADER (Premium)
-   - die Smart-Scroll Klasse ist .header-hidden
+   - Smart-Scroll Klasse: .header-hidden
 ====================================== */
 .site-header{
   position:fixed;
@@ -127,15 +127,14 @@ body::after{
   text-shadow: 0 0 12px rgba(0,255,136,0.20);
 }
 
-/* nav layout */
+/* Desktop nav layout */
 nav{
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:center;
   gap:2rem;
 }
 
-/* Center links */
 .nav-links{
   display:flex;
   align-items:center;
@@ -151,6 +150,7 @@ nav{
   border-radius:12px;
   transition:all 0.22s ease;
   letter-spacing:-0.2px;
+  white-space: nowrap;
 }
 
 .nav-links a:hover{
@@ -243,17 +243,9 @@ nav{
 
 .menu-toggle:hover{ background:rgba(0,255,136,0.08); }
 
-/* Mobile nav */
-@media (max-width: 600px) {
-  .legal-modal__panel {
-    margin: 3vh auto;
-    max-height: 94vh;
-  }
-
-  .legal-modal__content {
-    padding: 0 1.4rem 2rem;
-  }
-}
+/* Mobile nav (FIX: korrekt in Media Query!) */
+@media (max-width: 992px){
+  .menu-toggle{ display:block; }
 
   nav{
     position:absolute;
@@ -274,6 +266,7 @@ nav{
     flex-direction:column;
     align-items:center;
     gap:1.05rem;
+  }
 }
 
 /* ======================================
@@ -286,7 +279,6 @@ nav{
   justify-content:center;
   align-items:center;
   text-align:center;
-
   padding: clamp(3.2rem, 6vw, 5.5rem) 5%;
 
   background:
@@ -347,16 +339,6 @@ nav{
   transform: translateY(-4px);
   box-shadow: 0 20px 65px rgba(0,255,136,0.12), 0 14px 40px rgba(0,0,0,0.55);
   filter: saturate(1.05);
-}
-
-.btn.btn-secondary{
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  border: 1px solid rgba(0,255,136,0.18);
-}
-
-.btn.btn-secondary:hover{
-  background: rgba(0,255,136,0.08);
 }
 
 .discord-btn{
@@ -470,6 +452,15 @@ nav{
   margin: 0.9rem auto 0;
 }
 
+/* ✅ Button Row für Stats (mehr Abstand zwischen Tracker & fortnite.gg) */
+.btn-row{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap: 1.4rem; /* <- Mehr Abstand */
+  margin: 2rem 0;
+}
+
 /* Discord button wrapper */
 .discord-btn-wrapper{
   margin: 3.5rem auto;
@@ -528,20 +519,15 @@ footer{
 }
 
 /* ======================================
-   PAGE TRANSITION
+   PAGE TRANSITION (Fix: ohne transform)
 ====================================== */
-.page-transition {
+.page-transition{
   opacity: 1;
   transition: opacity 0.6s ease;
 }
 
-body.page-transition {
-  opacity: 0;
-}
-
-body.loaded {
-  opacity: 1;
-}
+body.page-transition{ opacity: 0; }
+body.loaded{ opacity: 1; }
 
 /* ======================================
    LEGAL MODAL (Impressum/Datenschutz/Kontakt)
@@ -552,10 +538,15 @@ body.modal-open{ overflow:hidden; }
   display:none;
   position:fixed;
   inset:0;
-  z-index:3000;
+  z-index:99999;
 }
 
-.legal-modal.show{ display:block; }
+.legal-modal.show{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
 
 .legal-modal__backdrop{
   position:absolute;
@@ -565,45 +556,18 @@ body.modal-open{ overflow:hidden; }
   backdrop-filter: blur(10px);
 }
 
-.legal-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 3000;
-}
-
-.legal-modal.show {
-  display: flex;                /* wichtig */
-  align-items: center;          /* vertikal zentrieren */
-  justify-content: center;      /* horizontal zentrieren */
-  padding: 24px;                /* Abstand am Rand */
-}
-
-.legal-modal__backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(10px);
-}
-
-.legal-modal__panel {
-  position: relative;
-  z-index: 2;
-  width: min(920px, calc(100% - 2rem));
-
-  /* 🔥 NEU */
-  height: auto;
+.legal-modal__panel{
+  position:relative;
+  z-index:2;
+  width:min(920px, calc(100% - 2rem));
   max-height: 90vh;
-
-  margin: 5vh auto;
   background: rgba(0,0,0,0.92);
   border: 1px solid rgba(0,255,136,0.28);
   border-radius: 22px;
   box-shadow: 0 30px 90px rgba(0,255,136,0.12);
-
-  display: flex;
-  flex-direction: column;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 
 .legal-modal__title{
@@ -611,13 +575,13 @@ body.modal-open{ overflow:hidden; }
   color: var(--accent);
   font-size: 2rem;
   letter-spacing:-0.6px;
+  flex-shrink:0;
 }
 
-.legal-modal__content {
+.legal-modal__content{
   padding: 0 2rem 2.4rem;
-  overflow-y: auto;
-  flex: 1;
-
+  overflow-y:auto;
+  flex:1;
   line-height: 1.8;
   opacity: 0.95;
 }
@@ -632,7 +596,7 @@ body.modal-open{ overflow:hidden; }
 .legal-modal__content p{ margin: 0.75rem 0; }
 .legal-modal__content a{ color: var(--accent); }
 
-/* Close button (auch wenn du’s erstmal ignorierst, bleibt sauber drin) */
+/* Close button */
 .legal-modal__close{
   position:absolute;
   top: 12px;
@@ -663,5 +627,8 @@ body.modal-open{ overflow:hidden; }
   transform: scale(1.05);
 }
 
-.legal-modal { z-index: 99999; }
-.legal-modal__panel { z-index: 100000; }
+/* Modal mobile polish */
+@media (max-width:600px){
+  .legal-modal.show{ padding: 14px; }
+  .legal-modal__content{ padding: 0 1.4rem 2rem; }
+}
