@@ -142,11 +142,12 @@
 
     // Header laden + init
     fetch('header.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-        initHeaderScripts(); // ✅ nur noch das – kein doppeltes JS
-      });
+  .then(r => r.text())
+  .then(html => {
+    document.getElementById('header-placeholder').innerHTML = html;
+    initHeaderScripts();
+  });
+
 
     // Footer laden
     fetch('footer.html')
