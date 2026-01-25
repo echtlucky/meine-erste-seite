@@ -215,17 +215,20 @@
         document.getElementById('footer-placeholder').innerHTML = html;
       });
 
-    // ===== Latest Blog Preview =====
+    // ===== Latest Blog Preview (FIX: immer window.db / window.echtlucky.db) =====
     async function loadLatestPostIntoLogin() {
       const titleEl = document.getElementById("latestPostTitle");
       const textEl  = document.getElementById("latestPostText");
       const linkEl  = document.getElementById("latestPostLink");
       if (!titleEl || !textEl || !linkEl) return;
 
-      // db muss in firebase.js als global existieren: const db = firebase.firestore();
-      if (typeof db === "undefined") {
+      const dbRef = window.echtlucky?.db || window.db || null;
+
+      if (!dbRef) {
         titleEl.textContent = "Aktuell kein Blog vorhanden";
-        textEl.textContent = "Firestore ist noch nicht bereit (db fehlt in firebase.js).";
+        textEl.textContent = "Firestore ist noch nicht bereit (window.db fehlt).";
+        linkEl.href = "blog.html";
+        linkEl.textContent = "Zum Blog →";
         return;
       }
 
@@ -233,13 +236,11 @@
       const makeExcerpt = (s, max=180) => (s.length > max ? s.slice(0, max).trim() + "…" : s);
 
       try {
-        // 1) try createdAt
         let snap;
         try {
-          snap = await db.collection("posts").orderBy("createdAt", "desc").limit(1).get();
+          snap = await dbRef.collection("posts").orderBy("createdAt", "desc").limit(1).get();
         } catch (e) {
-          // 2) fallback to date
-          snap = await db.collection("posts").orderBy("date", "desc").limit(1).get();
+          snap = await dbRef.collection("posts").orderBy("date", "desc").limit(1).get();
         }
 
         if (!snap || snap.empty) {
