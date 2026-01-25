@@ -1,19 +1,19 @@
-// firebase.js — echtlucky (v2)
+// firebase.js — echtlucky (v2.1)
 // Saubere, einmalige Initialisierung + zentraler App-Namespace
 
 (function () {
   "use strict";
 
+  // Prevent double-load (kills flicker + double auth listeners side-effects)
   if (window.__ECHTLUCKY_FIREBASE_LOADED__) {
-  console.warn("🔥 firebase.js already loaded – skipping");
-  return;
-}
-window.__ECHTLUCKY_FIREBASE_LOADED__ = true;
-
+    console.warn("🔥 firebase.js already loaded – skipping");
+    return;
+  }
+  window.__ECHTLUCKY_FIREBASE_LOADED__ = true;
 
   /* =========================
      ⚙️ Firebase Config
-     ========================= */
+  ========================= */
   const firebaseConfig = {
     apiKey: "AIzaSyCVOWzlu3_N3zd6yS90D2YY-U1ZL0VYHVo",
     authDomain: "echtlucky-blog.firebaseapp.com",
@@ -25,51 +25,43 @@ window.__ECHTLUCKY_FIREBASE_LOADED__ = true;
   };
 
   /* =========================
-     🧠 Global Namespace (1 Platz)
-     ========================= */
+     🧠 Global Namespace
+  ========================= */
   const appNS = (window.echtlucky = window.echtlucky || {});
 
   /* =========================
-     🚀 Firebase Initialisieren
-     ========================= */
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
+     🚀 Firebase Init
+  ========================= */
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
   /* =========================
      🔐 AUTH & FIRESTORE
-     ========================= */
+  ========================= */
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // Provider (Google)
   const googleProvider = new firebase.auth.GoogleAuthProvider();
   googleProvider.setCustomParameters({ prompt: "select_account" });
 
-  /* =========================
-     🧩 Firestore Settings (safe)
-     ========================= */
-  // Hinweis: In compat ist enablePersistence optional.
-  // Wenn es im Browser nicht geht -> wird es einfach abgefangen.
+  // Optional persistence (safe)
   try {
     db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
   } catch (_) {}
 
   /* =========================
-     👑 Admin / Role Helpers
-     ========================= */
+     👑 Admin / Roles
+  ========================= */
   const ADMIN_EMAIL = "lucassteckel04@gmail.com";
 
   function isAdminByEmail(user) {
     return !!user && user.email === ADMIN_EMAIL;
   }
 
-  // Sauber: Rolle aus users/{uid}
   async function getRole(uid) {
     if (!uid) return null;
     try {
       const snap = await db.collection("users").doc(uid).get();
-      return snap.exists ? snap.data()?.role || "user" : null;
+      return snap.exists ? (snap.data()?.role || "user") : null;
     } catch (e) {
       console.warn("getRole failed:", e);
       return null;
@@ -79,86 +71,88 @@ window.__ECHTLUCKY_FIREBASE_LOADED__ = true;
   async function isAdmin(user) {
     if (!user) return false;
     if (isAdminByEmail(user)) return true; // fallback
-    const role = await getRole(user.uid);
-    return role === "admin";
+    const r = await getRole(user.uid);
+    return r === "admin";
   }
 
   /* =========================
-     👤 Username / Profile Helpers
-     ========================= */
-
+     👤 Username Helpers
+  ========================= */
   function sanitizeUsername(raw) {
-    const u = String(raw || "")
+    return String(raw || "")
       .trim()
       .toLowerCase()
       .replace(/\s+/g, "")
       .replace(/[^a-z0-9_.-]/g, "")
       .slice(0, 20);
-
-    return u;
   }
 
+  /**
+   * Creates/updates users/{uid} safely.
+   * - On CREATE: sets role based on email (admin gets admin)
+   * - On UPDATE: NEVER overwrites existing role automatically
+   */
   async function ensureUserDoc(user, extra = {}) {
     if (!user?.uid) return;
 
     const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
 
-    const base = {
-      email: user.email || "",
-      username: user.displayName || "",
-      role: "user",
-      lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
-    };
+    const now = firebase.firestore.FieldValue.serverTimestamp();
 
     if (!snap.exists) {
+      // IMPORTANT: role decided ONCE at creation time
+      const initialRole = isAdminByEmail(user) ? "admin" : "user";
+
       await ref.set({
-        ...base,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        email: user.email || "",
+        username: user.displayName || "",
+        role: initialRole,
+        createdAt: now,
+        lastLoginAt: now,
         ...extra,
       });
     } else {
+      // Never auto-overwrite role
       await ref.update({
-        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
+        email: user.email || "",
+        username: user.displayName || snap.data()?.username || "",
+        lastLoginAt: now,
         ...extra,
       });
     }
   }
 
-  // Speichert displayName + usernames mapping (für Username-Login!)
+  /**
+   * Saves displayName + usernames mapping (for username-login)
+   */
   async function saveUsername(user, usernameRaw) {
     if (!user || !usernameRaw) return;
 
     const uname = sanitizeUsername(usernameRaw);
-    if (!uname || uname.length < 3) {
-      throw new Error("Username ungültig (min. 3 Zeichen).");
-    }
+    if (!uname || uname.length < 3) throw new Error("Username ungültig (min. 3 Zeichen).");
 
     const unameRef = db.collection("usernames").doc(uname);
     const existing = await unameRef.get();
 
-    // Username schon vergeben?
     if (existing.exists && existing.data()?.uid !== user.uid) {
       throw new Error("Username ist schon vergeben.");
     }
 
-    // displayName setzen
     await user.updateProfile({ displayName: uname });
 
-    // Mapping setzen
     await unameRef.set(
       {
         uid: user.uid,
         email: user.email || "",
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdAt: existing.exists
-          ? existing.data()?.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+          ? (existing.data()?.createdAt || firebase.firestore.FieldValue.serverTimestamp())
           : firebase.firestore.FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
 
-    // users doc updaten
     await ensureUserDoc(user, { username: uname });
 
     console.log("✅ Username gespeichert + verknüpft:", uname);
@@ -167,13 +161,12 @@ window.__ECHTLUCKY_FIREBASE_LOADED__ = true;
 
   /* =========================
      🌍 Export in Namespace
-     ========================= */
+  ========================= */
   appNS.auth = auth;
   appNS.db = db;
   appNS.googleProvider = googleProvider;
 
   appNS.ADMIN_EMAIL = ADMIN_EMAIL;
-
   appNS.isAdminByEmail = isAdminByEmail;
   appNS.isAdmin = isAdmin;
   appNS.getRole = getRole;
@@ -184,18 +177,16 @@ window.__ECHTLUCKY_FIREBASE_LOADED__ = true;
 
   /* =========================
      ✅ Backwards compatibility
-     (Damit dein alter Code NICHT bricht)
-     ========================= */
+  ========================= */
   window.auth = auth;
   window.db = db;
   window.googleProvider = googleProvider;
-  window.isAdmin = isAdminByEmail; // alter code erwartet oft sync boolean
+
+  // keep old sync helper
+  window.isAdmin = isAdminByEmail;
   window.saveUsername = saveUsername;
 
-  /* =========================
-     🔎 DEBUG
-     ========================= */
-  console.log("🔥 Firebase initialisiert (echtlucky v2)", {
+  console.log("🔥 Firebase initialisiert (echtlucky v2.1)", {
     auth: !!auth,
     firestore: !!db,
     provider: !!googleProvider,
