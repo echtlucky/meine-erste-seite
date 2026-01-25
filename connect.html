@@ -11,146 +11,313 @@
 
 <body class="page-transition connect-page">
 
-  <div id="header-placeholder"></div>
+<!-- =====================================================
+     HEADER
+===================================================== -->
+<div id="header-placeholder"></div>
 
-  <main class="connect-wrap">
+<!-- =====================================================
+     MAIN WRAPPER
+===================================================== -->
+<main class="connect-wrap">
 
-    <!-- HERO -->
-    <section class="connect-hero">
-      <div>
-        <div class="connect-badge">⚡ echtlucky • Connect</div>
-        <h1 class="connect-title">Groups. Chat. Presence.</h1>
-        <p class="connect-sub">
-          Fokus statt Chaos. Öffentliche & private Groups, Live-Chat,
-          Status & Community – alles an einem Ort.
-        </p>
+  <!-- =====================================================
+       HERO / INTRO
+  ====================================================== -->
+  <section class="connect-hero">
+    <div>
+      <div class="connect-badge">⚡ echtlucky • Connect</div>
+      <h1 class="connect-title">Community. Fokus. Realtime.</h1>
+      <p class="connect-sub">
+        Connect ist dein zentrales Interface für Austausch, Fokus,
+        Live-Chat, Groups und Presence.  
+        Klar strukturiert. Kein Chaos. Kein Noise.
+      </p>
+    </div>
+
+    <div class="connect-heroActions">
+      <button class="btn btn-ghost" id="btnSetActivity">Activity</button>
+      <button class="btn btn-primary" id="btnCreateGroup">Neue Group</button>
+    </div>
+  </section>
+
+  <!-- =====================================================
+       LOGIN GATE
+  ====================================================== -->
+  <section class="connect-gate" id="loginGate">
+    <div class="gate-card">
+      <h2 class="gate-title">Members only ✋</h2>
+      <p class="gate-text">
+        Öffentliche Inhalte sind sichtbar.  
+        Chat, Presence & Interaktion nur mit Account.
+      </p>
+      <div class="gate-actions">
+        <a href="login.html" class="btn btn-primary">Anmelden</a>
+        <a href="login.html" class="btn btn-secondary">Account erstellen</a>
       </div>
+    </div>
+  </section>
 
-      <div class="connect-heroActions">
-        <button class="btn btn-ghost" id="btnSetActivity">Activity</button>
-        <button class="btn btn-primary" id="btnCreateGroup">Neue Group</button>
-      </div>
-    </section>
+  <!-- =====================================================
+       CONNECT APP (ADMIN PANEL LAYOUT)
+  ====================================================== -->
+  <section class="connect-app" id="connectApp">
 
-    <!-- LOGIN GATE -->
-    <section class="connect-gate" id="loginGate">
-      <div class="gate-card">
-        <h2 class="gate-title">Members only ✋</h2>
-        <p class="gate-text">
-          Du kannst öffentliche Groups sehen –  
-          aber Chat & Presence sind nur mit Account verfügbar.
-        </p>
-        <div class="gate-actions">
-          <a href="login.html" class="btn btn-primary">Anmelden</a>
-          <a href="login.html" class="btn btn-secondary">Registrieren</a>
+    <!-- =================================================
+         LEFT SIDEBAR / NAVIGATION
+    ================================================== -->
+    <aside class="pane pane-left">
+
+      <div class="pane-head">
+        <div>
+          <div class="pane-title">Connect</div>
+          <div class="pane-hint">User Interface</div>
         </div>
       </div>
-    </section>
 
-    <!-- APP -->
-    <section class="connect-app" id="connectApp">
+      <nav class="connect-nav">
+        <a class="nav-item is-active">💬 Live Chat</a>
+        <a class="nav-item">🧭 Discover</a>
+        <a class="nav-item">⭐ Favoriten</a>
+        <a class="nav-item">📊 Community Stats</a>
+        <a class="nav-item">🧠 Fokus Sessions</a>
+        <a class="nav-item">👤 Profil</a>
+        <a class="nav-item">⚙ Einstellungen</a>
+        <a class="nav-item">❓ Hilfe</a>
+      </nav>
+
+      <div class="nav-divider"></div>
 
       <!-- GROUPS -->
-      <aside class="pane pane-left">
-        <div class="pane-head">
-          <div>
-            <div class="pane-title">Groups</div>
-            <div class="pane-hint">Public & Private</div>
-          </div>
-          <div class="pane-actions">
-            <button class="icon-btn" id="btnRefreshGroups">⟳</button>
-          </div>
+      <div class="pane-head">
+        <div>
+          <div class="pane-title">Groups</div>
+          <div class="pane-hint">Public & Private</div>
         </div>
+        <button class="icon-btn" id="btnRefreshGroups">⟳</button>
+      </div>
 
-        <div class="group-search">
-          <input id="groupSearch" placeholder="Groups durchsuchen…" />
+      <div class="group-search">
+        <input id="groupSearch" placeholder="Groups durchsuchen…" />
+      </div>
+
+      <div class="group-list" id="groupList"></div>
+
+      <div class="pane-foot">
+        <div class="me-chip">
+          <span class="me-dot" id="meDot"></span>
+          <span class="me-name" id="meName">Gast</span>
         </div>
+        <button class="btn btn-ghost btn-sm" id="btnLogout">Logout</button>
+      </div>
+    </aside>
 
-        <div class="group-list" id="groupList"></div>
+    <!-- =================================================
+         MAIN CHAT AREA
+    ================================================== -->
+    <section class="pane pane-mid">
 
-        <div class="pane-foot">
-          <div class="me-chip">
-            <span class="me-dot" id="meDot"></span>
-            <span class="me-name" id="meName">Gast</span>
-          </div>
-          <button class="btn btn-ghost btn-sm" id="btnLogout">Logout</button>
-        </div>
-      </aside>
-
-      <!-- CHAT -->
-      <section class="pane pane-mid">
-        <div class="pane-head">
-          <div>
-            <div class="pane-title" id="chatTitle">Keine Group gewählt</div>
-            <div class="pane-hint" id="chatHint">Wähle links eine Group.</div>
-          </div>
-          <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>
-            Join
-          </button>
-        </div>
-
-        <div class="chat-scroll" id="chatScroll"></div>
-
-        <div class="typing-indicator" id="typingIndicator"></div>
-
-        <form class="chat-compose" id="chatForm">
-          <input
-            type="text"
-            id="chatInput"
-            class="chat-input"
-            placeholder="Nachricht schreiben…"
-            disabled
-          />
-          <button class="btn btn-primary btn-sm" type="submit" disabled>
-            Senden
-          </button>
-        </form>
-      </section>
-
-      <!-- MEMBERS -->
-      <aside class="pane pane-right">
-        <div class="pane-head">
-          <div>
-            <div class="pane-title">Members</div>
-            <div class="pane-hint" id="membersHint">—</div>
+      <div class="pane-head">
+        <div>
+          <div class="pane-title" id="chatTitle">Keine Group gewählt</div>
+          <div class="pane-hint" id="chatHint">
+            Wähle links eine Group oder entdecke neue Communities.
           </div>
         </div>
+        <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>
+          Join
+        </button>
+      </div>
 
-        <div class="member-list" id="memberList"></div>
+      <div class="chat-scroll" id="chatScroll"></div>
 
-        <p class="mini-note">
-          Presence ist browserbasiert & „best effort“.
-        </p>
-      </aside>
+      <div class="typing-indicator" id="typingIndicator"></div>
 
+      <form class="chat-compose" id="chatForm">
+        <input
+          type="text"
+          id="chatInput"
+          class="chat-input"
+          placeholder="Nachricht schreiben…"
+          disabled
+        />
+        <button class="btn btn-primary btn-sm" type="submit" disabled>
+          Senden
+        </button>
+      </form>
     </section>
-  </main>
 
-  <div id="footer-placeholder"></div>
+    <!-- =================================================
+         RIGHT SIDEBAR / MEMBERS + INFO
+    ================================================== -->
+    <aside class="pane pane-right">
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+      <div class="pane-head">
+        <div>
+          <div class="pane-title">Members</div>
+          <div class="pane-hint" id="membersHint">—</div>
+        </div>
+      </div>
 
-  <script src="firebase.js"></script>
-  <script src="js/menu.js"></script>
-  <script src="js/notify.js"></script>
-  <script src="js/connect.js"></script>
+      <div class="member-list" id="memberList"></div>
 
-  <script>
-    document.body.classList.add("loaded");
+      <div class="pane-section">
+        <h3>ℹ️ Group Infos</h3>
+        <p>
+          Groups sind fokussierte Räume.
+          Keine globalen Channels, kein Lärm.
+        </p>
+      </div>
 
-    fetch("header.html").then(r=>r.text()).then(html=>{
-      document.getElementById("header-placeholder").innerHTML = html;
-      initHeaderScripts?.();
-      initSmartHeaderScroll?.();
-    });
+      <div class="pane-section">
+        <h3>🟢 Presence</h3>
+        <p>
+          Online, Idle oder Offline –  
+          browserbasiert & transparent.
+        </p>
+      </div>
 
-    fetch("footer.html").then(r=>r.text()).then(html=>{
-      document.getElementById("footer-placeholder").innerHTML = html;
-    });
-  </script>
+      <p class="mini-note">
+        Presence basiert auf Browser-Events („best effort“).
+      </p>
+    </aside>
+
+  </section>
+
+  <!-- =====================================================
+       DISCOVER SECTION
+  ====================================================== -->
+  <section class="connect-section">
+    <h2>🧭 Discover Groups</h2>
+    <p>
+      Entdecke neue Communities.  
+      Öffentliche Groups, sortiert nach Aktivität & Thema.
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Valorant Ranked</h3>
+        <p>Competitive Fokus, EU</p>
+      </div>
+      <div class="card">
+        <h3>Deep Focus</h3>
+        <p>Pomodoro, stille Sessions</p>
+      </div>
+      <div class="card">
+        <h3>Dev Talk</h3>
+        <p>Web, Firebase, Frontend</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================
+       COMMUNITY STATS
+  ====================================================== -->
+  <section class="connect-section">
+    <h2>📊 Community Stats</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <strong>128</strong>
+        <span>Aktive Groups</span>
+      </div>
+      <div class="stat-card">
+        <strong>842</strong>
+        <span>Online User</span>
+      </div>
+      <div class="stat-card">
+        <strong>24k+</strong>
+        <span>Messages gesendet</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================
+       USER PROFILE PREVIEW
+  ====================================================== -->
+  <section class="connect-section">
+    <h2>👤 Dein Profil</h2>
+    <p>
+      Dein Status, deine Activity und deine Communities
+      auf einen Blick.
+    </p>
+
+    <div class="profile-card">
+      <p><strong>Status:</strong> Online</p>
+      <p><strong>Activity:</strong> In Focus Session</p>
+      <p><strong>Groups:</strong> 6</p>
+    </div>
+  </section>
+
+  <!-- =====================================================
+       SETTINGS
+  ====================================================== -->
+  <section class="connect-section">
+    <h2>⚙ Einstellungen</h2>
+    <ul>
+      <li>Presence anzeigen</li>
+      <li>Activity öffentlich</li>
+      <li>Benachrichtigungen</li>
+      <li>Dark Mode (default)</li>
+    </ul>
+  </section>
+
+  <!-- =====================================================
+       HELP / FAQ
+  ====================================================== -->
+  <section class="connect-section">
+    <h2>❓ Hilfe & Regeln</h2>
+    <p>
+      Connect lebt von Respekt und Fokus.
+      Kein Spam, kein Toxic-Verhalten.
+    </p>
+  </section>
+
+  <!-- =====================================================
+       ROADMAP
+  ====================================================== -->
+  <section class="connect-section">
+    <h2>🗺 Roadmap</h2>
+    <ul>
+      <li>⭐ Favoriten & Pins</li>
+      <li>🔥 Message Reactions</li>
+      <li>📌 Pinned Messages</li>
+      <li>🛡 Moderation Tools</li>
+      <li>🧠 Fokus-Timer</li>
+    </ul>
+  </section>
+
+</main>
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+<div id="footer-placeholder"></div>
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+<script src="firebase.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/notify.js"></script>
+<script src="js/connect.js"></script>
+
+<script>
+  document.body.classList.add("loaded");
+
+  fetch("header.html").then(r=>r.text()).then(html=>{
+    document.getElementById("header-placeholder").innerHTML = html;
+    initHeaderScripts?.();
+    initSmartHeaderScroll?.();
+  });
+
+  fetch("footer.html").then(r=>r.text()).then(html=>{
+    document.getElementById("footer-placeholder").innerHTML = html;
+  });
+</script>
 
 </body>
 </html>
