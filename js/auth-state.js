@@ -1,38 +1,31 @@
 // js/auth-state.js
-// Single Source of Truth für Auth-State + UI Updates (Header + CTAs)
-// Features:
-// - 1 Listener (onAuthStateChanged)
-// - Header injected via fetch -> "echtlucky:header-ready"
-// - Account CTA Buttons via [data-account-cta]
-// - Optional Admin role via Firestore users/{uid}.role (cached)
-// - Anti-flicker debounce + safe guards
+// Single source of truth für Auth-State (1 Listener, 1 UI-Update)
+// - Works with Firebase compat auth (window.auth)
+// - Handles header injected via fetch with "echtlucky:header-ready"
+// - Updates data-account-cta automatically
+// - Admin role via users/{uid}.role (cached), fallback: ADMIN_EMAIL
 
 (function () {
   "use strict";
 
-  // ✅ Guard: verhindert doppelte Initialisierung
+  // ✅ Fix: konsistenter Guard-Name (bei dir war ein Tippfehler drin)
   if (window.__ECHTLUCKY_AUTH_WIRED__) return;
   window.__ECHTLUCKY_AUTH_WIRED__ = true;
 
-  // Namespace (optional)
   const appNS = (window.echtlucky = window.echtlucky || {});
-
-  // Firebase handles (müssen aus firebase.js kommen)
   const auth = window.auth || appNS.auth;
   const db = window.db || appNS.db;
 
   if (!auth || typeof auth.onAuthStateChanged !== "function") {
-    console.error(
-      "auth-state.js: window.auth fehlt oder onAuthStateChanged ist nicht verfügbar. firebase.js muss vorher geladen werden."
-    );
+    console.error("auth-state.js: auth fehlt. firebase.js muss vorher geladen werden.");
     return;
   }
 
-  // Globale Quelle der Wahrheit (kann jede Seite nutzen)
+  // globale Quelle der Wahrheit
   window.__ECHTLUCKY_CURRENT_USER__ = window.__ECHTLUCKY_CURRENT_USER__ || null;
 
   // -----------------------------
-  // Header DOM Targets
+  // Header Targets
   // -----------------------------
   function getHeaderEls() {
     return {
@@ -43,13 +36,13 @@
     };
   }
 
-  function headerIsReady() {
+  function headerReady() {
     const { loginLink, userName, dropdown } = getHeaderEls();
     return !!(loginLink || userName || dropdown);
   }
 
   // -----------------------------
-  // Account CTA Buttons
+  // Account CTA (Home Button etc.)
   // -----------------------------
   function applyAccountCTAs(user) {
     const nodes = document.querySelectorAll("[data-account-cta]");
@@ -63,25 +56,25 @@
 
       if (user) {
         el.textContent = inText;
-        el.setAttribute("href", inHref);
+        el.href = inHref;
         el.setAttribute("aria-label", inText);
       } else {
         el.textContent = outText;
-        el.setAttribute("href", outHref);
+        el.href = outHref;
         el.setAttribute("aria-label", outText);
       }
     });
   }
 
   // -----------------------------
-  // Admin Role (Firestore) + Cache
+  // Admin Role Cache (minimiert Firestore Reads)
   // -----------------------------
   const ROLE_CACHE_KEY = "echtlucky:role-cache:v1";
+  const ROLE_TTL_MS = 10 * 60 * 1000; // 10 min
 
   function loadRoleCache() {
     try {
-      const raw = localStorage.getItem(ROLE_CACHE_KEY);
-      return raw ? JSON.parse(raw) : {};
+      return JSON.parse(localStorage.getItem(ROLE_CACHE_KEY) || "{}");
     } catch (_) {
       return {};
     }
@@ -93,64 +86,60 @@
     } catch (_) {}
   }
 
-  async function getRoleForUser(uid) {
-    // Default role
-    let role = "user";
+  async function resolveRole(user) {
+    if (!user?.uid) return "user";
 
-    // Wenn kein db da -> fertig
-    if (!db || !db.collection) return role;
+    // fallback: admin email (aus firebase.js)
+    if (typeof appNS.isAdminByEmail === "function" && appNS.isAdminByEmail(user)) {
+      return "admin";
+    }
 
-    // Cache check
+    // cached?
     const cache = loadRoleCache();
-    const cached = cache?.[uid];
+    const cached = cache[user.uid];
     const now = Date.now();
 
-    // Cache TTL: 10 Minuten (damit Änderungen nicht ewig hängen)
-    const TTL = 10 * 60 * 1000;
-
-    if (cached && cached.role && cached.ts && now - cached.ts < TTL) {
+    if (cached?.role && cached?.ts && (now - cached.ts < ROLE_TTL_MS)) {
       return cached.role;
     }
 
-    // Firestore Query
-    try {
-      const snap = await db.collection("users").doc(uid).get();
-      role = snap.exists ? (snap.data()?.role || "user") : "user";
-    } catch (_) {
-      role = "user";
+    // fetch role
+    let role = "user";
+    if (db && db.collection) {
+      try {
+        const snap = await db.collection("users").doc(user.uid).get();
+        role = snap.exists ? (snap.data()?.role || "user") : "user";
+      } catch (_) {
+        role = "user";
+      }
     }
 
-    // Cache update
-    cache[uid] = { role, ts: now };
+    cache[user.uid] = { role, ts: now };
     saveRoleCache(cache);
-
     return role;
   }
 
   // -----------------------------
-  // Header Apply (safe + async)
+  // Apply Header UI
   // -----------------------------
   async function applyHeaderState(user) {
     const { loginLink, userName, dropdown, adminPanelLink } = getHeaderEls();
 
-    // Header noch nicht im DOM? -> return (wird später bei header-ready nochmal gemacht)
+    // Header noch nicht da? -> später via event
     if (!loginLink && !userName && !dropdown) return;
 
     if (!user) {
-      // LOGGED OUT
       if (loginLink) loginLink.style.display = "inline-flex";
-
       if (userName) {
         userName.textContent = "";
         userName.style.display = "none";
       }
-
       if (dropdown) dropdown.style.display = "none";
       if (adminPanelLink) adminPanelLink.style.display = "none";
       return;
     }
 
-    // LOGGED IN
+    // logged in
     if (loginLink) loginLink.style.display = "none";
 
     if (userName) {
@@ -162,65 +151,54 @@
 
     if (dropdown) dropdown.style.display = "block";
 
-    // Admin link
     if (adminPanelLink) {
       adminPanelLink.style.display = "none";
-      const role = await getRoleForUser(user.uid);
+      const role = await resolveRole(user);
       if (role === "admin") adminPanelLink.style.display = "block";
     }
   }
 
-  // -----------------------------
-  // Events (für andere Module)
-  // -----------------------------
   function emitAuthEvent(user) {
-    window.dispatchEvent(
-      new CustomEvent("echtlucky:auth", { detail: { user } })
-    );
+    window.dispatchEvent(new CustomEvent("echtlucky:auth", { detail: { user } }));
   }
 
   // -----------------------------
-  // Anti-flicker / Debounce
+  // Anti-Flicker
   // -----------------------------
   let lastUid = "__init__";
   let lastTs = 0;
 
   function shouldSkip(uid) {
     const now = Date.now();
-    const tooFast = now - lastTs < 180;
-    const sameUid = uid === lastUid;
-    if (sameUid && tooFast) return true;
+    const tooFast = (now - lastTs) < 180;
+    const same = uid === lastUid;
+    if (same && tooFast) return true;
     lastUid = uid;
     lastTs = now;
     return false;
   }
 
   // -----------------------------
-  // Main Auth Listener
+  // Main listener
   // -----------------------------
   auth.onAuthStateChanged(async (user) => {
     const uid = user?.uid || null;
     if (shouldSkip(uid)) return;
 
-    // Global user
     window.__ECHTLUCKY_CURRENT_USER__ = user || null;
 
-    // Optional: ensure user doc
+    // optional: ensure user doc exists / lastLoginAt update
     if (user && typeof appNS.ensureUserDoc === "function") {
       try { await appNS.ensureUserDoc(user); } catch (_) {}
     }
 
-    // Apply UI
     await applyHeaderState(user || null);
     applyAccountCTAs(user || null);
 
-    // Emit event
     emitAuthEvent(user || null);
   });
 
-  // -----------------------------
-  // Header injected later via fetch
-  // -----------------------------
+  // Header injected later (fetch)
   window.addEventListener("echtlucky:header-ready", async () => {
     const u = auth.currentUser || null;
     window.__ECHTLUCKY_CURRENT_USER__ = u;
@@ -228,16 +206,11 @@
     applyAccountCTAs(u);
   });
 
-  // -----------------------------
-  // Bonus: wenn DOMContentLoaded später kommt
-  // -----------------------------
+  // fallback: falls event nie gefeuert wird
   document.addEventListener("DOMContentLoaded", async () => {
-    // Falls Header schon da ist, aber event nie gefeuert wurde
-    if (headerIsReady()) {
-      const u = auth.currentUser || window.__ECHTLUCKY_CURRENT_USER__ || null;
-      await applyHeaderState(u);
-      applyAccountCTAs(u);
-    }
+    if (!headerReady()) return;
+    const u = auth.currentUser || window.__ECHTLUCKY_CURRENT_USER__ || null;
+    await applyHeaderState(u);
+    applyAccountCTAs(u);
   });
-
 })();

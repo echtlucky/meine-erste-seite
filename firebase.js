@@ -1,5 +1,6 @@
-// firebase.js — echtlucky (v2.1)
+// firebase.js — echtlucky (v2.2)
 // Saubere, einmalige Initialisierung + zentraler App-Namespace
+// Erwartet Firebase COMPAT global: window.firebase (CDN scripts)
 
 (function () {
   "use strict";
@@ -10,6 +11,11 @@
     return;
   }
   window.__ECHTLUCKY_FIREBASE_LOADED__ = true;
+
+  if (!window.firebase) {
+    console.error("firebase.js: window.firebase fehlt. Du nutzt Firebase CDN/compat? Lade die Firebase Scripts VOR firebase.js.");
+    return;
+  }
 
   /* =========================
      ⚙️ Firebase Config
@@ -58,13 +64,13 @@
   }
 
   async function getRole(uid) {
-    if (!uid) return null;
+    if (!uid) return "user";
     try {
       const snap = await db.collection("users").doc(uid).get();
-      return snap.exists ? (snap.data()?.role || "user") : null;
+      return snap.exists ? (snap.data()?.role || "user") : "user";
     } catch (e) {
       console.warn("getRole failed:", e);
-      return null;
+      return "user";
     }
   }
 
@@ -97,7 +103,6 @@
 
     const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
-
     const now = firebase.firestore.FieldValue.serverTimestamp();
 
     if (!snap.exists) {
@@ -113,10 +118,11 @@
         ...extra,
       });
     } else {
+      const data = snap.data() || {};
       // Never auto-overwrite role
       await ref.update({
         email: user.email || "",
-        username: user.displayName || snap.data()?.username || "",
+        username: user.displayName || data.username || "",
         lastLoginAt: now,
         ...extra,
       });
@@ -182,11 +188,11 @@
   window.db = db;
   window.googleProvider = googleProvider;
 
-  // keep old sync helper
+  // keep old sync helper name (falls irgendwo benutzt)
   window.isAdmin = isAdminByEmail;
   window.saveUsername = saveUsername;
 
-  console.log("🔥 Firebase initialisiert (echtlucky v2.1)", {
+  console.log("🔥 Firebase initialisiert (echtlucky v2.2)", {
     auth: !!auth,
     firestore: !!db,
     provider: !!googleProvider,
