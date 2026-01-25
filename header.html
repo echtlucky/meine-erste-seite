@@ -1,10 +1,13 @@
-<header class="site-header">
-  <!-- Links -->
+<header class="site-header" role="banner">
+  <!-- Left -->
   <div class="header-left">
-    <a href="index.html" class="logo">echtlucky</a>
+    <a href="index.html" class="logo" aria-label="echtlucky Home">
+      echtlucky
+      <span class="logo-glow" aria-hidden="true"></span>
+    </a>
   </div>
 
-  <!-- Mitte (Navigation) -->
+  <!-- Center / Nav -->
   <nav id="mainNav" class="header-nav" aria-label="Hauptnavigation">
     <div class="nav-links">
       <a href="index.html">Home</a>
@@ -14,22 +17,58 @@
     </div>
   </nav>
 
-  <!-- Rechts (Account) -->
+  <!-- Right / Account -->
   <div class="header-right">
+    <!-- Logged out -->
     <a href="login.html" id="login-link" class="nav-auth">Anmelden</a>
 
+    <!-- Logged in -->
     <div class="user-dropdown-wrapper">
-      <span id="user-name-display" class="user-name" style="display:none;"></span>
+      <!-- ✅ Button statt Span: bessere UX (cursor/hover/click) -->
+      <button
+        id="user-name-display"
+        class="user-name"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        style="display:none;"
+      >
+        <span class="user-dot" aria-hidden="true"></span>
+        <span class="user-name-text">User</span>
+        <span class="chev" aria-hidden="true">▾</span>
+      </button>
 
-      <div id="dropdown-menu" class="dropdown-menu">
-        <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">
+      <div id="dropdown-menu" class="dropdown-menu" role="menu" aria-label="Account Menü">
+        <a href="account.html" class="dropdown-item" role="menuitem">Konto verwalten</a>
+
+        <a
+          href="admin-panel.html"
+          class="dropdown-item admin-panel"
+          id="admin-panel-link"
+          role="menuitem"
+          style="display:none;"
+        >
           Admin Panel
         </a>
-        <a href="#" class="dropdown-item logout" onclick="logout(); return false;">Ausloggen</a>
+
+        <div class="dropdown-sep" aria-hidden="true"></div>
+
+        <a href="#" class="dropdown-item logout" role="menuitem" onclick="logout(); return false;">
+          Ausloggen
+        </a>
       </div>
     </div>
 
-    <!-- Hamburger nur Mobile -->
-    <button class="menu-toggle" id="menuToggle" aria-label="Menü öffnen" type="button">☰</button>
+    <!-- Mobile toggle -->
+    <button
+      class="menu-toggle"
+      id="menuToggle"
+      aria-label="Menü öffnen"
+      aria-controls="mainNav"
+      aria-expanded="false"
+      type="button"
+    >
+      <span class="burger" aria-hidden="true"></span>
+    </button>
   </div>
 </header>
