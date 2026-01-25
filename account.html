@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Konto verwalten | echtlucky</title>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages/account.css" />
+</head>
+
+<body class="page-transition account-page">
+  <div id="header-placeholder"></div>
+
+  <main class="account-wrap">
+    <!-- HERO -->
+    <section class="account-hero">
+      <div class="account-hero__left">
+        <div class="account-badge">⚡ echtlucky • Konto</div>
+        <h1 class="account-title">Account verwalten</h1>
+        <p class="account-sub">
+          Hier siehst du deine Stats & kannst Local ↔ Account syncen.
+        </p>
+
+        <div class="account-pills">
+          <span class="pill" id="pillStatus">Status: —</span>
+          <span class="pill" id="pillProvider">Login: —</span>
+          <span class="pill" id="pillUpdated">Update: —</span>
+        </div>
+      </div>
+
+      <div class="account-hero__right">
+        <div class="profile-card" id="profileCard">
+          <div class="profile-top">
+            <div class="avatar" id="avatarInitial">?</div>
+            <div class="profile-meta">
+              <div class="profile-name" id="profileName">—</div>
+              <div class="profile-email" id="profileEmail">—</div>
+            </div>
+          </div>
+
+          <div class="profile-actions">
+            <a class="btn btn-secondary btn-sm" href="index.html">Home</a>
+            <button class="btn btn-ghost btn-sm" id="btnSignOut" type="button">Ausloggen</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGGED OUT CARD -->
+    <section class="account-card" id="loggedOutCard" style="display:none;">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Du bist nicht eingeloggt</h2>
+          <p class="card-hint">Log dich ein, damit dein Fortschritt im Account landet.</p>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <a class="btn btn-primary" href="login.html">Zum Login</a>
+        <a class="btn btn-secondary" href="index.html">Zur Startseite</a>
+      </div>
+    </section>
+
+    <!-- MAIN GRID -->
+    <section class="account-grid" id="accountGrid" style="display:none;">
+      <!-- LEFT: YOUR STATS -->
+      <div class="account-card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Deine Stats</h2>
+            <p class="card-hint">Local (dieses Gerät) vs. Account (Cloud).</p>
+          </div>
+          <div class="chip" id="chipSync">Sync: —</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-tile">
+            <div class="stat-label">Ranked • Level</div>
+            <div class="stat-value" id="rankedLevel">—</div>
+            <div class="stat-sub" id="rankedMeta">—</div>
+          </div>
+
+          <div class="stat-tile">
+            <div class="stat-label">Ranked • XP</div>
+            <div class="stat-value" id="rankedXp">—</div>
+            <div class="stat-sub" id="rankedStreak">—</div>
+          </div>
+
+          <div class="stat-tile">
+            <div class="stat-label">Reflex • Best Avg</div>
+            <div class="stat-value" id="reflexAvg">—</div>
+            <div class="stat-sub" id="reflexRating">—</div>
+          </div>
+
+          <div class="stat-tile">
+            <div class="stat-label">Reflex • Best Hit</div>
+            <div class="stat-value" id="reflexBest">—</div>
+            <div class="stat-sub" id="reflexLast">—</div>
+          </div>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <div class="sync-actions">
+          <button class="btn btn-primary" id="btnUploadLocal" type="button">Local → Account speichern</button>
+          <button class="btn btn-secondary" id="btnDownloadCloud" type="button">Account → Local übernehmen</button>
+          <button class="btn btn-ghost" id="btnClearLocal" type="button">Local Stats löschen</button>
+        </div>
+
+        <p class="mini-note">
+          Hinweis: „Account → Local“ überschreibt deine lokalen Werte.
+        </p>
+      </div>
+
+      <!-- RIGHT: DETAILS / PREVIEW -->
+      <div class="account-card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Account Daten</h2>
+            <p class="card-hint">Was im Firestore gespeichert ist (Preview).</p>
+          </div>
+        </div>
+
+        <div class="preview">
+          <div class="preview-row">
+            <div class="preview-k">UID</div>
+            <div class="preview-v" id="pvUid">—</div>
+          </div>
+          <div class="preview-row">
+            <div class="preview-k">Ranked (cloud)</div>
+            <div class="preview-v" id="pvRanked">—</div>
+          </div>
+          <div class="preview-row">
+            <div class="preview-k">Reflex (cloud)</div>
+            <div class="preview-v" id="pvReflex">—</div>
+          </div>
+          <div class="preview-row">
+            <div class="preview-k">Updated</div>
+            <div class="preview-v" id="pvUpdated">—</div>
+          </div>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <div class="danger-zone">
+          <div class="dz-head">
+            <div>
+              <h3>Danger Zone</h3>
+              <p>Nur wenn du sicher bist.</p>
+            </div>
+          </div>
+
+          <button class="btn btn-ghost danger" id="btnWipeCloud" type="button">
+            Cloud Stats zurücksetzen
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+  <script src="firebase.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/legal-modal.js"></script>
+  <script src="js/notify.js"></script>
+  <script src="js/account.js"></script>
+
+  <script>
+    document.body.classList.add('loaded');
+
+    fetch('header.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+        if (typeof initHeaderScripts === "function") initHeaderScripts();
+        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+      });
+
+    fetch('footer.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      });
+  </script>
+</body>
+</html>
