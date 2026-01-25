@@ -4,6 +4,13 @@
 (function () {
   "use strict";
 
+  if (window.__ECHTLUCKY_FIREBASE_LOADED__) {
+  console.warn("🔥 firebase.js already loaded – skipping");
+  return;
+}
+window.__ECHTLUCKY_FIREBASE_LOADED__ = true;
+
+
   /* =========================
      ⚙️ Firebase Config
      ========================= */
