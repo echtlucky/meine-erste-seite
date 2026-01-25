@@ -49,10 +49,18 @@
   const googleProvider = new firebase.auth.GoogleAuthProvider();
   googleProvider.setCustomParameters({ prompt: "select_account" });
 
-  // Optional persistence (safe)
+    // Optional persistence (robust / compat-safe)
+  // Multi-tab cache (best effort). Some environments block IndexedDB (private mode / strict settings).
   try {
-    db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-  } catch (_) {}
+    db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+      // "failed-precondition" => multiple tabs open or persistence already enabled elsewhere
+      // "unimplemented"     => browser doesn't support persistence
+      // Both are safe to ignore for MVP
+      console.warn("Firestore persistence disabled:", err?.code || err?.message || err);
+    });
+  } catch (err) {
+    console.warn("Firestore persistence init failed:", err?.message || err);
+  }
 
   /* =========================
      👑 Admin / Roles

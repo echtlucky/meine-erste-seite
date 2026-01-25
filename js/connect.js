@@ -159,36 +159,42 @@
     return el;
   }
 
-  function listenGroups() {
-    if (groupsUnsub) groupsUnsub();
+function listenGroups() {
+  if (groupsUnsub) groupsUnsub();
 
-    const q = db
-      .collection("groups")
-      .where("isPublic", "==", true)
-      .orderBy("lastMessageAt", "desc")
-      .limit(50);
+  const q = db
+    .collection("groups")
+    .where("isPublic", "==", true)
+    .limit(50);
 
-    groupsUnsub = q.onSnapshot((snap) => {
-      if (!groupList) return;
-      groupList.innerHTML = "";
+  groupsUnsub = q.onSnapshot((snap) => {
+    if (!groupList) return;
+    groupList.innerHTML = "";
 
-      if (snap.empty) {
-        const empty = document.createElement("div");
-        empty.className = "group-meta";
-        empty.style.padding = ".8rem";
-        empty.textContent = "Noch keine Groups. Erstelle die erste 😤";
-        groupList.appendChild(empty);
-        return;
-      }
+    if (snap.empty) {
+      const empty = document.createElement("div");
+      empty.className = "group-meta";
+      empty.style.padding = ".8rem";
+      empty.textContent = "Noch keine Groups. Erstelle die erste 😤";
+      groupList.appendChild(empty);
+      return;
+    }
 
-      snap.forEach((doc) => {
-        groupList.appendChild(renderGroupCard(doc.id, doc.data() || {}));
-      });
-    }, (err) => {
-      console.error(err);
-      notify("error", "Groups konnten nicht geladen werden.");
+    // client-side sort nach lastMessageAt desc
+    const docs = [];
+    snap.forEach((d) => docs.push({ id: d.id, data: d.data() || {} }));
+    docs.sort((a, b) => {
+      const ta = a.data?.lastMessageAt?.toMillis?.() ?? 0;
+      const tb = b.data?.lastMessageAt?.toMillis?.() ?? 0;
+      return tb - ta;
     });
-  }
+
+    docs.forEach((d) => groupList.appendChild(renderGroupCard(d.id, d.data)));
+  }, (err) => {
+    console.error(err);
+    notify("error", "Groups konnten nicht geladen werden.");
+  });
+}
 
   async function createGroupFlow() {
     if (!currentUser) return notify("warn", "Bitte anmelden, um eine Group zu erstellen.");
