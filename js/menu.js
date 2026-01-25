@@ -1,4 +1,4 @@
-// js/menu.js — FINAL v2 (Fetch-Header kompatibel, anti-flicker, single auth listener)
+// js/menu.js — FINAL v3 (Fetch-Header kompatibel, anti-flicker, SINGLE auth listener, Mobile-Menü fix)
 (function () {
   "use strict";
 
@@ -73,25 +73,55 @@
     const menuToggle = qs("menuToggle");
     const mainNav = qs("mainNav");
 
-    /* 📱 Mobile Menü Toggle */
+    /* =========================
+       📱 Mobile Menü Toggle (FIXED)
+    ========================= */
     if (menuToggle && mainNav && !menuToggle.__wired) {
       menuToggle.__wired = true;
 
+      menuToggle.setAttribute("aria-expanded", "false");
+
       menuToggle.addEventListener("click", (e) => {
         e.stopPropagation();
+
         mainNav.classList.toggle("open");
+
+        const isOpen = mainNav.classList.contains("open");
+        menuToggle.setAttribute("aria-expanded", String(isOpen));
+        menuToggle.classList.toggle("is-open", isOpen);
       });
 
-      document.addEventListener("click", () => {
-        mainNav.classList.remove("open");
+      // Close menu when clicking outside (NOT when clicking inside nav or on toggle)
+      document.addEventListener("click", (e) => {
+        if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
+          mainNav.classList.remove("open");
+          menuToggle.setAttribute("aria-expanded", "false");
+          menuToggle.classList.remove("is-open");
+        }
       });
 
+      // Close menu after clicking a nav link (mobile UX)
+      mainNav.querySelectorAll("a").forEach((a) => {
+        a.addEventListener("click", () => {
+          mainNav.classList.remove("open");
+          menuToggle.setAttribute("aria-expanded", "false");
+          menuToggle.classList.remove("is-open");
+        });
+      });
+
+      // Resize => Menü resetten
       window.addEventListener("resize", () => {
-        if (window.innerWidth > 992) mainNav.classList.remove("open");
+        if (window.innerWidth > 992) {
+          mainNav.classList.remove("open");
+          menuToggle.setAttribute("aria-expanded", "false");
+          menuToggle.classList.remove("is-open");
+        }
       });
     }
 
-    /* 👤 Dropdown */
+    /* =========================
+       👤 Dropdown
+    ========================= */
     if (userNameDisplay && dropdownMenu && !userNameDisplay.__wired) {
       userNameDisplay.__wired = true;
 
@@ -107,10 +137,14 @@
       });
     }
 
-    /* 🔗 Active Link */
+    /* =========================
+       🔗 Active Link
+    ========================= */
     setActiveNavLink();
 
-    /* 🔐 Apply current auth state immediately (prevents header blink) */
+    /* =========================
+       🔐 Apply current auth state immediately (prevents header blink)
+    ========================= */
     renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
   };
 
