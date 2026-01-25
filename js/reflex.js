@@ -491,6 +491,35 @@
     auth.onAuthStateChanged(() => updateSaveStatus());
   }
 
+  function paintRange(input){
+  const min = Number(input.min || 0);
+  const max = Number(input.max || 100);
+  const val = Number(input.value || 0);
+  const pct = ((val - min) / (max - min)) * 100;
+  input.style.background = `linear-gradient(90deg,
+    rgba(0,255,136,.85) ${pct}%,
+    rgba(0,255,136,.20) ${pct}%)`;
+}
+
+function wireRange(id, outId){
+  const el = document.getElementById(id);
+  const out = document.getElementById(outId);
+  if (!el) return;
+
+  const update = () => {
+    if (out) out.textContent = el.value;
+    paintRange(el);
+  };
+
+  el.addEventListener("input", update, { passive: true });
+  update();
+}
+
+// call once on page load:
+wireRange("targetsRange", "targetsVal");
+wireRange("sizeRange", "sizeVal");
+wireRange("spawnRange", "spawnVal");
+
   // Init
   renderTopStats();
   updateSaveStatus();

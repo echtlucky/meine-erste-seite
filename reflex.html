@@ -103,6 +103,69 @@
       </footer>
     </section>
 
+    <section class="lab-card">
+  <div class="lab-head">
+    <div>
+      <h2>Reflex Settings</h2>
+      <p class="lab-hint">Stell dir dein Setup ein – clean, schnell, keine Ablenkung.</p>
+    </div>
+  </div>
+
+  <div class="lab-controls">
+
+    <div class="control">
+      <div class="control__top">
+        <div class="control__label">
+          <strong>Targets</strong>
+          <span>Wie viele Ziele pro Run</span>
+        </div>
+        <div class="value-pill"><i></i><span id="targetsVal">10</span></div>
+      </div>
+      <input id="targetsRange" class="range" type="range" min="5" max="50" step="1" value="10" />
+    </div>
+
+    <div class="control">
+      <div class="control__top">
+        <div class="control__label">
+          <strong>Target Size</strong>
+          <span>Trefferfläche: klein = sweaty</span>
+        </div>
+        <div class="value-pill"><i></i><span id="sizeVal">36</span>px</div>
+      </div>
+      <input id="sizeRange" class="range" type="range" min="18" max="80" step="1" value="36" />
+    </div>
+
+    <div class="control">
+      <div class="control__top">
+        <div class="control__label">
+          <strong>Spawn Delay</strong>
+          <span>Wie schnell das nächste Ziel kommt</span>
+        </div>
+        <div class="value-pill"><i></i><span id="spawnVal">250</span>ms</div>
+      </div>
+      <input id="spawnRange" class="range" type="range" min="0" max="800" step="10" value="250" />
+    </div>
+
+    <div class="control">
+      <div class="control__top">
+        <div class="control__label">
+          <strong>Mode</strong>
+          <span>Einfacher Einstieg oder full tryhard</span>
+        </div>
+      </div>
+
+      <div class="segmented" id="modeSegment">
+        <button class="seg-btn is-active" type="button" data-mode="classic">Classic</button>
+        <button class="seg-btn" type="button" data-mode="flick">Flick</button>
+        <button class="seg-btn" type="button" data-mode="micro">Micro</button>
+      </div>
+
+      <p class="mini-note">Tipp: Micro + kleine Targets fühlt sich wie Aim-Drill an.</p>
+    </div>
+
+  </div>
+</section>
+
     <section class="reflex-result" id="resultCard" style="display:none;">
       <header class="reflex-result__head">
         <h2 class="reflex-result__title">Run Result</h2>
