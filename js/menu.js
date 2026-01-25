@@ -86,7 +86,7 @@
   /* =========================
      Header Auth UI
   ========================= */
-  function renderAuthUI(user) {
+  window.renderAuthUI = function renderAuthUI(user) {
     const userNameDisplay = qs("user-name-display");
     const dropdownMenu = qs("dropdown-menu");
     const loginLink = qs("login-link");

@@ -240,12 +240,18 @@
 
     // Header laden + init
     fetch('header.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-        if (typeof initHeaderScripts === "function") initHeaderScripts();
-        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-      });
+  .then(r => r.text())
+  .then(html => {
+    document.getElementById('header-placeholder').innerHTML = html;
+
+    if (typeof initHeaderScripts === "function") initHeaderScripts();
+    if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+
+    // ✅ FIX: nach Header-Inject sofort Auth UI setzen
+    if (typeof window.renderAuthUI === "function") {
+      window.renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__ || null);
+    }
+  });
 
     // Footer laden
     fetch('footer.html')
