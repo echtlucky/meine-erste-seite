@@ -1,98 +1,36 @@
 // js/menu.js — FINAL v4
-// Fetch-Header kompatibel, anti-flicker, SINGLE auth listener,
-// Mobile-Menü fix, Account-CTA Switch (Account erstellen ↔ verwalten)
+// - Fetch-Header kompatibel
+// - Anti-flicker + robust gegen Timing (Firebase lädt manchmal später)
+// - SINGLE auth listener
+// - Mobile-Menü fix
+// - Dropdown fix
+// - GLOBAL Account-CTA (data-account-cta) -> "Account erstellen" vs "Account verwalten"
+
 (function () {
   "use strict";
 
-  // Prevent double load (if script is included twice by accident)
+  // Prevent double load
   if (window.__ECHTLUCKY_MENU_JS_LOADED__) {
     console.warn("menu.js already loaded – skipping");
     return;
   }
   window.__ECHTLUCKY_MENU_JS_LOADED__ = true;
 
-  // Global user cache (shared across pages)
+  // Global user state
   window.__ECHTLUCKY_CURRENT_USER__ = window.__ECHTLUCKY_CURRENT_USER__ || null;
 
   /* =========================
      Helpers
   ========================= */
-  function qs(id) {
-    return document.getElementById(id);
+  const qs = (id) => document.getElementById(id);
+
+  function getAuth() {
+    return window.auth || window.echtlucky?.auth || null;
   }
 
-  function safeTextFromUser(user) {
-    return (
-      user?.displayName ||
-      (user?.email ? user.email.split("@")[0] : null) ||
-      "User"
-    );
-  }
-
-  /* =========================
-     AUTH UI (Header)
-  ========================= */
-  function renderAuthUI(user) {
-    const userNameDisplay = qs("user-name-display");
-    const dropdownMenu = qs("dropdown-menu");
-    const loginLink = qs("login-link");
-    const adminPanelLink = qs("admin-panel-link");
-
-    // Header not injected yet? no problem.
-    if (!loginLink && !userNameDisplay && !adminPanelLink) return;
-
-    if (user) {
-      if (loginLink) loginLink.style.display = "none";
-
-      if (userNameDisplay) {
-        userNameDisplay.textContent = safeTextFromUser(user);
-        userNameDisplay.style.display = "inline-flex";
-      }
-
-      // Admin Link (email fallback)
-      const ADMIN_EMAIL = "lucassteckel04@gmail.com";
-      if (adminPanelLink) {
-        adminPanelLink.style.display =
-          user.email && user.email === ADMIN_EMAIL ? "block" : "none";
-      }
-    } else {
-      if (loginLink) loginLink.style.display = "inline-flex";
-      if (userNameDisplay) userNameDisplay.style.display = "none";
-      if (dropdownMenu) dropdownMenu.classList.remove("show");
-      if (adminPanelLink) adminPanelLink.style.display = "none";
-    }
-  }
-
-  /* =========================
-     Account CTA Switch (Site-wide)
-     - Default:
-       logged out -> "Account erstellen" (login.html)
-       logged in  -> "Account verwalten" (account.html)
-     - Works for ANY element that has:
-       id="accountActionBtn" OR data-account-cta
-  ========================= */
-  function updateAccountCTA(user) {
-    // 1) single known CTA
-    const primary = document.getElementById("accountActionBtn");
-
-    // 2) optional multiple CTAs
-    const all = Array.from(document.querySelectorAll("[data-account-cta]"));
-
-    const targets = [];
-    if (primary) targets.push(primary);
-    all.forEach((el) => targets.push(el));
-
-    if (!targets.length) return;
-
-    targets.forEach((btn) => {
-      if (user) {
-        btn.textContent = btn.getAttribute("data-cta-logged-in") || "Account verwalten";
-        btn.setAttribute("href", btn.getAttribute("data-href-logged-in") || "account.html");
-      } else {
-        btn.textContent = btn.getAttribute("data-cta-logged-out") || "Account erstellen";
-        btn.setAttribute("href", btn.getAttribute("data-href-logged-out") || "login.html");
-      }
-    });
+  function getUserLabel(user) {
+    if (!user) return "User";
+    return user.displayName || (user.email ? user.email.split("@")[0] : "User");
   }
 
   /* =========================
@@ -110,122 +48,159 @@
   }
 
   /* =========================
-     Public init (call after fetch(header.html))
+     Account CTA (global)
+     - any element with [data-account-cta]
+     - optional overrides via data attrs
   ========================= */
-  window.initHeaderScripts = function initHeaderScripts() {
-    const userNameDisplay = qs("user-name-display");
-    const dropdownMenu = qs("dropdown-menu");
-    const menuToggle = qs("menuToggle");
-    const mainNav = qs("mainNav");
+  function updateAccountCTAs(user) {
+    const ctas = document.querySelectorAll("[data-account-cta]");
+    if (!ctas.length) return;
 
-    /* =========================
-       Mobile Menü Toggle
-    ========================= */
-    if (menuToggle && mainNav && !menuToggle.__wired) {
-      menuToggle.__wired = true;
-      menuToggle.setAttribute("aria-expanded", "false");
+    ctas.forEach((el) => {
+      // you can override defaults:
+      // data-cta-logged-out-text="Account erstellen"
+      // data-cta-logged-in-text="Account verwalten"
+      // data-cta-logged-out-href="login.html"
+      // data-cta-logged-in-href="account.html"
 
-      menuToggle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        mainNav.classList.toggle("open");
+      const outText = el.getAttribute("data-cta-logged-out-text") || "Account erstellen";
+      const inText  = el.getAttribute("data-cta-logged-in-text")  || "Account verwalten";
 
-        const isOpen = mainNav.classList.contains("open");
-        menuToggle.setAttribute("aria-expanded", String(isOpen));
-        menuToggle.classList.toggle("is-open", isOpen);
-      });
+      const outHref = el.getAttribute("data-cta-logged-out-href") || "login.html";
+      const inHref  = el.getAttribute("data-cta-logged-in-href")  || "account.html";
 
-      // Close menu when clicking outside
-      document.addEventListener("click", (e) => {
-        if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
-          mainNav.classList.remove("open");
-          menuToggle.setAttribute("aria-expanded", "false");
-          menuToggle.classList.remove("is-open");
-        }
-      });
-
-      // Close menu after clicking a nav link
-      mainNav.querySelectorAll("a").forEach((a) => {
-        a.addEventListener("click", () => {
-          mainNav.classList.remove("open");
-          menuToggle.setAttribute("aria-expanded", "false");
-          menuToggle.classList.remove("is-open");
-        });
-      });
-
-      // Resize => reset menu
-      window.addEventListener("resize", () => {
-        if (window.innerWidth > 992) {
-          mainNav.classList.remove("open");
-          menuToggle.setAttribute("aria-expanded", "false");
-          menuToggle.classList.remove("is-open");
-        }
-      });
-    }
-
-    /* =========================
-       Dropdown (User)
-    ========================= */
-    if (userNameDisplay && dropdownMenu && !userNameDisplay.__wired) {
-      userNameDisplay.__wired = true;
-
-      userNameDisplay.addEventListener("click", (e) => {
-        e.stopPropagation();
-        dropdownMenu.classList.toggle("show");
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!dropdownMenu.contains(e.target) && !userNameDisplay.contains(e.target)) {
-          dropdownMenu.classList.remove("show");
-        }
-      });
-    }
-
-    // Active link
-    setActiveNavLink();
-
-    // Apply current auth state to freshly injected header + CTAs
-    const u = window.__ECHTLUCKY_CURRENT_USER__ || null;
-    renderAuthUI(u);
-    updateAccountCTA(u);
-  };
-
-  /* =========================
-     SINGLE Auth Listener (global)
-     - attaches once per page load
-  ========================= */
-  function ensureAuthListener() {
-    if (window.__ECHTLUCKY_AUTH_LISTENER_SET__) return;
-    window.__ECHTLUCKY_AUTH_LISTENER_SET__ = true;
-
-    const auth = window.auth || window.echtlucky?.auth;
-    if (!auth || typeof auth.onAuthStateChanged !== "function") {
-      console.warn("Auth not ready yet – auth listener will not attach.");
-      return;
-    }
-
-    auth.onAuthStateChanged((user) => {
-      window.__ECHTLUCKY_CURRENT_USER__ = user || null;
-
-      // Update header & any CTA elements on the page
-      renderAuthUI(user || null);
-      updateAccountCTA(user || null);
+      if (user) {
+        if (el.tagName.toLowerCase() === "a") el.setAttribute("href", inHref);
+        el.textContent = inText;
+        el.classList.add("is-logged-in");
+        el.classList.remove("is-logged-out");
+      } else {
+        if (el.tagName.toLowerCase() === "a") el.setAttribute("href", outHref);
+        el.textContent = outText;
+        el.classList.add("is-logged-out");
+        el.classList.remove("is-logged-in");
+      }
     });
   }
 
-  // Try immediately
-  ensureAuthListener();
+  /* =========================
+     Header Auth UI
+  ========================= */
+  function renderAuthUI(user) {
+    const userNameDisplay = qs("user-name-display");
+    const dropdownMenu = qs("dropdown-menu");
+    const loginLink = qs("login-link");
+    const adminPanelLink = qs("admin-panel-link");
+
+    // header may not exist yet
+    if (!loginLink && !userNameDisplay && !adminPanelLink) {
+      updateAccountCTAs(user);
+      return;
+    }
+
+    if (user) {
+      // hide "Anmelden"
+      if (loginLink) loginLink.style.display = "none";
+
+      // show user
+      if (userNameDisplay) {
+        userNameDisplay.textContent = getUserLabel(user);
+        userNameDisplay.style.display = "inline-flex";
+      }
+
+      // Admin link (email fallback)
+      const ADMIN_EMAIL = "lucassteckel04@gmail.com";
+      if (adminPanelLink) {
+        adminPanelLink.style.display =
+          user.email && user.email === ADMIN_EMAIL ? "block" : "none";
+      }
+    } else {
+      if (loginLink) loginLink.style.display = "inline-flex";
+      if (userNameDisplay) userNameDisplay.style.display = "none";
+      if (dropdownMenu) dropdownMenu.classList.remove("show");
+      if (adminPanelLink) adminPanelLink.style.display = "none";
+    }
+
+    // also update CTA buttons on page
+    updateAccountCTAs(user);
+  }
 
   /* =========================
-     Logout global (used by header.html onclick)
+     Wiring: Mobile menu + Dropdown
   ========================= */
-  window.logout = function logout() {
-    const auth = window.auth || window.echtlucky?.auth;
-    if (!auth) return;
+  function wireMobileMenu() {
+    const menuToggle = qs("menuToggle");
+    const mainNav = qs("mainNav");
+    if (!menuToggle || !mainNav || menuToggle.__wired) return;
 
-    auth
-      .signOut()
-      .then(() => (window.location.href = "index.html"))
-      .catch((err) => alert("Ausloggen fehlgeschlagen: " + err.message));
+    menuToggle.__wired = true;
+    menuToggle.setAttribute("aria-expanded", "false");
+
+    menuToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      mainNav.classList.toggle("open");
+      const isOpen = mainNav.classList.contains("open");
+      menuToggle.setAttribute("aria-expanded", String(isOpen));
+      menuToggle.classList.toggle("is-open", isOpen);
+    });
+
+    // close on outside click
+    document.addEventListener("click", (e) => {
+      if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
+        mainNav.classList.remove("open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.classList.remove("is-open");
+      }
+    });
+
+    // close after clicking a link
+    mainNav.querySelectorAll("a").forEach((a) => {
+      a.addEventListener("click", () => {
+        mainNav.classList.remove("open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.classList.remove("is-open");
+      });
+    });
+
+    // resize reset
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 992) {
+        mainNav.classList.remove("open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.classList.remove("is-open");
+      }
+    });
+  }
+
+  function wireDropdown() {
+    const userNameDisplay = qs("user-name-display");
+    const dropdownMenu = qs("dropdown-menu");
+    if (!userNameDisplay || !dropdownMenu || userNameDisplay.__wired) return;
+
+    userNameDisplay.__wired = true;
+
+    userNameDisplay.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle("show");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!dropdownMenu.contains(e.target) && !userNameDisplay.contains(e.target)) {
+        dropdownMenu.classList.remove("show");
+      }
+    });
+  }
+
+  /* =========================
+     Public init (call after fetch(header.html))
+  ========================= */
+  window.initHeaderScripts = function initHeaderScripts() {
+    wireMobileMenu();
+    wireDropdown();
+    setActiveNavLink();
+
+    // apply current state immediately
+    renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
   };
 
   /* =========================
@@ -269,4 +244,60 @@
       { passive: true }
     );
   };
+
+  /* =========================
+     Logout global
+  ========================= */
+  window.logout = function logout() {
+    const auth = getAuth();
+    if (!auth) return;
+
+    auth
+      .signOut()
+      .then(() => (window.location.href = "index.html"))
+      .catch((err) => alert("Ausloggen fehlgeschlagen: " + (err?.message || "Unbekannt")));
+  };
+
+  /* =========================
+     SINGLE auth listener — robust timing
+     - If firebase auth isn't ready yet, we retry a few times.
+  ========================= */
+  function attachAuthListener() {
+    if (window.__ECHTLUCKY_AUTH_LISTENER_SET__) return true;
+
+    const auth = getAuth();
+    if (!auth || typeof auth.onAuthStateChanged !== "function") return false;
+
+    window.__ECHTLUCKY_AUTH_LISTENER_SET__ = true;
+
+    auth.onAuthStateChanged((user) => {
+      window.__ECHTLUCKY_CURRENT_USER__ = user || null;
+      renderAuthUI(user || null);
+    });
+
+    return true;
+  }
+
+  // Try now + retry (for slow firebase init)
+  (function ensureAuthListener() {
+    if (attachAuthListener()) return;
+
+    let tries = 0;
+    const maxTries = 20; // ~2s (20 * 100ms)
+    const timer = setInterval(() => {
+      tries++;
+      if (attachAuthListener() || tries >= maxTries) clearInterval(timer);
+
+      // Even if no auth yet: keep CTA correct based on current global user (might be null)
+      renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
+    }, 100);
+  })();
+
+  /* =========================
+     Also update CTA on DOM ready (pages without header fetch yet)
+  ========================= */
+  document.addEventListener("DOMContentLoaded", () => {
+    updateAccountCTAs(window.__ECHTLUCKY_CURRENT_USER__);
+  });
+
 })();
