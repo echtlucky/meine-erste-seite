@@ -5,197 +5,162 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connect | echtlucky</title>
 
-  <!-- GitHub Pages base URL fix -->
-  <base href="/meine-erste-seite/" />
-
-  <!-- Firebase CDN (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/connect.css" />
 </head>
 
-<body class="connect-page">
+<body class="page-transition connect-page">
+  <!-- Header via fetch -->
+  <div id="header-placeholder"></div>
 
-<!-- =====================================================
-     HEADER (Inline - No Fetch)
-===================================================== -->
-<header class="site-header">
-  <a href="index.html" style="font-size: 1.2rem;">echtlucky</a>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="blog.html">Blog</a>
-    <a href="ranked.html">Ranked</a>
-    <a href="connect.html">Connect</a>
-  </nav>
-  <div id="headerAuth">
-    <a href="login.html">Login</a>
-  </div>
-</header>
+  <main class="container connect-shell">
 
-<!-- =====================================================
-     MAIN CONNECT APP (Discord-like Layout)
-===================================================== -->
-<main class="connect-app">
+    <!-- HERO SECTION -->
+    <section class="connect-hero">
+      <div class="connect-hero__inner">
+        <div class="connect-badge">⚡ echtlucky • Community</div>
+        <h1 class="connect-title">Connect</h1>
+        <p class="connect-sub">
+          Echte Community, echter Grind. Gruppen, Chat, Voice — alles auf der Seite.
+        </p>
 
-  <!-- SIDEBAR -->
-  <aside class="connect-sidebar">
-    <div class="sidebar-header">
-      <h2 class="sidebar-title">echtlucky Connect</h2>
-    </div>
-
-    <nav class="sidebar-nav">
-      <a class="nav-item is-active" data-view="overview" href="#">📡 Overview</a>
-      <a class="nav-item" data-view="chat" href="#">💬 Chat</a>
-      <a class="nav-item" data-view="members" href="#">👥 Members</a>
-      <a class="nav-item" data-view="stats" href="#">📊 Stats</a>
-      <a class="nav-item" data-view="voice" href="#">🎤 Voice</a>
-    </nav>
-
-    <div class="sidebar-section">
-      <h3 class="sidebar-section-title">Groups</h3>
-      <button class="btn btn-primary" id="btnCreateGroup" style="width: 100%; margin-bottom: 8px;">+ New Group</button>
-    </div>
-
-    <div class="groups-list" id="groupsList">
-      <div style="padding: 8px; color: #666; text-align: center;">No groups yet</div>
-    </div>
-
-    <div class="sidebar-user">
-      <div class="user-info" id="userInfo">
-        <span class="user-status">Not logged in</span>
-      </div>
-      <button class="nav-item" id="btnUserMenu" style="padding: 4px 8px;">⋮</button>
-    </div>
-  </aside>
-
-  <!-- MAIN CONTENT -->
-  <section class="connect-main">
-    <header class="connect-header">
-      <div class="header-info" id="headerInfo">
-        <h2 class="header-title">Welcome to Connect</h2>
-        <p class="header-subtitle">Select a group to start chatting or create a new one</p>
-      </div>
-    </header>
-
-    <div class="connect-content">
-
-      <!-- OVERVIEW VIEW -->
-      <div class="connect-view is-active" data-view="overview">
-        <div class="view-welcome">
-          <div class="welcome-box">
-            <div class="welcome-emoji">🌐</div>
-            <h3>Welcome to echtlucky Connect</h3>
-            <p>Select a group from the sidebar to start chatting, or create a new group.</p>
-            <button class="btn btn-primary" id="btnCreateGroupWelcome">Create First Group</button>
+        <!-- Auth Status Card -->
+        <div class="auth-status-card" id="authStatusCard">
+          <div class="auth-status-content">
+            <span class="status-label" id="statusLabel">Nicht eingeloggt</span>
+            <a href="login.html" class="btn btn-primary" id="btnLogin">Anmelden</a>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- CHAT VIEW -->
-      <div class="connect-view" data-view="chat">
-        <div class="chat-container">
-          <div class="messages-area" id="messagesArea">
-            <div style="color: #666; text-align: center; padding: 20px;">Select a group to view messages</div>
-          </div>
+    <!-- GROUPS SECTION -->
+    <section class="connect-card" id="groupsSection">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Deine Gruppen</h2>
+          <p class="card-hint">Tritt einer Gruppe bei oder erstelle eine neue.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btnCreateGroup">+ Neue Gruppe</button>
+      </div>
+
+      <div class="groups-container" id="groupsContainer">
+        <div class="empty-state">
+          <p>📭 Noch keine Gruppen</p>
+          <small>Erstelle eine neue Gruppe um zu starten</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- SELECTED GROUP SECTION -->
+    <section class="connect-card" id="selectedGroupSection" style="display:none;">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title" id="groupTitle">Gruppe laden...</h2>
+          <p class="card-hint" id="groupDesc">Wähle einen Tab aus</p>
+        </div>
+      </div>
+
+      <!-- TAB NAVIGATION -->
+      <div class="group-tabs">
+        <button class="tab-btn is-active" data-tab="chat">💬 Chat</button>
+        <button class="tab-btn" data-tab="members">👥 Members</button>
+        <button class="tab-btn" data-tab="voice">🎤 Voice</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Einstellungen</button>
+      </div>
+
+      <!-- CHAT TAB -->
+      <div class="tab-content is-active" data-tab="chat">
+        <div class="chat-box">
+          <div class="messages-list" id="messagesList"></div>
           <div class="chat-input-area">
-            <input type="text" id="messageInput" class="message-input" placeholder="Send a message..." disabled />
-            <button class="send-btn" id="btnSendMessage" disabled>Send</button>
+            <input type="text" id="messageInput" class="message-input" placeholder="Nachricht..." disabled />
+            <button class="btn btn-primary btn-sm" id="btnSendMessage" disabled>Senden</button>
           </div>
         </div>
       </div>
 
-      <!-- MEMBERS VIEW -->
-      <div class="connect-view" data-view="members">
-        <div class="members-container">
-          <div class="members-header">
-            <h3>Group Members</h3>
-            <input type="text" placeholder="Search members..." class="members-search" />
-          </div>
-          <div class="members-list" id="membersList"></div>
-        </div>
+      <!-- MEMBERS TAB -->
+      <div class="tab-content" data-tab="members">
+        <div class="members-grid" id="membersList"></div>
       </div>
 
-      <!-- STATS VIEW -->
-      <div class="connect-view" data-view="stats">
-        <div class="stats-container">
-          <h3>Community Stats</h3>
-          <div class="stats-grid" id="statsGrid"></div>
-        </div>
-      </div>
-
-      <!-- VOICE VIEW -->
-      <div class="connect-view" data-view="voice">
-        <div class="voice-container">
-          <div class="voice-header">
-            <h3>Voice Calls</h3>
-            <p id="voiceStatus">Not in a call</p>
-          </div>
-          <div class="voice-controls">
-            <button class="btn btn-success" id="btnStartVoiceCall">🎤 Start Voice Call</button>
-            <button class="btn btn-danger" id="btnEndVoiceCall" style="display: none;">☎️ End Call</button>
-            <button class="btn btn-secondary" id="btnToggleMic" style="display: none;">🎤 Mute</button>
+      <!-- VOICE TAB -->
+      <div class="tab-content" data-tab="voice">
+        <div class="voice-section">
+          <div class="voice-status" id="voiceStatus">Nicht im Call</div>
+          <div class="voice-buttons">
+            <button class="btn btn-primary" id="btnStartVoice">🎤 Voice starten</button>
+            <button class="btn btn-danger" id="btnEndVoice" style="display:none;">☎️ Beenden</button>
           </div>
           <div class="voice-participants" id="voiceParticipants"></div>
         </div>
       </div>
 
-    </div>
-  </section>
-
-  <!-- RIGHT PANEL -->
-  <aside class="connect-panel">
-    <div class="panel-header">
-      <h3 class="panel-title">Online Users</h3>
-    </div>
-    <div class="panel-content">
-      <div class="online-users" id="onlineUsers">
-        <div style="color: #666; text-align: center; padding: 12px;">No users online</div>
+      <!-- SETTINGS TAB -->
+      <div class="tab-content" data-tab="settings">
+        <div class="settings-section">
+          <h3>Gruppeneinstellungen</h3>
+          <div class="setting-item">
+            <label>Gruppenlevel</label>
+            <input type="text" id="groupLevel" disabled />
+          </div>
+          <div class="setting-item">
+            <button class="btn btn-secondary" id="btnLeaveGroup">Gruppe verlassen</button>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="panel-footer">
-      <small>Real-time presence</small>
-    </div>
-  </aside>
+    </section>
 
-</main>
+  </main>
 
-<!-- =====================================================
-     SCRIPTS (Inline - No Fetch)
-===================================================== -->
-<script src="firebase.js"></script>
-<script src="js/auth-state.js"></script>
-<script src="js/menu.js"></script>
-<script src="js/notify.js"></script>
-<script src="js/connect.js"></script>
-<script src="js/voice-chat.js"></script>
+  <!-- Footer via fetch -->
+  <div id="footer-placeholder"></div>
 
-<!-- VIEW CONTROLLER -->
-<script>
-  (function() {
-    const navItems = document.querySelectorAll(".nav-item[data-view]");
-    const views = document.querySelectorAll(".connect-view");
+  <!-- SCRIPTS -->
+  <script src="firebase.js"></script>
+  <script src="js/auth-state.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/notify.js"></script>
+  <script src="js/connect.js"></script>
+  <script src="js/voice-chat.js"></script>
 
-    function switchView(viewName) {
-      views.forEach(v => {
-        v.classList.toggle("is-active", v.dataset.view === viewName);
+  <!-- POST-LOAD HEADER INIT -->
+  <script>
+    document.body.classList.add('loaded');
+
+    // Header laden
+    fetch('header.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+        if (typeof initHeaderScripts === "function") initHeaderScripts();
+        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
       });
-      navItems.forEach(n => {
-        n.classList.toggle("is-active", n.dataset.view === viewName);
-      });
-    }
 
-    navItems.forEach(item => {
-      item.addEventListener("click", e => {
-        e.preventDefault();
-        switchView(item.dataset.view);
+    // Footer laden
+    fetch('footer.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      });
+
+    // TAB SWITCHING
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const tabName = e.target.dataset.tab;
+        
+        // Update buttons
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('is-active'));
+        e.target.classList.add('is-active');
+        
+        // Update content
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('is-active'));
+        document.querySelector(`.tab-content[data-tab="${tabName}"]`).classList.add('is-active');
       });
     });
-  })();
-</script>
+  </script>
 
 </body>
 </html>
