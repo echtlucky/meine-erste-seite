@@ -87,34 +87,25 @@
 
     navItems.forEach(item => {
       item.addEventListener("click", () => {
-        navItems.forEach(n => n.classList.remove("is-active"));
-        item.classList.add("is-active");
-
-        const label = item.textContent.toLowerCase();
-
-        if (label.includes("chat")) switchTab("chat");
-        else if (label.includes("discover")) switchTab("discover");
-        else if (label.includes("stats")) switchTab("stats");
-        else if (label.includes("profil")) switchTab("profile");
-        else if (label.includes("einstellung")) switchTab("settings");
-        else if (label.includes("hilfe")) switchTab("help");
+        const view = item.dataset.view;
+        if (view) {
+          switchTab(view);
+        }
       });
     });
   }
 
   function switchTab(tab){
-  activeTab = tab;
+    activeTab = tab;
 
-  document.querySelectorAll(".connect-view").forEach(v => {
-    v.classList.toggle("is-active", v.dataset.view === tab);
-  });
+    document.querySelectorAll(".connect-view").forEach(v => {
+      v.classList.toggle("is-active", v.dataset.view === tab);
+    });
 
-  document.querySelectorAll(".nav-item").forEach(n => {
-    n.classList.toggle("is-active",
-      n.textContent.toLowerCase().includes(tab)
-    );
-  });
-}
+    document.querySelectorAll(".nav-item").forEach(n => {
+      n.classList.toggle("is-active", n.dataset.view === tab);
+    });
+  }
 
   /* =====================================================
      PRESENCE
