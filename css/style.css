@@ -668,3 +668,38 @@ body.modal-open{ overflow:hidden; }
     gap: .6rem;
   }
 }
+
+/* =========================
+   FIX: Header Nav Hover/Click feels like selecting text
+   Ursache: Overlay / ::before / blur layer liegt über Links
+========================= */
+
+/* 1) Header immer "on top" */
+.site-header{
+  position: fixed;
+  z-index: 100000; /* stärker als alle Cards/Overlays */
+}
+
+/* 2) Deko-Overlays dürfen keine Pointer abfangen */
+.site-header::before,
+.site-header::after{
+  pointer-events: none !important;
+}
+
+/* 3) Falls du in Header-Containern Deko-Layer nutzt */
+.site-header *::before,
+.site-header *::after{
+  pointer-events: none !important;
+}
+
+/* 4) Nav Links wirklich wie Buttons */
+.nav-links a{
+  cursor: pointer !important;
+  user-select: none;
+}
+
+/* 5) Falls irgendwo global "cursor: text" reindrückt */
+.nav-links,
+.nav-links *{
+  cursor: pointer !important;
+}
