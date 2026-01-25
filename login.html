@@ -22,7 +22,6 @@
         <!-- Left: Visual / Content -->
         <section class="auth-visual">
           <div>
-            <!-- WICHTIG: eigene Klasse statt .badge (verhindert Kollisionen) -->
             <div class="auth-badge">⚡ echtlucky • Competitive</div>
 
             <h1>Willkommen zurück.</h1>
@@ -74,7 +73,7 @@
           </div>
 
           <div class="auth-card__body">
-            <div id="msgBox" class="msg"></div>
+            <div id="msgBox" class="msg" style="display:none;"></div>
 
             <!-- LOGIN FORM -->
             <form id="loginForm">
@@ -175,7 +174,7 @@
       <!-- Latest Blog (unten) -->
       <section class="auth-latest" id="latestPostCard" aria-live="polite">
         <div class="auth-latest__meta">Letzter Blog</div>
-        <h2 class="auth-latest__title" id="latestPostTitle">Lädt...</h2>
+        <h2 class="auth-latest__title" id="latestPostTitle">Lädt…</h2>
         <p class="auth-latest__text" id="latestPostText">Bitte einen Moment.</p>
         <a class="auth-latest__cta" id="latestPostLink" href="blog.html">Zum Blog →</a>
       </section>
@@ -191,60 +190,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
+  <!-- Your setup -->
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/legal-modal.js"></script>
   <script src="js/login.js"></script>
-
-  <script>
-    async function loadLatestPostIntoLogin() {
-      const titleEl = document.getElementById("latestPostTitle");
-      const textEl = document.getElementById("latestPostText");
-      const linkEl = document.getElementById("latestPostLink");
-      if (!titleEl || !textEl || !linkEl) return;
-
-      if (typeof window.db === "undefined") {
-        titleEl.textContent = "Aktuell kein Blog vorhanden";
-        textEl.textContent = "Firestore ist noch nicht bereit.";
-        return;
-      }
-
-      try {
-        const snap = await window.db
-          .collection("posts")
-          .orderBy("createdAt", "desc")
-          .limit(1)
-          .get();
-
-        if (snap.empty) {
-          titleEl.textContent = "Aktuell kein Blog vorhanden";
-          textEl.textContent = "Sobald ein Beitrag online ist, wird er hier angezeigt.";
-          linkEl.href = "blog.html";
-          linkEl.textContent = "Zum Blog →";
-          return;
-        }
-
-        const doc = snap.docs[0];
-        const data = doc.data() || {};
-        const title = data.title || "Neuer Beitrag";
-        const content = (data.content || "").toString().trim();
-        const excerpt = content.length > 220 ? content.slice(0, 220) + "…" : (content || "Beitrag ansehen.");
-
-        titleEl.textContent = title;
-        textEl.textContent = excerpt;
-
-        linkEl.href = "blog.html";
-        linkEl.textContent = "Beitrag lesen →";
-      } catch (err) {
-        titleEl.textContent = "Aktuell kein Blog vorhanden";
-        textEl.textContent = "Konnte den Blog nicht laden: " + err.message;
-        linkEl.href = "blog.html";
-        linkEl.textContent = "Zum Blog →";
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", loadLatestPostIntoLogin);
-  </script>
 
   <script>
     document.body.classList.add('loaded');
@@ -265,174 +215,60 @@
         document.getElementById('footer-placeholder').innerHTML = html;
       });
 
-    // ====== UI helpers ======
-    const tabLogin = document.getElementById('tabLogin');
-    const tabRegister = document.getElementById('tabRegister');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const msgBox = document.getElementById('msgBox');
+    // ===== Latest Blog Preview =====
+    async function loadLatestPostIntoLogin() {
+      const titleEl = document.getElementById("latestPostTitle");
+      const textEl  = document.getElementById("latestPostText");
+      const linkEl  = document.getElementById("latestPostLink");
+      if (!titleEl || !textEl || !linkEl) return;
 
-    function showMsg(text, type="error"){
-      msgBox.textContent = text;
-      msgBox.className = "msg " + (type === "success" ? "success" : "error");
-      msgBox.style.display = "block";
-    }
-    function clearMsg(){
-      msgBox.style.display = "none";
-      msgBox.textContent = "";
-      msgBox.className = "msg";
-    }
-
-    function setTab(mode){
-      clearMsg();
-      if (mode === "login"){
-        tabLogin.classList.add("active");
-        tabRegister.classList.remove("active");
-        loginForm.classList.remove("hidden");
-        registerForm.classList.add("hidden");
-      } else {
-        tabRegister.classList.add("active");
-        tabLogin.classList.remove("active");
-        registerForm.classList.remove("hidden");
-        loginForm.classList.add("hidden");
-      }
-    }
-    tabLogin.addEventListener('click', () => setTab("login"));
-    tabRegister.addEventListener('click', () => setTab("register"));
-
-    // ====== Username → Email resolver ======
-    async function resolveEmailFromIdentifier(identifierRaw){
-      const identifier = (identifierRaw || "").trim();
-      if (!identifier) throw new Error("Bitte E-Mail oder Username eingeben.");
-
-      if (identifier.includes("@")) return identifier;
-
-      const uname = identifier.toLowerCase();
-      if (!window.db) throw new Error("DB nicht verfügbar. Prüfe firebase.js + Firestore SDK.");
-
-      const doc = await db.collection("usernames").doc(uname).get();
-      if (!doc.exists) throw new Error("Username nicht gefunden.");
-      const data = doc.data();
-      if (!data?.email) throw new Error("Username ist nicht korrekt verknüpft.");
-      return data.email;
-    }
-
-    function isValidUsername(u){
-      const v = (u || "").trim();
-      if (v.length < 3 || v.length > 20) return false;
-      return /^[a-zA-Z0-9_.-]+$/.test(v);
-    }
-
-    // ====== LOGIN ======
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearMsg();
-
-      const identifier = document.getElementById('loginIdentifier').value;
-      const password = document.getElementById('loginPassword').value;
-
-      try{
-        const email = await resolveEmailFromIdentifier(identifier);
-        await auth.signInWithEmailAndPassword(email, password);
-        showMsg("Eingeloggt. Weiterleitung…", "success");
-        setTimeout(() => window.location.href = "index.html", 650);
-      }catch(err){
-        showMsg(err?.message || "Login fehlgeschlagen.");
-      }
-    });
-
-    // ====== REGISTER ======
-    registerForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearMsg();
-
-      const username = document.getElementById('regUsername').value.trim();
-      const email = document.getElementById('regEmail').value.trim();
-      const password = document.getElementById('regPassword').value;
-
-      if (!isValidUsername(username)){
-        showMsg("Username ungültig. Erlaubt: A-Z, 0-9, _ . - (3–20 Zeichen).");
+      // db muss in firebase.js als global existieren: const db = firebase.firestore();
+      if (typeof db === "undefined") {
+        titleEl.textContent = "Aktuell kein Blog vorhanden";
+        textEl.textContent = "Firestore ist noch nicht bereit (db fehlt in firebase.js).";
         return;
       }
 
-      try{
-        const unameLower = username.toLowerCase();
-        const existing = await db.collection("usernames").doc(unameLower).get();
-        if (existing.exists){
-          showMsg("Username ist schon vergeben.");
+      const stripHtml = (s) => String(s || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+      const makeExcerpt = (s, max=180) => (s.length > max ? s.slice(0, max).trim() + "…" : s);
+
+      try {
+        // 1) try createdAt
+        let snap;
+        try {
+          snap = await db.collection("posts").orderBy("createdAt", "desc").limit(1).get();
+        } catch (e) {
+          // 2) fallback to date
+          snap = await db.collection("posts").orderBy("date", "desc").limit(1).get();
+        }
+
+        if (!snap || snap.empty) {
+          titleEl.textContent = "Aktuell kein Blog vorhanden";
+          textEl.textContent = "Sobald ein Beitrag online ist, wird er hier angezeigt.";
+          linkEl.href = "blog.html";
+          linkEl.textContent = "Zum Blog →";
           return;
         }
 
-        const cred = await auth.createUserWithEmailAndPassword(email, password);
-        await cred.user.updateProfile({ displayName: username });
+        const data = snap.docs[0].data() || {};
+        const title = data.title || "Neuer Beitrag";
+        const content = stripHtml(data.content || "");
+        const excerpt = makeExcerpt(content || "Beitrag ansehen.", 190);
 
-        await db.collection("usernames").doc(unameLower).set({
-          email: email,
-          uid: cred.user.uid,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        titleEl.textContent = title;
+        textEl.textContent = excerpt;
 
-        showMsg("Account erstellt. Weiterleitung…", "success");
-        setTimeout(() => window.location.href = "index.html", 650);
-      }catch(err){
-        showMsg(err?.message || "Registrierung fehlgeschlagen.");
-      }
-    });
-
-    // ====== GOOGLE AUTH ======
-    async function googleSignIn(){
-      clearMsg();
-      try{
-        const result = await auth.signInWithPopup(googleProvider);
-
-        const u = result.user;
-        if (u?.displayName){
-          const unameLower = u.displayName.toLowerCase().replace(/\s+/g, "").slice(0,20);
-          const docRef = db.collection("usernames").doc(unameLower);
-          const snap = await docRef.get();
-          if (!snap.exists){
-            await docRef.set({
-              email: u.email,
-              uid: u.uid,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          }
-        }
-
-        showMsg("Mit Google eingeloggt. Weiterleitung…", "success");
-        setTimeout(() => window.location.href = "index.html", 650);
-      }catch(err){
-        showMsg(err?.message || "Google Login fehlgeschlagen.");
+        linkEl.href = "blog.html";
+        linkEl.textContent = "Beitrag lesen →";
+      } catch (err) {
+        titleEl.textContent = "Aktuell kein Blog vorhanden";
+        textEl.textContent = "Konnte den Blog nicht laden: " + (err?.message || "Unbekannter Fehler");
+        linkEl.href = "blog.html";
+        linkEl.textContent = "Zum Blog →";
       }
     }
 
-    document.getElementById('googleLoginBtn').addEventListener('click', googleSignIn);
-    document.getElementById('googleRegisterBtn').addEventListener('click', googleSignIn);
-
-    // ====== PASSWORD RESET ======
-    document.getElementById('forgotPw').addEventListener('click', async (e) => {
-      e.preventDefault();
-      clearMsg();
-
-      const identifier = document.getElementById('loginIdentifier').value.trim();
-      if (!identifier){
-        showMsg("Bitte zuerst E-Mail oder Username eingeben.");
-        return;
-      }
-
-      try{
-        const email = await resolveEmailFromIdentifier(identifier);
-        await auth.sendPasswordResetEmail(email);
-        showMsg("Reset-Mail wurde gesendet (falls die Adresse existiert).", "success");
-      }catch(err){
-        showMsg(err?.message || "Reset fehlgeschlagen.");
-      }
-    });
-
-    // If already logged in, redirect
-    auth.onAuthStateChanged((user) => {
-      if (user) window.location.href = "index.html";
-    });
+    document.addEventListener("DOMContentLoaded", loadLatestPostIntoLogin);
   </script>
 </body>
 </html>
