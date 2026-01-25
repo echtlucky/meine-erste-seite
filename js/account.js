@@ -55,17 +55,18 @@
   const btnClearLocal   = el("btnClearLocal");
   const btnWipeCloud    = el("btnWipeCloud");
 
-  // Notify wrapper (falls notify.js vorhanden)
+  // Notify wrapper — einheitlich mit notify.js
   function toast(type, msg) {
-    // expected: window.notify.success/error/warn/info OR window.notify.show(type,msg)
-    const n = window.notify;
-    if (n?.show) return n.show(type, msg);
-    if (type === "success" && n?.success) return n.success(msg);
-    if (type === "error" && n?.error) return n.error(msg);
-    if (type === "warn" && (n?.warn || n?.warning)) return (n.warn || n.warning)(msg);
-    if (n?.info) return n.info(msg);
-    // fallback
-    alert(msg);
+    if (window.notify?.show) {
+      return window.notify.show({
+        type: type,
+        title: type === "success" ? "Erfolg" : type === "error" ? "Fehler" : "Info",
+        message: msg,
+        duration: 4500
+      });
+    }
+    // Fallback
+    console.log(`[${type.toUpperCase()}] ${msg}`);
   }
 
   function msToLabel(ms) {

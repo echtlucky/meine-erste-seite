@@ -269,7 +269,18 @@
     if (u) await saveCloud(u, res.state);
 
     render(res.state, u ? "cloud" : "local");
-    if (res.msg) alert(res.msg);
+    if (res.msg) {
+      if (window.notify?.show) {
+        window.notify.show({
+          type: "success",
+          title: "Task abgeschlossen",
+          message: res.msg,
+          duration: 4500
+        });
+      } else {
+        alert(res.msg);
+      }
+    }
   }
 
   async function reroll() {

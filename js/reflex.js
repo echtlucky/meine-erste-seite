@@ -435,12 +435,13 @@
   }
 
   function showHow(){
-    if (window.notify) {
-      notify.info(
-        "Reaction: Target kommt nach Delay. Flick: sofortige Targets. Precision: kleiner + sweaty. ESC/Exit beendet.",
-        "How it works",
-        6500
-      );
+    if (window.notify?.show) {
+      window.notify.show({
+        type: "info",
+        title: "How it works",
+        message: "Reaction: Target kommt nach Delay. Flick: sofortige Targets. Precision: kleiner + sweaty. ESC/Exit beendet.",
+        duration: 6500
+      });
       return;
     }
     alert("Reaction: Delay • Flick: instant • Precision: kleiner • ESC/Exit beendet");

@@ -58,6 +58,21 @@
 
     // ---- UI helpers
     function showMsg(text, type = "error") {
+      // Use global notify system wenn verfügbar
+      if (window.notify?.show) {
+        const typeMap = {
+          error: "error",
+          success: "success",
+          warn: "warn"
+        };
+        return window.notify.show({
+          type: typeMap[type] || "info",
+          title: type === "success" ? "Erfolg" : "Fehler",
+          message: text,
+          duration: 4500
+        });
+      }
+      // Fallback: alte msgBox Methode
       if (!msgBox) return;
       msgBox.textContent = text;
       msgBox.className = "msg " + (type === "success" ? "success" : "error");

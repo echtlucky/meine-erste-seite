@@ -8,7 +8,7 @@
     type: "info",
     title: "",
     message: "",
-    duration: 3200, // ms (0 = sticky)
+    duration: 4500, // ms (erhöht von 3200 auf 4500 für längere Sichtbarkeit)
   };
 
   let stackEl = null;

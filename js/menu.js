@@ -260,10 +260,20 @@ window.renderAuthUI = function renderAuthUI(user) {
     const auth = getAuth();
     if (!auth) return;
 
-    auth
-      .signOut()
-      .then(() => (window.location.href = "index.html"))
-      .catch((err) => alert("Ausloggen fehlgeschlagen: " + (err?.message || "Unbekannt")));
+    auth.signOut()
+      .then(() => {
+        if (window.notify?.success) {
+          window.notify.success("Erfolgreich abgemeldet", "Logout", 3500);
+        }
+        window.location.href = "index.html";
+      })
+      .catch((err) => {
+        if (window.notify?.error) {
+          window.notify.error("Ausloggen fehlgeschlagen: " + (err?.message || "Unbekannt"), "Fehler", 4500);
+        } else {
+          alert("Ausloggen fehlgeschlagen: " + (err?.message || "Unbekannt"));
+        }
+      });
   };
 
   /* =========================

@@ -132,9 +132,33 @@
               Wähle links eine Group oder entdecke neue Communities.
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>
-            Join
-          </button>
+          <div class="pane-head-actions">
+            <button class="btn btn-ghost btn-sm" id="btnStartVoiceCall" title="Voice Chat starten">
+              🎤 Voice
+            </button>
+            <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>
+              Join
+            </button>
+          </div>
+        </div>
+
+        <!-- Voice Call Panel -->
+        <div class="voice-call-panel" id="voiceCallPanel">
+          <div class="voice-status">
+            <div class="voice-indicator">
+              <span class="voice-pulse"></span>
+              <span id="voiceStatus">Verbindung wird hergestellt...</span>
+            </div>
+            <div class="voice-participants" id="voiceParticipants"></div>
+          </div>
+          <div class="voice-controls">
+            <button class="voice-btn voice-btn--mute" id="btnToggleMic" title="Mikrofon stummschalten">
+              🎤
+            </button>
+            <button class="voice-btn voice-btn--hang-up" id="btnEndVoiceCall" title="Anruf beenden">
+              ☎️ Beenden
+            </button>
+          </div>
         </div>
 
         <div class="chat-scroll" id="chatScroll"></div>
@@ -306,6 +330,7 @@
 <script src="js/menu.js"></script>
 <script src="js/notify.js"></script>
 <script src="js/connect.js"></script>
+<script src="js/voice-chat.js"></script>
 
 <script>
   document.body.classList.add("loaded");

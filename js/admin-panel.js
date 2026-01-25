@@ -467,7 +467,11 @@
 
     const ok = await canModerate(user);
     if (!ok) {
-      alert("Zugriff verweigert – keine Admin/Mod Rechte.");
+      if (window.notify?.error) {
+        window.notify.error("Keine Admin/Mod Rechte", "Zugriff verweigert", 4500);
+      } else {
+        alert("Zugriff verweigert – keine Admin/Mod Rechte.");
+      }
       window.location.href = "index.html";
       return;
     }

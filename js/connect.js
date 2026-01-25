@@ -20,7 +20,14 @@
   const serverTS = () => firebase.firestore.FieldValue.serverTimestamp();
 
   const notify = (type, msg) => {
-    if (window.notify?.show) return window.notify.show(type, msg);
+    if (window.notify?.show) {
+      return window.notify.show({
+        type: type,
+        title: type === "success" ? "Erfolg" : type === "error" ? "Fehler" : "Info",
+        message: msg,
+        duration: 4500
+      });
+    }
     console.log(type.toUpperCase() + ":", msg);
   };
 
@@ -86,11 +93,26 @@
     const navItems = $$(".nav-item");
 
     navItems.forEach(item => {
-      item.addEventListener("click", () => {
-        const view = item.dataset.view;
-        if (view) {
-          switchTab(view);
-        }
+      item.addEventListener("click", (e) => {
+        // Verhindere Event-Bubbling
+        e.preventDefault();
+        e.stopPropagation();
+        
+        navItems.forEach(n => n.classList.remove("is-active"));
+        item.classList.add("is-active");
+        
+        // Finde View basierend auf Text oder data-view
+        const itemText = item.textContent.toLowerCase();
+        let view = "chat";
+        
+        if (itemText.includes("discover")) view = "discover";
+        else if (itemText.includes("stats") || itemText.includes("community")) view = "stats";
+        else if (itemText.includes("profil")) view = "profile";
+        else if (itemText.includes("einstellung")) view = "settings";
+        else if (itemText.includes("hilfe")) view = "help";
+        else if (itemText.includes("chat")) view = "chat";
+        
+        switchTab(view);
       });
     });
   }
@@ -98,12 +120,28 @@
   function switchTab(tab){
     activeTab = tab;
 
-    document.querySelectorAll(".connect-view").forEach(v => {
-      v.classList.toggle("is-active", v.dataset.view === tab);
+    // Zeige nur die aktive View
+    const views = document.querySelectorAll(".connect-view");
+    views.forEach(v => {
+      if (v.dataset.view === tab) {
+        v.classList.add("is-active");
+      } else {
+        v.classList.remove("is-active");
+      }
     });
 
-    document.querySelectorAll(".nav-item").forEach(n => {
-      n.classList.toggle("is-active", n.dataset.view === tab);
+    // Update active nav item
+    const navItems = $$(".nav-item");
+    navItems.forEach(n => {
+      const nText = n.textContent.toLowerCase();
+      let nView = "chat";
+      if (nText.includes("discover")) nView = "discover";
+      else if (nText.includes("stats") || nText.includes("community")) nView = "stats";
+      else if (nText.includes("profil")) nView = "profile";
+      else if (nText.includes("einstellung")) nView = "settings";
+      else if (nText.includes("hilfe")) nView = "help";
+      
+      n.classList.toggle("is-active", nView === tab);
     });
   }
 
@@ -182,6 +220,9 @@
     selectedGroup = { id, ...data };
     chatTitle.textContent = data.name;
     chatHint.textContent = "Lade Group…";
+
+    // Speichere selectedGroup für voice-chat.js
+    window.__ECHTLUCKY_SELECTED_GROUP__ = id;
 
     cleanupGroupListeners();
 
