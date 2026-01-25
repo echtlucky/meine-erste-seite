@@ -1,0 +1,215 @@
+/* =========================
+   Ranked Challenge Page
+========================= */
+
+.ranked-wrap{
+  width: min(1100px, 92%);
+  margin: 0 auto;
+  padding: clamp(1.8rem, 3vw, 2.6rem) 0;
+  display: grid;
+  gap: 1.4rem;
+}
+
+.ranked-hero{
+  border-radius: 22px;
+  border: 1px solid rgba(0,255,136,0.14);
+  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.74));
+  box-shadow: 0 26px 90px rgba(0,0,0,0.45);
+  padding: 1.4rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ranked-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .55rem .95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0,255,136,0.18);
+  background: rgba(0,0,0,0.35);
+  color: rgba(224,255,224,0.88);
+  font-weight: 820;
+  width: fit-content;
+  margin-bottom: .9rem;
+}
+
+.ranked-title{
+  margin: 0 0 .35rem;
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  letter-spacing: -0.6px;
+}
+
+.ranked-sub{
+  margin: 0;
+  opacity: .85;
+  line-height: 1.6;
+}
+
+.ranked-stats{
+  display: grid;
+  grid-auto-flow: column;
+  gap: .9rem;
+}
+
+.stat{
+  min-width: 110px;
+  padding: .9rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(0,255,136,0.12);
+  background: rgba(0,0,0,0.35);
+}
+
+.stat-label{
+  font-size: .85rem;
+  opacity: .8;
+  margin-bottom: .25rem;
+}
+
+.stat-value{
+  font-size: 1.35rem;
+  font-weight: 850;
+  color: rgba(0,255,136,0.95);
+}
+
+.ranked-card{
+  border-radius: 22px;
+  border: 1px solid rgba(0,255,136,0.14);
+  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.74));
+  box-shadow: 0 26px 90px rgba(0,0,0,0.45);
+  padding: 1.3rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.ranked-card__head{
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ranked-card__title{
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.ranked-card__hint{
+  margin: .3rem 0 0;
+  opacity: .8;
+}
+
+.ranked-actions{
+  display:flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+
+.ranked-progress{
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+  border: 1px solid rgba(0,255,136,0.12);
+}
+
+.ranked-progress__bar{
+  height: 100%;
+  width: 0%;
+  background: rgba(0,255,136,0.85);
+  border-radius: 999px;
+  transition: width .25s ease;
+}
+
+.ranked-progress__meta{
+  display:flex;
+  justify-content: space-between;
+  opacity: .85;
+  font-size: .92rem;
+}
+
+.ranked-list{
+  display:grid;
+  gap: .85rem;
+}
+
+.ranked-task{
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(0,255,136,0.12);
+  background: rgba(0,0,0,0.38);
+}
+
+.ranked-task__title{
+  font-weight: 850;
+  margin-bottom: .25rem;
+}
+
+.ranked-task__desc{
+  opacity: .85;
+  line-height: 1.55;
+}
+
+.ranked-task__right{
+  display:flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .5rem;
+}
+
+.ranked-task__xp{
+  font-size: .9rem;
+  opacity: .8;
+}
+
+.ranked-footer{
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: .4rem;
+  border-top: 1px solid rgba(0,255,136,0.10);
+}
+
+.ranked-footer__left{
+  display:flex;
+  align-items: center;
+  gap: .6rem;
+  opacity: .75;
+  font-size: .9rem;
+}
+
+.ranked-footer .dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0,255,136,0.9);
+}
+
+@media (max-width: 900px){
+  .ranked-hero{
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ranked-stats{
+    grid-auto-flow: row;
+    width: 100%;
+  }
+  .stat{ width: 100%; }
+  .ranked-task{
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ranked-task__right{
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
