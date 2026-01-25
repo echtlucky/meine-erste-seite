@@ -1,4 +1,6 @@
-// js/menu.js — FINAL v3 (Fetch-Header kompatibel, anti-flicker, SINGLE auth listener, Mobile-Menü fix)
+// js/menu.js — FINAL v4
+// Fetch-Header kompatibel, anti-flicker, SINGLE auth listener,
+// Mobile-Menü fix, Account-CTA Switch (Account erstellen ↔ verwalten)
 (function () {
   "use strict";
 
@@ -9,32 +11,41 @@
   }
   window.__ECHTLUCKY_MENU_JS_LOADED__ = true;
 
-  // Global state
+  // Global user cache (shared across pages)
   window.__ECHTLUCKY_CURRENT_USER__ = window.__ECHTLUCKY_CURRENT_USER__ || null;
 
   /* =========================
-     🧩 Helpers
+     Helpers
   ========================= */
   function qs(id) {
     return document.getElementById(id);
   }
 
-  // Re-render auth UI whenever header is (re)injected
+  function safeTextFromUser(user) {
+    return (
+      user?.displayName ||
+      (user?.email ? user.email.split("@")[0] : null) ||
+      "User"
+    );
+  }
+
+  /* =========================
+     AUTH UI (Header)
+  ========================= */
   function renderAuthUI(user) {
     const userNameDisplay = qs("user-name-display");
     const dropdownMenu = qs("dropdown-menu");
     const loginLink = qs("login-link");
     const adminPanelLink = qs("admin-panel-link");
 
-    // If header not present yet, just return
+    // Header not injected yet? no problem.
     if (!loginLink && !userNameDisplay && !adminPanelLink) return;
 
     if (user) {
       if (loginLink) loginLink.style.display = "none";
 
       if (userNameDisplay) {
-        userNameDisplay.textContent =
-          user.displayName || (user.email ? user.email.split("@")[0] : "User");
+        userNameDisplay.textContent = safeTextFromUser(user);
         userNameDisplay.style.display = "inline-flex";
       }
 
@@ -52,6 +63,41 @@
     }
   }
 
+  /* =========================
+     Account CTA Switch (Site-wide)
+     - Default:
+       logged out -> "Account erstellen" (login.html)
+       logged in  -> "Account verwalten" (account.html)
+     - Works for ANY element that has:
+       id="accountActionBtn" OR data-account-cta
+  ========================= */
+  function updateAccountCTA(user) {
+    // 1) single known CTA
+    const primary = document.getElementById("accountActionBtn");
+
+    // 2) optional multiple CTAs
+    const all = Array.from(document.querySelectorAll("[data-account-cta]"));
+
+    const targets = [];
+    if (primary) targets.push(primary);
+    all.forEach((el) => targets.push(el));
+
+    if (!targets.length) return;
+
+    targets.forEach((btn) => {
+      if (user) {
+        btn.textContent = btn.getAttribute("data-cta-logged-in") || "Account verwalten";
+        btn.setAttribute("href", btn.getAttribute("data-href-logged-in") || "account.html");
+      } else {
+        btn.textContent = btn.getAttribute("data-cta-logged-out") || "Account erstellen";
+        btn.setAttribute("href", btn.getAttribute("data-href-logged-out") || "login.html");
+      }
+    });
+  }
+
+  /* =========================
+     Active Nav Link
+  ========================= */
   function setActiveNavLink() {
     const currentPath = window.location.pathname.split("/").pop() || "index.html";
     document.querySelectorAll(".nav-links a").forEach((link) => {
@@ -64,26 +110,23 @@
   }
 
   /* =========================
-     ✅ Public init (call after fetch(header.html))
+     Public init (call after fetch(header.html))
   ========================= */
   window.initHeaderScripts = function initHeaderScripts() {
-    // Header elements exist only after fetch(header.html)
     const userNameDisplay = qs("user-name-display");
     const dropdownMenu = qs("dropdown-menu");
     const menuToggle = qs("menuToggle");
     const mainNav = qs("mainNav");
 
     /* =========================
-       📱 Mobile Menü Toggle (FIXED)
+       Mobile Menü Toggle
     ========================= */
     if (menuToggle && mainNav && !menuToggle.__wired) {
       menuToggle.__wired = true;
-
       menuToggle.setAttribute("aria-expanded", "false");
 
       menuToggle.addEventListener("click", (e) => {
         e.stopPropagation();
-
         mainNav.classList.toggle("open");
 
         const isOpen = mainNav.classList.contains("open");
@@ -91,7 +134,7 @@
         menuToggle.classList.toggle("is-open", isOpen);
       });
 
-      // Close menu when clicking outside (NOT when clicking inside nav or on toggle)
+      // Close menu when clicking outside
       document.addEventListener("click", (e) => {
         if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
           mainNav.classList.remove("open");
@@ -100,7 +143,7 @@
         }
       });
 
-      // Close menu after clicking a nav link (mobile UX)
+      // Close menu after clicking a nav link
       mainNav.querySelectorAll("a").forEach((a) => {
         a.addEventListener("click", () => {
           mainNav.classList.remove("open");
@@ -109,7 +152,7 @@
         });
       });
 
-      // Resize => Menü resetten
+      // Resize => reset menu
       window.addEventListener("resize", () => {
         if (window.innerWidth > 992) {
           mainNav.classList.remove("open");
@@ -120,7 +163,7 @@
     }
 
     /* =========================
-       👤 Dropdown
+       Dropdown (User)
     ========================= */
     if (userNameDisplay && dropdownMenu && !userNameDisplay.__wired) {
       userNameDisplay.__wired = true;
@@ -137,19 +180,17 @@
       });
     }
 
-    /* =========================
-       🔗 Active Link
-    ========================= */
+    // Active link
     setActiveNavLink();
 
-    /* =========================
-       🔐 Apply current auth state immediately (prevents header blink)
-    ========================= */
-    renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
+    // Apply current auth state to freshly injected header + CTAs
+    const u = window.__ECHTLUCKY_CURRENT_USER__ || null;
+    renderAuthUI(u);
+    updateAccountCTA(u);
   };
 
   /* =========================
-     🔐 SINGLE Auth Listener (global)
+     SINGLE Auth Listener (global)
      - attaches once per page load
   ========================= */
   function ensureAuthListener() {
@@ -164,15 +205,18 @@
 
     auth.onAuthStateChanged((user) => {
       window.__ECHTLUCKY_CURRENT_USER__ = user || null;
+
+      // Update header & any CTA elements on the page
       renderAuthUI(user || null);
+      updateAccountCTA(user || null);
     });
   }
 
-  // Try immediately (firebase.js might already be loaded)
+  // Try immediately
   ensureAuthListener();
 
   /* =========================
-     🚪 Logout global (used by header.html onclick)
+     Logout global (used by header.html onclick)
   ========================= */
   window.logout = function logout() {
     const auth = window.auth || window.echtlucky?.auth;
@@ -185,7 +229,7 @@
   };
 
   /* =========================
-     🧠 Smart Header Scroll (single init)
+     Smart Header Scroll (single init)
   ========================= */
   window.initSmartHeaderScroll = function initSmartHeaderScroll() {
     if (window.__ECHTLUCKY_SMART_HEADER__) return;
