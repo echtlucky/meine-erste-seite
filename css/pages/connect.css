@@ -509,17 +509,12 @@
 ========================================================= */
 
 .connect-section{
-  background: linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.45));
-  border: 1px solid rgba(0,255,136,.18);
-}
-
-/*.connect-section{
   padding: 1.6rem 1.7rem;
   border-radius: var(--radius-xl);
   border:1px solid var(--border-soft);
-  background: rgba(0,0,0,.55);
+  background: linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.45));
   box-shadow: var(--shadow-lg);
-}*/
+}
 
 .connect-section h2{
   margin:0 0 .4rem;
