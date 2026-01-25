@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connect | echtlucky</title>
 
+  <!-- GitHub Pages base URL fix -->
+  <base href="/meine-erste-seite/" />
+
   <!-- Firebase CDN (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -15,43 +18,227 @@
   <link rel="stylesheet" href="css/pages/connect.css" />
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Quick inline fixes for GitHub Pages */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       background: #0a0e27;
       color: #f0f0f0;
-      min-height: 100vh;
     }
 
     .connect-page {
+      background: #0a0e27;
+      color: #f0f0f0;
+      height: 100vh;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
     }
 
+    /* Make sure header is visible */
+    .site-header {
+      background: #1a2038;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .site-header a {
+      color: #00ff88;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .site-header nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    .site-header nav a {
+      color: #a0a0a0;
+      font-weight: 400;
+      text-decoration: none;
+    }
+
+    .site-header nav a.active,
+    .site-header a[href*="connect.html"] {
+      color: #00ff88;
+    }
+
+    /* Main app container */
     .connect-app {
       display: flex;
       flex: 1;
       overflow: hidden;
+      gap: 0;
     }
 
-    .connect-sidebar,
-    .connect-panel {
+    /* Basic sidebar styling */
+    .connect-sidebar {
       width: 280px;
       background: #1a2038;
-      border-color: rgba(0,255,136,.2);
-      border-style: solid;
-      border-width: 0 1px;
+      border-right: 1px solid rgba(0, 255, 136, 0.2);
       overflow-y: auto;
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
     }
 
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .sidebar-title {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #00ff88;
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-nav {
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: #a0a0a0;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      display: block;
+    }
+
+    .nav-item:hover {
+      background: rgba(0, 255, 136, 0.1);
+      color: #00ff88;
+    }
+
+    .nav-item.is-active {
+      background: rgba(0, 255, 136, 0.15);
+      color: #00ff88;
+      border-color: rgba(0, 255, 136, 0.3);
+      font-weight: 600;
+    }
+
+    .sidebar-section {
+      padding: 16px 12px;
+      border-top: 1px solid rgba(0, 255, 136, 0.2);
+      margin-top: auto;
+    }
+
+    .sidebar-section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .groups-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 0 8px;
+    }
+
+    .group-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: #a0a0a0;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      display: block;
+      text-decoration: none;
+    }
+
+    .group-item:hover {
+      background: rgba(0, 255, 136, 0.1);
+      color: #f0f0f0;
+    }
+
+    .group-item.selected {
+      background: rgba(0, 255, 136, 0.15);
+      color: #00ff88;
+      border-color: rgba(0, 255, 136, 0.3);
+    }
+
+    .sidebar-user {
+      padding: 12px;
+      border-top: 1px solid rgba(0, 255, 136, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: space-between;
+    }
+
+    .user-info {
+      flex: 1;
+      font-size: 0.9rem;
+      color: #a0a0a0;
+    }
+
+    .user-status {
+      display: block;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    /* Basic main content styling */
     .connect-main {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      background: #0a0e27;
+    }
+
+    .connect-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+      background: #1a2038;
+      flex-shrink: 0;
+    }
+
+    .header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f0f0f0;
+      margin: 0;
+    }
+
+    .header-subtitle {
+      font-size: 0.9rem;
+      color: #a0a0a0;
+      margin: 0;
     }
 
     .connect-content {
@@ -60,71 +247,518 @@
       padding: 24px;
     }
 
-    /* ===== Views ===== */
-    .connect-view { display: none; }
-    .connect-view.is-active { display: block; }
+    /* Views */
+    .connect-view {
+      display: none;
+    }
 
-    .nav-item.is-active {
-      color: #00ff88;
+    .connect-view.is-active {
+      display: block;
+    }
+
+    /* View Welcome */
+    .view-welcome {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .welcome-box {
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .welcome-emoji {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+
+    .welcome-box h3 {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: #f0f0f0;
+    }
+
+    .welcome-box p {
+      color: #a0a0a0;
+      margin-bottom: 24px;
+    }
+
+    /* Chat styling */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      gap: 16px;
+    }
+
+    .messages-area {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .message {
+      padding: 12px;
+      background: rgba(0, 255, 136, 0.08);
+      border-radius: 6px;
+      border-left: 3px solid #00ff88;
+    }
+
+    .message-user {
       font-weight: 600;
+      color: #00ff88;
+      font-size: 0.9rem;
+    }
+
+    .message-text {
+      color: #f0f0f0;
+      margin-top: 4px;
+    }
+
+    .chat-input-area {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .message-input {
+      flex: 1;
+      padding: 12px;
+      background: #1a2038;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 6px;
+      color: #f0f0f0;
+      font-family: inherit;
+    }
+
+    .message-input:focus {
+      outline: none;
+      border-color: #00ff88;
+      box-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+    }
+
+    .message-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .send-btn {
+      padding: 12px 20px;
+      background: #00ff88;
+      color: #0a0e27;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      background: #00cc66;
+      transform: translateY(-2px);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Members styling */
+    .members-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .members-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .members-search {
+      padding: 10px 12px;
+      background: #1a2038;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 6px;
+      color: #f0f0f0;
+      font-family: inherit;
+    }
+
+    .members-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .member-card {
+      padding: 16px;
+      background: #1a2038;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .member-name {
+      font-weight: 600;
+      color: #00ff88;
+    }
+
+    .member-role {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    /* Stats styling */
+    .stats-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-card {
+      padding: 20px;
+      background: #1a2038;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 6px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #00ff88;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #a0a0a0;
+      margin-top: 8px;
+    }
+
+    /* Voice styling */
+    .voice-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .voice-header {
+      padding: 16px;
+      background: #1a2038;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .voice-header h3 {
+      margin: 0 0 8px 0;
+      color: #f0f0f0;
+    }
+
+    .voice-header p {
+      margin: 0;
+      color: #a0a0a0;
+      font-size: 0.9rem;
+    }
+
+    .voice-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: #00ff88;
+      color: #0a0e27;
+    }
+
+    .btn-primary:hover {
+      background: #00cc66;
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background: #00ff88;
+      color: #0a0e27;
+    }
+
+    .btn-success:hover {
+      background: #00cc66;
+    }
+
+    .btn-danger {
+      background: #ff3366;
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #ff1a4d;
+    }
+
+    .btn-secondary {
+      background: #1a2038;
+      color: #a0a0a0;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 255, 136, 0.1);
+      color: #00ff88;
+    }
+
+    .voice-participants {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .voice-participant {
+      padding: 16px;
+      background: #1a2038;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .participant-name {
+      font-weight: 600;
+      color: #00ff88;
+    }
+
+    .participant-status {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    /* Basic panel styling */
+    .connect-panel {
+      width: 280px;
+      background: #1a2038;
+      border-left: 1px solid rgba(0, 255, 136, 0.2);
+      overflow-y: auto;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #00ff88;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .online-users {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .online-user {
+      padding: 12px;
+      background: rgba(0, 255, 136, 0.08);
+      border-radius: 6px;
+      border-left: 2px solid #00ff88;
+      font-size: 0.9rem;
+    }
+
+    .online-user-name {
+      font-weight: 600;
+      color: #00ff88;
+    }
+
+    .online-user-status {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .panel-footer {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(0, 255, 136, 0.2);
+      font-size: 0.8rem;
+      color: #666;
+      text-align: center;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 136, 0.3);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 255, 136, 0.5);
     }
   </style>
 </head>
 
 <body class="connect-page">
 
-<!-- HEADER -->
-<header class="site-header" style="background:#1a2038;padding:12px 24px;border-bottom:1px solid rgba(0,255,136,.2);display:flex;justify-content:space-between;">
-  <a href="index.html" style="color:#00ff88;font-weight:700;text-decoration:none;">echtlucky</a>
-  <nav style="display:flex;gap:20px;">
-    <a href="index.html" style="color:#aaa;">Home</a>
-    <a href="blog.html" style="color:#aaa;">Blog</a>
-    <a href="connect.html" style="color:#00ff88;font-weight:600;">Connect</a>
+<!-- =====================================================
+     HEADER (Inline - No Fetch)
+===================================================== -->
+<header class="site-header">
+  <a href="index.html" style="font-size: 1.2rem;">echtlucky</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="blog.html">Blog</a>
+    <a href="ranked.html">Ranked</a>
+    <a href="connect.html">Connect</a>
   </nav>
-  <div id="headerAuth"><a href="login.html" style="color:#00ff88;">Login</a></div>
+  <div id="headerAuth">
+    <a href="login.html">Login</a>
+  </div>
 </header>
 
-<!-- APP -->
+<!-- =====================================================
+     MAIN CONNECT APP (Discord-like Layout)
+===================================================== -->
 <main class="connect-app">
 
   <!-- SIDEBAR -->
   <aside class="connect-sidebar">
-    <nav style="padding:16px;display:grid;gap:10px;">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">echtlucky Connect</h2>
+    </div>
+
+    <nav class="sidebar-nav">
       <a class="nav-item is-active" data-view="overview" href="#">📡 Overview</a>
       <a class="nav-item" data-view="chat" href="#">💬 Chat</a>
       <a class="nav-item" data-view="members" href="#">👥 Members</a>
       <a class="nav-item" data-view="stats" href="#">📊 Stats</a>
       <a class="nav-item" data-view="voice" href="#">🎤 Voice</a>
     </nav>
+
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">Groups</h3>
+      <button class="btn btn-primary" id="btnCreateGroup" style="width: 100%; margin-bottom: 8px;">+ New Group</button>
+    </div>
+
+    <div class="groups-list" id="groupsList">
+      <div style="padding: 8px; color: #666; text-align: center;">No groups yet</div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-info" id="userInfo">
+        <span class="user-status">Not logged in</span>
+      </div>
+      <button class="nav-item" id="btnUserMenu" style="padding: 4px 8px;">⋮</button>
+    </div>
   </aside>
 
-  <!-- MAIN -->
+  <!-- MAIN CONTENT -->
   <section class="connect-main">
+    <header class="connect-header">
+      <div class="header-info" id="headerInfo">
+        <h2 class="header-title">Welcome to Connect</h2>
+        <p class="header-subtitle">Select a group to start chatting or create a new one</p>
+      </div>
+    </header>
+
     <div class="connect-content">
 
+      <!-- OVERVIEW VIEW -->
       <div class="connect-view is-active" data-view="overview">
-        <h2>Welcome to Connect</h2>
-        <p>Wähle links eine Funktion aus.</p>
+        <div class="view-welcome">
+          <div class="welcome-box">
+            <div class="welcome-emoji">🌐</div>
+            <h3>Welcome to echtlucky Connect</h3>
+            <p>Select a group from the sidebar to start chatting, or create a new group.</p>
+            <button class="btn btn-primary" id="btnCreateGroupWelcome">Create First Group</button>
+          </div>
+        </div>
       </div>
 
+      <!-- CHAT VIEW -->
       <div class="connect-view" data-view="chat">
-        <h2>Chat</h2>
-        <div id="chatArea">Chat UI kommt von connect.js</div>
+        <div class="chat-container">
+          <div class="messages-area" id="messagesArea">
+            <div style="color: #666; text-align: center; padding: 20px;">Select a group to view messages</div>
+          </div>
+          <div class="chat-input-area">
+            <input type="text" id="messageInput" class="message-input" placeholder="Send a message..." disabled />
+            <button class="send-btn" id="btnSendMessage" disabled>Send</button>
+          </div>
+        </div>
       </div>
 
+      <!-- MEMBERS VIEW -->
       <div class="connect-view" data-view="members">
-        <h2>Members</h2>
-        <div id="membersList"></div>
+        <div class="members-container">
+          <div class="members-header">
+            <h3>Group Members</h3>
+            <input type="text" placeholder="Search members..." class="members-search" />
+          </div>
+          <div class="members-list" id="membersList"></div>
+        </div>
       </div>
 
+      <!-- STATS VIEW -->
       <div class="connect-view" data-view="stats">
-        <h2>Community Stats</h2>
-        <div id="statsGrid"></div>
+        <div class="stats-container">
+          <h3>Community Stats</h3>
+          <div class="stats-grid" id="statsGrid"></div>
+        </div>
       </div>
 
+      <!-- VOICE VIEW -->
       <div class="connect-view" data-view="voice">
-        <h2>Voice</h2>
-        <p>Voice-Chat (Platzhalter)</p>
+        <div class="voice-container">
+          <div class="voice-header">
+            <h3>Voice Calls</h3>
+            <p id="voiceStatus">Not in a call</p>
+          </div>
+          <div class="voice-controls">
+            <button class="btn btn-success" id="btnStartVoiceCall">🎤 Start Voice Call</button>
+            <button class="btn btn-danger" id="btnEndVoiceCall" style="display: none;">☎️ End Call</button>
+            <button class="btn btn-secondary" id="btnToggleMic" style="display: none;">🎤 Mute</button>
+          </div>
+          <div class="voice-participants" id="voiceParticipants"></div>
+        </div>
       </div>
 
     </div>
@@ -132,35 +766,53 @@
 
   <!-- RIGHT PANEL -->
   <aside class="connect-panel">
-    <div style="padding:16px;">
-      <h3>Online Users</h3>
-      <div id="onlineUsers"></div>
+    <div class="panel-header">
+      <h3 class="panel-title">Online Users</h3>
+    </div>
+    <div class="panel-content">
+      <div class="online-users" id="onlineUsers">
+        <div style="color: #666; text-align: center; padding: 12px;">No users online</div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <small>Real-time presence</small>
     </div>
   </aside>
 
 </main>
 
-<!-- SCRIPTS -->
+<!-- =====================================================
+     SCRIPTS (Inline - No Fetch)
+===================================================== -->
 <script src="firebase.js"></script>
+<script src="js/auth-state.js"></script>
+<script src="js/menu.js"></script>
 <script src="js/notify.js"></script>
 <script src="js/connect.js"></script>
+<script src="js/voice-chat.js"></script>
 
 <!-- VIEW CONTROLLER -->
 <script>
-  const navItems = document.querySelectorAll(".nav-item");
-  const views = document.querySelectorAll(".connect-view");
+  (function() {
+    const navItems = document.querySelectorAll(".nav-item[data-view]");
+    const views = document.querySelectorAll(".connect-view");
 
-  function switchView(view) {
-    views.forEach(v => v.classList.toggle("is-active", v.dataset.view === view));
-    navItems.forEach(n => n.classList.toggle("is-active", n.dataset.view === view));
-  }
+    function switchView(viewName) {
+      views.forEach(v => {
+        v.classList.toggle("is-active", v.dataset.view === viewName);
+      });
+      navItems.forEach(n => {
+        n.classList.toggle("is-active", n.dataset.view === viewName);
+      });
+    }
 
-  navItems.forEach(item => {
-    item.addEventListener("click", e => {
-      e.preventDefault();
-      switchView(item.dataset.view);
+    navItems.forEach(item => {
+      item.addEventListener("click", e => {
+        e.preventDefault();
+        switchView(item.dataset.view);
+      });
     });
-  });
+  })();
 </script>
 
 </body>
