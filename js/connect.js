@@ -103,13 +103,18 @@
   }
 
   function switchTab(tab){
-    activeTab = tab;
+  activeTab = tab;
 
-    // App Hauptbereich steuern (nur visuell)
-    document.body.dataset.connectTab = tab;
+  document.querySelectorAll(".connect-view").forEach(v => {
+    v.classList.toggle("is-active", v.dataset.view === tab);
+  });
 
-    notify("info", "Tab: " + tab);
-  }
+  document.querySelectorAll(".nav-item").forEach(n => {
+    n.classList.toggle("is-active",
+      n.textContent.toLowerCase().includes(tab)
+    );
+  });
+}
 
   /* =====================================================
      PRESENCE

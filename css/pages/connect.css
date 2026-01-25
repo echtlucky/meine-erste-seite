@@ -509,12 +509,17 @@
 ========================================================= */
 
 .connect-section{
+  background: linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.45));
+  border: 1px solid rgba(0,255,136,.18);
+}
+
+/*.connect-section{
   padding: 1.6rem 1.7rem;
   border-radius: var(--radius-xl);
   border:1px solid var(--border-soft);
   background: rgba(0,0,0,.55);
   box-shadow: var(--shadow-lg);
-}
+}*/
 
 .connect-section h2{
   margin:0 0 .4rem;
@@ -547,4 +552,33 @@
   font-size:.9rem;
   color: var(--c-text-muted);
   line-height:1.6;
+}
+
+/* =========================
+   CONNECT VIEWS
+========================= */
+
+.connect-views{
+  display: grid;
+  gap: 2rem;
+}
+
+.connect-view{
+  display: none;
+  animation: fadeIn .35s ease;
+}
+
+.connect-view.is-active{
+  display: block;
+}
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+    transform: translateY(8px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
 }
