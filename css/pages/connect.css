@@ -34,7 +34,7 @@
   background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(0,0,0,.74));
   box-shadow: var(--c-shadow);
   backdrop-filter: blur(18px);
-  padding: 1.25rem 1.25rem;
+  padding: 1.25rem;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -85,22 +85,46 @@
   justify-content:flex-end;
 }
 
-/* ===== Gate */
+/* ===== Login Gate + Blur Lock */
+.connect-gate{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(14px);
+  padding: 18px;
+}
+
+.connect-page.is-locked .connect-gate{
+  display:flex;
+}
+
+.connect-page.is-locked .connect-app{
+  filter: blur(16px);
+  opacity: .55;
+  pointer-events: none;
+}
+
 .connect-gate .gate-card{
+  width: min(520px, 92vw);
   border-radius: var(--c-r-xl);
   border: 1px solid rgba(255,204,0,.25);
   background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(0,0,0,.78));
   box-shadow: var(--c-shadow);
   backdrop-filter: blur(18px);
-  padding: 1.2rem;
+  padding: 1.4rem 1.35rem;
 }
 .gate-title{
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 860;
   letter-spacing: -.35px;
 }
 .gate-text{
-  margin-top: .4rem;
+  margin-top: .45rem;
   color: rgba(224,255,224,.78);
   line-height: 1.7;
 }

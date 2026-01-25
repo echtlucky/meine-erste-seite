@@ -6,21 +6,22 @@
   <title>Connect | echtlucky</title>
 
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/connect.css" />
 </head>
 
 <body class="page-transition connect-page">
+
   <div id="header-placeholder"></div>
 
   <main class="connect-wrap">
-    <!-- Top header card -->
+
+    <!-- HERO -->
     <section class="connect-hero">
       <div>
         <div class="connect-badge">⚡ echtlucky • Connect</div>
         <h1 class="connect-title">Groups, Chat & Presence</h1>
         <p class="connect-sub">
-          Kein Server-Chaos. Einfach Groups, live chatten, Status setzen – clean & schnell.
+          Kein Server-Chaos. Gruppen statt Server, Live-Chat & Status – clean & fokussiert.
         </p>
       </div>
 
@@ -30,30 +31,32 @@
       </div>
     </section>
 
-    <!-- Login gate -->
-    <section class="connect-gate" id="loginGate" style="display:none;">
+    <!-- LOGIN GATE -->
+    <section class="connect-gate" id="loginGate">
       <div class="gate-card">
-        <div class="gate-title">Du bist nicht eingeloggt</div>
-        <div class="gate-text">
-          Für Chat & Gruppen brauchst du einen Account. (Du kannst aber die öffentliche Group-Liste sehen.)
-        </div>
+        <h2>Nur für Mitglieder</h2>
+        <p>
+          Chat, Groups & Live-Presence sind exklusiv für eingeloggte User.
+          Du kannst aber öffentliche Groups ansehen.
+        </p>
         <div class="gate-actions">
-          <a class="btn btn-primary" href="login.html">Anmelden / Registrieren</a>
-          <button class="btn btn-secondary" id="btnContinueReadOnly" type="button">Nur ansehen</button>
+          <a href="login.html" class="btn">Anmelden</a>
+          <a href="login.html" class="btn btn-secondary">Account erstellen</a>
         </div>
       </div>
     </section>
 
-    <!-- App Layout -->
-    <section class="connect-app" id="connectApp" aria-label="Connect App">
-      <!-- Left: Groups -->
-      <aside class="pane pane-left" aria-label="Groups">
+    <!-- APP -->
+    <section class="connect-app" id="connectApp">
+
+      <!-- GROUPS -->
+      <aside class="pane pane-left">
         <div class="pane-head">
           <div>
             <div class="pane-title">Groups</div>
-            <div class="pane-hint">Public Groups – join & go</div>
+            <div class="pane-hint">Public & Private</div>
           </div>
-          <button class="icon-btn" id="btnRefreshGroups" type="button" aria-label="Refresh">⟳</button>
+          <button class="icon-btn" id="btnRefreshGroups">⟳</button>
         </div>
 
         <div class="group-list" id="groupList"></div>
@@ -61,42 +64,37 @@
         <div class="pane-foot">
           <div class="me-chip">
             <span class="me-dot" id="meDot"></span>
-            <span class="me-name" id="meName">—</span>
+            <span class="me-name" id="meName">Gast</span>
           </div>
-          <button class="btn btn-ghost btn-sm" id="btnLogout" type="button" style="display:none;">Logout</button>
+          <button class="btn btn-ghost btn-sm" id="btnLogout">Logout</button>
         </div>
       </aside>
 
-      <!-- Middle: Chat -->
-      <section class="pane pane-mid" aria-label="Chat">
+      <!-- CHAT -->
+      <section class="pane pane-mid">
         <div class="pane-head">
           <div>
-            <div class="pane-title" id="chatTitle">Wähle eine Group</div>
-            <div class="pane-hint" id="chatHint">Dann kannst du loslegen.</div>
+            <div class="pane-title" id="chatTitle">Keine Group gewählt</div>
+            <div class="pane-hint" id="chatHint">Wähle links eine Group.</div>
           </div>
-
-          <div class="pane-actions">
-            <button class="btn btn-ghost btn-sm" id="btnJoinLeave" type="button" disabled>Join</button>
-          </div>
+          <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>Join</button>
         </div>
 
-        <div class="chat-scroll" id="chatScroll" aria-live="polite"></div>
+        <div class="chat-scroll" id="chatScroll"></div>
 
         <form class="chat-compose" id="chatForm">
           <input
-            class="chat-input"
-            id="chatInput"
             type="text"
-            placeholder="Schreib eine Nachricht…"
-            autocomplete="off"
+            id="chatInput"
+            placeholder="Nachricht schreiben…"
             disabled
           />
-          <button class="btn btn-primary" id="btnSend" type="submit" disabled>Senden</button>
+          <button class="btn btn-primary" type="submit" disabled>Senden</button>
         </form>
       </section>
 
-      <!-- Right: Members -->
-      <aside class="pane pane-right" aria-label="Members">
+      <!-- MEMBERS -->
+      <aside class="pane pane-right">
         <div class="pane-head">
           <div>
             <div class="pane-title">Members</div>
@@ -106,43 +104,39 @@
 
         <div class="member-list" id="memberList"></div>
 
-        <div class="mini-note">
-          Presence ist „best effort“ im Browser (online/idle/offline). Später upgraden wir das noch härter.
-        </div>
+        <p class="mini-note">
+          Presence: online / idle / offline (Browser-basiert).
+        </p>
       </aside>
+
     </section>
   </main>
 
   <div id="footer-placeholder"></div>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-  <!-- Your setup -->
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>
-  <script src="js/legal-modal.js"></script>
   <script src="js/notify.js"></script>
   <script src="js/connect.js"></script>
 
   <script>
-    document.body.classList.add('loaded');
+    document.body.classList.add("loaded");
 
-    fetch('header.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-        if (typeof initHeaderScripts === "function") initHeaderScripts();
-        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-      });
+    fetch("header.html").then(r=>r.text()).then(html=>{
+      document.getElementById("header-placeholder").innerHTML = html;
+      initHeaderScripts?.();
+      initSmartHeaderScroll?.();
+    });
 
-    fetch('footer.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      });
+    fetch("footer.html").then(r=>r.text()).then(html=>{
+      document.getElementById("footer-placeholder").innerHTML = html;
+    });
   </script>
+
 </body>
 </html>

@@ -1,6 +1,6 @@
 // js/connect.js — echtlucky Connect (MVP v1)
 // Groups + Live Chat + Members + Presence + Activity (Firestore)
-// NOTE: Presence in Firestore ist "best effort" (Browser kann offline nicht perfekt).
+// Presence in Firestore ist "best effort".
 
 (() => {
   "use strict";
@@ -10,7 +10,6 @@
 
   const notify = (type, msg) => {
     if (typeof window.notify === "function") return window.notify(type, msg);
-    // fallback:
     if (type === "error") return alert(msg);
     console.log(type + ":", msg);
   };
@@ -54,11 +53,10 @@
   let membersUnsub = null;
   let presenceHeart = null;
 
-  let presenceUnsubs = []; // per member presence onSnapshot
-  let selectedGroup = null; // {id, ...data}
+  let presenceUnsubs = [];
+  let selectedGroup = null;
   let isMemberOfSelected = false;
 
-  // Helpers
   const serverTS = () => firebase.firestore.FieldValue.serverTimestamp();
 
   function escapeHtml(s) {
@@ -80,6 +78,11 @@
     }
   }
 
+  function setPageLock(locked) {
+    document.body.classList.toggle("is-locked", !!locked);
+    if (loginGate) loginGate.style.display = locked ? "flex" : "none";
+  }
+
   function setMeDot(state) {
     if (!meDot) return;
     if (state === "online") meDot.style.background = "rgba(0,255,136,.95)";
@@ -89,9 +92,10 @@
   }
 
   function setChatEnabled(enabled) {
-    chatInput.disabled = !enabled;
-    btnSend.disabled = !enabled;
-    btnJoinLeave.disabled = !selectedGroup; // join/leave needs group selected
+    const ok = !!enabled;
+    if (chatInput) chatInput.disabled = !ok;
+    if (btnSend) btnSend.disabled = !ok;
+    if (btnJoinLeave) btnJoinLeave.disabled = !selectedGroup || (!currentUser || readOnly) ? true : false;
   }
 
   function clearPresenceSubs() {
@@ -99,7 +103,7 @@
     presenceUnsubs = [];
   }
 
-  // ===== Presence (Firestore best-effort)
+  // ===== Presence
   async function writePresence(patch) {
     if (!currentUser) return;
     try {
@@ -110,7 +114,6 @@
         ...patch
       }, { merge: true });
     } catch (e) {
-      // Presence darf leise failen
       console.warn("presence write failed:", e?.message || e);
     }
   }
@@ -118,15 +121,14 @@
   function startPresence() {
     if (!currentUser) return;
 
-    // initial online
     writePresence({ state: "online" });
     setMeDot("online");
 
-    // heartbeat (keeps it fresh)
     if (presenceHeart) clearInterval(presenceHeart);
-    presenceHeart = setInterval(() => writePresence({ state: document.hidden ? "idle" : "online" }), 25000);
+    presenceHeart = setInterval(() => {
+      writePresence({ state: document.hidden ? "idle" : "online" });
+    }, 25000);
 
-    // tab visibility => idle/online
     document.addEventListener("visibilitychange", () => {
       if (!currentUser) return;
       const st = document.hidden ? "idle" : "online";
@@ -134,14 +136,7 @@
       setMeDot(st);
     });
 
-    // best-effort offline
     window.addEventListener("beforeunload", () => {
-      try {
-        navigator.sendBeacon?.(
-          "/",
-          "" // noop, we still try a normal write below
-        );
-      } catch (_) {}
       writePresence({ state: "offline" });
     });
   }
@@ -174,7 +169,9 @@
       .limit(50);
 
     groupsUnsub = q.onSnapshot((snap) => {
+      if (!groupList) return;
       groupList.innerHTML = "";
+
       if (snap.empty) {
         const empty = document.createElement("div");
         empty.className = "group-meta";
@@ -211,7 +208,6 @@
         lastMessageAt: serverTS()
       });
 
-      // auto-join as owner
       await db.collection("groups").doc(ref.id).collection("members").doc(currentUser.uid).set({
         uid: currentUser.uid,
         role: "owner",
@@ -220,7 +216,7 @@
       });
 
       notify("success", "Group erstellt ✅");
-      // select it
+
       const snap = await db.collection("groups").doc(ref.id).get();
       selectGroup(ref.id, snap.data() || {});
     } catch (e) {
@@ -229,7 +225,7 @@
     }
   }
 
-  // ===== Select Group + Chat + Members
+  // ===== Group membership
   async function checkMembership(groupId) {
     if (!currentUser) return false;
     try {
@@ -244,42 +240,46 @@
     isMemberOfSelected = await checkMembership(groupId);
 
     if (!currentUser || readOnly) {
-      btnJoinLeave.textContent = "Join";
-      btnJoinLeave.disabled = true;
+      if (btnJoinLeave) {
+        btnJoinLeave.textContent = "Join";
+        btnJoinLeave.disabled = true;
+      }
+      setChatEnabled(false);
       return;
     }
 
-    btnJoinLeave.disabled = false;
-    btnJoinLeave.textContent = isMemberOfSelected ? "Leave" : "Join";
+    if (btnJoinLeave) {
+      btnJoinLeave.disabled = false;
+      btnJoinLeave.textContent = isMemberOfSelected ? "Leave" : "Join";
+    }
+
     setChatEnabled(isMemberOfSelected);
-    chatHint.textContent = isMemberOfSelected
-      ? "Du bist drin. Schreib was Cleanes."
-      : "Join die Group, um zu chatten.";
+
+    if (chatHint) {
+      chatHint.textContent = isMemberOfSelected
+        ? "Du bist drin. Schreib was Cleanes."
+        : "Join die Group, um zu chatten.";
+    }
   }
 
   function clearChatUI() {
-    chatScroll.innerHTML = "";
-    memberList.innerHTML = "";
-    membersHint.textContent = "—";
+    if (chatScroll) chatScroll.innerHTML = "";
+    if (memberList) memberList.innerHTML = "";
+    if (membersHint) membersHint.textContent = "—";
     setChatEnabled(false);
   }
 
   async function selectGroup(id, data) {
     selectedGroup = { id, ...(data || {}) };
 
-    // highlight selection
-    document.querySelectorAll(".group-card").forEach((c) => c.classList.remove("is-active"));
-    // we re-render often; so just set by matching click’s element is enough via re-render;
-    // quick hack: re-listen triggers. We’ll just update chat title now:
-    chatTitle.textContent = selectedGroup.name || "Group";
-    chatHint.textContent = "Checke Membership…";
+    if (chatTitle) chatTitle.textContent = selectedGroup.name || "Group";
+    if (chatHint) chatHint.textContent = "Checke Membership…";
 
     clearChatUI();
     clearPresenceSubs();
 
     await updateJoinLeaveUI(id);
 
-    // listen messages ONLY if member (keeps rules clean)
     if (messagesUnsub) messagesUnsub();
     if (membersUnsub) membersUnsub();
 
@@ -287,10 +287,11 @@
       listenMessages(id);
       listenMembers(id);
     } else {
-      chatScroll.innerHTML = `<div class="group-meta" style="padding:.4rem;">Join die Group, um Messages zu sehen.</div>`;
+      if (chatScroll) {
+        chatScroll.innerHTML = `<div class="group-meta" style="padding:.4rem;">Join die Group, um Messages zu sehen.</div>`;
+      }
     }
 
-    // refresh left highlight by reloading groups UI quickly
     listenGroups();
   }
 
@@ -304,7 +305,9 @@
       .limitToLast(80);
 
     messagesUnsub = q.onSnapshot((snap) => {
+      if (!chatScroll) return;
       chatScroll.innerHTML = "";
+
       snap.forEach((doc) => {
         const m = doc.data() || {};
         const mine = currentUser && m.uid === currentUser.uid;
@@ -321,7 +324,6 @@
         chatScroll.appendChild(el);
       });
 
-      // auto-scroll
       chatScroll.scrollTop = chatScroll.scrollHeight;
     }, (err) => {
       console.error(err);
@@ -331,13 +333,16 @@
 
   function listenMembers(groupId) {
     if (membersUnsub) membersUnsub();
+
     membersUnsub = db
       .collection("groups").doc(groupId)
       .collection("members")
       .orderBy("joinedAt", "asc")
       .onSnapshot((snap) => {
+        if (!memberList) return;
+
         memberList.innerHTML = "";
-        membersHint.textContent = `${snap.size} Member`;
+        if (membersHint) membersHint.textContent = `${snap.size} Member`;
 
         clearPresenceSubs();
 
@@ -359,7 +364,6 @@
           `;
           memberList.appendChild(row);
 
-          // presence live
           const unsub = db.collection("presence").doc(m.uid).onSnapshot((ps) => {
             const p = ps.data() || {};
             const dot = document.getElementById(`dot_${m.uid}`);
@@ -400,7 +404,6 @@
       notify("success", "Joined ✅");
       await updateJoinLeaveUI(selectedGroup.id);
 
-      // start listeners
       listenMessages(selectedGroup.id);
       listenMembers(selectedGroup.id);
     } catch (e) {
@@ -413,19 +416,18 @@
     if (!currentUser || readOnly) return;
     if (!selectedGroup) return;
 
-    // Owner can't leave (MVP rule)
     try {
       const mRef = db.collection("groups").doc(selectedGroup.id).collection("members").doc(currentUser.uid);
       const mSnap = await mRef.get();
       const role = mSnap.data()?.role || "member";
+
       if (role === "owner") {
-        return notify("warn", "Owner kann die Group im MVP nicht verlassen. (Später: Ownership transfer)");
+        return notify("warn", "Owner kann im MVP nicht verlassen. (Später: Ownership transfer)");
       }
 
       await mRef.delete();
       notify("success", "Left ✅");
 
-      // stop listeners
       if (messagesUnsub) messagesUnsub();
       if (membersUnsub) membersUnsub();
       clearPresenceSubs();
@@ -443,10 +445,10 @@
     if (!currentUser || readOnly) return notify("warn", "Bitte anmelden.");
     if (!selectedGroup || !isMemberOfSelected) return;
 
-    const text = String(chatInput.value || "").trim();
+    const text = String(chatInput?.value || "").trim();
     if (!text) return;
 
-    chatInput.value = "";
+    if (chatInput) chatInput.value = "";
 
     try {
       const payload = {
@@ -458,8 +460,6 @@
 
       const gRef = db.collection("groups").doc(selectedGroup.id);
       await gRef.collection("messages").add(payload);
-
-      // bump group
       await gRef.set({ lastMessageAt: serverTS() }, { merge: true });
 
     } catch (e2) {
@@ -478,40 +478,32 @@
     notify("success", "Activity updated ✅");
   }
 
-  // ===== Auth binding
   function applyAuthUI() {
     const name = currentUser
       ? (currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "User"))
       : "Guest";
 
-    meName.textContent = name;
+    if (meName) meName.textContent = name;
 
     if (currentUser) {
-      btnLogout.style.display = "inline-flex";
-      if (loginGate) loginGate.style.display = "none";
+      if (btnLogout) btnLogout.style.display = "inline-flex";
       setMeDot("online");
+      setPageLock(false);
     } else {
-      btnLogout.style.display = "none";
+      if (btnLogout) btnLogout.style.display = "none";
       setMeDot("offline");
-    }
-  }
-
-  function showGateIfNeeded() {
-    if (!currentUser && !readOnly) {
-      if (loginGate) loginGate.style.display = "block";
-    } else {
-      if (loginGate) loginGate.style.display = "none";
+      setPageLock(!readOnly);
     }
   }
 
   // ===== Wire UI
-  btnRefreshGroups?.addEventListener("click", () => listenGroups());
+  btnRefreshGroups?.addEventListener("click", listenGroups);
   btnCreateGroup?.addEventListener("click", createGroupFlow);
   btnSetActivity?.addEventListener("click", setActivityFlow);
 
   btnContinueReadOnly?.addEventListener("click", () => {
     readOnly = true;
-    showGateIfNeeded();
+    setPageLock(false);
     notify("info", "Read-only aktiv. Für Chat brauchst du Login.");
   });
 
@@ -538,17 +530,17 @@
   // ===== Init
   listenGroups();
   setChatEnabled(false);
-  applyAuthUI();
-  showGateIfNeeded();
 
+  // Gate defaults: locked when not logged in
+  setPageLock(true);
+
+  // Auth binding
   if (auth && typeof auth.onAuthStateChanged === "function") {
     auth.onAuthStateChanged(async (u) => {
       currentUser = u || null;
-      readOnly = readOnly && !currentUser; // if user logs in, keep normal mode
-      applyAuthUI();
-      showGateIfNeeded();
 
-      // stop listeners if user logs out
+      applyAuthUI();
+
       if (!currentUser) {
         stopPresence();
         if (messagesUnsub) messagesUnsub();
@@ -556,14 +548,13 @@
         clearPresenceSubs();
         isMemberOfSelected = false;
         setChatEnabled(false);
-        chatHint.textContent = "Bitte anmelden, um zu chatten.";
+        if (chatHint) chatHint.textContent = "Bitte anmelden, um zu chatten.";
         return;
       }
 
-      // start presence
       startPresence();
 
-      // If a group is selected, refresh membership & listeners
+      // Refresh membership & listeners when logged in
       if (selectedGroup?.id) {
         await updateJoinLeaveUI(selectedGroup.id);
         if (isMemberOfSelected) {
@@ -573,8 +564,7 @@
       }
     });
   } else {
-    // no auth: gate
     currentUser = null;
-    showGateIfNeeded();
+    applyAuthUI();
   }
 })();
