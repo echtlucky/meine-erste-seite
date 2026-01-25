@@ -126,7 +126,15 @@
 
       <div class="home-actions">
         <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">Discord Community</a>
-        <a class="btn btn-secondary" href="login.html">Account erstellen</a>
+        <a class="btn btn-secondary"
+            data-account-cta
+            data-cta-logged-out-text="Account erstellen"
+            data-cta-logged-in-text="Account verwalten"
+            data-cta-logged-out-href="login.html"
+            data-cta-logged-in-href="account.html"
+            href="login.html">
+            Account erstellen
+        </a>
       </div>
     </section>
 
@@ -224,6 +232,8 @@
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/legal-modal.js"></script>
+  <script src="js/login.js"></script>
+  <script src="js/notify.js"></script>
 
   <script>
     document.body.classList.add('loaded');
