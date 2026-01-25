@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connect | echtlucky</title>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages/connect.css" />
+</head>
+
+<body class="page-transition connect-page">
+  <div id="header-placeholder"></div>
+
+  <main class="connect-wrap">
+    <!-- Top header card -->
+    <section class="connect-hero">
+      <div>
+        <div class="connect-badge">⚡ echtlucky • Connect</div>
+        <h1 class="connect-title">Groups, Chat & Presence</h1>
+        <p class="connect-sub">
+          Kein Server-Chaos. Einfach Groups, live chatten, Status setzen – clean & schnell.
+        </p>
+      </div>
+
+      <div class="connect-heroActions">
+        <button class="btn btn-ghost" id="btnSetActivity" type="button">Activity setzen</button>
+        <button class="btn btn-primary" id="btnCreateGroup" type="button">Group erstellen</button>
+      </div>
+    </section>
+
+    <!-- Login gate -->
+    <section class="connect-gate" id="loginGate" style="display:none;">
+      <div class="gate-card">
+        <div class="gate-title">Du bist nicht eingeloggt</div>
+        <div class="gate-text">
+          Für Chat & Gruppen brauchst du einen Account. (Du kannst aber die öffentliche Group-Liste sehen.)
+        </div>
+        <div class="gate-actions">
+          <a class="btn btn-primary" href="login.html">Anmelden / Registrieren</a>
+          <button class="btn btn-secondary" id="btnContinueReadOnly" type="button">Nur ansehen</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Layout -->
+    <section class="connect-app" id="connectApp" aria-label="Connect App">
+      <!-- Left: Groups -->
+      <aside class="pane pane-left" aria-label="Groups">
+        <div class="pane-head">
+          <div>
+            <div class="pane-title">Groups</div>
+            <div class="pane-hint">Public Groups – join & go</div>
+          </div>
+          <button class="icon-btn" id="btnRefreshGroups" type="button" aria-label="Refresh">⟳</button>
+        </div>
+
+        <div class="group-list" id="groupList"></div>
+
+        <div class="pane-foot">
+          <div class="me-chip">
+            <span class="me-dot" id="meDot"></span>
+            <span class="me-name" id="meName">—</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btnLogout" type="button" style="display:none;">Logout</button>
+        </div>
+      </aside>
+
+      <!-- Middle: Chat -->
+      <section class="pane pane-mid" aria-label="Chat">
+        <div class="pane-head">
+          <div>
+            <div class="pane-title" id="chatTitle">Wähle eine Group</div>
+            <div class="pane-hint" id="chatHint">Dann kannst du loslegen.</div>
+          </div>
+
+          <div class="pane-actions">
+            <button class="btn btn-ghost btn-sm" id="btnJoinLeave" type="button" disabled>Join</button>
+          </div>
+        </div>
+
+        <div class="chat-scroll" id="chatScroll" aria-live="polite"></div>
+
+        <form class="chat-compose" id="chatForm">
+          <input
+            class="chat-input"
+            id="chatInput"
+            type="text"
+            placeholder="Schreib eine Nachricht…"
+            autocomplete="off"
+            disabled
+          />
+          <button class="btn btn-primary" id="btnSend" type="submit" disabled>Senden</button>
+        </form>
+      </section>
+
+      <!-- Right: Members -->
+      <aside class="pane pane-right" aria-label="Members">
+        <div class="pane-head">
+          <div>
+            <div class="pane-title">Members</div>
+            <div class="pane-hint" id="membersHint">—</div>
+          </div>
+        </div>
+
+        <div class="member-list" id="memberList"></div>
+
+        <div class="mini-note">
+          Presence ist „best effort“ im Browser (online/idle/offline). Später upgraden wir das noch härter.
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+  <!-- Your setup -->
+  <script src="firebase.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/legal-modal.js"></script>
+  <script src="js/notify.js"></script>
+  <script src="js/connect.js"></script>
+
+  <script>
+    document.body.classList.add('loaded');
+
+    fetch('header.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+        if (typeof initHeaderScripts === "function") initHeaderScripts();
+        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+      });
+
+    fetch('footer.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      });
+  </script>
+</body>
+</html>
