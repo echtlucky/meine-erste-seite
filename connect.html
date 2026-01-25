@@ -58,141 +58,139 @@
     </div>
   </section>
 
-  <!-- =====================================================
-       CONNECT APP (ADMIN PANEL LAYOUT)
-  ====================================================== -->
-  <section class="connect-app" id="connectApp">
+  <!-- =========================
+       CONNECT VIEWS
+  ========================= -->
 
-    <!-- =================================================
-         LEFT SIDEBAR / NAVIGATION
-    ================================================== -->
-    <aside class="pane pane-left">
-
-      <div class="pane-head">
-        <div>
-          <div class="pane-title">Connect</div>
-          <div class="pane-hint">User Interface</div>
-        </div>
-      </div>
-
-      <nav class="connect-nav">
-        <a class="nav-item is-active">💬 Live Chat</a>
-        <a class="nav-item">🧭 Discover</a>
-        <a class="nav-item">⭐ Favoriten</a>
-        <a class="nav-item">📊 Community Stats</a>
-        <a class="nav-item">🧠 Fokus Sessions</a>
-        <a class="nav-item">👤 Profil</a>
-        <a class="nav-item">⚙ Einstellungen</a>
-        <a class="nav-item">❓ Hilfe</a>
-      </nav>
-
-      <div class="nav-divider"></div>
-
-      <!-- GROUPS -->
-      <div class="pane-head">
-        <div>
-          <div class="pane-title">Groups</div>
-          <div class="pane-hint">Public & Private</div>
-        </div>
-        <button class="icon-btn" id="btnRefreshGroups">⟳</button>
-      </div>
-
-      <div class="group-search">
-        <input id="groupSearch" placeholder="Groups durchsuchen…" />
-      </div>
-
-      <div class="group-list" id="groupList"></div>
-
-      <div class="pane-foot">
-        <div class="me-chip">
-          <span class="me-dot" id="meDot"></span>
-          <span class="me-name" id="meName">Gast</span>
-        </div>
-        <button class="btn btn-ghost btn-sm" id="btnLogout">Logout</button>
-      </div>
-    </aside>
-
-    <!-- =================================================
-         MAIN CHAT AREA
-    ================================================== -->
-    <section class="pane pane-mid">
-
-      <div class="pane-head">
-        <div>
-          <div class="pane-title" id="chatTitle">Keine Group gewählt</div>
-          <div class="pane-hint" id="chatHint">
-            Wähle links eine Group oder entdecke neue Communities.
-          </div>
-        </div>
-        <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>
-          Join
-        </button>
-      </div>
-
-      <div class="chat-scroll" id="chatScroll"></div>
-
-      <div class="typing-indicator" id="typingIndicator"></div>
-
-      <form class="chat-compose" id="chatForm">
-        <input
-          type="text"
-          id="chatInput"
-          class="chat-input"
-          placeholder="Nachricht schreiben…"
-          disabled
-        />
-        <button class="btn btn-primary btn-sm" type="submit" disabled>
-          Senden
-        </button>
-      </form>
-    </section>
-
-    <!-- =================================================
-         RIGHT SIDEBAR / MEMBERS + INFO
-    ================================================== -->
-    <aside class="pane pane-right">
-
-      <div class="pane-head">
-        <div>
-          <div class="pane-title">Members</div>
-          <div class="pane-hint" id="membersHint">—</div>
-        </div>
-      </div>
-
-      <div class="member-list" id="memberList"></div>
-
-      <div class="pane-section">
-        <h3>ℹ️ Group Infos</h3>
-        <p>
-          Groups sind fokussierte Räume.
-          Keine globalen Channels, kein Lärm.
-        </p>
-      </div>
-
-      <div class="pane-section">
-        <h3>🟢 Presence</h3>
-        <p>
-          Online, Idle oder Offline –  
-          browserbasiert & transparent.
-        </p>
-      </div>
-
-      <p class="mini-note">
-        Presence basiert auf Browser-Events („best effort“).
-      </p>
-    </aside>
-
-  </section>
-
-<!-- =========================
-     CONNECT VIEWS
-========================= -->
-
-<section class="connect-views">
+  <section class="connect-views">
 
   <!-- CHAT VIEW -->
   <div class="connect-view is-active" data-view="chat">
-    <!-- bestehender connect-app Block bleibt HIER -->
+    <!-- =====================================================
+         CONNECT APP (ADMIN PANEL LAYOUT)
+    ====================================================== -->
+    <section class="connect-app" id="connectApp">
+
+      <!-- =================================================
+           LEFT SIDEBAR / NAVIGATION
+      ================================================== -->
+      <aside class="pane pane-left">
+
+        <div class="pane-head">
+          <div>
+            <div class="pane-title">Connect</div>
+            <div class="pane-hint">User Interface</div>
+          </div>
+        </div>
+
+        <nav class="connect-nav">
+          <a class="nav-item is-active" data-view="chat">💬 Live Chat</a>
+          <a class="nav-item" data-view="discover">🧭 Discover</a>
+          <a class="nav-item">⭐ Favoriten</a>
+          <a class="nav-item" data-view="stats">📊 Community Stats</a>
+          <a class="nav-item">🧠 Fokus Sessions</a>
+          <a class="nav-item" data-view="profile">👤 Profil</a>
+          <a class="nav-item" data-view="settings">⚙ Einstellungen</a>
+          <a class="nav-item" data-view="help">❓ Hilfe</a>
+        </nav>
+
+        <div class="nav-divider"></div>
+
+        <!-- GROUPS -->
+        <div class="pane-head">
+          <div>
+            <div class="pane-title">Groups</div>
+            <div class="pane-hint">Public & Private</div>
+          </div>
+          <button class="icon-btn" id="btnRefreshGroups">⟳</button>
+        </div>
+
+        <div class="group-search">
+          <input id="groupSearch" placeholder="Groups durchsuchen…" />
+        </div>
+
+        <div class="group-list" id="groupList"></div>
+
+        <div class="pane-foot">
+          <div class="me-chip">
+            <span class="me-dot" id="meDot"></span>
+            <span class="me-name" id="meName">Gast</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btnLogout">Logout</button>
+        </div>
+      </aside>
+
+      <!-- =================================================
+           MAIN CHAT AREA
+      ================================================== -->
+      <section class="pane pane-mid">
+
+        <div class="pane-head">
+          <div>
+            <div class="pane-title" id="chatTitle">Keine Group gewählt</div>
+            <div class="pane-hint" id="chatHint">
+              Wähle links eine Group oder entdecke neue Communities.
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>
+            Join
+          </button>
+        </div>
+
+        <div class="chat-scroll" id="chatScroll"></div>
+
+        <div class="typing-indicator" id="typingIndicator"></div>
+
+        <form class="chat-compose" id="chatForm">
+          <input
+            type="text"
+            id="chatInput"
+            class="chat-input"
+            placeholder="Nachricht schreiben…"
+            disabled
+          />
+          <button class="btn btn-primary btn-sm" type="submit" disabled>
+            Senden
+          </button>
+        </form>
+      </section>
+
+      <!-- =================================================
+           RIGHT SIDEBAR / MEMBERS + INFO
+      ================================================== -->
+      <aside class="pane pane-right">
+
+        <div class="pane-head">
+          <div>
+            <div class="pane-title">Members</div>
+            <div class="pane-hint" id="membersHint">—</div>
+          </div>
+        </div>
+
+        <div class="member-list" id="memberList"></div>
+
+        <div class="pane-section">
+          <h3>ℹ️ Group Infos</h3>
+          <p>
+            Groups sind fokussierte Räume.
+            Keine globalen Channels, kein Lärm.
+          </p>
+        </div>
+
+        <div class="pane-section">
+          <h3>🟢 Presence</h3>
+          <p>
+            Online, Idle oder Offline –  
+            browserbasiert & transparent.
+          </p>
+        </div>
+
+        <p class="mini-note">
+          Presence basiert auf Browser-Events („best effort“).
+        </p>
+      </aside>
+
+    </section>
   </div>
 
   <!-- DISCOVER -->
@@ -274,7 +272,7 @@
     </section>
   </div>
 
-</section>
+  </section>
 
   <!-- =====================================================
        ROADMAP
