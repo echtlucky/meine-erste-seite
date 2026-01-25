@@ -282,6 +282,10 @@
     }
 
     stage.focus({ preventScroll: true });
+        // place crosshair instantly to current pointer or center
+    const cx = pointer.x || (window.innerWidth / 2);
+    const cy = pointer.y || (window.innerHeight / 2);
+    setCrosshair(cx, cy);
   }
 
   async function closeOverlay(){
@@ -400,22 +404,23 @@
     );
   }
 
-  // Crosshair loop
-  function crosshairLoop(){
-    cross.x += (pointer.x - cross.x) * 0.28;
-    cross.y += (pointer.y - cross.y) * 0.28;
-
-    if (crosshair){
-      crosshair.style.transform =
-        `translate3d(${cross.x}px, ${cross.y}px, 0) translate3d(-50%, -50%, 0)`;
-    }
-    requestAnimationFrame(crosshairLoop);
+  // Crosshair (STIFF / instant)
+  function setCrosshair(x, y){
+    if (!crosshair) return;
+    crosshair.style.transform =
+      `translate3d(${x}px, ${y}px, 0) translate3d(-50%, -50%, 0)`;
   }
 
-  function onPointerMove(e){
+    function onPointerMove(e){
     pointer.x = e.clientX;
     pointer.y = e.clientY;
+
+    // only update crosshair when overlay is active
+    if (overlay && overlay.classList.contains("show")) {
+      setCrosshair(pointer.x, pointer.y);
+    }
   }
+
 
   // Seg helpers
   function setSegActive(list, matchValue){
@@ -490,6 +495,4 @@
   renderTopStats();
   updateSaveStatus();
 
-  // Start crosshair loop
-  requestAnimationFrame(crosshairLoop);
 })();
