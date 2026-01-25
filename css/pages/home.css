@@ -1,83 +1,62 @@
 /* =========================
-   HOME • Airy Apple Premium (v2)
-   Fixes:
-   - safer overlay layering (no conflict with style.css body::after)
-   - center stays stable
-   - smoother fade without breaking footer / header click
+   HOME • vNext (Apple clean x echtlucky)
+   File: css/pages/home.css
+   - style.css bleibt Base
+   - home.css ist die Weiterentwicklung nur für Home
 ========================= */
 
-/* Page token */
-body.home-page{
-  position: relative;
-}
-
-/* --------- Background fade smoothing (page-only overlay) ---------
-   IMPORTANT:
-   style.css already uses body::before + body::after.
-   So we DO NOT touch ::after here.
-   We add an extra overlay via ::before on home-page,
-   but we keep pointer-events none so it never blocks clicks.
-*/
-body.home-page::before{
-  content:"";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-
-  /* Put it ABOVE global background layers (-2/-1) but BELOW content (0+) */
-  z-index: 0;
-
-  /* Long, soft fade (no harsh step) */
-  background:
-    radial-gradient(circle at 50% 10%, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.10) 45%, rgba(0,0,0,0.38) 85%),
-    linear-gradient(to bottom,
-      rgba(0,0,0,0.04) 0%,
-      rgba(0,0,0,0.10) 22%,
-      rgba(0,0,0,0.20) 45%,
-      rgba(0,0,0,0.38) 75%,
-      rgba(0,0,0,0.54) 100%
-    );
-  opacity: 1;
-}
-
-/* Ensure main content is above home overlay */
-body.home-page main,
-body.home-page header,
-body.home-page footer{
-  position: relative;
-  z-index: 1;
-}
-
-/* Extra top breathing room after fixed header */
 body.home-page{
   --home-top-gap: clamp(1.2rem, 3vw, 2.4rem);
 }
 
+/* Extra spacing nach fixed header */
 body.home-page main.container{
   padding-top: var(--home-top-gap);
   padding-bottom: clamp(3.0rem, 5.5vw, 4.8rem);
+  position: relative;
+  z-index: 1;
 }
 
-/* Make overall vertical rhythm more airy */
+/* Smooth “fade into dark” NUR für Home – ohne body pseudo-element conflicts */
+body.home-page main.container::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background:
+    radial-gradient(circle at 50% 10%, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.14) 48%, rgba(0,0,0,0.45) 88%),
+    linear-gradient(to bottom,
+      rgba(0,0,0,0.06) 0%,
+      rgba(0,0,0,0.12) 22%,
+      rgba(0,0,0,0.22) 45%,
+      rgba(0,0,0,0.40) 75%,
+      rgba(0,0,0,0.58) 100%
+    );
+  opacity: 1;
+}
+
+/* Vertikaler Rhythmus airy */
 body.home-page main.container > section{
-  margin: clamp(1.8rem, 4.2vw, 3.4rem) 0;
+  margin: clamp(1.9rem, 4.4vw, 3.6rem) 0;
+  position: relative;
+  z-index: 1;
 }
 
 /* ======================================
-   HERO (bigger + centered)
+   HERO vNext (größer, premium, exakt centered)
 ====================================== */
 body.home-page .hero{
   background: none !important;
-  border-bottom: none !important;
-  min-height: unset !important;
-  height: auto !important;
+  border: none !important;
 
   width: min(1120px, calc(100% - 2rem));
   margin: clamp(1.6rem, 3.6vw, 2.6rem) auto clamp(1.8rem, 3.8vw, 2.8rem) auto !important;
 
   padding: clamp(2.8rem, 4.8vw, 4.1rem) clamp(2.0rem, 4.2vw, 3.6rem);
-
   border-radius: 30px;
+
   border: 1px solid rgba(0,255,136,0.18);
   box-shadow: 0 28px 95px rgba(0,0,0,0.58);
 
@@ -86,7 +65,6 @@ body.home-page .hero{
   text-align: center !important;
 }
 
-/* Hero glass background */
 body.home-page .hero::before{
   content:"";
   position:absolute;
@@ -99,7 +77,6 @@ body.home-page .hero::before{
     linear-gradient(135deg, rgba(255,255,255,0.06), rgba(0,0,0,0.76));
 }
 
-/* Subtle grid/glow */
 body.home-page .hero::after{
   content:"";
   position:absolute;
@@ -115,15 +92,15 @@ body.home-page .hero::after{
   mix-blend-mode: screen;
 }
 
-/* Hero content centered */
+/* hero-inner wirklich mittig */
 body.home-page .hero-inner{
   position: relative;
   z-index: 2;
 
-  display: flex;
+  display:flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content:center;
   gap: 1.1rem;
 
   width: 100%;
@@ -131,9 +108,9 @@ body.home-page .hero-inner{
 
 /* Badge centered */
 body.home-page .hero-badge{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 
   margin: 0 auto;
   padding: .72rem 1.15rem;
@@ -146,11 +123,8 @@ body.home-page .hero-badge{
   font-weight: 640;
   letter-spacing: -0.2px;
   line-height: 1;
-
-  transform: translateZ(0);
 }
 
-/* Title */
 body.home-page .hero h1{
   margin: .2rem 0 0;
   font-size: clamp(2.9rem, 4.9vw, 4.2rem);
@@ -164,7 +138,6 @@ body.home-page .hero h1{
   -webkit-text-fill-color: transparent;
 }
 
-/* Tagline */
 body.home-page .hero .tagline{
   margin: 0;
   max-width: 72ch;
@@ -174,13 +147,12 @@ body.home-page .hero .tagline{
   opacity: .96;
 }
 
-/* Buttons */
 body.home-page .btn-group{
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
   gap: .95rem;
   margin-top: .45rem;
 }
@@ -191,20 +163,20 @@ body.home-page .discord-btn{
   padding: 1.02rem 1.45rem !important;
 }
 
-/* Pills */
+/* Optional: Stat pills, falls vorhanden */
 body.home-page .hero-stats{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
   gap: .65rem;
   margin-top: .25rem;
 }
 
 body.home-page .stat-pill{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   padding: .58rem 1.0rem;
   border-radius: 999px;
   border: 1px solid rgba(0,255,136,0.16);
@@ -214,7 +186,7 @@ body.home-page .stat-pill{
 }
 
 /* ======================================
-   SECTIONS wider to match hero
+   SECTIONS vNext (breiter, stärker, konsistent)
 ====================================== */
 body.home-page .community-teaser,
 body.home-page .bio,
@@ -222,8 +194,8 @@ body.home-page .stats-section,
 body.home-page .discord-section,
 body.home-page .twitch-section{
   width: min(1040px, 100%);
-  margin-left: auto;
-  margin-right: auto;
+  margin-left:auto;
+  margin-right:auto;
 
   border-radius: 28px;
   border: 1px solid rgba(0,255,136,0.16);
@@ -231,10 +203,10 @@ body.home-page .twitch-section{
   box-shadow: 0 22px 80px rgba(0,0,0,0.58);
 
   padding: clamp(1.8rem, 3.3vw, 2.7rem);
-  text-align: center;
+  text-align:center;
 
   position: relative;
-  overflow: hidden;
+  overflow:hidden;
 }
 
 body.home-page .community-teaser::before,
@@ -264,18 +236,21 @@ body.home-page .twitch-section > *{
 
 /* Section head */
 body.home-page .section-head{
-  display: flex;
+  display:flex;
   flex-direction: column;
-  align-items: center;
+  align-items:center;
   gap: .38rem;
   margin-bottom: 1.15rem;
 }
-body.home-page .section-head p{ max-width: 72ch; }
 
-/* Features grid */
+body.home-page .section-head p{
+  max-width: 72ch;
+}
+
+/* Features grid airy */
 body.home-page .features{
   width: 100%;
-  display: grid;
+  display:grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(1.05rem, 2.2vw, 1.55rem);
   margin: 1.5rem 0 1.7rem;
@@ -287,7 +262,7 @@ body.home-page .feature{
   background: rgba(0,0,0,0.48);
   padding: 1.45rem 1.45rem 1.3rem;
   box-shadow: 0 14px 50px rgba(0,0,0,0.45);
-  text-align: left;
+  text-align:left;
 }
 
 /* Actions */
@@ -309,7 +284,7 @@ body.home-page .prose{
   width: 100%;
   max-width: 80ch;
   margin: 0 auto;
-  display: grid;
+  display:grid;
   gap: 1.0rem;
 }
 
@@ -317,8 +292,8 @@ body.home-page .prose{
 body.home-page .embed{
   margin-top: 1.25rem;
   max-width: 1040px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-left:auto;
+  margin-right:auto;
 }
 body.home-page .embed iframe{
   border-radius: 22px;
