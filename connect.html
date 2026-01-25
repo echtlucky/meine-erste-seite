@@ -5,74 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connect | echtlucky</title>
 
-  <!-- GitHub Pages base URL fix -->
-  <base href="/meine-erste-seite/" />
-
-  <!-- Firebase v9 Compat SDK for CDN -->
+  <!-- Firebase CDN (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/connect.css" />
 
   <style>
-    /* Quick inline fixes for GitHub Pages */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #0a0e27;
       color: #f0f0f0;
+      min-height: 100vh;
     }
 
     .connect-page {
-      background: #0a0e27;
-      color: #f0f0f0;
-      height: 100vh;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
     }
 
-    /* Make sure header is visible */
-    .site-header {
-      background: #1a2038;
-      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
-      padding: 12px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-      z-index: 100;
-    }
-
-    /* Main app container */
     .connect-app {
       display: flex;
       flex: 1;
       overflow: hidden;
-      gap: 0;
     }
 
-    /* Basic sidebar styling */
-    .connect-sidebar {
+    .connect-sidebar,
+    .connect-panel {
       width: 280px;
       background: #1a2038;
-      border-right: 1px solid rgba(0, 255, 136, 0.2);
+      border-color: rgba(0,255,136,.2);
+      border-style: solid;
+      border-width: 0 1px;
       overflow-y: auto;
       flex-shrink: 0;
     }
 
-    /* Basic main content styling */
     .connect-main {
       flex: 1;
       display: flex;
@@ -80,166 +54,114 @@
       overflow: hidden;
     }
 
-    /* Basic panel styling */
-    .connect-panel {
-      width: 280px;
-      background: #1a2038;
-      border-left: 1px solid rgba(0, 255, 136, 0.2);
+    .connect-content {
+      flex: 1;
       overflow-y: auto;
-      flex-shrink: 0;
+      padding: 24px;
+    }
+
+    /* ===== Views ===== */
+    .connect-view { display: none; }
+    .connect-view.is-active { display: block; }
+
+    .nav-item.is-active {
+      color: #00ff88;
+      font-weight: 600;
     }
   </style>
 </head>
 
-<body class="page-transition connect-page">
+<body class="connect-page">
 
-<!-- =====================================================
-     SIMPLE HEADER (NO FETCH)
-===================================================== -->
-<header class="site-header" style="background: #1a2038; border-bottom: 1px solid rgba(0, 255, 136, 0.2); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;">
-  <div style="color: #00ff88; font-weight: 700; font-size: 1.2rem;">
-    <a href="index.html" style="color: #00ff88; text-decoration: none;">echtlucky</a>
-  </div>
-  <nav style="display: flex; gap: 20px;">
-    <a href="index.html" style="color: #a0a0a0; text-decoration: none;">Home</a>
-    <a href="blog.html" style="color: #a0a0a0; text-decoration: none;">Blog</a>
-    <a href="connect.html" style="color: #00ff88; text-decoration: none; font-weight: 600;">Connect</a>
+<!-- HEADER -->
+<header class="site-header" style="background:#1a2038;padding:12px 24px;border-bottom:1px solid rgba(0,255,136,.2);display:flex;justify-content:space-between;">
+  <a href="index.html" style="color:#00ff88;font-weight:700;text-decoration:none;">echtlucky</a>
+  <nav style="display:flex;gap:20px;">
+    <a href="index.html" style="color:#aaa;">Home</a>
+    <a href="blog.html" style="color:#aaa;">Blog</a>
+    <a href="connect.html" style="color:#00ff88;font-weight:600;">Connect</a>
   </nav>
-  <div id="headerAuth">
-    <a href="login.html" style="color: #00ff88; text-decoration: none;">Login</a>
-  </div>
+  <div id="headerAuth"><a href="login.html" style="color:#00ff88;">Login</a></div>
 </header>
 
-<!-- =====================================================
-     MAIN CONNECT APP (Discord-like Layout)
-===================================================== -->
+<!-- APP -->
 <main class="connect-app">
 
   <!-- SIDEBAR -->
   <aside class="connect-sidebar">
-    <div class="sidebar-header">
-      <h2 class="sidebar-title">echtlucky Connect</h2>
-    </div>
-
-    <nav class="sidebar-nav">
+    <nav style="padding:16px;display:grid;gap:10px;">
       <a class="nav-item is-active" data-view="overview" href="#">📡 Overview</a>
       <a class="nav-item" data-view="chat" href="#">💬 Chat</a>
-      <a class="nav-item" data-view="voice" href="#">🎤 Voice</a>
       <a class="nav-item" data-view="members" href="#">👥 Members</a>
       <a class="nav-item" data-view="stats" href="#">📊 Stats</a>
+      <a class="nav-item" data-view="voice" href="#">🎤 Voice</a>
     </nav>
-
-    <div class="sidebar-divider"></div>
-
-    <div class="sidebar-section">
-      <h3 class="sidebar-section-title">Groups</h3>
-      <button class="sidebar-add-btn" id="btnCreateGroup">+ New Group</button>
-    </div>
-
-    <div class="groups-list" id="groupsList"></div>
-
-    <div class="sidebar-user">
-      <div class="user-info" id="userInfo">
-        <span class="user-status">Not logged in</span>
-      </div>
-      <button class="user-action-btn" id="btnUserMenu">⋮</button>
-    </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <section class="connect-main">
-    <header class="connect-header">
-      <div class="header-info" id="headerInfo">
-        <h2 class="header-title">Select a group</h2>
-        <p class="header-subtitle">Join or create a group to start</p>
-      </div>
-    </header>
-
     <div class="connect-content">
-      <!-- OVERVIEW VIEW -->
+
       <div class="connect-view is-active" data-view="overview">
-        <div class="view-welcome">
-          <div class="welcome-box">
-            <div class="welcome-emoji">🌐</div>
-            <h3>Welcome to echtlucky Connect</h3>
-            <p>Select a group from the sidebar to start chatting, or create a new group.</p>
-            <button class="btn btn-primary" id="btnCreateGroupWelcome">Create First Group</button>
-          </div>
-        </div>
+        <h2>Welcome to Connect</h2>
+        <p>Wähle links eine Funktion aus.</p>
       </div>
 
-      <!-- CHAT VIEW -->
       <div class="connect-view" data-view="chat">
-        <div class="chat-container">
-          <div class="messages-area" id="messagesArea"></div>
-          <div class="chat-input-area">
-            <input type="text" id="messageInput" class="message-input" placeholder="Send a message..." disabled />
-            <button class="send-btn" id="btnSendMessage" disabled>Send</button>
-          </div>
-        </div>
+        <h2>Chat</h2>
+        <div id="chatArea">Chat UI kommt von connect.js</div>
       </div>
 
-      <!-- VOICE VIEW -->
-      <div class="connect-view" data-view="voice">
-        <div class="voice-container">
-          <div class="voice-header">
-            <h3>Voice Calls</h3>
-            <p id="voiceStatus">Not in a call</p>
-          </div>
-          <div class="voice-controls">
-            <button class="btn btn-success" id="btnStartVoiceCall">🎤 Start Voice Call</button>
-            <button class="btn btn-danger" id="btnEndVoiceCall" style="display: none;">☎️ End Call</button>
-            <button class="btn btn-secondary" id="btnToggleMic" style="display: none;">🎤 Mute</button>
-          </div>
-          <div class="voice-participants" id="voiceParticipants"></div>
-        </div>
-      </div>
-
-      <!-- MEMBERS VIEW -->
       <div class="connect-view" data-view="members">
-        <div class="members-container">
-          <div class="members-header">
-            <h3>Group Members</h3>
-            <input type="text" placeholder="Search members..." class="members-search" />
-          </div>
-          <div class="members-list" id="membersList"></div>
-        </div>
+        <h2>Members</h2>
+        <div id="membersList"></div>
       </div>
 
-      <!-- STATS VIEW -->
       <div class="connect-view" data-view="stats">
-        <div class="stats-container">
-          <h3>Community Stats</h3>
-          <div class="stats-grid" id="statsGrid"></div>
-        </div>
+        <h2>Community Stats</h2>
+        <div id="statsGrid"></div>
       </div>
+
+      <div class="connect-view" data-view="voice">
+        <h2>Voice</h2>
+        <p>Voice-Chat (Platzhalter)</p>
+      </div>
+
     </div>
   </section>
 
   <!-- RIGHT PANEL -->
   <aside class="connect-panel">
-    <div class="panel-header">
-      <h3 class="panel-title">Online Users</h3>
-    </div>
-    <div class="panel-content">
-      <div class="online-users" id="onlineUsers"></div>
-    </div>
-    <div class="panel-footer">
-      <small>Real-time presence</small>
+    <div style="padding:16px;">
+      <h3>Online Users</h3>
+      <div id="onlineUsers"></div>
     </div>
   </aside>
 
 </main>
 
-<!-- =====================================================
-     SCRIPTS (Inline - No Fetch)
-===================================================== -->
+<!-- SCRIPTS -->
 <script src="firebase.js"></script>
-<script src="js/auth-state.js"></script>
-<script src="js/menu.js"></script>
 <script src="js/notify.js"></script>
 <script src="js/connect.js"></script>
-<script src="js/voice-chat.js"></script>
+
+<!-- VIEW CONTROLLER -->
+<script>
+  const navItems = document.querySelectorAll(".nav-item");
+  const views = document.querySelectorAll(".connect-view");
+
+  function switchView(view) {
+    views.forEach(v => v.classList.toggle("is-active", v.dataset.view === view));
+    navItems.forEach(n => n.classList.toggle("is-active", n.dataset.view === view));
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener("click", e => {
+      e.preventDefault();
+      switchView(item.dataset.view);
+    });
+  });
+</script>
 
 </body>
 </html>
