@@ -249,12 +249,12 @@
 /* Container */
 .notify-stack{
   position: fixed;
-  top: 74px; /* unter deinem fixed header */
-  right: 18px;
+  top: 20px; /* Better positioning for modern layouts */
+  right: 20px;
   z-index: 99999;
   display: grid;
-  gap: 10px;
-  width: min(420px, calc(100vw - 24px));
+  gap: 12px;
+  width: min(420px, calc(100vw - 40px));
   pointer-events: none;
 }
 

@@ -1,436 +1,516 @@
-// =====================================================
-// connect.js — echtlucky Connect V3
-// Navigation Tabs + Groups + Chat + Presence
-// =====================================================
+// js/connect.js — echtlucky Connect Page Controller
+// Manages chat, groups, voice calls, and real-time presence
+// Guard: prevent double-load
 
-(() => {
+(function () {
   "use strict";
 
-  /* =====================================================
-     FIREBASE
-  ===================================================== */
-  const auth = window.echtlucky?.auth || window.auth || null;
-  const db   = window.echtlucky?.db   || window.db   || null;
+  if (window.__ECHTLUCKY_CONNECT_LOADED__) {
+    console.warn("connect.js already loaded – skipping");
+    return;
+  }
+  window.__ECHTLUCKY_CONNECT_LOADED__ = true;
 
-  if (!db) {
-    console.error("connect.js: Firestore fehlt (window.db).");
+  const auth = window.auth || window.echtlucky?.auth;
+  const db = window.db || window.echtlucky?.db;
+
+  if (!auth || !db) {
+    console.error("connect.js: auth/db missing. firebase.js must load first.");
     return;
   }
 
-  const serverTS = () => firebase.firestore.FieldValue.serverTimestamp();
+  // ============================================
+  // STATE
+  // ============================================
 
-  const notify = (type, msg) => {
-    if (window.notify?.show) {
-      return window.notify.show({
-        type: type,
-        title: type === "success" ? "Erfolg" : type === "error" ? "Fehler" : "Info",
-        message: msg,
-        duration: 4500
-      });
-    }
-    console.log(type.toUpperCase() + ":", msg);
-  };
+  let selectedGroupId = null;
+  let currentUserGroups = [];
+  let onlineUsers = new Map();
+  let messageUnsubscribe = null;
+  let groupsUnsubscribe = null;
+  let presenceUnsubscribe = null;
 
-  /* =====================================================
-     DOM HELPERS
-  ===================================================== */
-  const $ = (id) => document.getElementById(id);
-  const $$ = (sel) => document.querySelectorAll(sel);
+  // ============================================
+  // DOM ELEMENTS
+  // ============================================
 
-  function esc(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
-  }
+  const groupsList = document.getElementById("groupsList");
+  const messageInput = document.getElementById("messageInput");
+  const btnSendMessage = document.getElementById("btnSendMessage");
+  const messagesArea = document.getElementById("messagesArea");
+  const btnCreateGroup = document.getElementById("btnCreateGroup");
+  const btnCreateGroupWelcome = document.getElementById("btnCreateGroupWelcome");
+  const headerInfo = document.getElementById("headerInfo");
+  const onlineUsersContainer = document.getElementById("onlineUsers");
+  const membersList = document.getElementById("membersList");
+  const statsGrid = document.getElementById("statsGrid");
+  const userInfo = document.getElementById("userInfo");
+  const btnUserMenu = document.getElementById("btnUserMenu");
 
-  /* =====================================================
-     STATE
-  ===================================================== */
-  let currentUser = null;
-  let selectedGroup = null;
-  let isMember = false;
+  // ============================================
+  // INITIALIZE
+  // ============================================
 
-  let unsubGroups = null;
-  let unsubMessages = null;
-  let unsubMembers = null;
-  let presenceTimer = null;
-  let presenceUnsubs = [];
-
-  let activeTab = "chat";
-
-  /* =====================================================
-     ELEMENTS
-  ===================================================== */
-  const loginGate = $("loginGate");
-
-  const groupList = $("groupList");
-  const groupSearch = $("groupSearch");
-
-  const chatTitle = $("chatTitle");
-  const chatHint = $("chatHint");
-  const chatScroll = $("chatScroll");
-  const chatForm = $("chatForm");
-  const chatInput = $("chatInput");
-
-  const btnJoinLeave = $("btnJoinLeave");
-  const btnCreateGroup = $("btnCreateGroup");
-  const btnRefreshGroups = $("btnRefreshGroups");
-  const btnSetActivity = $("btnSetActivity");
-  const btnLogout = $("btnLogout");
-
-  const memberList = $("memberList");
-  const membersHint = $("membersHint");
-
-  const meDot = $("meDot");
-  const meName = $("meName");
-
-  /* =====================================================
-     NAVIGATION (LEFT PANEL)
-  ===================================================== */
-
-  function initNavigation(){
-    const navItems = $$(".nav-item");
-
-    navItems.forEach(item => {
-      item.addEventListener("click", (e) => {
-        // Verhindere Event-Bubbling
+  function init() {
+    // Setup message send
+    messageInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        e.stopPropagation();
-        
-        navItems.forEach(n => n.classList.remove("is-active"));
-        item.classList.add("is-active");
-        
-        // Finde View basierend auf Text oder data-view
-        const itemText = item.textContent.toLowerCase();
-        let view = "chat";
-        
-        if (itemText.includes("discover")) view = "discover";
-        else if (itemText.includes("stats") || itemText.includes("community")) view = "stats";
-        else if (itemText.includes("profil")) view = "profile";
-        else if (itemText.includes("einstellung")) view = "settings";
-        else if (itemText.includes("hilfe")) view = "help";
-        else if (itemText.includes("chat")) view = "chat";
-        
-        switchTab(view);
-      });
-    });
-  }
-
-  function switchTab(tab){
-    activeTab = tab;
-
-    // Zeige nur die aktive View
-    const views = document.querySelectorAll(".connect-view");
-    views.forEach(v => {
-      if (v.dataset.view === tab) {
-        v.classList.add("is-active");
-      } else {
-        v.classList.remove("is-active");
+        sendMessage();
       }
     });
 
-    // Update active nav item
-    const navItems = $$(".nav-item");
-    navItems.forEach(n => {
-      const nText = n.textContent.toLowerCase();
-      let nView = "chat";
-      if (nText.includes("discover")) nView = "discover";
-      else if (nText.includes("stats") || nText.includes("community")) nView = "stats";
-      else if (nText.includes("profil")) nView = "profile";
-      else if (nText.includes("einstellung")) nView = "settings";
-      else if (nText.includes("hilfe")) nView = "help";
+    btnSendMessage.addEventListener("click", sendMessage);
+
+    // Create group buttons
+    btnCreateGroup.addEventListener("click", createGroupPrompt);
+    btnCreateGroupWelcome.addEventListener("click", createGroupPrompt);
+
+    // View navigation
+    document.querySelectorAll(".nav-item").forEach((item) => {
+      item.addEventListener("click", (e) => {
+        e.preventDefault();
+        const view = item.dataset.view;
+        if (view) switchView(view);
+      });
+    });
+
+    // Settings
+    document.querySelectorAll(".settings-form input").forEach((input) => {
+      input.addEventListener("change", (e) => {
+        const key = e.target.id;
+        localStorage.setItem(key, e.target.checked);
+      });
+    });
+
+    // User menu
+    btnUserMenu.addEventListener("click", showUserMenu);
+
+    // Listen to auth state
+    auth.onAuthStateChanged(handleAuthStateChange);
+  }
+
+  // ============================================
+  // AUTH STATE
+  // ============================================
+
+  function handleAuthStateChange(user) {
+    if (user) {
+      window.__ECHTLUCKY_CURRENT_USER__ = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || "Anonymous"
+      };
+
+      // Update UI
+      userInfo.textContent = user.displayName || user.email;
+
+      // Load groups
+      loadUserGroups();
+
+      // Setup presence
+      setupPresence(user.uid);
+    } else {
+      // Not logged in
+      userInfo.innerHTML = '<span class="user-status">Not logged in</span>';
+      messageInput.disabled = true;
+      btnSendMessage.disabled = true;
       
-      n.classList.toggle("is-active", nView === tab);
+      // Clear listeners
+      if (messageUnsubscribe) messageUnsubscribe();
+      if (groupsUnsubscribe) groupsUnsubscribe();
+      if (presenceUnsubscribe) presenceUnsubscribe();
+    }
+  }
+
+  // ============================================
+  // PRESENCE (Online Status)
+  // ============================================
+
+  function setupPresence(uid) {
+    const presenceRef = db.collection("presence").doc(uid);
+    const userRef = db.collection("users").doc(uid);
+
+    // Set presence as online
+    presenceRef.set({
+      uid,
+      lastSeen: new Date(),
+      status: "online"
     });
-  }
 
-  /* =====================================================
-     PRESENCE
-  ===================================================== */
+    // Listen to all presence docs
+    presenceUnsubscribe = db.collection("presence").onSnapshot((snap) => {
+      onlineUsers.clear();
+      snap.forEach((doc) => {
+        const data = doc.data();
+        if (data.status === "online") {
+          onlineUsers.set(doc.id, data);
+        }
+      });
+      updateOnlineUsersList();
+    });
 
-  async function writePresence(patch){
-    if (!currentUser) return;
-    try {
-      await db.collection("presence").doc(currentUser.uid).set({
-        uid: currentUser.uid,
-        displayName: currentUser.displayName || "User",
-        lastSeenAt: serverTS(),
-        ...patch
-      }, { merge:true });
-    } catch(e){}
-  }
-
-  function startPresence(){
-    writePresence({ state:"online" });
-    setDot("online");
-
-    if (presenceTimer) clearInterval(presenceTimer);
-    presenceTimer = setInterval(() => {
-      writePresence({ state: document.hidden ? "idle" : "online" });
-    }, 25000);
-
+    // Set offline on page unload
     window.addEventListener("beforeunload", () => {
-      writePresence({ state:"offline" });
+      presenceRef.set({ status: "offline", lastSeen: new Date() });
     });
   }
 
-  function stopPresence(){
-    if (presenceTimer) clearInterval(presenceTimer);
-    setDot("offline");
-  }
+  // ============================================
+  // LOAD & DISPLAY GROUPS
+  // ============================================
 
-  function setDot(state){
-    if (!meDot) return;
-    if (state === "online") meDot.style.background = "#00ff88";
-    else if (state === "idle") meDot.style.background = "#ffcc00";
-    else meDot.style.background = "rgba(255,255,255,.3)";
-  }
+  function loadUserGroups() {
+    const uid = auth.currentUser.uid;
 
-  /* =====================================================
-     GROUPS
-  ===================================================== */
-
-  function renderGroup(id, data){
-    const el = document.createElement("div");
-    el.className = "group-card" + (selectedGroup?.id === id ? " is-active":"");
-    el.innerHTML = `
-      <div class="group-name">${esc(data.name)}</div>
-      <div class="group-meta">${data.isPublic ? "Public":"Private"}</div>
-    `;
-    el.onclick = () => selectGroup(id, data);
-    return el;
-  }
-
-  function listenGroups(){
-    unsubGroups?.();
-
-    unsubGroups = db.collection("groups")
-      .where("isPublic","==",true)
-      .limit(50)
-      .onSnapshot(snap => {
-        groupList.innerHTML = "";
-        snap.forEach(doc => {
-          groupList.appendChild(renderGroup(doc.id, doc.data()));
+    groupsUnsubscribe = db
+      .collection("groups")
+      .where("members", "array-contains", uid)
+      .onSnapshot((snap) => {
+        currentUserGroups = [];
+        snap.forEach((doc) => {
+          currentUserGroups.push({ id: doc.id, ...doc.data() });
         });
+        displayGroupsList();
       });
   }
 
-  async function selectGroup(id, data){
-    selectedGroup = { id, ...data };
-    chatTitle.textContent = data.name;
-    chatHint.textContent = "Lade Group…";
+  function displayGroupsList() {
+    groupsList.innerHTML = "";
 
-    // Speichere selectedGroup für voice-chat.js
-    window.__ECHTLUCKY_SELECTED_GROUP__ = id;
-
-    cleanupGroupListeners();
-
-    isMember = await checkMembership(id);
-    updateJoinLeave();
-
-    if (isMember) {
-      listenMessages(id);
-      listenMembers(id);
-    } else {
-      chatScroll.innerHTML = `<div class="group-meta">Join die Group um zu chatten.</div>`;
-    }
-  }
-
-  async function checkMembership(groupId){
-    if (!currentUser) return false;
-    const snap = await db.collection("groups").doc(groupId)
-      .collection("members").doc(currentUser.uid).get();
-    return snap.exists;
-  }
-
-  /* =====================================================
-     CHAT
-  ===================================================== */
-
-  function listenMessages(groupId){
-    unsubMessages?.();
-
-    unsubMessages = db.collection("groups").doc(groupId)
-      .collection("messages")
-      .orderBy("createdAt","asc")
-      .limitToLast(80)
-      .onSnapshot(snap => {
-        chatScroll.innerHTML = "";
-        snap.forEach(doc => {
-          const m = doc.data();
-          const mine = m.uid === currentUser?.uid;
-
-          const el = document.createElement("div");
-          el.className = "msg" + (mine ? " me":"");
-          el.innerHTML = `
-            <div class="msg-top">
-              <div class="msg-name">${esc(m.displayName)}</div>
-              <div class="msg-time">${new Date(m.createdAt?.toDate?.()||Date.now()).toLocaleTimeString()}</div>
-            </div>
-            <div class="msg-text">${esc(m.text)}</div>
-          `;
-          chatScroll.appendChild(el);
-        });
-        chatScroll.scrollTop = chatScroll.scrollHeight;
-      });
-  }
-
-  async function sendMessage(e){
-    e.preventDefault();
-    if (!chatInput.value || !selectedGroup) return;
-
-    const text = chatInput.value.trim();
-    chatInput.value = "";
-
-    await db.collection("groups").doc(selectedGroup.id)
-      .collection("messages").add({
-        uid: currentUser.uid,
-        displayName: currentUser.displayName || "User",
-        text,
-        createdAt: serverTS()
-      });
-
-    await db.collection("groups").doc(selectedGroup.id)
-      .set({ lastMessageAt: serverTS() }, { merge:true });
-  }
-
-  /* =====================================================
-     MEMBERS
-  ===================================================== */
-
-  function listenMembers(groupId){
-    unsubMembers?.();
-    clearPresenceSubs();
-
-    unsubMembers = db.collection("groups").doc(groupId)
-      .collection("members")
-      .onSnapshot(snap => {
-        memberList.innerHTML = "";
-        membersHint.textContent = snap.size + " Member";
-
-        snap.forEach(doc => {
-          const m = doc.data();
-          const row = document.createElement("div");
-          row.className = "member";
-          row.innerHTML = `
-            <div class="member-left">
-              <span class="dot" id="dot_${m.uid}"></span>
-              <div>
-                <div class="member-name">${esc(m.displayName)}</div>
-                <div class="member-activity" id="act_${m.uid}">—</div>
-              </div>
-            </div>
-            <span class="group-meta">${m.role || "member"}</span>
-          `;
-          memberList.appendChild(row);
-
-          const unsub = db.collection("presence").doc(m.uid)
-            .onSnapshot(ps => {
-              const p = ps.data() || {};
-              const dot = $("dot_"+m.uid);
-              const act = $("act_"+m.uid);
-              if (dot) dot.style.background =
-                p.state==="online"?"#00ff88":p.state==="idle"?"#ffcc00":"rgba(255,255,255,.3)";
-              if (act) act.textContent = p.activity || "—";
-            });
-
-          presenceUnsubs.push(unsub);
-        });
-      });
-  }
-
-  function clearPresenceSubs(){
-    presenceUnsubs.forEach(u=>u());
-    presenceUnsubs=[];
-  }
-
-  function cleanupGroupListeners(){
-    unsubMessages?.();
-    unsubMembers?.();
-    clearPresenceSubs();
-  }
-
-  /* =====================================================
-     JOIN / LEAVE
-  ===================================================== */
-
-  async function joinLeave(){
-    if (!currentUser || !selectedGroup) return;
-
-    const ref = db.collection("groups").doc(selectedGroup.id)
-      .collection("members").doc(currentUser.uid);
-
-    if (isMember){
-      const snap = await ref.get();
-      if (snap.data()?.role === "owner"){
-        notify("warn","Owner kann nicht verlassen.");
-        return;
-      }
-      await ref.delete();
-      isMember = false;
-      cleanupGroupListeners();
-    } else {
-      await ref.set({
-        uid: currentUser.uid,
-        displayName: currentUser.displayName || "User",
-        role:"member",
-        joinedAt: serverTS()
-      });
-      isMember = true;
-      listenMessages(selectedGroup.id);
-      listenMembers(selectedGroup.id);
-    }
-
-    updateJoinLeave();
-  }
-
-  function updateJoinLeave(){
-    if (!currentUser){
-      btnJoinLeave.disabled = true;
-      chatInput.disabled = true;
+    if (currentUserGroups.length === 0) {
+      groupsList.innerHTML =
+        '<p style="padding: 12px; color: var(--c-text-secondary); text-align: center;">Keine Groups. Erstelle eine neue!</p>';
       return;
     }
 
-    btnJoinLeave.disabled = false;
-    btnJoinLeave.textContent = isMember ? "Leave" : "Join";
-    chatInput.disabled = !isMember;
-    chatHint.textContent = isMember
-      ? "Du bist drin."
-      : "Join die Group um zu chatten.";
+    currentUserGroups.forEach((group) => {
+      const div = document.createElement("div");
+      div.className = "group-item";
+      if (group.id === selectedGroupId) div.classList.add("is-active");
+
+      const memberCount = group.members?.length || 0;
+
+      div.innerHTML = `
+        <div class="group-name">${group.name}</div>
+        <div class="group-users">${memberCount} member${memberCount !== 1 ? "s" : ""}</div>
+      `;
+
+      div.addEventListener("click", () => selectGroup(group.id, group));
+      groupsList.appendChild(div);
+    });
   }
 
-  /* =====================================================
-     INIT
-  ===================================================== */
+  // ============================================
+  // SELECT GROUP
+  // ============================================
 
-  btnJoinLeave?.addEventListener("click", joinLeave);
-  chatForm?.addEventListener("submit", sendMessage);
-  btnCreateGroup?.addEventListener("click", () => notify("info","Group erstellen (Flow folgt)"));
-  btnRefreshGroups?.addEventListener("click", listenGroups);
-  btnSetActivity?.addEventListener("click", () => notify("info","Activity setzen (Flow folgt)"));
+  function selectGroup(groupId, groupData) {
+    selectedGroupId = groupId;
+    window.__ECHTLUCKY_SELECTED_GROUP__ = groupId;
 
-  btnLogout?.addEventListener("click", async ()=>{
-    await writePresence({ state:"offline" });
-    await auth.signOut();
-    notify("success","Logout");
-  });
+    // Update UI
+    displayGroupsList();
+    updateHeaderInfo(groupData);
+    loadGroupMessages();
+    loadGroupMembers();
+    loadGroupStats();
 
-  initNavigation();
-  listenGroups();
+    // Switch to chat view
+    switchView("chat");
 
-  if (auth){
-    auth.onAuthStateChanged(user=>{
-      currentUser = user || null;
-      if (user){
-        meName.textContent = user.displayName || "User";
-        startPresence();
-        loginGate.style.display = "none";
-      } else {
-        stopPresence();
-        loginGate.style.display = "flex";
+    // Enable input
+    messageInput.disabled = false;
+    btnSendMessage.disabled = false;
+  }
+
+  function updateHeaderInfo(groupData) {
+    headerInfo.innerHTML = `
+      <h2 class="header-title"># ${groupData.name}</h2>
+      <p class="header-subtitle">${groupData.description || "No description"}</p>
+    `;
+  }
+
+  // ============================================
+  // MESSAGES
+  // ============================================
+
+  function loadGroupMessages() {
+    if (!selectedGroupId) return;
+
+    // Unsubscribe from previous group
+    if (messageUnsubscribe) messageUnsubscribe();
+
+    // Listen to messages from this group
+    messageUnsubscribe = db
+      .collection("groups")
+      .doc(selectedGroupId)
+      .collection("messages")
+      .orderBy("createdAt", "asc")
+      .limitToLast(50)
+      .onSnapshot((snap) => {
+        messagesArea.innerHTML = "";
+
+        snap.forEach((doc) => {
+          const msg = doc.data();
+          displayMessage(msg);
+        });
+
+        // Scroll to bottom
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+      });
+  }
+
+  function displayMessage(msg) {
+    const div = document.createElement("div");
+    div.className = "message";
+
+    const initials = (msg.authorName || "?").substring(0, 1).toUpperCase();
+    const time = new Date(msg.createdAt.toDate()).toLocaleTimeString("de-DE", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+    div.innerHTML = `
+      <div class="message-avatar">${initials}</div>
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-author">${msg.authorName || "Anonymous"}</span>
+          <span class="message-time">${time}</span>
+        </div>
+        <div class="message-text">${escapeHtml(msg.text)}</div>
+      </div>
+    `;
+
+    messagesArea.appendChild(div);
+  }
+
+  function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text || !selectedGroupId || !auth.currentUser) {
+      window.notify?.show({
+        type: "warn",
+        title: "Warnung",
+        message: "Select a group first"
+      });
+      return;
+    }
+
+    const groupRef = db.collection("groups").doc(selectedGroupId);
+
+    groupRef.collection("messages").add({
+      authorUid: auth.currentUser.uid,
+      authorName: auth.currentUser.displayName || auth.currentUser.email,
+      text: text,
+      createdAt: new Date()
+    });
+
+    messageInput.value = "";
+    messageInput.focus();
+  }
+
+  // ============================================
+  // MEMBERS
+  // ============================================
+
+  function loadGroupMembers() {
+    if (!selectedGroupId) return;
+
+    const group = currentUserGroups.find((g) => g.id === selectedGroupId);
+    if (!group || !group.members) return;
+
+    membersList.innerHTML = "";
+
+    group.members.forEach((uid) => {
+      db.collection("users")
+        .doc(uid)
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            const user = doc.data();
+            const div = document.createElement("div");
+            div.className = "member-card";
+
+            const initials = (user.displayName || "?").substring(0, 1).toUpperCase();
+            const isOnline = onlineUsers.has(uid);
+
+            div.innerHTML = `
+              <div class="member-avatar">${initials}</div>
+              <div class="member-name">${user.displayName || "Unknown"}</div>
+              <div class="member-status">${isOnline ? "🟢 Online" : "⚫ Offline"}</div>
+            `;
+
+            membersList.appendChild(div);
+          }
+        });
+    });
+  }
+
+  // ============================================
+  // STATS
+  // ============================================
+
+  function loadGroupStats() {
+    if (!selectedGroupId) return;
+
+    const group = currentUserGroups.find((g) => g.id === selectedGroupId);
+    if (!group) return;
+
+    statsGrid.innerHTML = "";
+
+    const stats = [
+      { icon: "👥", label: "Members", value: group.members?.length || 0 },
+      { icon: "💬", label: "Messages", value: "Loading..." },
+      { icon: "📅", label: "Created", value: new Date(group.createdAt.toDate()).toLocaleDateString("de-DE") },
+      { icon: "⭐", label: "Activity", value: "High" }
+    ];
+
+    stats.forEach((stat) => {
+      const div = document.createElement("div");
+      div.className = "stat-card";
+      div.innerHTML = `
+        <div class="stat-icon">${stat.icon}</div>
+        <div class="stat-label">${stat.label}</div>
+        <div class="stat-value">${stat.value}</div>
+      `;
+      statsGrid.appendChild(div);
+    });
+
+    // Load actual message count
+    db.collection("groups")
+      .doc(selectedGroupId)
+      .collection("messages")
+      .get()
+      .then((snap) => {
+        const cards = statsGrid.querySelectorAll(".stat-card");
+        if (cards[1]) {
+          cards[1].querySelector(".stat-value").textContent = snap.size;
+        }
+      });
+  }
+
+  // ============================================
+  // ONLINE USERS PANEL
+  // ============================================
+
+  function updateOnlineUsersList() {
+    onlineUsersContainer.innerHTML = "";
+
+    if (onlineUsers.size === 0) {
+      onlineUsersContainer.innerHTML =
+        '<p style="padding: 12px; text-align: center; color: var(--c-text-secondary); font-size: 0.85rem;">No one online</p>';
+      return;
+    }
+
+    onlineUsers.forEach((user) => {
+      const div = document.createElement("div");
+      div.className = "online-user";
+      div.innerHTML = `
+        <div class="user-dot"></div>
+        <div class="online-user-name">${user.displayName || user.email || "User"}</div>
+      `;
+      onlineUsersContainer.appendChild(div);
+    });
+  }
+
+  // ============================================
+  // CREATE GROUP
+  // ============================================
+
+  function createGroupPrompt() {
+    const name = prompt("Group name:");
+    if (!name) return;
+
+    const description = prompt("Description (optional):");
+
+    const uid = auth.currentUser.uid;
+
+    db.collection("groups")
+      .add({
+        name: name,
+        description: description || "",
+        members: [uid],
+        createdAt: new Date(),
+        createdBy: uid
+      })
+      .then((docRef) => {
+        window.notify?.show({
+          type: "success",
+          title: "Success",
+          message: `Group "${name}" created!`,
+          duration: 4500
+        });
+        selectGroup(docRef.id, { id: docRef.id, name, description });
+      })
+      .catch((error) => {
+        window.notify?.show({
+          type: "error",
+          title: "Error",
+          message: "Could not create group: " + error.message,
+          duration: 5000
+        });
+      });
+  }
+
+  // ============================================
+  // VIEW NAVIGATION
+  // ============================================
+
+  function switchView(viewName) {
+    // Update nav items
+    document.querySelectorAll(".nav-item").forEach((item) => {
+      item.classList.remove("is-active");
+      if (item.dataset.view === viewName) {
+        item.classList.add("is-active");
+      }
+    });
+
+    // Update views
+    document.querySelectorAll(".connect-view").forEach((view) => {
+      view.classList.remove("is-active");
+      if (view.dataset.view === viewName) {
+        view.classList.add("is-active");
       }
     });
   }
 
+  // ============================================
+  // USER MENU
+  // ============================================
+
+  function showUserMenu() {
+    if (!auth.currentUser) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    const choice = confirm(`Hi ${auth.currentUser.displayName || "User"}!\n\nLogout?`);
+    if (choice) {
+      auth.signOut();
+      window.notify?.show({
+        type: "success",
+        title: "Logged Out",
+        message: "See you later!",
+        duration: 3500
+      });
+    }
+  }
+
+  // ============================================
+  // UTILITIES
+  // ============================================
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ============================================
+  // STARTUP
+  // ============================================
+
+  document.addEventListener("DOMContentLoaded", init);
+
+  console.log("✅ connect.js initialized");
 })();

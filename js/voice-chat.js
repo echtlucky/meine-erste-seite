@@ -43,7 +43,7 @@
   // DOM ELEMENTS
   // ============================================
 
-  const voiceCallPanel = document.getElementById("voiceCallPanel");
+  const voiceCallPanel = null; // Not used in new layout
   const voiceStatus = document.getElementById("voiceStatus");
   const voiceParticipants = document.getElementById("voiceParticipants");
   const btnStartVoiceCall = document.getElementById("btnStartVoiceCall");
@@ -622,11 +622,15 @@
 
   function updateVoiceUI(isActive, statusText) {
     if (isActive) {
-      voiceCallPanel.classList.add("is-active");
-      voiceStatus.textContent = statusText;
+      if (voiceStatus) voiceStatus.textContent = statusText;
+      if (btnStartVoiceCall) btnStartVoiceCall.style.display = "none";
+      if (btnEndVoiceCall) btnEndVoiceCall.style.display = "block";
+      if (btnToggleMic) btnToggleMic.style.display = "block";
     } else {
-      voiceCallPanel.classList.remove("is-active");
-      voiceStatus.textContent = "";
+      if (voiceStatus) voiceStatus.textContent = "Not in a call";
+      if (btnStartVoiceCall) btnStartVoiceCall.style.display = "block";
+      if (btnEndVoiceCall) btnEndVoiceCall.style.display = "none";
+      if (btnToggleMic) btnToggleMic.style.display = "none";
     }
   }
 

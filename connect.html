@@ -12,339 +12,197 @@
 <body class="page-transition connect-page">
 
 <!-- =====================================================
-     HEADER
+     HEADER (Shared)
 ===================================================== -->
 <div id="header-placeholder"></div>
 
 <!-- =====================================================
-     MAIN WRAPPER
+     MAIN CONNECT APP (Discord-like Layout)
 ===================================================== -->
-<main class="connect-wrap">
+<main class="connect-app">
 
   <!-- =====================================================
-       HERO / INTRO
-  ====================================================== -->
-  <section class="connect-hero">
-    <div>
-      <div class="connect-badge">⚡ echtlucky • Connect</div>
-      <h1 class="connect-title">Community. Fokus. Realtime.</h1>
-      <p class="connect-sub">
-        Connect ist dein zentrales Interface für Austausch, Fokus,
-        Live-Chat, Groups und Presence.  
-        Klar strukturiert. Kein Chaos. Kein Noise.
-      </p>
+       SIDEBAR: Groups & Navigation (Left)
+  ===================================================== -->
+  <aside class="connect-sidebar">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">echtlucky Connect</h2>
     </div>
 
-    <div class="connect-heroActions">
-      <button class="btn btn-ghost" id="btnSetActivity">Activity</button>
-      <button class="btn btn-primary" id="btnCreateGroup">Neue Group</button>
-    </div>
-  </section>
+    <!-- Navigation Items -->
+    <nav class="sidebar-nav">
+      <a class="nav-item is-active" data-view="overview" href="#">📡 Overview</a>
+      <a class="nav-item" data-view="chat" href="#">💬 Chat</a>
+      <a class="nav-item" data-view="voice" href="#">🎤 Voice Calls</a>
+      <a class="nav-item" data-view="members" href="#">👥 Members</a>
+      <a class="nav-item" data-view="stats" href="#">📊 Stats</a>
+      <a class="nav-item" data-view="settings" href="#">⚙️ Settings</a>
+    </nav>
 
-  <!-- =====================================================
-       LOGIN GATE
-  ====================================================== -->
-  <section class="connect-gate" id="loginGate">
-    <div class="gate-card">
-      <h2 class="gate-title">Members only ✋</h2>
-      <p class="gate-text">
-        Öffentliche Inhalte sind sichtbar.  
-        Chat, Presence & Interaktion nur mit Account.
-      </p>
-      <div class="gate-actions">
-        <a href="login.html" class="btn btn-primary">Anmelden</a>
-        <a href="login.html" class="btn btn-secondary">Account erstellen</a>
+    <div class="sidebar-divider"></div>
+
+    <!-- Groups List -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">Groups</h3>
+      <button class="sidebar-add-btn" id="btnCreateGroup">+ New Group</button>
+    </div>
+
+    <div class="groups-list" id="groupsList">
+      <!-- Groups dynamically inserted -->
+    </div>
+
+    <!-- User Profile (Bottom) -->
+    <div class="sidebar-user">
+      <div class="user-info" id="userInfo">
+        <span class="user-status">Not logged in</span>
       </div>
+      <button class="user-action-btn" id="btnUserMenu">⋮</button>
     </div>
-  </section>
+  </aside>
 
-  <!-- =========================
-       CONNECT VIEWS
-  ========================= -->
+  <!-- =====================================================
+       MAIN CONTENT: Chat & Views (Center)
+  ===================================================== -->
+  <section class="connect-main">
 
-  <section class="connect-views">
+    <!-- Header: Group Info -->
+    <header class="connect-header">
+      <div class="header-info" id="headerInfo">
+        <h2 class="header-title">Select a group</h2>
+        <p class="header-subtitle">Join or create a group to start</p>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btnSettings" title="Settings">⚙️</button>
+        <button class="icon-btn" id="btnSearch" title="Search">🔍</button>
+      </div>
+    </header>
 
-  <!-- CHAT VIEW -->
-  <div class="connect-view is-active" data-view="chat">
-    <!-- =====================================================
-         CONNECT APP (ADMIN PANEL LAYOUT)
-    ====================================================== -->
-    <section class="connect-app" id="connectApp">
+    <!-- Content Area (views) -->
+    <div class="connect-content">
 
-      <!-- =================================================
-           LEFT SIDEBAR / NAVIGATION
-      ================================================== -->
-      <aside class="pane pane-left">
-
-        <div class="pane-head">
-          <div>
-            <div class="pane-title">Connect</div>
-            <div class="pane-hint">User Interface</div>
+      <!-- OVERVIEW VIEW -->
+      <div class="connect-view is-active" data-view="overview">
+        <div class="view-welcome">
+          <div class="welcome-box">
+            <div class="welcome-emoji">🌐</div>
+            <h3>Welcome to echtlucky Connect</h3>
+            <p>Select a group from the sidebar to start chatting, or create a new group.</p>
+            <button class="btn btn-primary" id="btnCreateGroupWelcome">Create First Group</button>
           </div>
         </div>
+      </div>
 
-        <nav class="connect-nav">
-          <a class="nav-item is-active" data-view="chat">💬 Live Chat</a>
-          <a class="nav-item" data-view="discover">🧭 Discover</a>
-          <a class="nav-item">⭐ Favoriten</a>
-          <a class="nav-item" data-view="stats">📊 Community Stats</a>
-          <a class="nav-item">🧠 Fokus Sessions</a>
-          <a class="nav-item" data-view="profile">👤 Profil</a>
-          <a class="nav-item" data-view="settings">⚙ Einstellungen</a>
-          <a class="nav-item" data-view="help">❓ Hilfe</a>
-        </nav>
-
-        <div class="nav-divider"></div>
-
-        <!-- GROUPS -->
-        <div class="pane-head">
-          <div>
-            <div class="pane-title">Groups</div>
-            <div class="pane-hint">Public & Private</div>
+      <!-- CHAT VIEW -->
+      <div class="connect-view" data-view="chat">
+        <div class="chat-container">
+          <div class="messages-area" id="messagesArea">
+            <!-- Messages dynamically inserted -->
           </div>
-          <button class="icon-btn" id="btnRefreshGroups">⟳</button>
-        </div>
-
-        <div class="group-search">
-          <input id="groupSearch" placeholder="Groups durchsuchen…" />
-        </div>
-
-        <div class="group-list" id="groupList"></div>
-
-        <div class="pane-foot">
-          <div class="me-chip">
-            <span class="me-dot" id="meDot"></span>
-            <span class="me-name" id="meName">Gast</span>
-          </div>
-          <button class="btn btn-ghost btn-sm" id="btnLogout">Logout</button>
-        </div>
-      </aside>
-
-      <!-- =================================================
-           MAIN CHAT AREA
-      ================================================== -->
-      <section class="pane pane-mid">
-
-        <div class="pane-head">
-          <div>
-            <div class="pane-title" id="chatTitle">Keine Group gewählt</div>
-            <div class="pane-hint" id="chatHint">
-              Wähle links eine Group oder entdecke neue Communities.
-            </div>
-          </div>
-          <div class="pane-head-actions">
-            <button class="btn btn-ghost btn-sm" id="btnStartVoiceCall" title="Voice Chat starten">
-              🎤 Voice
-            </button>
-            <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>
-              Join
-            </button>
+          <div class="chat-input-area">
+            <input 
+              type="text" 
+              id="messageInput" 
+              class="message-input" 
+              placeholder="Send a message..."
+              disabled
+            />
+            <button class="send-btn" id="btnSendMessage" disabled>Send</button>
           </div>
         </div>
+      </div>
 
-        <!-- Voice Call Panel -->
-        <div class="voice-call-panel" id="voiceCallPanel">
-          <div class="voice-status">
-            <div class="voice-indicator">
-              <span class="voice-pulse"></span>
-              <span id="voiceStatus">Verbindung wird hergestellt...</span>
-            </div>
-            <div class="voice-participants" id="voiceParticipants"></div>
+      <!-- VOICE VIEW -->
+      <div class="connect-view" data-view="voice">
+        <div class="voice-container">
+          <div class="voice-header">
+            <h3>Voice Calls</h3>
+            <p id="voiceStatus">Not in a call</p>
           </div>
           <div class="voice-controls">
-            <button class="voice-btn voice-btn--mute" id="btnToggleMic" title="Mikrofon stummschalten">
-              🎤
-            </button>
-            <button class="voice-btn voice-btn--hang-up" id="btnEndVoiceCall" title="Anruf beenden">
-              ☎️ Beenden
-            </button>
+            <button class="btn btn-success" id="btnStartVoiceCall">🎤 Start Voice Call</button>
+            <button class="btn btn-danger" id="btnEndVoiceCall" style="display: none;">☎️ End Call</button>
+            <button class="btn btn-secondary" id="btnToggleMic" style="display: none;">🎤 Mute</button>
+          </div>
+          <div class="voice-participants" id="voiceParticipants">
+            <!-- Participants dynamically inserted -->
           </div>
         </div>
+      </div>
 
-        <div class="chat-scroll" id="chatScroll"></div>
-
-        <div class="typing-indicator" id="typingIndicator"></div>
-
-        <form class="chat-compose" id="chatForm">
-          <input
-            type="text"
-            id="chatInput"
-            class="chat-input"
-            placeholder="Nachricht schreiben…"
-            disabled
-          />
-          <button class="btn btn-primary btn-sm" type="submit" disabled>
-            Senden
-          </button>
-        </form>
-      </section>
-
-      <!-- =================================================
-           RIGHT SIDEBAR / MEMBERS + INFO
-      ================================================== -->
-      <aside class="pane pane-right">
-
-        <div class="pane-head">
-          <div>
-            <div class="pane-title">Members</div>
-            <div class="pane-hint" id="membersHint">—</div>
+      <!-- MEMBERS VIEW -->
+      <div class="connect-view" data-view="members">
+        <div class="members-container">
+          <div class="members-header">
+            <h3>Group Members</h3>
+            <input type="text" placeholder="Search members..." class="members-search" />
+          </div>
+          <div class="members-list" id="membersList">
+            <!-- Members dynamically inserted -->
           </div>
         </div>
+      </div>
 
-        <div class="member-list" id="memberList"></div>
-
-        <div class="pane-section">
-          <h3>ℹ️ Group Infos</h3>
-          <p>
-            Groups sind fokussierte Räume.
-            Keine globalen Channels, kein Lärm.
-          </p>
-        </div>
-
-        <div class="pane-section">
-          <h3>🟢 Presence</h3>
-          <p>
-            Online, Idle oder Offline –  
-            browserbasiert & transparent.
-          </p>
-        </div>
-
-        <p class="mini-note">
-          Presence basiert auf Browser-Events („best effort“).
-        </p>
-      </aside>
-
-    </section>
-  </div>
-
-  <!-- DISCOVER -->
-  <div class="connect-view" data-view="discover">
-    <section class="connect-section">
-      <h2>🧭 Discover Groups</h2>
-      <p>Entdecke neue Communities nach Aktivität & Thema.</p>
-
-      <div class="card-grid">
-        <div class="card">
-          <h3>Valorant Ranked</h3>
-          <p>Competitive Fokus · EU</p>
-        </div>
-        <div class="card">
-          <h3>Deep Focus</h3>
-          <p>Pomodoro · stille Sessions</p>
-        </div>
-        <div class="card">
-          <h3>Dev Talk</h3>
-          <p>Web · Firebase · Frontend</p>
+      <!-- STATS VIEW -->
+      <div class="connect-view" data-view="stats">
+        <div class="stats-container">
+          <h3>Community Stats</h3>
+          <div class="stats-grid" id="statsGrid">
+            <!-- Stats dynamically inserted -->
+          </div>
         </div>
       </div>
-    </section>
-  </div>
 
-  <!-- STATS -->
-  <div class="connect-view" data-view="stats">
-    <section class="connect-section">
-      <h2>📊 Community Stats</h2>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <strong>128</strong>
-          <span>Aktive Groups</span>
-        </div>
-        <div class="stat-card">
-          <strong>842</strong>
-          <span>Online User</span>
-        </div>
-        <div class="stat-card">
-          <strong>24k+</strong>
-          <span>Messages</span>
+      <!-- SETTINGS VIEW -->
+      <div class="connect-view" data-view="settings">
+        <div class="settings-container">
+          <h3>Settings</h3>
+          <div class="settings-form">
+            <label>
+              <input type="checkbox" id="settingNotifications" checked />
+              Notifications enabled
+            </label>
+            <label>
+              <input type="checkbox" id="settingDarkMode" checked />
+              Dark mode
+            </label>
+            <label>
+              <input type="checkbox" id="settingAutoJoinVoice" />
+              Auto-join voice calls
+            </label>
+          </div>
         </div>
       </div>
-    </section>
-  </div>
 
-  <!-- PROFILE -->
-  <div class="connect-view" data-view="profile">
-    <section class="connect-section">
-      <h2>👤 Dein Profil</h2>
-
-      <div class="profile-card">
-        <p><strong>Status:</strong> Online</p>
-        <p><strong>Activity:</strong> In Focus Session</p>
-        <p><strong>Groups:</strong> 6</p>
-      </div>
-    </section>
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="connect-view" data-view="settings">
-    <section class="connect-section">
-      <h2>⚙ Einstellungen</h2>
-      <ul>
-        <li>Presence anzeigen</li>
-        <li>Activity öffentlich</li>
-        <li>Benachrichtigungen</li>
-        <li>Dark Mode (default)</li>
-      </ul>
-    </section>
-  </div>
-
-  <!-- HELP -->
-  <div class="connect-view" data-view="help">
-    <section class="connect-section">
-      <h2>❓ Hilfe & Regeln</h2>
-      <p>Respekt, Fokus, kein Spam.</p>
-    </section>
-  </div>
-
+    </div>
   </section>
 
   <!-- =====================================================
-       ROADMAP
-  ====================================================== -->
-  <section class="connect-section">
-    <h2>🗺 Roadmap</h2>
-    <ul>
-      <li>⭐ Favoriten & Pins</li>
-      <li>🔥 Message Reactions</li>
-      <li>📌 Pinned Messages</li>
-      <li>🛡 Moderation Tools</li>
-      <li>🧠 Fokus-Timer</li>
-    </ul>
-  </section>
+       RIGHT PANEL: Activity / Info (Right)
+  ===================================================== -->
+  <aside class="connect-panel">
+    <div class="panel-header">
+      <h3 class="panel-title">Online Users</h3>
+    </div>
+    <div class="panel-content">
+      <div class="online-users" id="onlineUsers">
+        <!-- Online users dynamically inserted -->
+      </div>
+    </div>
+    <div class="panel-footer">
+      <small>Real-time presence</small>
+    </div>
+  </aside>
 
 </main>
 
 <!-- =====================================================
-     FOOTER
-===================================================== -->
-<div id="footer-placeholder"></div>
-
-<!-- =====================================================
      SCRIPTS
 ===================================================== -->
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
 <script src="firebase.js"></script>
 <script src="js/menu.js"></script>
 <script src="js/notify.js"></script>
 <script src="js/connect.js"></script>
 <script src="js/voice-chat.js"></script>
-
-<script>
-  document.body.classList.add("loaded");
-
-  fetch("header.html").then(r=>r.text()).then(html=>{
-    document.getElementById("header-placeholder").innerHTML = html;
-    initHeaderScripts?.();
-    initSmartHeaderScroll?.();
-  });
-
-  fetch("footer.html").then(r=>r.text()).then(html=>{
-    document.getElementById("footer-placeholder").innerHTML = html;
-  });
-</script>
 
 </body>
 </html>
