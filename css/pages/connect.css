@@ -25,12 +25,19 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  padding-top: 0;
+}
+
+.site-header {
+  flex-shrink: 0;
+  z-index: 100;
 }
 
 #header-placeholder {
   flex-shrink: 0;
   background: var(--c-darker);
   border-bottom: 1px solid var(--c-border);
+  display: none; /* Hide placeholder since we have inline header */
 }
 
 .connect-app {
