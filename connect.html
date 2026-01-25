@@ -184,93 +184,97 @@
 
   </section>
 
-  <!-- =====================================================
-       DISCOVER SECTION
-  ====================================================== -->
-  <section class="connect-section">
-    <h2>🧭 Discover Groups</h2>
-    <p>
-      Entdecke neue Communities.  
-      Öffentliche Groups, sortiert nach Aktivität & Thema.
-    </p>
+<!-- =========================
+     CONNECT VIEWS
+========================= -->
 
-    <div class="card-grid">
-      <div class="card">
-        <h3>Valorant Ranked</h3>
-        <p>Competitive Fokus, EU</p>
-      </div>
-      <div class="card">
-        <h3>Deep Focus</h3>
-        <p>Pomodoro, stille Sessions</p>
-      </div>
-      <div class="card">
-        <h3>Dev Talk</h3>
-        <p>Web, Firebase, Frontend</p>
-      </div>
-    </div>
-  </section>
+<section class="connect-views">
 
-  <!-- =====================================================
-       COMMUNITY STATS
-  ====================================================== -->
-  <section class="connect-section">
-    <h2>📊 Community Stats</h2>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <strong>128</strong>
-        <span>Aktive Groups</span>
+  <!-- CHAT VIEW -->
+  <div class="connect-view is-active" data-view="chat">
+    <!-- bestehender connect-app Block bleibt HIER -->
+  </div>
+
+  <!-- DISCOVER -->
+  <div class="connect-view" data-view="discover">
+    <section class="connect-section">
+      <h2>🧭 Discover Groups</h2>
+      <p>Entdecke neue Communities nach Aktivität & Thema.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>Valorant Ranked</h3>
+          <p>Competitive Fokus · EU</p>
+        </div>
+        <div class="card">
+          <h3>Deep Focus</h3>
+          <p>Pomodoro · stille Sessions</p>
+        </div>
+        <div class="card">
+          <h3>Dev Talk</h3>
+          <p>Web · Firebase · Frontend</p>
+        </div>
       </div>
-      <div class="stat-card">
-        <strong>842</strong>
-        <span>Online User</span>
+    </section>
+  </div>
+
+  <!-- STATS -->
+  <div class="connect-view" data-view="stats">
+    <section class="connect-section">
+      <h2>📊 Community Stats</h2>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <strong>128</strong>
+          <span>Aktive Groups</span>
+        </div>
+        <div class="stat-card">
+          <strong>842</strong>
+          <span>Online User</span>
+        </div>
+        <div class="stat-card">
+          <strong>24k+</strong>
+          <span>Messages</span>
+        </div>
       </div>
-      <div class="stat-card">
-        <strong>24k+</strong>
-        <span>Messages gesendet</span>
+    </section>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="connect-view" data-view="profile">
+    <section class="connect-section">
+      <h2>👤 Dein Profil</h2>
+
+      <div class="profile-card">
+        <p><strong>Status:</strong> Online</p>
+        <p><strong>Activity:</strong> In Focus Session</p>
+        <p><strong>Groups:</strong> 6</p>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
-  <!-- =====================================================
-       USER PROFILE PREVIEW
-  ====================================================== -->
-  <section class="connect-section">
-    <h2>👤 Dein Profil</h2>
-    <p>
-      Dein Status, deine Activity und deine Communities
-      auf einen Blick.
-    </p>
+  <!-- SETTINGS -->
+  <div class="connect-view" data-view="settings">
+    <section class="connect-section">
+      <h2>⚙ Einstellungen</h2>
+      <ul>
+        <li>Presence anzeigen</li>
+        <li>Activity öffentlich</li>
+        <li>Benachrichtigungen</li>
+        <li>Dark Mode (default)</li>
+      </ul>
+    </section>
+  </div>
 
-    <div class="profile-card">
-      <p><strong>Status:</strong> Online</p>
-      <p><strong>Activity:</strong> In Focus Session</p>
-      <p><strong>Groups:</strong> 6</p>
-    </div>
-  </section>
+  <!-- HELP -->
+  <div class="connect-view" data-view="help">
+    <section class="connect-section">
+      <h2>❓ Hilfe & Regeln</h2>
+      <p>Respekt, Fokus, kein Spam.</p>
+    </section>
+  </div>
 
-  <!-- =====================================================
-       SETTINGS
-  ====================================================== -->
-  <section class="connect-section">
-    <h2>⚙ Einstellungen</h2>
-    <ul>
-      <li>Presence anzeigen</li>
-      <li>Activity öffentlich</li>
-      <li>Benachrichtigungen</li>
-      <li>Dark Mode (default)</li>
-    </ul>
-  </section>
-
-  <!-- =====================================================
-       HELP / FAQ
-  ====================================================== -->
-  <section class="connect-section">
-    <h2>❓ Hilfe & Regeln</h2>
-    <p>
-      Connect lebt von Respekt und Fokus.
-      Kein Spam, kein Toxic-Verhalten.
-    </p>
-  </section>
+</section>
 
   <!-- =====================================================
        ROADMAP
