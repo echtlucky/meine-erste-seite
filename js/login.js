@@ -1,17 +1,24 @@
 /* =========================
-   login.js — echtlucky (stable)
+   login.js — echtlucky (final, robust)
    - Tabs (Login/Register)
    - Email OR Username login
-   - Register creates:
+   - Register creates/updates:
      - users/{uid}
      - usernames/{usernameLower}
-   - Google Sign-In creates the same docs
-   - FIX: kein onAuthStateChanged-Redirect Loop
-   - FIX: Admin-Mail bekommt role=admin beim ersten Create + Bootstrap Update
+   - Google Sign-In creates/updates the same docs
+   - NO onAuthStateChanged redirect loop
+   - Guard: verhindert doppelte Initialisierung
 ========================= */
 
 (function () {
   "use strict";
+
+  // ✅ Guard: wenn Datei doppelt eingebunden wurde -> nix tun
+  if (window.__ECHTLUCKY_LOGIN_LOADED__) {
+    console.warn("login.js already loaded – skipping init");
+    return;
+  }
+  window.__ECHTLUCKY_LOGIN_LOADED__ = true;
 
   document.addEventListener("DOMContentLoaded", () => {
     const authRef =
@@ -24,15 +31,10 @@
       window.db ||
       (typeof db !== "undefined" ? db : null);
 
-    const googleProvider =
-      window.echtlucky?.googleProvider ||
-      window.googleProvider ||
-      null;
-
     const ADMIN_EMAIL = "lucassteckel04@gmail.com";
 
     if (!authRef || !dbRef || typeof firebase === "undefined") {
-      console.error("login.js: auth/db/firebase missing. Prüfe firebase.js + Includes.");
+      console.error("login.js: auth/db/firebase missing. Prüfe firebase.js + SDK includes.");
       return;
     }
 
@@ -86,7 +88,7 @@
     tabLogin?.addEventListener("click", () => setTab("login"));
     tabRegister?.addEventListener("click", () => setTab("register"));
 
-    // ---- Username validation + sanitize
+    // ---- Username helpers
     function isValidUsername(u) {
       const v = (u || "").trim();
       if (v.length < 3 || v.length > 20) return false;
@@ -109,66 +111,89 @@
       if (identifier.includes("@")) return identifier;
 
       const uname = identifier.toLowerCase();
-      const doc = await dbRef.collection("usernames").doc(uname).get();
-      if (!doc.exists) throw new Error("Username nicht gefunden.");
-      const data = doc.data();
+      const snap = await dbRef.collection("usernames").doc(uname).get();
+      if (!snap.exists) throw new Error("Username nicht gefunden.");
+      const data = snap.data();
       if (!data?.email) throw new Error("Username ist nicht korrekt verknüpft.");
       return data.email;
     }
 
-    // ---- Ensure user doc exists (users + usernames)
-    async function ensureUserDocs(user, usernameMaybe) {
+    // ---- Ensure users/{uid} exists + stable role bootstrap
+    async function ensureUserDoc(user, usernameMaybe) {
       if (!user?.uid) return;
 
       const uid = user.uid;
       const email = user.email || "";
       const username = (usernameMaybe || user.displayName || "").trim();
 
-      const userDoc = dbRef.collection("users").doc(uid);
-      const snap = await userDoc.get();
+      const ref = dbRef.collection("users").doc(uid);
+      const snap = await ref.get();
+
+      const base = {
+        email,
+        username,
+        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
+      };
 
       if (!snap.exists) {
-        // ✅ Role beim ersten Create setzen (Admin-Mail wird admin)
-        await userDoc.set({
-          email,
-          username,
+        await ref.set({
+          ...base,
           role: (email === ADMIN_EMAIL ? "admin" : "user"),
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
       } else {
-        // niemals role anfassen
-        await userDoc.update({
-          lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
-          email,
-          username: username || snap.data()?.username || "",
+        // role niemals überschreiben
+        const old = snap.data() || {};
+        await ref.update({
+          ...base,
+          username: username || old.username || "",
         });
       }
 
-      // Username mapping optional (nur wenn vorhanden + frei/owner)
-      const unameLower = sanitizeUsername(username);
-      if (unameLower && unameLower.length >= 3) {
-        const unameRef = dbRef.collection("usernames").doc(unameLower);
-        const unameSnap = await unameRef.get();
-
-        if (!unameSnap.exists) {
-          await unameRef.set({
-            uid,
-            email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-        }
-      }
-
-      // ✅ Bootstrap: falls dein Admin früher als "user" angelegt wurde, einmalig auf admin heben
-      // (geht nur mit den neuen Rules, nur für deine Admin-Mail)
+      // ✅ Bootstrap: falls Admin früher als user drin war → role=admin mergen (Rules erlauben das via Admin-Mail)
       if (email === ADMIN_EMAIL) {
         try {
-          await userDoc.set({ role: "admin" }, { merge: true });
-        } catch (_) {
-          // wenn Rules noch nicht deployed sind, ignoriere hier
+          await ref.set({ role: "admin" }, { merge: true });
+        } catch (e) {
+          console.warn("Bootstrap role merge blocked (rules not deployed yet?):", e?.message);
         }
       }
+    }
+
+    // ---- Ensure usernames/{uname} mapping (merge + owner check)
+    async function ensureUsernameMapping(user, usernameRaw) {
+      const uid = user?.uid;
+      const email = user?.email || "";
+      const uname = sanitizeUsername(usernameRaw);
+
+      if (!uid || !uname || uname.length < 3) return;
+
+      const ref = dbRef.collection("usernames").doc(uname);
+      const snap = await ref.get();
+
+      if (!snap.exists) {
+        // neu anlegen
+        await ref.set({
+          uid,
+          email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        return;
+      }
+
+      // existiert: nur updaten, wenn es deinem uid gehört (owner)
+      const data = snap.data() || {};
+      if (data.uid === uid) {
+        await ref.set(
+          {
+            email,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+      }
+      // wenn es fremd ist -> nix tun (damit kein takeover)
     }
 
     // ---- LOGIN (Email/Username + Password)
@@ -183,7 +208,9 @@
         const email = await resolveEmailFromIdentifier(identifier);
         const cred = await authRef.signInWithEmailAndPassword(email, password);
 
-        await ensureUserDocs(cred.user);
+        const u = cred.user;
+        await ensureUserDoc(u, u?.displayName || "");
+        await ensureUsernameMapping(u, u?.displayName || "");
 
         showMsg("Eingeloggt. Weiterleitung…", "success");
         setTimeout(() => (window.location.href = "index.html"), 450);
@@ -209,6 +236,7 @@
       try {
         const unameLower = sanitizeUsername(usernameRaw);
 
+        // Check availability
         const existing = await dbRef.collection("usernames").doc(unameLower).get();
         if (existing.exists) {
           showMsg("Username ist schon vergeben.");
@@ -218,10 +246,11 @@
         const cred = await authRef.createUserWithEmailAndPassword(email, password);
 
         // displayName setzen
-        await cred.user.updateProfile({ displayName: usernameRaw });
+        await cred.user.updateProfile({ displayName: unameLower });
 
         // docs
-        await ensureUserDocs(cred.user, usernameRaw);
+        await ensureUserDoc(cred.user, unameLower);
+        await ensureUsernameMapping(cred.user, unameLower);
 
         showMsg("Account erstellt. Weiterleitung…", "success");
         setTimeout(() => (window.location.href = "index.html"), 450);
@@ -235,8 +264,10 @@
       clearMsg();
 
       try {
+        // Provider aus firebase.js nutzen, sonst neu
         const provider =
-          googleProvider ||
+          window.echtlucky?.googleProvider ||
+          window.googleProvider ||
           new firebase.auth.GoogleAuthProvider();
 
         if (provider.setCustomParameters) {
@@ -253,16 +284,22 @@
         username = sanitizeUsername(username);
         if (!username) username = "user" + (u?.uid || "").slice(0, 6);
 
-        // Wenn username belegt ist: kein mapping erzwingen (Login via Email bleibt ok)
-        const unameSnap = await dbRef.collection("usernames").doc(username).get();
-        const finalUsername = unameSnap.exists ? "" : username;
+        // wenn username belegt (fremd), dann KEIN mapping erzwingen
+        const unameRef = dbRef.collection("usernames").doc(username);
+        const unameSnap = await unameRef.get();
 
-        // optional displayName updaten wenn frei
+        let finalUsername = username;
+        if (unameSnap.exists && (unameSnap.data()?.uid || "") !== u.uid) {
+          finalUsername = ""; // belegt durch jemand anderen
+        }
+
+        // displayName nur setzen, wenn wir finalUsername haben
         if (finalUsername) {
           try { await u.updateProfile({ displayName: finalUsername }); } catch (_) {}
         }
 
-        await ensureUserDocs(u, finalUsername);
+        await ensureUserDoc(u, finalUsername || (u?.displayName || ""));
+        await ensureUsernameMapping(u, finalUsername || "");
 
         showMsg("Mit Google eingeloggt. Weiterleitung…", "success");
         setTimeout(() => (window.location.href = "index.html"), 450);
@@ -294,8 +331,6 @@
       }
     });
 
-    // ✅ WICHTIG: KEIN authRef.onAuthStateChanged Redirect hier!
-    // Der Header (menu.js) kümmert sich ums UI,
-    // Redirect passiert NUR nach erfolgreichem Login/Register/Google.
+    // ✅ Absichtlich KEIN auth.onAuthStateChanged Redirect hier
   });
 })();
