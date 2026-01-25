@@ -1,171 +1,234 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>echtlucky | Fortnite Competitive</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home | echtlucky</title>
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/pages/blog.css" />
+  <link rel="stylesheet" href="css/pages/home.css" />
 </head>
 
 <body class="page-transition home-page">
+  <!-- Header via fetch -->
   <div id="header-placeholder"></div>
 
-  <!-- HERO -->
-  <header class="hero">
-    <div class="hero-inner">
-      <div class="hero-badge">⚡ echtlucky • Competitive</div>
+  <main class="container home-shell">
 
-      <h1>echtlucky</h1>
+    <!-- 1) HERO: Headline Card -->
+    <section class="home-hero">
+      <div class="home-hero__inner">
+        <div class="home-badge">⚡ echtlucky • Competitive</div>
 
-      <p class="tagline">
-        Unreal Grind • Ballistic & Ranked • EU Competitive Scene • Auf dem Weg nach ganz oben
-      </p>
+        <h1 class="home-title">echtlucky</h1>
 
-      <nav class="btn-group" aria-label="Schnellaktionen">
-        <a href="blog.html" class="btn">Zum Blog</a>
-        <a href="login.html" class="btn">Community beitreten</a>
-        <a href="https://discord.gg/c7jmXnBSv6" target="_blank" rel="noopener" class="discord-btn">Discord joinen</a>
-      </nav>
-
-      <div class="hero-stats" aria-label="Schwerpunkte">
-        <div class="stat-pill">⚔️ Ballistic</div>
-        <div class="stat-pill">🏆 Ranked</div>
-        <div class="stat-pill">🌍 EU</div>
-      </div>
-    </div>
-  </header>
-
-  <main class="container">
-
-    <!-- COMMUNITY -->
-    <section class="community-teaser" aria-labelledby="community-title">
-      <div class="section-head">
-        <h2 id="community-title">Werde Teil der echten Grind-Community</h2>
-        <p>Hier treffen sich ambitionierte Spieler, die mehr wollen als nur Casual-Ranked.</p>
-      </div>
-
-      <div class="features" role="list">
-        <article class="feature" role="listitem">
-          <h3>Scrims & Customs</h3>
-          <p>Tägliche organisierte Matches, VOD-Reviews und 1v1s gegen starke Gegner.</p>
-        </article>
-
-        <article class="feature" role="listitem">
-          <h3>Trainingspläne & Tipps</h3>
-          <p>Wöchentliche Challenges, Mechanics-Guides und Settings-Tuning von echten Grindern.</p>
-        </article>
-
-        <article class="feature" role="listitem">
-          <h3>Team-Suche & Networking</h3>
-          <p>Finde IGLs, Fraggers, Coaches und Contender-Teams – direkt und ohne Drama.</p>
-        </article>
-
-        <article class="feature" role="listitem">
-          <h3>Exklusive Inhalte</h3>
-          <p>Nur für Mitglieder: Private Streams, Cash-Cup-Vorbereitung und Insider-Tipps.</p>
-        </article>
-      </div>
-
-      <div class="section-actions">
-        <a href="login.html" class="btn">Jetzt beitreten</a>
-      </div>
-    </section>
-
-    <!-- ÜBER MICH -->
-    <section class="bio" aria-labelledby="bio-title">
-      <div class="section-head">
-        <h2 id="bio-title">Über mich</h2>
-        <p>Kurzer Kontext – damit klar ist, wofür echtlucky steht.</p>
-      </div>
-
-      <div class="prose">
-        <p>
-          Ich bin ein ambitionierter Fortnite-Spieler aus Deutschland, der aktuell voll auf Ballistic und Ranked grindet.
-          Mein Ziel ist es, in den kommenden Monaten konstant in den höheren Divisionen zu landen und langfristig im
-          kompetitiven Bereich Fuß zu fassen.
+        <p class="home-sub">
+          Unreal Grind • Ballistic &amp; Ranked • EU Competitive Scene • Auf dem Weg nach ganz oben
         </p>
-        <p>
-          Täglich trainiere ich Mechanics, Game Sense, Rotations und Teamplay. Neben Solo-Ranked liegt mein Fokus besonders
-          auf 5v5 Ballistic – hier sehe ich das größte Potenzial für Wachstum und Turniere.
-        </p>
-        <p>
-          Ich suche aktuell aktive Mitspieler/Teams für Scrims, Customs und zukünftige Contests.
-          Wenn du ähnlich ambitioniert bist – melde dich gerne!
-        </p>
+
+        <div class="home-hero__cta">
+          <a class="btn" href="ranked.html">Ranked starten</a>
+          <a class="btn btn-secondary" href="reflex.html">Reflex Lab</a>
+          <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">Discord joinen</a>
+        </div>
+
+        <div class="home-hero__mini">
+          <span class="mini-pill">Guides</span>
+          <span class="mini-pill">Challenges</span>
+          <span class="mini-pill">Customs / Scrims</span>
+          <span class="mini-pill">EU Focus</span>
+        </div>
       </div>
     </section>
 
-    <!-- STATS -->
-    <section id="stats" class="stats-section" aria-labelledby="stats-title">
-      <div class="section-head">
-        <h2 id="stats-title">Ballistic Statistiken</h2>
-        <p>Aktueller Rank, Divisionsfortschritt und Performance-Metriken – werden in Echtzeit aktualisiert.</p>
-      </div>
+    <!-- 2) NAV EXPLAIN: 3 Wege + Arrow + Button -->
+    <section class="home-navcard">
+      <header class="home-sectionhead">
+        <h2>Wohin willst du?</h2>
+        <p>3 schnelle Wege – alles bleibt auf der Website, kein Chaos.</p>
+      </header>
 
-      <div class="link-row" aria-label="Statistik-Links">
-        <a href="https://fortnitetracker.com/profile/all/mr.%20z00m" target="_blank" rel="noopener" class="btn">
-          Fortnite Tracker
-        </a>
-        <a href="https://fortnite.gg/ballistic-stats?player=mr.%20z00m" target="_blank" rel="noopener" class="btn btn-secondary">
-          fortnite.gg
-        </a>
+      <div class="home-navgrid">
+        <article class="nav-spot">
+          <div class="nav-spot__text">
+            <h3>Blog</h3>
+            <p>Updates, Meta-Talk, Short Guides – schnell rein, schnell besser werden.</p>
+          </div>
+
+          <div class="nav-arrow" aria-hidden="true"></div>
+
+          <a class="btn btn-secondary nav-spot__btn" href="blog.html">Zum Blog</a>
+        </article>
+
+        <article class="nav-spot">
+          <div class="nav-spot__text">
+            <h3>Ranked Challenge</h3>
+            <p>Dailies + XP + Streak. Mini Tasks, maximaler Progress.</p>
+          </div>
+
+          <div class="nav-arrow" aria-hidden="true"></div>
+
+          <a class="btn nav-spot__btn" href="ranked.html">Ranked öffnen</a>
+        </article>
+
+        <article class="nav-spot">
+          <div class="nav-spot__text">
+            <h3>Reflex Lab</h3>
+            <p>Targets klicken, Zeit messen, Rating abholen. Crosshair only im Game.</p>
+          </div>
+
+          <div class="nav-arrow" aria-hidden="true"></div>
+
+          <a class="btn btn-secondary nav-spot__btn" href="reflex.html">Reflex starten</a>
+        </article>
       </div>
     </section>
 
-    <!-- DISCORD -->
-    <section id="discord" class="discord-section" aria-labelledby="discord-title">
-      <div class="section-head">
-        <h2 id="discord-title">Discord Community</h2>
-        <p>Trete bei für Scrims, VOD-Reviews, Strategie-Diskussionen und kompetitives Fortnite-Netzwerken.</p>
+    <!-- 3) COMMUNITY CARD: 6 Features -->
+    <section class="home-community">
+      <header class="home-sectionhead">
+        <h2>Werde Teil der echten Grind-Community</h2>
+        <p>Mehr als nur „join Discord“. Hier geht’s um Struktur, Progress und Tryhard ohne Toxic.</p>
+      </header>
+
+      <div class="home-features">
+        <div class="home-feature">
+          <h3>Scrims &amp; Customs</h3>
+          <p>Regelmäßige Lobbies, klare Regeln, fairer Grind.</p>
+        </div>
+
+        <div class="home-feature">
+          <h3>Team-Suche</h3>
+          <p>Rollen, Region, Zeiten – match dich sauber mit Leuten.</p>
+        </div>
+
+        <div class="home-feature">
+          <h3>VOD-Talk</h3>
+          <p>Mini Reviews &amp; Learnings: kein Roman, nur das was hilft.</p>
+        </div>
+
+        <div class="home-feature">
+          <h3>Ranked Dailies</h3>
+          <p>Streak halten, XP farmen, konstant besser werden.</p>
+        </div>
+
+        <div class="home-feature">
+          <h3>Reflex Drills</h3>
+          <p>Mechanics warm-up, schnell, flüssig, messbar.</p>
+        </div>
+
+        <div class="home-feature">
+          <h3>Roadmap</h3>
+          <p>Features &amp; Updates transparent – du siehst was kommt.</p>
+        </div>
       </div>
 
-      <div class="section-actions">
-        <a href="https://discord.gg/c7jmXnBSv6" target="_blank" rel="noopener" class="discord-btn">
-          Discord beitreten
-        </a>
+      <div class="home-actions">
+        <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">Discord Community</a>
+        <a class="btn btn-secondary" href="login.html">Account erstellen</a>
       </div>
     </section>
 
-    <!-- TWITCH -->
-    <section id="twitch" class="twitch-section" aria-labelledby="twitch-title">
-      <div class="section-head">
-        <h2 id="twitch-title">Twitch Stream</h2>
-        <p>Live dabei, wenn ich Ballistic & Ranked grinde – oder schau dir VODs an.</p>
+    <!-- 4) BALLISTIC STATS CARD -->
+    <section class="home-stats">
+      <header class="home-sectionhead">
+        <h2>Ballistic Stats</h2>
+        <p>Aktueller Status – hier soll später live mehr reinkommen (Rank, Peak, Season-Progress, etc.).</p>
+      </header>
+
+      <div class="stats-grid">
+        <div class="stat-big">
+          <div class="stat-big__label">Aktueller Rang</div>
+          <div class="stat-big__value" id="rankValue">Unranked</div>
+          <div class="stat-big__hint" id="rankHint">Wird demnächst live angebunden.</div>
+        </div>
+
+        <div class="stat-mini">
+          <div class="stat-mini__label">Peak</div>
+          <div class="stat-mini__value" id="peakValue">—</div>
+        </div>
+
+        <div class="stat-mini">
+          <div class="stat-mini__label">Season</div>
+          <div class="stat-mini__value" id="seasonValue">—</div>
+        </div>
       </div>
 
-      <div class="embed">
-        <iframe
-          src="https://player.twitch.tv/?channel=echtlucky&parent=echtlucky.github.io&parent=localhost&muted=true&autoplay=false"
-          frameborder="0"
-          allowfullscreen="true"
-          scrolling="no"
-          height="506"
-          width="100%">
-        </iframe>
+      <div class="home-actions home-actions--spread">
+        <a class="btn" href="ranked.html">Ranked Dailies</a>
+        <a class="btn btn-secondary" href="blog.html">Meta / Updates</a>
+      </div>
+    </section>
+
+    <!-- 5) DISCORD CARD bigger -->
+    <section class="home-discord">
+      <header class="home-sectionhead">
+        <h2>Discord Community</h2>
+        <p>Wenn du wirklich grindest: komm rein. Rollen, LFG, Events – clean organisiert.</p>
+      </header>
+
+      <div class="discord-split">
+        <div class="discord-left">
+          <ul class="home-list">
+            <li>✅ LFG / Team-Search</li>
+            <li>✅ Customs / Scrims</li>
+            <li>✅ Guides / Settings / Diskussionen</li>
+            <li>✅ Updates direkt ohne Social-Spam</li>
+          </ul>
+        </div>
+
+        <div class="discord-right">
+          <div class="discord-box">
+            <div class="discord-box__title">Ready to join?</div>
+            <div class="discord-box__text">2 Klicks, dann bist du drin.</div>
+            <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">Discord öffnen</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6) EXTRA INFO: Roadmap + FAQ -->
+    <section class="home-more">
+      <header class="home-sectionhead">
+        <h2>Was als Nächstes kommt</h2>
+        <p>Mehr Stuff auf der Website – damit Leute hier bleiben und nicht nach 10 Sekunden weg sind.</p>
+      </header>
+
+      <div class="more-grid">
+        <div class="more-card">
+          <h3>Account-Übersicht</h3>
+          <p>Ranked/Reflex Fortschritt, Bestzeiten, Streak, Stats – alles in „Konto verwalten“.</p>
+        </div>
+        <div class="more-card">
+          <h3>Weekly Challenges</h3>
+          <p>Wöchentliche Ziele + Rewards. Optional „sweaty mode“.</p>
+        </div>
+        <div class="more-card">
+          <h3>Leaderboard</h3>
+          <p>Reflex Bestzeiten / Ranked XP – fair &amp; clean, kein Cheat-Spam.</p>
+        </div>
+        <div class="more-card">
+          <h3>FAQ / Quickstart</h3>
+          <p>Neue Leute checken sofort, was abgeht – ohne wall of text.</p>
+        </div>
       </div>
     </section>
 
   </main>
 
+  <!-- Footer via fetch -->
   <div id="footer-placeholder"></div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
+  <!-- Base Scripts -->
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/legal-modal.js"></script>
-  <script src="js/login.js"></script>
-  <script src="js/notify.js"></script>
 
   <script>
     document.body.classList.add('loaded');
 
+    // Header laden + init
     fetch('header.html')
       .then(r => r.text())
       .then(html => {
@@ -174,8 +237,9 @@
         if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
       });
 
+    // Footer laden
     fetch('footer.html')
-      .then(res => res.text())
+      .then(r => r.text())
       .then(html => {
         document.getElementById('footer-placeholder').innerHTML = html;
       });
