@@ -19,29 +19,30 @@
     <section class="connect-hero">
       <div>
         <div class="connect-badge">⚡ echtlucky • Connect</div>
-        <h1 class="connect-title">Groups, Chat & Presence</h1>
+        <h1 class="connect-title">Groups. Chat. Presence.</h1>
         <p class="connect-sub">
-          Kein Server-Chaos. Gruppen statt Server, Live-Chat & Status – clean & fokussiert.
+          Fokus statt Chaos. Öffentliche & private Groups, Live-Chat,
+          Status & Community – alles an einem Ort.
         </p>
       </div>
 
       <div class="connect-heroActions">
-        <button class="btn btn-ghost" id="btnSetActivity" type="button">Activity setzen</button>
-        <button class="btn btn-primary" id="btnCreateGroup" type="button">Group erstellen</button>
+        <button class="btn btn-ghost" id="btnSetActivity">Activity</button>
+        <button class="btn btn-primary" id="btnCreateGroup">Neue Group</button>
       </div>
     </section>
 
     <!-- LOGIN GATE -->
     <section class="connect-gate" id="loginGate">
       <div class="gate-card">
-        <h2>Nur für Mitglieder</h2>
-        <p>
-          Chat, Groups & Live-Presence sind exklusiv für eingeloggte User.
-          Du kannst aber öffentliche Groups ansehen.
+        <h2 class="gate-title">Members only ✋</h2>
+        <p class="gate-text">
+          Du kannst öffentliche Groups sehen –  
+          aber Chat & Presence sind nur mit Account verfügbar.
         </p>
         <div class="gate-actions">
-          <a href="login.html" class="btn">Anmelden</a>
-          <a href="login.html" class="btn btn-secondary">Account erstellen</a>
+          <a href="login.html" class="btn btn-primary">Anmelden</a>
+          <a href="login.html" class="btn btn-secondary">Registrieren</a>
         </div>
       </div>
     </section>
@@ -56,7 +57,13 @@
             <div class="pane-title">Groups</div>
             <div class="pane-hint">Public & Private</div>
           </div>
-          <button class="icon-btn" id="btnRefreshGroups">⟳</button>
+          <div class="pane-actions">
+            <button class="icon-btn" id="btnRefreshGroups">⟳</button>
+          </div>
+        </div>
+
+        <div class="group-search">
+          <input id="groupSearch" placeholder="Groups durchsuchen…" />
         </div>
 
         <div class="group-list" id="groupList"></div>
@@ -77,19 +84,26 @@
             <div class="pane-title" id="chatTitle">Keine Group gewählt</div>
             <div class="pane-hint" id="chatHint">Wähle links eine Group.</div>
           </div>
-          <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>Join</button>
+          <button class="btn btn-ghost btn-sm" id="btnJoinLeave" disabled>
+            Join
+          </button>
         </div>
 
         <div class="chat-scroll" id="chatScroll"></div>
+
+        <div class="typing-indicator" id="typingIndicator"></div>
 
         <form class="chat-compose" id="chatForm">
           <input
             type="text"
             id="chatInput"
+            class="chat-input"
             placeholder="Nachricht schreiben…"
             disabled
           />
-          <button class="btn btn-primary" type="submit" disabled>Senden</button>
+          <button class="btn btn-primary btn-sm" type="submit" disabled>
+            Senden
+          </button>
         </form>
       </section>
 
@@ -105,7 +119,7 @@
         <div class="member-list" id="memberList"></div>
 
         <p class="mini-note">
-          Presence: online / idle / offline (Browser-basiert).
+          Presence ist browserbasiert & „best effort“.
         </p>
       </aside>
 

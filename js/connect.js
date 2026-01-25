@@ -1,66 +1,90 @@
-// js/connect.js — echtlucky Connect (MVP v1)
-// Groups + Live Chat + Members + Presence + Activity (Firestore)
-// Presence in Firestore ist "best effort".
+// ======================================================
+// echtlucky Connect — V2 (saubere Modernisierung)
+// Groups • Live Chat • Members • Presence • Activity
+// Firestore COMPAT • Firebase Namespace-safe
+// ======================================================
 
 (() => {
   "use strict";
 
+  /* ======================================================
+     🔌 Firebase / Globals
+  ====================================================== */
   const auth = window.echtlucky?.auth || window.auth || null;
   const db   = window.echtlucky?.db   || window.db   || null;
 
-  const notify = (type, msg) => {
-    if (typeof window.notify === "function") return window.notify(type, msg);
-    if (type === "error") return alert(msg);
-    console.log(type + ":", msg);
-  };
-
   if (!db) {
-    console.error("connect.js: Firestore db fehlt. Prüfe firebase.js (window.db).");
+    console.error("❌ connect.js: Firestore db fehlt.");
     return;
   }
 
-  // DOM
-  const loginGate = document.getElementById("loginGate");
-  const btnContinueReadOnly = document.getElementById("btnContinueReadOnly");
-
-  const groupList = document.getElementById("groupList");
-  const btnRefreshGroups = document.getElementById("btnRefreshGroups");
-  const btnCreateGroup = document.getElementById("btnCreateGroup");
-  const btnSetActivity = document.getElementById("btnSetActivity");
-
-  const chatTitle = document.getElementById("chatTitle");
-  const chatHint = document.getElementById("chatHint");
-  const chatScroll = document.getElementById("chatScroll");
-  const chatForm = document.getElementById("chatForm");
-  const chatInput = document.getElementById("chatInput");
-  const btnSend = document.getElementById("btnSend");
-
-  const btnJoinLeave = document.getElementById("btnJoinLeave");
-
-  const memberList = document.getElementById("memberList");
-  const membersHint = document.getElementById("membersHint");
-
-  const meName = document.getElementById("meName");
-  const meDot = document.getElementById("meDot");
-  const btnLogout = document.getElementById("btnLogout");
-
-  // State
-  let currentUser = null;
-  let readOnly = false;
-
-  let groupsUnsub = null;
-  let messagesUnsub = null;
-  let membersUnsub = null;
-  let presenceHeart = null;
-
-  let presenceUnsubs = [];
-  let selectedGroup = null;
-  let isMemberOfSelected = false;
+  const notify = (type, msg) => {
+    const n = window.notify;
+    if (n?.show) return n.show(type, msg);
+    if (type === "success" && n?.success) return n.success(msg);
+    if (type === "error" && n?.error) return n.error(msg);
+    if (type === "warn" && (n?.warn || n?.warning)) return (n.warn || n.warning)(msg);
+    if (n?.info) return n.info(msg);
+    console.log(`[${type}]`, msg);
+  };
 
   const serverTS = () => firebase.firestore.FieldValue.serverTimestamp();
 
-  function escapeHtml(s) {
-    return String(s ?? "")
+  /* ======================================================
+     🧠 State
+  ====================================================== */
+  const state = {
+    user: null,
+    readOnly: false,
+    selectedGroup: null,
+    isMember: false,
+
+    listeners: {
+      groups: null,
+      messages: null,
+      members: null,
+      presenceHeart: null,
+      presenceSubs: [],
+    }
+  };
+
+  /* ======================================================
+     📦 DOM Cache
+  ====================================================== */
+  const $ = (id) => document.getElementById(id);
+
+  const dom = {
+    loginGate: $("loginGate"),
+
+    groupList: $("groupList"),
+    btnRefreshGroups: $("btnRefreshGroups"),
+    btnCreateGroup: $("btnCreateGroup"),
+    btnSetActivity: $("btnSetActivity"),
+
+    chatTitle: $("chatTitle"),
+    chatHint: $("chatHint"),
+    chatScroll: $("chatScroll"),
+    chatForm: $("chatForm"),
+    chatInput: $("chatInput"),
+
+    btnJoinLeave: $("btnJoinLeave"),
+
+    memberList: $("memberList"),
+    membersHint: $("membersHint"),
+
+    meName: $("meName"),
+    meDot: $("meDot"),
+    btnLogout: $("btnLogout"),
+
+    groupSearch: $("groupSearch"),
+    typingIndicator: $("typingIndicator"),
+  };
+
+  /* ======================================================
+     🛠 Utils
+  ====================================================== */
+  function escapeHtml(str) {
+    return String(str ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -70,8 +94,7 @@
 
   function fmtTime(ts) {
     try {
-      const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
-      if (!d) return "";
+      const d = ts?.toDate ? ts.toDate() : new Date(ts);
       return d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
     } catch {
       return "";
@@ -80,57 +103,56 @@
 
   function setPageLock(locked) {
     document.body.classList.toggle("is-locked", !!locked);
-    if (loginGate) loginGate.style.display = locked ? "flex" : "none";
+    if (dom.loginGate) dom.loginGate.style.display = locked ? "flex" : "none";
   }
 
-  function setMeDot(state) {
-    if (!meDot) return;
-    if (state === "online") meDot.style.background = "rgba(0,255,136,.95)";
-    else if (state === "idle") meDot.style.background = "rgba(255,204,0,.95)";
-    else if (state === "dnd") meDot.style.background = "rgba(255,51,102,.95)";
-    else meDot.style.background = "rgba(255,255,255,.18)";
-  }
-
-  function setChatEnabled(enabled) {
-    const ok = !!enabled;
-    if (chatInput) chatInput.disabled = !ok;
-    if (btnSend) btnSend.disabled = !ok;
-    if (btnJoinLeave) btnJoinLeave.disabled = !selectedGroup || (!currentUser || readOnly) ? true : false;
+  function setMeDot(stateName) {
+    if (!dom.meDot) return;
+    const map = {
+      online: "rgba(0,255,136,.95)",
+      idle: "rgba(255,204,0,.95)",
+      dnd: "rgba(255,51,102,.95)",
+      offline: "rgba(255,255,255,.18)",
+    };
+    dom.meDot.style.background = map[stateName] || map.offline;
   }
 
   function clearPresenceSubs() {
-    presenceUnsubs.forEach((u) => { try { u(); } catch(_){} });
-    presenceUnsubs = [];
+    state.listeners.presenceSubs.forEach(u => { try { u(); } catch {} });
+    state.listeners.presenceSubs = [];
   }
 
-  // ===== Presence
-  async function writePresence(patch) {
-    if (!currentUser) return;
+  /* ======================================================
+     🟢 Presence
+  ====================================================== */
+  async function writePresence(patch = {}) {
+    if (!state.user) return;
     try {
-      await db.collection("presence").doc(currentUser.uid).set({
-        uid: currentUser.uid,
-        displayName: currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "User"),
+      await db.collection("presence").doc(state.user.uid).set({
+        uid: state.user.uid,
+        displayName:
+          state.user.displayName ||
+          (state.user.email ? state.user.email.split("@")[0] : "User"),
         lastSeenAt: serverTS(),
-        ...patch
+        ...patch,
       }, { merge: true });
     } catch (e) {
-      console.warn("presence write failed:", e?.message || e);
+      console.warn("Presence write failed:", e);
     }
   }
 
   function startPresence() {
-    if (!currentUser) return;
+    if (!state.user) return;
 
     writePresence({ state: "online" });
     setMeDot("online");
 
-    if (presenceHeart) clearInterval(presenceHeart);
-    presenceHeart = setInterval(() => {
+    stopPresence();
+    state.listeners.presenceHeart = setInterval(() => {
       writePresence({ state: document.hidden ? "idle" : "online" });
     }, 25000);
 
     document.addEventListener("visibilitychange", () => {
-      if (!currentUser) return;
       const st = document.hidden ? "idle" : "online";
       writePresence({ state: st });
       setMeDot(st);
@@ -142,435 +164,303 @@
   }
 
   function stopPresence() {
-    if (presenceHeart) clearInterval(presenceHeart);
-    presenceHeart = null;
+    if (state.listeners.presenceHeart) {
+      clearInterval(state.listeners.presenceHeart);
+      state.listeners.presenceHeart = null;
+    }
     setMeDot("offline");
   }
 
-  // ===== Groups
+  /* ======================================================
+     👥 Groups
+  ====================================================== */
   function renderGroupCard(id, data) {
     const el = document.createElement("div");
-    el.className = "group-card" + (selectedGroup?.id === id ? " is-active" : "");
+    el.className = "group-card" + (state.selectedGroup?.id === id ? " is-active" : "");
     el.innerHTML = `
-      <div class="group-name">${escapeHtml(data?.name || "Group")}</div>
-      <div class="group-meta">${data?.isPublic ? "Public" : "Private"} • ${escapeHtml(data?.topic || "Chat")}</div>
+      <div class="group-name">${escapeHtml(data.name || "Group")}</div>
+      <div class="group-meta">
+        ${data.isPublic ? "Public" : "Private"} • ${escapeHtml(data.topic || "Chat")}
+      </div>
     `;
-    el.addEventListener("click", () => selectGroup(id, data));
+    el.onclick = () => selectGroup(id, data);
     return el;
   }
 
-function listenGroups() {
-  if (groupsUnsub) groupsUnsub();
+  function listenGroups() {
+    state.listeners.groups?.();
 
-  const q = db
-    .collection("groups")
-    .where("isPublic", "==", true)
-    .limit(50);
+    state.listeners.groups = db
+      .collection("groups")
+      .where("isPublic", "==", true)
+      .limit(50)
+      .onSnapshot(snap => {
+        dom.groupList.innerHTML = "";
 
-  groupsUnsub = q.onSnapshot((snap) => {
-    if (!groupList) return;
-    groupList.innerHTML = "";
+        if (snap.empty) {
+          dom.groupList.innerHTML =
+            `<div class="group-meta" style="padding:.8rem;">Noch keine Groups.</div>`;
+          return;
+        }
 
-    if (snap.empty) {
-      const empty = document.createElement("div");
-      empty.className = "group-meta";
-      empty.style.padding = ".8rem";
-      empty.textContent = "Noch keine Groups. Erstelle die erste 😤";
-      groupList.appendChild(empty);
-      return;
-    }
+        const docs = [];
+        snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
+        docs.sort((a, b) =>
+          (b.data.lastMessageAt?.toMillis?.() || 0) -
+          (a.data.lastMessageAt?.toMillis?.() || 0)
+        );
 
-    // client-side sort nach lastMessageAt desc
-    const docs = [];
-    snap.forEach((d) => docs.push({ id: d.id, data: d.data() || {} }));
-    docs.sort((a, b) => {
-      const ta = a.data?.lastMessageAt?.toMillis?.() ?? 0;
-      const tb = b.data?.lastMessageAt?.toMillis?.() ?? 0;
-      return tb - ta;
-    });
-
-    docs.forEach((d) => groupList.appendChild(renderGroupCard(d.id, d.data)));
-  }, (err) => {
-    console.error(err);
-    notify("error", "Groups konnten nicht geladen werden.");
-  });
-}
+        docs.forEach(d => dom.groupList.appendChild(renderGroupCard(d.id, d.data)));
+      }, () => notify("error", "Groups konnten nicht geladen werden."));
+  }
 
   async function createGroupFlow() {
-    if (!currentUser) return notify("warn", "Bitte anmelden, um eine Group zu erstellen.");
-    const name = prompt("Group Name (z.B. EU Ranked Grind):");
+    if (!state.user) return notify("warn", "Bitte anmelden.");
+    const name = prompt("Group Name:");
     if (!name) return;
 
     const clean = name.trim().slice(0, 40);
     if (clean.length < 3) return notify("warn", "Name zu kurz.");
 
-    try {
-      const ref = await db.collection("groups").add({
-        name: clean,
-        topic: "Chat",
-        isPublic: true,
-        createdAt: serverTS(),
-        createdBy: currentUser.uid,
-        lastMessageAt: serverTS()
-      });
+    const ref = await db.collection("groups").add({
+      name: clean,
+      topic: "Chat",
+      isPublic: true,
+      createdAt: serverTS(),
+      createdBy: state.user.uid,
+      lastMessageAt: serverTS(),
+    });
 
-      await db.collection("groups").doc(ref.id).collection("members").doc(currentUser.uid).set({
-        uid: currentUser.uid,
+    await db.collection("groups").doc(ref.id)
+      .collection("members").doc(state.user.uid).set({
+        uid: state.user.uid,
         role: "owner",
-        displayName: currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "User"),
-        joinedAt: serverTS()
+        displayName: state.user.displayName || "User",
+        joinedAt: serverTS(),
       });
 
-      notify("success", "Group erstellt ✅");
-
-      const snap = await db.collection("groups").doc(ref.id).get();
-      selectGroup(ref.id, snap.data() || {});
-    } catch (e) {
-      console.error(e);
-      notify("error", e?.message || "Group erstellen fehlgeschlagen.");
-    }
+    notify("success", "Group erstellt ✅");
+    const snap = await db.collection("groups").doc(ref.id).get();
+    selectGroup(ref.id, snap.data());
   }
 
-  // ===== Group membership
+  /* ======================================================
+     🔑 Membership
+  ====================================================== */
   async function checkMembership(groupId) {
-    if (!currentUser) return false;
-    try {
-      const m = await db.collection("groups").doc(groupId).collection("members").doc(currentUser.uid).get();
-      return m.exists;
-    } catch {
-      return false;
-    }
+    if (!state.user) return false;
+    const snap = await db.collection("groups").doc(groupId)
+      .collection("members").doc(state.user.uid).get();
+    return snap.exists;
   }
 
-  async function updateJoinLeaveUI(groupId) {
-    isMemberOfSelected = await checkMembership(groupId);
+  async function updateJoinUI(groupId) {
+    state.isMember = await checkMembership(groupId);
 
-    if (!currentUser || readOnly) {
-      if (btnJoinLeave) {
-        btnJoinLeave.textContent = "Join";
-        btnJoinLeave.disabled = true;
-      }
-      setChatEnabled(false);
+    if (!state.user || state.readOnly) {
+      dom.btnJoinLeave.disabled = true;
+      dom.chatInput.disabled = true;
       return;
     }
 
-    if (btnJoinLeave) {
-      btnJoinLeave.disabled = false;
-      btnJoinLeave.textContent = isMemberOfSelected ? "Leave" : "Join";
-    }
-
-    setChatEnabled(isMemberOfSelected);
-
-    if (chatHint) {
-      chatHint.textContent = isMemberOfSelected
-        ? "Du bist drin. Schreib was Cleanes."
-        : "Join die Group, um zu chatten.";
-    }
+    dom.btnJoinLeave.disabled = false;
+    dom.btnJoinLeave.textContent = state.isMember ? "Leave" : "Join";
+    dom.chatInput.disabled = !state.isMember;
   }
 
-  function clearChatUI() {
-    if (chatScroll) chatScroll.innerHTML = "";
-    if (memberList) memberList.innerHTML = "";
-    if (membersHint) membersHint.textContent = "—";
-    setChatEnabled(false);
+  /* ======================================================
+     💬 Chat
+  ====================================================== */
+  function clearChat() {
+    dom.chatScroll.innerHTML = "";
+    dom.memberList.innerHTML = "";
+    dom.membersHint.textContent = "—";
   }
 
   async function selectGroup(id, data) {
-    selectedGroup = { id, ...(data || {}) };
+    state.selectedGroup = { id, ...data };
+    dom.chatTitle.textContent = data.name || "Group";
+    dom.chatHint.textContent = "Lade…";
 
-    if (chatTitle) chatTitle.textContent = selectedGroup.name || "Group";
-    if (chatHint) chatHint.textContent = "Checke Membership…";
-
-    clearChatUI();
+    clearChat();
     clearPresenceSubs();
 
-    await updateJoinLeaveUI(id);
+    await updateJoinUI(id);
 
-    if (messagesUnsub) messagesUnsub();
-    if (membersUnsub) membersUnsub();
+    state.listeners.messages?.();
+    state.listeners.members?.();
 
-    if (currentUser && isMemberOfSelected) {
+    if (state.user && state.isMember) {
       listenMessages(id);
       listenMembers(id);
     } else {
-      if (chatScroll) {
-        chatScroll.innerHTML = `<div class="group-meta" style="padding:.4rem;">Join die Group, um Messages zu sehen.</div>`;
-      }
+      dom.chatScroll.innerHTML =
+        `<div class="group-meta" style="padding:.6rem;">Join die Group, um Messages zu sehen.</div>`;
     }
 
     listenGroups();
   }
 
   function listenMessages(groupId) {
-    if (messagesUnsub) messagesUnsub();
+    state.listeners.messages?.();
 
-    const q = db
+    state.listeners.messages = db
       .collection("groups").doc(groupId)
       .collection("messages")
       .orderBy("createdAt", "asc")
-      .limitToLast(80);
+      .limitToLast(80)
+      .onSnapshot(snap => {
+        dom.chatScroll.innerHTML = "";
+        snap.forEach(doc => {
+          const m = doc.data();
+          const mine = m.uid === state.user?.uid;
 
-    messagesUnsub = q.onSnapshot((snap) => {
-      if (!chatScroll) return;
-      chatScroll.innerHTML = "";
-
-      snap.forEach((doc) => {
-        const m = doc.data() || {};
-        const mine = currentUser && m.uid === currentUser.uid;
-
-        const el = document.createElement("div");
-        el.className = "msg" + (mine ? " me" : "");
-        el.innerHTML = `
-          <div class="msg-top">
-            <div class="msg-name">${escapeHtml(m.displayName || "User")}</div>
-            <div class="msg-time">${escapeHtml(fmtTime(m.createdAt))}</div>
-          </div>
-          <div class="msg-text">${escapeHtml(m.text || "")}</div>
-        `;
-        chatScroll.appendChild(el);
+          const el = document.createElement("div");
+          el.className = "msg" + (mine ? " me" : "");
+          el.innerHTML = `
+            <div class="msg-top">
+              <div class="msg-name">${escapeHtml(m.displayName)}</div>
+              <div class="msg-time">${fmtTime(m.createdAt)}</div>
+            </div>
+            <div class="msg-text">${escapeHtml(m.text)}</div>
+          `;
+          dom.chatScroll.appendChild(el);
+        });
+        dom.chatScroll.scrollTop = dom.chatScroll.scrollHeight;
       });
-
-      chatScroll.scrollTop = chatScroll.scrollHeight;
-    }, (err) => {
-      console.error(err);
-      notify("error", "Messages konnten nicht geladen werden.");
-    });
   }
 
-  function listenMembers(groupId) {
-    if (membersUnsub) membersUnsub();
+  async function sendMessage(e) {
+    e.preventDefault();
+    if (!state.user || !state.isMember) return;
 
-    membersUnsub = db
+    const text = dom.chatInput.value.trim();
+    if (!text) return;
+    dom.chatInput.value = "";
+
+    await db.collection("groups").doc(state.selectedGroup.id)
+      .collection("messages").add({
+        uid: state.user.uid,
+        displayName: state.user.displayName || "User",
+        text: text.slice(0, 900),
+        createdAt: serverTS(),
+      });
+
+    await db.collection("groups").doc(state.selectedGroup.id)
+      .set({ lastMessageAt: serverTS() }, { merge: true });
+  }
+
+  /* ======================================================
+     👤 Members
+  ====================================================== */
+  function listenMembers(groupId) {
+    state.listeners.members?.();
+
+    state.listeners.members = db
       .collection("groups").doc(groupId)
       .collection("members")
       .orderBy("joinedAt", "asc")
-      .onSnapshot((snap) => {
-        if (!memberList) return;
-
-        memberList.innerHTML = "";
-        if (membersHint) membersHint.textContent = `${snap.size} Member`;
-
+      .onSnapshot(snap => {
+        dom.memberList.innerHTML = "";
+        dom.membersHint.textContent = `${snap.size} Member`;
         clearPresenceSubs();
 
-        const members = [];
-        snap.forEach((doc) => members.push(doc.data() || {}));
-
-        members.forEach((m) => {
+        snap.forEach(doc => {
+          const m = doc.data();
           const row = document.createElement("div");
           row.className = "member";
           row.innerHTML = `
             <div class="member-left">
               <span class="dot" id="dot_${m.uid}"></span>
-              <div style="min-width:0;">
-                <div class="member-name">${escapeHtml(m.displayName || "User")}</div>
+              <div>
+                <div class="member-name">${escapeHtml(m.displayName)}</div>
                 <div class="member-activity" id="act_${m.uid}">—</div>
               </div>
             </div>
-            <div class="group-meta" style="opacity:.75;">${escapeHtml(m.role || "member")}</div>
+            <div class="group-meta">${escapeHtml(m.role)}</div>
           `;
-          memberList.appendChild(row);
+          dom.memberList.appendChild(row);
 
-          const unsub = db.collection("presence").doc(m.uid).onSnapshot((ps) => {
-            const p = ps.data() || {};
-            const dot = document.getElementById(`dot_${m.uid}`);
-            const act = document.getElementById(`act_${m.uid}`);
+          const unsub = db.collection("presence").doc(m.uid)
+            .onSnapshot(ps => {
+              const p = ps.data() || {};
+              const dot = $(`dot_${m.uid}`);
+              const act = $(`act_${m.uid}`);
 
-            const st = p.state || "offline";
-            if (dot) {
-              if (st === "online") dot.style.background = "rgba(0,255,136,.95)";
-              else if (st === "idle") dot.style.background = "rgba(255,204,0,.95)";
-              else if (st === "dnd") dot.style.background = "rgba(255,51,102,.95)";
-              else dot.style.background = "rgba(255,255,255,.18)";
-            }
+              if (dot) setMeDot.call({ meDot: dot }, p.state);
+              if (act) act.textContent = p.activity || "—";
+            });
 
-            if (act) act.textContent = p.activity ? String(p.activity).slice(0, 38) : "—";
-          });
-
-          presenceUnsubs.push(unsub);
+          state.listeners.presenceSubs.push(unsub);
         });
-      }, (err) => {
-        console.error(err);
-        notify("error", "Memberliste konnte nicht geladen werden.");
       });
   }
 
-  async function joinSelected() {
-    if (!currentUser || readOnly) return notify("warn", "Bitte anmelden.");
-    if (!selectedGroup) return;
+  /* ======================================================
+     🔘 UI Wiring
+  ====================================================== */
+  dom.btnRefreshGroups?.addEventListener("click", listenGroups);
+  dom.btnCreateGroup?.addEventListener("click", createGroupFlow);
+  dom.btnSetActivity?.addEventListener("click", async () => {
+    const txt = prompt("Activity:");
+    if (txt != null) await writePresence({ activity: txt.slice(0, 48) });
+  });
 
-    try {
-      await db.collection("groups").doc(selectedGroup.id)
-        .collection("members").doc(currentUser.uid).set({
-          uid: currentUser.uid,
-          role: "member",
-          displayName: currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "User"),
-          joinedAt: serverTS()
-        }, { merge: true });
+  dom.btnJoinLeave?.addEventListener("click", async () => {
+    if (!state.user) return;
+    const ref = db.collection("groups").doc(state.selectedGroup.id)
+      .collection("members").doc(state.user.uid);
 
-      notify("success", "Joined ✅");
-      await updateJoinLeaveUI(selectedGroup.id);
+    if (state.isMember) await ref.delete();
+    else await ref.set({
+      uid: state.user.uid,
+      role: "member",
+      displayName: state.user.displayName || "User",
+      joinedAt: serverTS(),
+    });
 
-      listenMessages(selectedGroup.id);
-      listenMembers(selectedGroup.id);
-    } catch (e) {
-      console.error(e);
-      notify("error", e?.message || "Join fehlgeschlagen.");
+    await updateJoinUI(state.selectedGroup.id);
+  });
+
+  dom.chatForm?.addEventListener("submit", sendMessage);
+
+  dom.btnLogout?.addEventListener("click", async () => {
+    await writePresence({ state: "offline" });
+    await auth.signOut();
+    notify("success", "Ausgeloggt ✅");
+  });
+
+  dom.groupSearch?.addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll(".group-card").forEach(c => {
+      c.style.display = c.textContent.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+
+  /* ======================================================
+     🔐 Auth Binding
+  ====================================================== */
+  auth?.onAuthStateChanged(async user => {
+    state.user = user || null;
+    dom.meName.textContent = user
+      ? (user.displayName || user.email.split("@")[0])
+      : "Gast";
+
+    if (!user) {
+      stopPresence();
+      setPageLock(true);
+      return;
     }
-  }
 
-  async function leaveSelected() {
-    if (!currentUser || readOnly) return;
-    if (!selectedGroup) return;
-
-    try {
-      const mRef = db.collection("groups").doc(selectedGroup.id).collection("members").doc(currentUser.uid);
-      const mSnap = await mRef.get();
-      const role = mSnap.data()?.role || "member";
-
-      if (role === "owner") {
-        return notify("warn", "Owner kann im MVP nicht verlassen. (Später: Ownership transfer)");
-      }
-
-      await mRef.delete();
-      notify("success", "Left ✅");
-
-      if (messagesUnsub) messagesUnsub();
-      if (membersUnsub) membersUnsub();
-      clearPresenceSubs();
-
-      clearChatUI();
-      await updateJoinLeaveUI(selectedGroup.id);
-    } catch (e) {
-      console.error(e);
-      notify("error", e?.message || "Leave fehlgeschlagen.");
-    }
-  }
-
-  async function sendMessage(e) {
-    e.preventDefault();
-    if (!currentUser || readOnly) return notify("warn", "Bitte anmelden.");
-    if (!selectedGroup || !isMemberOfSelected) return;
-
-    const text = String(chatInput?.value || "").trim();
-    if (!text) return;
-
-    if (chatInput) chatInput.value = "";
-
-    try {
-      const payload = {
-        uid: currentUser.uid,
-        displayName: currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "User"),
-        text: text.slice(0, 900),
-        createdAt: serverTS()
-      };
-
-      const gRef = db.collection("groups").doc(selectedGroup.id);
-      await gRef.collection("messages").add(payload);
-      await gRef.set({ lastMessageAt: serverTS() }, { merge: true });
-
-    } catch (e2) {
-      console.error(e2);
-      notify("error", e2?.message || "Senden fehlgeschlagen.");
-    }
-  }
-
-  async function setActivityFlow() {
-    if (!currentUser) return notify("warn", "Bitte anmelden.");
-    const txt = prompt("Activity (z.B. In Reflex Lab / In Ranked / Playing: Valorant):", "");
-    if (txt === null) return;
-
-    const clean = String(txt).trim().slice(0, 48);
-    await writePresence({ activity: clean });
-    notify("success", "Activity updated ✅");
-  }
-
-  function applyAuthUI() {
-    const name = currentUser
-      ? (currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "User"))
-      : "Guest";
-
-    if (meName) meName.textContent = name;
-
-    if (currentUser) {
-      if (btnLogout) btnLogout.style.display = "inline-flex";
-      setMeDot("online");
-      setPageLock(false);
-    } else {
-      if (btnLogout) btnLogout.style.display = "none";
-      setMeDot("offline");
-      setPageLock(!readOnly);
-    }
-  }
-
-  // ===== Wire UI
-  btnRefreshGroups?.addEventListener("click", listenGroups);
-  btnCreateGroup?.addEventListener("click", createGroupFlow);
-  btnSetActivity?.addEventListener("click", setActivityFlow);
-
-  btnContinueReadOnly?.addEventListener("click", () => {
-    readOnly = true;
     setPageLock(false);
-    notify("info", "Read-only aktiv. Für Chat brauchst du Login.");
+    startPresence();
   });
 
-  btnJoinLeave?.addEventListener("click", async () => {
-    if (!selectedGroup) return;
-    if (!currentUser || readOnly) return notify("warn", "Bitte anmelden.");
-    if (isMemberOfSelected) return leaveSelected();
-    return joinSelected();
-  });
-
-  chatForm?.addEventListener("submit", sendMessage);
-
-  btnLogout?.addEventListener("click", async () => {
-    if (!auth) return;
-    try {
-      await writePresence({ state: "offline" });
-      await auth.signOut();
-      notify("success", "Ausgeloggt ✅");
-    } catch (e) {
-      notify("error", e?.message || "Logout fehlgeschlagen.");
-    }
-  });
-
-  // ===== Init
+  /* ======================================================
+     🚀 Init
+  ====================================================== */
   listenGroups();
-  setChatEnabled(false);
-
-  // Gate defaults: locked when not logged in
   setPageLock(true);
 
-  // Auth binding
-  if (auth && typeof auth.onAuthStateChanged === "function") {
-    auth.onAuthStateChanged(async (u) => {
-      currentUser = u || null;
-
-      applyAuthUI();
-
-      if (!currentUser) {
-        stopPresence();
-        if (messagesUnsub) messagesUnsub();
-        if (membersUnsub) membersUnsub();
-        clearPresenceSubs();
-        isMemberOfSelected = false;
-        setChatEnabled(false);
-        if (chatHint) chatHint.textContent = "Bitte anmelden, um zu chatten.";
-        return;
-      }
-
-      startPresence();
-
-      // Refresh membership & listeners when logged in
-      if (selectedGroup?.id) {
-        await updateJoinLeaveUI(selectedGroup.id);
-        if (isMemberOfSelected) {
-          listenMessages(selectedGroup.id);
-          listenMembers(selectedGroup.id);
-        }
-      }
-    });
-  } else {
-    currentUser = null;
-    applyAuthUI();
-  }
+  console.log("🚀 echtlucky Connect V2 geladen");
 })();
