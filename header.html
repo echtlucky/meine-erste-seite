@@ -5,8 +5,8 @@
   </div>
 
   <!-- Mitte (Navigation) -->
-  <nav id="mainNav" class="header-nav">
-    <div class="nav-links"> ... </div>
+  <nav id="mainNav" class="header-nav" aria-label="Hauptnavigation">
+    <div class="nav-links">
       <a href="index.html">Home</a>
       <a href="blog.html">Blog</a>
       <a href="ranked.html">Ranked</a>
@@ -25,7 +25,7 @@
         <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" style="display:none;">
           Admin Panel
         </a>
-        <a href="#" class="dropdown-item logout" onclick="logout()">Ausloggen</a>
+        <a href="#" class="dropdown-item logout" onclick="logout(); return false;">Ausloggen</a>
       </div>
     </div>
 
