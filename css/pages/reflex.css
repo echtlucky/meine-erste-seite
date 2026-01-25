@@ -1,17 +1,7 @@
 /* =========================
-   Reflex Lab — Apple-ish glass + super smooth
+   Reflex Lab — UI cursor normal
+   Cursor hidden ONLY inside game overlay
 ========================= */
-
-.reflex-page{
-  /* Wichtig: Cursor unsichtbar (nur Crosshair sichtbar) */
-  cursor: none;
-}
-
-/* Auch im Stage nochmal hart erzwingen */
-.reflex-stage,
-.reflex-stage *{
-  cursor: none !important;
-}
 
 .reflex-wrap{
   width: min(1100px, 92%);
@@ -21,6 +11,7 @@
   gap: 1.4rem;
 }
 
+/* Hero */
 .reflex-hero{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,0.10);
@@ -87,6 +78,7 @@
   color: rgba(224,255,224,0.95);
 }
 
+/* Card */
 .reflex-card{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,0.10);
@@ -105,15 +97,8 @@
   gap: 1rem;
 }
 
-.reflex-card__title{
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-.reflex-card__hint{
-  margin: .3rem 0 0;
-  opacity: .8;
-}
+.reflex-card__title{ margin: 0; font-size: 1.25rem; }
+.reflex-card__hint{ margin: .3rem 0 0; opacity: .8; }
 
 .reflex-actions{
   display:flex;
@@ -121,6 +106,7 @@
   flex-wrap: wrap;
 }
 
+/* Modes */
 .reflex-modes{
   display:flex;
   gap:.6rem;
@@ -143,38 +129,71 @@
   color: rgba(0,255,136,0.95);
 }
 
-.reflex-config{
+/* Apple-ish control bar (inedinandergreifend) */
+.reflex-controls{
   display:grid;
-  grid-template-columns: repeat(4, minmax(0,1fr));
+  grid-template-columns: 1.25fr 1fr 1fr 0.8fr;
   gap: .9rem;
+  align-items: stretch;
 }
 
-.cfg{
+.ctl{
   border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.03);
   border-radius: 18px;
-  padding: .9rem 1rem;
+  padding: .85rem 1rem;
   backdrop-filter: blur(16px);
+  display:flex;
+  flex-direction: column;
+  gap: .45rem;
 }
 
-.cfg-label{
-  opacity:.8;
-  margin-bottom:.35rem;
+.ctl-label{
+  opacity:.82;
   font-size:.9rem;
 }
 
-.cfg-control{
+.ctl-pill{
   display:flex;
   align-items:center;
-  justify-content: space-between;
-  gap:.8rem;
+  gap: .55rem;
+  padding: .55rem .6rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.35);
 }
 
-.cfg-control input[type="range"]{
+.ctl-value{
+  min-width: 34px;
+  text-align:right;
+  font-weight: 850;
+  opacity: .95;
+}
+
+.ctl-pill input[type="range"]{
   width: 100%;
 }
 
-.pill{
+.seg{
+  border: 0;
+  background: transparent;
+  color: rgba(224,255,224,0.86);
+  font-weight: 760;
+  padding: .45rem .65rem;
+  border-radius: 12px;
+  transition: background .16s ease, color .16s ease, transform .16s ease;
+}
+.seg:hover{ transform: translateY(-1px); }
+.seg.is-active{
+  background: rgba(0,255,136,0.12);
+  color: rgba(0,255,136,0.95);
+}
+
+.ctl-pill--save{
+  justify-content: flex-start;
+}
+
+.save-pill{
   display:inline-flex;
   align-items:center;
   padding:.35rem .7rem;
@@ -185,149 +204,29 @@
   opacity:.95;
 }
 
-.reflex-stage-wrap{
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.45);
-}
-
-.reflex-stage{
-  position: relative;
-  height: min(62vh, 540px);
-  outline: none;
-
-  /* super smooth feeling */
-  will-change: transform;
-  transform: translate3d(0,0,0);
-
-  /* disable selection / highlight */
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.reflex-hud{
-  position:absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
+/* Footer */
+.reflex-footer{
   display:flex;
   justify-content: space-between;
-  gap:.8rem;
-  pointer-events:none;
-  z-index: 8;
+  align-items: center;
+  gap: 1rem;
+  padding-top: .4rem;
+  border-top: 1px solid rgba(255,255,255,0.10);
 }
 
-.hud-left, .hud-right{
+.reflex-footer__left{
   display:flex;
-  gap:.5rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem;
+  opacity: .78;
+  font-size: .92rem;
 }
 
-.hud-chip{
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(14px);
-  border-radius: 999px;
-  padding: .35rem .75rem;
-  font-size: .9rem;
-  opacity: .95;
-}
-
-.reflex-center{
-  position:absolute;
-  inset:0;
-  display:flex;
-  flex-direction: column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  gap:.35rem;
-  z-index: 5;
-  padding: 1rem;
-}
-.center-title{
-  font-weight: 880;
-  letter-spacing:-0.6px;
-  font-size: 1.25rem;
-}
-.center-text{
-  opacity:.85;
-  max-width: 56ch;
-}
-
-/* Targets */
-.target{
-  position:absolute;
-  border-radius: 999px;
-  transform: translate3d(-50%, -50%, 0);
-  will-change: transform;
-  pointer-events: auto;
-
-  border: 1px solid rgba(255,255,255,0.14);
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), transparent 58%),
-    radial-gradient(circle at 50% 50%, rgba(0,255,136,0.28), rgba(0,0,0,0.35));
-  box-shadow: 0 18px 55px rgba(0,0,0,0.55);
-}
-
-.target::after{
-  content:"";
-  position:absolute;
-  inset: 18%;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.16);
-  opacity: .85;
-}
-
-.target:active{
-  transform: translate3d(-50%, -50%, 0) scale(0.98);
-}
-
-/* Crosshair overlay */
-.crosshair{
-  position: fixed;
-  width: 26px;
-  height: 26px;
-  z-index: 99999;
-  pointer-events:none;
-
-  transform: translate3d(-50%, -50%, 0);
-  will-change: transform;
-
-  /* Apple-ish: crisp lines */
-  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55));
-}
-
-.crosshair::before,
-.crosshair::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:50%;
-  width: 26px;
-  height: 2px;
-  background: rgba(224,255,224,0.92);
-  transform: translate(-50%, -50%);
-  border-radius: 2px;
-}
-
-.crosshair::after{
-  width: 2px;
-  height: 26px;
-}
-
-.crosshair .dot{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(0,255,136,0.95);
-  transform: translate(-50%, -50%);
+.reflex-footer .dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0,255,136,0.9);
 }
 
 /* Results */
@@ -386,34 +285,167 @@
   opacity:.95;
 }
 
-.reflex-footer{
+/* =========================
+   GAME OVERLAY (Fullscreen)
+   Cursor hidden ONLY here
+========================= */
+.reflex-game{
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  display:none;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(0,255,136,0.14), transparent 58%),
+    radial-gradient(circle at 78% 72%, rgba(88,101,242,0.12), transparent 60%),
+    rgba(0,0,0,0.82);
+  backdrop-filter: blur(22px);
+  cursor: none;
+}
+
+.reflex-game.show{
+  display:block;
+}
+
+.reflex-game,
+.reflex-game *{
+  cursor:none !important;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.reflex-game__topbar{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
   display:flex;
+  align-items:center;
   justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding-top: .4rem;
-  border-top: 1px solid rgba(255,255,255,0.10);
+  padding: 0 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(18px);
+  z-index: 6;
 }
 
-.reflex-footer__left{
+.topbar-left, .topbar-right{
   display:flex;
-  align-items: center;
-  gap: .6rem;
-  opacity: .78;
-  font-size: .92rem;
+  gap:.55rem;
+  align-items:center;
+  flex-wrap: wrap;
 }
 
-.reflex-footer .dot{
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(0,255,136,0.9);
+.hud-chip{
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(14px);
+  border-radius: 999px;
+  padding: .35rem .75rem;
+  font-size: .9rem;
+  opacity: .95;
+}
+
+/* Stage */
+.reflex-stage{
+  position:absolute;
+  top: 62px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  outline:none;
+  will-change: transform;
+  transform: translate3d(0,0,0);
+}
+
+/* Center msg */
+.reflex-center{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:.35rem;
+  z-index: 5;
+  padding: 1rem;
+}
+
+.center-title{ font-weight: 900; letter-spacing:-0.6px; font-size: 1.25rem; }
+.center-text{ opacity:.85; max-width: 56ch; }
+
+/* Targets */
+.target{
+  position:absolute;
+  border-radius: 999px;
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
+  pointer-events: auto;
+
+  border: 1px solid rgba(255,255,255,0.14);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), transparent 58%),
+    radial-gradient(circle at 50% 50%, rgba(0,255,136,0.28), rgba(0,0,0,0.35));
+  box-shadow: 0 18px 55px rgba(0,0,0,0.55);
+}
+
+.target::after{
+  content:"";
+  position:absolute;
+  inset: 18%;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  opacity: .85;
+}
+
+/* Crosshair */
+.crosshair{
+  position: fixed;
+  width: 26px;
+  height: 26px;
+  z-index: 99999;
+  pointer-events:none;
+
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55));
+}
+
+.crosshair::before,
+.crosshair::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width: 26px;
+  height: 2px;
+  background: rgba(224,255,224,0.92);
+  transform: translate(-50%, -50%);
+  border-radius: 2px;
+}
+
+.crosshair::after{
+  width: 2px;
+  height: 26px;
+}
+
+.crosshair .dot{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(0,255,136,0.95);
+  transform: translate(-50%, -50%);
 }
 
 @media (max-width: 900px){
   .reflex-hero{ flex-direction: column; align-items:flex-start; }
   .reflex-stats{ grid-auto-flow: row; width:100%; }
   .stat{ width:100%; }
-  .reflex-config{ grid-template-columns: 1fr 1fr; }
+  .reflex-controls{ grid-template-columns: 1fr 1fr; }
   .reflex-result__grid{ grid-template-columns: 1fr 1fr; }
 }

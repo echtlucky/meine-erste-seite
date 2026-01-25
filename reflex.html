@@ -19,7 +19,7 @@
         <div class="reflex-badge">⚡ echtlucky • Reflex Lab</div>
         <h1 class="reflex-title">Reflex Lab</h1>
         <p class="reflex-sub">
-          Klick die Targets so schnell wie möglich. Crosshair only. Kein Mauszeiger. Clean & smooth.
+          Test deine Reflexe. Targets klicken → Zeit messen → Rating. Crosshair only im Spiel.
         </p>
       </div>
 
@@ -42,12 +42,12 @@
     <section class="reflex-card">
       <header class="reflex-card__head">
         <div>
-          <h2 class="reflex-card__title">Games</h2>
-          <p class="reflex-card__hint">Wähle einen Modus. Trefferzeiten werden live gemessen.</p>
+          <h2 class="reflex-card__title">Reflex Games</h2>
+          <p class="reflex-card__hint">Start öffnet ein Fullscreen-Spiel. Im Spiel ist der Cursor aus.</p>
         </div>
 
         <div class="reflex-actions">
-          <button class="btn btn-ghost" id="btnHow" type="button">How it works</button>
+          <button class="btn btn-ghost" id="btnHow" type="button">How</button>
           <button class="btn btn-primary" id="btnStart" type="button">Start</button>
         </div>
       </header>
@@ -58,74 +58,46 @@
         <button class="mode" data-mode="precision" type="button">Precision</button>
       </div>
 
-      <div class="reflex-config">
-        <div class="cfg">
-          <div class="cfg-label">Targets</div>
-          <div class="cfg-control">
+      <!-- Apple-ish Control Bar (inedinandergreifend) -->
+      <div class="reflex-controls" aria-label="Game Settings">
+        <div class="ctl">
+          <div class="ctl-label">Targets</div>
+          <div class="ctl-pill">
             <input id="cfgTargets" type="range" min="5" max="30" value="15" />
-            <span id="cfgTargetsVal">15</span>
+            <span class="ctl-value" id="cfgTargetsVal">15</span>
           </div>
         </div>
 
-        <div class="cfg">
-          <div class="cfg-label">Size</div>
-          <div class="cfg-control">
-            <select id="cfgSize">
-              <option value="mixed" selected>Mixed</option>
-              <option value="large">Large</option>
-              <option value="medium">Medium</option>
-              <option value="small">Small</option>
-            </select>
+        <div class="ctl">
+          <div class="ctl-label">Size</div>
+          <div class="ctl-pill">
+            <button class="seg is-active" data-size="mixed" type="button">Mixed</button>
+            <button class="seg" data-size="large" type="button">L</button>
+            <button class="seg" data-size="medium" type="button">M</button>
+            <button class="seg" data-size="small" type="button">S</button>
           </div>
         </div>
 
-        <div class="cfg">
-          <div class="cfg-label">Spawn</div>
-          <div class="cfg-control">
-            <select id="cfgSpawn">
-              <option value="safe" selected>Safe (rand away)</option>
-              <option value="full">Full Random</option>
-            </select>
+        <div class="ctl">
+          <div class="ctl-label">Spawn</div>
+          <div class="ctl-pill">
+            <button class="seg is-active" data-spawn="safe" type="button">Safe</button>
+            <button class="seg" data-spawn="full" type="button">Random</button>
           </div>
         </div>
 
-        <div class="cfg">
-          <div class="cfg-label">Save</div>
-          <div class="cfg-control">
-            <span class="pill" id="saveStatus">Local</span>
+        <div class="ctl ctl-save">
+          <div class="ctl-label">Save</div>
+          <div class="ctl-pill ctl-pill--save">
+            <span class="save-pill" id="saveStatus">Local</span>
           </div>
         </div>
-      </div>
-
-      <div class="reflex-stage-wrap">
-        <div class="reflex-stage" id="stage" tabindex="0" aria-label="Reflex playfield">
-          <!-- targets injected here -->
-          <div class="reflex-hud">
-            <div class="hud-left">
-              <span class="hud-chip" id="hudMode">Reaction</span>
-              <span class="hud-chip" id="hudProgress">0/15</span>
-            </div>
-            <div class="hud-right">
-              <span class="hud-chip" id="hudLast">Last: —</span>
-              <span class="hud-chip" id="hudBest">Best: —</span>
-              <span class="hud-chip" id="hudAvg">Avg: —</span>
-            </div>
-          </div>
-
-          <div class="reflex-center" id="centerMsg">
-            <div class="center-title">Crosshair only ✅</div>
-            <div class="center-text">Klick Start. Dann klickst du Targets so schnell wie möglich.</div>
-          </div>
-        </div>
-
-        <!-- Crosshair overlay -->
-        <div class="crosshair" id="crosshair" aria-hidden="true"></div>
       </div>
 
       <footer class="reflex-footer">
         <div class="reflex-footer__left">
           <span class="dot"></span>
-          <span id="footerHint">Tip: Auf Mobile geht’s auch (Tap). Auf Desktop fühlt’s sich am besten an.</span>
+          <span id="footerHint">Desktop: best feel. Mobile: tap geht klar.</span>
         </div>
         <button class="btn btn-ghost" id="btnReset" type="button">Reset Stats</button>
       </footer>
@@ -163,9 +135,36 @@
     </section>
   </main>
 
+  <!-- FULLSCREEN GAME OVERLAY -->
+  <div class="reflex-game" id="gameOverlay" aria-hidden="true">
+    <div class="reflex-game__topbar">
+      <div class="topbar-left">
+        <span class="hud-chip" id="hudMode">Reaction</span>
+        <span class="hud-chip" id="hudProgress">0/15</span>
+        <span class="hud-chip" id="hudLast">Last: —</span>
+      </div>
+
+      <div class="topbar-right">
+        <span class="hud-chip" id="hudBest">Best: —</span>
+        <span class="hud-chip" id="hudAvg">Avg: —</span>
+        <button class="btn btn-ghost btn-sm" id="btnExit" type="button">Exit</button>
+      </div>
+    </div>
+
+    <div class="reflex-stage" id="stage" tabindex="0" aria-label="Reflex playfield">
+      <div class="reflex-center" id="centerMsg">
+        <div class="center-title">Ready?</div>
+        <div class="center-text">Targets erscheinen gleich. Klick so schnell wie möglich.</div>
+      </div>
+    </div>
+
+    <!-- Crosshair overlay -->
+    <div class="crosshair" id="crosshair" aria-hidden="true"></div>
+  </div>
+
   <div id="footer-placeholder"></div>
 
-  <!-- Firebase SDKs (bei dir Standard) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>

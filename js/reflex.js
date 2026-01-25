@@ -1,34 +1,26 @@
 /* =========================
-   Reflex Lab — echtlucky
-   - Crosshair only (cursor hidden)
-   - 3 Modes: Reaction / Flick / Precision
-   - Smooth target spawn + time measurement
-   - Save: localStorage always, Firestore if logged in
+   Reflex Lab — echtlucky (v2)
+   FIX:
+   - Cursor sichtbar im UI
+   - Cursor hidden only in overlay
+   - Start -> fullscreen overlay
+   UI:
+   - segmented controls for size/spawn
 ========================= */
 
 (() => {
   "use strict";
 
-  const LS_KEY = "echtlucky_reflex_v1";
+  const LS_KEY = "echtlucky_reflex_v2";
 
-  // Firebase optional (works without login)
+  // Firebase optional
   const authRef = window.echtlucky?.auth || window.auth || null;
   const dbRef   = window.echtlucky?.db   || window.db   || null;
 
-  // DOM
-  const stage = document.getElementById("stage");
-  const crosshair = document.getElementById("crosshair");
-  const centerMsg = document.getElementById("centerMsg");
-
+  // UI DOM
   const bestValue = document.getElementById("bestValue");
   const avgValue = document.getElementById("avgValue");
   const ratingValue = document.getElementById("ratingValue");
-
-  const hudMode = document.getElementById("hudMode");
-  const hudProgress = document.getElementById("hudProgress");
-  const hudLast = document.getElementById("hudLast");
-  const hudBest = document.getElementById("hudBest");
-  const hudAvg = document.getElementById("hudAvg");
 
   const btnStart = document.getElementById("btnStart");
   const btnReset = document.getElementById("btnReset");
@@ -36,12 +28,26 @@
 
   const cfgTargets = document.getElementById("cfgTargets");
   const cfgTargetsVal = document.getElementById("cfgTargetsVal");
-  const cfgSize = document.getElementById("cfgSize");
-  const cfgSpawn = document.getElementById("cfgSpawn");
   const saveStatus = document.getElementById("saveStatus");
 
   const modeBtns = Array.from(document.querySelectorAll(".mode"));
+  const sizeSegs = Array.from(document.querySelectorAll(".seg[data-size]"));
+  const spawnSegs = Array.from(document.querySelectorAll(".seg[data-spawn]"));
 
+  // Overlay DOM
+  const overlay = document.getElementById("gameOverlay");
+  const stage = document.getElementById("stage");
+  const crosshair = document.getElementById("crosshair");
+  const centerMsg = document.getElementById("centerMsg");
+  const btnExit = document.getElementById("btnExit");
+
+  const hudMode = document.getElementById("hudMode");
+  const hudProgress = document.getElementById("hudProgress");
+  const hudLast = document.getElementById("hudLast");
+  const hudBest = document.getElementById("hudBest");
+  const hudAvg = document.getElementById("hudAvg");
+
+  // Results
   const resultCard = document.getElementById("resultCard");
   const resultRating = document.getElementById("resultRating");
   const resAvg = document.getElementById("resAvg");
@@ -50,34 +56,31 @@
   const resScore = document.getElementById("resScore");
   const hitChips = document.getElementById("hitChips");
 
-  // Crosshair dot (optional)
+  // Crosshair dot
   if (crosshair && !crosshair.querySelector(".dot")) {
     const d = document.createElement("div");
     d.className = "dot";
     crosshair.appendChild(d);
   }
 
-  // State
+  // Game state
   let mode = "reaction";
-  let running = false;
+  let sizeMode = "mixed"; // mixed|large|medium|small
+  let spawnMode = "safe"; // safe|full
 
+  let running = false;
   let runTotal = 15;
   let runCount = 0;
-
-  let hitTimes = []; // ms per hit
+  let hitTimes = [];
   let currentSpawnAt = 0;
+  let lastPos = { x: 0.5, y: 0.5 };
 
-  let lastPos = { x: 0.5, y: 0.5 }; // for "safe" spawn
-
-  // Smooth crosshair tracking
+  // Crosshair tracking
   let pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
   let cross = { x: pointer.x, y: pointer.y };
 
   function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-
-  function nowMs() {
-    return performance.now();
-  }
+  function nowMs(){ return performance.now(); }
 
   function msToLabel(ms){
     if (!isFinite(ms)) return "—";
@@ -96,7 +99,6 @@
 
   function getRating(avgMs){
     if (!isFinite(avgMs)) return { label:"—", grade:"—" };
-    // Simple & fun
     if (avgMs <= 220) return { label:"Godlike", grade:"S+" };
     if (avgMs <= 280) return { label:"Cracked", grade:"S" };
     if (avgMs <= 340) return { label:"Insane", grade:"A" };
@@ -107,17 +109,13 @@
 
   function calcStats(times){
     if (!times.length) return { avg: NaN, best: NaN, std: NaN, score: 0 };
-
     const avg = times.reduce((a,b)=>a+b,0) / times.length;
     const best = Math.min(...times);
-
-    // Std dev (consistency)
     const varr = times.reduce((s,t)=> s + Math.pow(t-avg,2), 0) / times.length;
     const std = Math.sqrt(varr);
 
-    // Score: speed + consistency
-    const speed = clamp(1000 - avg, 0, 1000);       // lower avg -> higher
-    const cons  = clamp(600 - std, 0, 600);         // lower std -> higher
+    const speed = clamp(1000 - avg, 0, 1000);
+    const cons  = clamp(600 - std, 0, 600);
     const sizeBonus = (mode === "precision") ? 180 : (mode === "flick") ? 120 : 80;
     const score = Math.round(speed + cons + sizeBonus + times.length * 12);
 
@@ -126,13 +124,9 @@
 
   function renderTopStats(){
     const ls = loadLS();
-    const best = ls?.bestMs;
-    const avg  = ls?.bestAvgMs;
-
-    bestValue.textContent = isFinite(best) ? msToLabel(best) : "—";
-    avgValue.textContent  = isFinite(avg) ? msToLabel(avg) : "—";
-
-    const r = getRating(avg);
+    bestValue.textContent = isFinite(ls?.bestMs) ? msToLabel(ls.bestMs) : "—";
+    avgValue.textContent  = isFinite(ls?.bestAvgMs) ? msToLabel(ls.bestAvgMs) : "—";
+    const r = getRating(ls?.bestAvgMs);
     ratingValue.textContent = r.grade;
   }
 
@@ -147,19 +141,16 @@
     }
   }
 
-  // Firestore save: store inside users doc (Rules-friendly)
   async function saveToAccountIfLoggedIn(payload){
     const user = window.__ECHTLUCKY_CURRENT_USER__ || null;
     if (!user || !dbRef) return;
 
     try {
-      // write into users/{uid} (merge) => allowed by your rules (self update, role unchanged)
       await dbRef.collection("users").doc(user.uid).set({
         reflexStats: payload,
         reflexUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
     } catch (e) {
-      // fail silently (local always works)
       console.warn("Reflex save failed:", e?.message || e);
     }
   }
@@ -169,14 +160,13 @@
   }
 
   function sizePx(){
-    const preset = cfgSize.value;
-    if (preset === "large") return 74;
-    if (preset === "medium") return 54;
-    if (preset === "small") return 34;
+    if (sizeMode === "large") return 76;
+    if (sizeMode === "medium") return 54;
+    if (sizeMode === "small") return 34;
 
     // mixed
     const pool = (mode === "precision")
-      ? [28, 30, 32, 34, 36]
+      ? [26, 28, 30, 32, 34]
       : (mode === "flick")
       ? [34, 40, 46, 52]
       : [40, 46, 52, 58, 64];
@@ -185,15 +175,13 @@
   }
 
   function spawnPoint(){
-    // stage rect
     const r = stage.getBoundingClientRect();
-    const pad = 40;
+    const pad = 46;
 
     let x = pad + Math.random() * (r.width - pad*2);
     let y = pad + Math.random() * (r.height - pad*2);
 
-    if (cfgSpawn.value === "safe") {
-      // keep some distance from last position
+    if (spawnMode === "safe") {
       const lx = lastPos.x * r.width;
       const ly = lastPos.y * r.height;
 
@@ -226,7 +214,6 @@
     t.style.left = p.x + "px";
     t.style.top = p.y + "px";
 
-    // For feel: tiny pop-in
     t.animate(
       [{ transform: "translate3d(-50%,-50%,0) scale(0.92)", opacity: 0.0 },
        { transform: "translate3d(-50%,-50%,0) scale(1)", opacity: 1.0 }],
@@ -240,13 +227,11 @@
 
       const hitMs = nowMs() - currentSpawnAt;
       hitTimes.push(hitMs);
-
       hudLast.textContent = "Last: " + msToLabel(hitMs);
 
       runCount++;
       hudProgress.textContent = `${runCount}/${runTotal}`;
 
-      // next
       if (runCount >= runTotal) finishRun();
       else nextTarget();
     });
@@ -256,20 +241,65 @@
   }
 
   function nextTarget(){
-    // Mode behavior
     if (mode === "reaction") {
-      // spawn after random delay, measure click time from spawn
       clearStage();
-      const delay = 250 + Math.random() * 700;
+      const delay = 260 + Math.random() * 760;
       setTimeout(() => {
         if (!running) return;
         createTarget();
       }, delay);
       return;
     }
-
-    // flick / precision = instant spawn
     createTarget();
+  }
+
+  function setCenterText(title, text){
+    if (!centerMsg) return;
+    const t = centerMsg.querySelector(".center-title");
+    const p = centerMsg.querySelector(".center-text");
+    if (t) t.textContent = title;
+    if (p) p.textContent = text;
+    centerMsg.style.display = "flex";
+  }
+
+  function hideCenter(){
+    if (centerMsg) centerMsg.style.display = "none";
+  }
+
+  async function openOverlay(){
+    if (!overlay) return;
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+
+    // fullscreen attempt (best effort)
+    try {
+      if (!document.fullscreenElement) {
+        await overlay.requestFullscreen?.();
+      }
+    } catch (_) {
+      // ignore
+    }
+
+    stage.focus({ preventScroll: true });
+  }
+
+  async function closeOverlay(){
+    running = false;
+    clearStage();
+    if (!overlay) return;
+
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+
+    // exit fullscreen
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+    } catch (_) {}
+
+    // bring back UI
+    setCenterText("Ready?", "Targets erscheinen gleich. Klick so schnell wie möglich.");
   }
 
   function startRun(){
@@ -277,14 +307,16 @@
     runTotal = parseInt(cfgTargets.value, 10) || 15;
     runCount = 0;
     hitTimes = [];
+
     hudProgress.textContent = `0/${runTotal}`;
     hudMode.textContent = mode[0].toUpperCase() + mode.slice(1);
     hudLast.textContent = "Last: —";
+    hudBest.textContent = "Best: —";
+    hudAvg.textContent  = "Avg: —";
 
-    if (centerMsg) centerMsg.style.display = "none";
     if (resultCard) resultCard.style.display = "none";
 
-    stage.focus({ preventScroll: true });
+    hideCenter();
     nextTarget();
   }
 
@@ -293,12 +325,10 @@
     clearStage();
 
     const stats = calcStats(hitTimes);
-
-    // Update HUD
     hudBest.textContent = "Best: " + msToLabel(stats.best);
     hudAvg.textContent  = "Avg: " + msToLabel(stats.avg);
 
-    // Save bests locally
+    // save local bests
     const ls = loadLS();
     const improvedBest = !isFinite(ls.bestMs) || stats.best < ls.bestMs;
     const improvedAvg  = !isFinite(ls.bestAvgMs) || stats.avg < ls.bestAvgMs;
@@ -309,6 +339,8 @@
       bestAvgMs: improvedAvg ? stats.avg : ls.bestAvgMs,
       lastRun: {
         mode,
+        sizeMode,
+        spawnMode,
         total: runTotal,
         times: hitTimes,
         avgMs: stats.avg,
@@ -320,7 +352,7 @@
     };
     saveLS(newLS);
 
-    // Show result card
+    // Results UI (outside overlay card)
     const r = getRating(stats.avg);
     if (resultCard) resultCard.style.display = "grid";
     if (resultRating) resultRating.textContent = `${r.grade} • ${r.label}`;
@@ -339,7 +371,7 @@
       });
     }
 
-    // Persist to account if logged in
+    // account save
     saveToAccountIfLoggedIn({
       bestMs: newLS.bestMs,
       bestAvgMs: newLS.bestAvgMs,
@@ -347,18 +379,15 @@
     });
 
     renderTopStats();
+    setCenterText("Run complete ✅", "Du kannst erneut starten oder Exit drücken.");
   }
 
   function resetStats(){
     if (!confirm("Reflex Stats wirklich resetten?")) return;
     localStorage.removeItem(LS_KEY);
-    hitTimes = [];
-    runCount = 0;
-    running = false;
-    clearStage();
-    if (centerMsg) centerMsg.style.display = "flex";
-    if (resultCard) resultCard.style.display = "none";
     renderTopStats();
+    if (resultCard) resultCard.style.display = "none";
+    alert("Reset done ✅");
   }
 
   function showHow(){
@@ -367,17 +396,18 @@
       "• Reaction: Target spawnt nach Delay — klick ASAP.\n" +
       "• Flick: Targets spawnen sofort — pure Flicks.\n" +
       "• Precision: kleinere Targets — Accuracy & Control.\n\n" +
-      "Cursor ist unsichtbar, du siehst nur das Crosshair."
+      "Start öffnet Fullscreen. Cursor ist nur im Game unsichtbar."
     );
   }
 
-  // Crosshair loop (ultra smooth)
+  // Crosshair loop
   function crosshairLoop(){
     cross.x += (pointer.x - cross.x) * 0.28;
     cross.y += (pointer.y - cross.y) * 0.28;
 
     if (crosshair){
-      crosshair.style.transform = `translate3d(${cross.x}px, ${cross.y}px, 0) translate3d(-50%, -50%, 0)`;
+      crosshair.style.transform =
+        `translate3d(${cross.x}px, ${cross.y}px, 0) translate3d(-50%, -50%, 0)`;
     }
     requestAnimationFrame(crosshairLoop);
   }
@@ -387,46 +417,70 @@
     pointer.y = e.clientY;
   }
 
+  // Seg helpers
+  function setSegActive(list, matchValue){
+    list.forEach(btn => btn.classList.toggle("is-active", btn.dataset.size === matchValue || btn.dataset.spawn === matchValue));
+  }
+
   // Wire config
   cfgTargetsVal.textContent = cfgTargets.value;
   cfgTargets.addEventListener("input", () => {
     cfgTargetsVal.textContent = cfgTargets.value;
-    if (!running) hudProgress.textContent = `0/${cfgTargets.value}`;
   });
 
-  // Mode buttons
+  // Modes
   modeBtns.forEach((b) => {
     b.addEventListener("click", () => {
       if (running) return;
-
       modeBtns.forEach(x => x.classList.remove("is-active"));
       b.classList.add("is-active");
       mode = b.dataset.mode;
-
-      hudMode.textContent = mode[0].toUpperCase() + mode.slice(1);
-
-      // hint changes (optional)
-      if (centerMsg) {
-        centerMsg.style.display = "flex";
-      }
     });
   });
 
-  btnStart.addEventListener("click", () => {
-    if (running) return;
+  // Size segs
+  sizeSegs.forEach((b) => {
+    b.addEventListener("click", () => {
+      if (running) return;
+      sizeMode = b.dataset.size;
+      setSegActive(sizeSegs, sizeMode);
+    });
+  });
+
+  // Spawn segs
+  spawnSegs.forEach((b) => {
+    b.addEventListener("click", () => {
+      if (running) return;
+      spawnMode = b.dataset.spawn;
+      setSegActive(spawnSegs, spawnMode);
+    });
+  });
+
+  // Start: open overlay + run
+  btnStart.addEventListener("click", async () => {
+    await openOverlay();
     startRun();
   });
+
+  btnExit.addEventListener("click", closeOverlay);
 
   btnReset.addEventListener("click", resetStats);
   btnHow.addEventListener("click", showHow);
 
-  // Stage: prevent selection + allow taps
+  // Stage pointer + prevent context menu
   stage.addEventListener("pointermove", onPointerMove, { passive: true });
   window.addEventListener("pointermove", onPointerMove, { passive: true });
-
   stage.addEventListener("contextmenu", (e) => e.preventDefault());
 
-  // Auth UI status updates (when login state changes)
+  // Exit on ESC
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay.classList.contains("show")) {
+      // let browser exit fullscreen then we close overlay
+      setTimeout(closeOverlay, 0);
+    }
+  });
+
+  // Auth save indicator updates
   const auth = authRef;
   if (auth && typeof auth.onAuthStateChanged === "function") {
     auth.onAuthStateChanged(() => updateSaveStatus());
@@ -435,11 +489,7 @@
   // Init
   renderTopStats();
   updateSaveStatus();
-  hudProgress.textContent = `0/${cfgTargets.value}`;
-  hudBest.textContent = "Best: —";
-  hudAvg.textContent = "Avg: —";
-  hudMode.textContent = "Reaction";
 
-  // start crosshair render
+  // Start crosshair loop
   requestAnimationFrame(crosshairLoop);
 })();
