@@ -13,10 +13,6 @@
    <body class="page-transition reflex-page">
 */
 
-.reflex-page{
-  /* Page scope (damit nix global reinballert) */
-}
-
 /* Tokens (nur Lab) */
 .reflex-page{
   --lab-glass: rgba(0,0,0,.58);

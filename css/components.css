@@ -226,3 +226,149 @@
 
 .hint--strong{ opacity: .92; }
 .hint--compact{ margin-top: .2rem; }
+
+/* ======================================
+   NOTIFY SYSTEM — echtlucky (global)
+   Types: info | success | warn | error
+====================================== */
+
+:root{
+  --notify-bg: rgba(0,0,0,0.76);
+  --notify-border: rgba(255,255,255,0.08);
+  --notify-shadow: 0 18px 60px rgba(0,0,0,0.55);
+
+  --notify-info: rgba(88,101,242,0.95);
+  --notify-success: rgba(0,255,136,0.95);
+  --notify-warn: rgba(255,190,60,0.98);
+  --notify-error: rgba(255,51,102,0.98);
+
+  --notify-text: rgba(224,255,224,0.92);
+  --notify-muted: rgba(224,255,224,0.72);
+}
+
+/* Container */
+.notify-stack{
+  position: fixed;
+  top: 74px; /* unter deinem fixed header */
+  right: 18px;
+  z-index: 99999;
+  display: grid;
+  gap: 10px;
+  width: min(420px, calc(100vw - 24px));
+  pointer-events: none;
+}
+
+/* Card */
+.notify{
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid var(--notify-border);
+  background: var(--notify-bg);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--notify-shadow);
+  padding: 12px 12px 12px 14px;
+
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  gap: 12px;
+  align-items: start;
+
+  transform: translateY(-6px);
+  opacity: 0;
+  transition: transform .18s ease, opacity .18s ease;
+}
+
+.notify.is-in{
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.notify.is-out{
+  transform: translateY(-6px);
+  opacity: 0;
+}
+
+/* Left color bar */
+.notify__bar{
+  width: 12px;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--notify-info);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset;
+}
+
+/* Content */
+.notify__title{
+  margin: 0 0 2px;
+  font-weight: 820;
+  letter-spacing: -0.25px;
+  color: var(--notify-text);
+  font-size: 0.98rem;
+}
+.notify__msg{
+  margin: 0;
+  color: var(--notify-muted);
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
+
+/* Close */
+.notify__close{
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  color: rgba(224,255,224,0.88);
+  border-radius: 12px;
+  height: 34px;
+  width: 34px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .14s ease, background .18s ease, border-color .18s ease;
+}
+.notify__close:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(0,255,136,0.16);
+}
+
+/* Progress bar (auto dismiss) */
+.notify__progress{
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+}
+.notify__progress > span{
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(1);
+  background: var(--notify-info);
+}
+
+/* Types */
+.notify[data-type="info"] .notify__bar,
+.notify[data-type="info"] .notify__progress > span{ background: var(--notify-info); }
+
+.notify[data-type="success"] .notify__bar,
+.notify[data-type="success"] .notify__progress > span{ background: var(--notify-success); }
+
+.notify[data-type="warn"] .notify__bar,
+.notify[data-type="warn"] .notify__progress > span{ background: var(--notify-warn); }
+
+.notify[data-type="error"] .notify__bar,
+.notify[data-type="error"] .notify__progress > span{ background: var(--notify-error); }
+
+@media (max-width: 520px){
+  .notify-stack{
+    right: 12px;
+    left: 12px;
+    width: auto;
+    top: 70px;
+  }
+}
