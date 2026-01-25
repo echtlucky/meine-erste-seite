@@ -1,21 +1,74 @@
 /* =========================
-   Ranked Challenge Page
+   ranked.css — Apple-ish Glass + Blur
 ========================= */
 
+/* Page background (blurry + clean) */
+.ranked-page{
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+.ranked-page::before{
+  content:"";
+  position: fixed;
+  inset: -2px;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(0,255,136,0.14), transparent 55%),
+    radial-gradient(circle at 82% 72%, rgba(88,101,242,0.14), transparent 60%),
+    linear-gradient(rgba(0,0,0,0.78), rgba(0,0,0,0.90)),
+    url("https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2400")
+      center/cover no-repeat fixed;
+  filter: blur(2px);
+  transform: scale(1.03);
+}
+
+.ranked-page::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px),
+    radial-gradient(circle at 40% 25%, rgba(255,255,255,0.06), transparent 55%),
+    radial-gradient(circle at 70% 75%, rgba(255,255,255,0.04), transparent 60%);
+  background-size: 84px 84px, 84px 84px, cover, cover;
+  opacity: 0.65;
+  mix-blend-mode: screen;
+}
+
+/* Layout */
 .ranked-wrap{
   width: min(1100px, 92%);
   margin: 0 auto;
   padding: clamp(1.8rem, 3vw, 2.6rem) 0;
   display: grid;
-  gap: 1.4rem;
+  gap: 1.25rem;
 }
 
+/* Apple-ish glass tokens */
+:root{
+  --glass-bg: rgba(18, 18, 20, 0.42);
+  --glass-bg-2: rgba(10, 10, 12, 0.50);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-border-strong: rgba(255,255,255,0.18);
+  --glass-shadow: 0 26px 90px rgba(0,0,0,0.45);
+  --glass-blur: blur(18px);
+}
+
+/* Hero */
 .ranked-hero{
-  border-radius: 22px;
-  border: 1px solid rgba(0,255,136,0.14);
-  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.74));
-  box-shadow: 0 26px 90px rgba(0,0,0,0.45);
-  padding: 1.4rem 1.4rem;
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(135deg, var(--glass-bg), var(--glass-bg-2));
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur) saturate(150%);
+  -webkit-backdrop-filter: var(--glass-blur) saturate(150%);
+  padding: 1.35rem 1.35rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -28,58 +81,65 @@
   gap: .6rem;
   padding: .55rem .95rem;
   border-radius: 999px;
-  border: 1px solid rgba(0,255,136,0.18);
-  background: rgba(0,0,0,0.35);
-  color: rgba(224,255,224,0.88);
-  font-weight: 820;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.20);
+  color: rgba(255,255,255,0.86);
+  font-weight: 800;
   width: fit-content;
-  margin-bottom: .9rem;
+  margin-bottom: .85rem;
 }
 
 .ranked-title{
   margin: 0 0 .35rem;
-  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
-  letter-spacing: -0.6px;
+  font-size: clamp(1.65rem, 2.7vw, 2.25rem);
+  letter-spacing: -0.7px;
+  color: rgba(255,255,255,0.95);
 }
 
 .ranked-sub{
   margin: 0;
-  opacity: .85;
+  color: rgba(255,255,255,0.78);
   line-height: 1.6;
 }
 
+/* Stats */
 .ranked-stats{
   display: grid;
   grid-auto-flow: column;
-  gap: .9rem;
+  gap: .85rem;
 }
 
 .stat{
-  min-width: 110px;
+  min-width: 112px;
   padding: .9rem 1rem;
   border-radius: 18px;
-  border: 1px solid rgba(0,255,136,0.12);
-  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.22);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
 }
 
 .stat-label{
   font-size: .85rem;
-  opacity: .8;
+  color: rgba(255,255,255,0.70);
   margin-bottom: .25rem;
 }
 
 .stat-value{
   font-size: 1.35rem;
   font-weight: 850;
-  color: rgba(0,255,136,0.95);
+  color: rgba(255,255,255,0.95);
 }
 
+/* Card */
 .ranked-card{
-  border-radius: 22px;
-  border: 1px solid rgba(0,255,136,0.14);
-  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.74));
-  box-shadow: 0 26px 90px rgba(0,0,0,0.45);
-  padding: 1.3rem;
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(135deg, var(--glass-bg), var(--glass-bg-2));
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur) saturate(150%);
+  -webkit-backdrop-filter: var(--glass-blur) saturate(150%);
+  padding: 1.25rem;
   display: grid;
   gap: 1rem;
 }
@@ -94,31 +154,27 @@
 .ranked-card__title{
   margin: 0;
   font-size: 1.25rem;
+  color: rgba(255,255,255,0.92);
 }
 
 .ranked-card__hint{
   margin: .3rem 0 0;
-  opacity: .8;
+  color: rgba(255,255,255,0.70);
 }
 
-.ranked-actions{
-  display:flex;
-  gap: .6rem;
-  flex-wrap: wrap;
-}
-
+/* Progress */
 .ranked-progress{
   height: 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.08);
   overflow: hidden;
-  border: 1px solid rgba(0,255,136,0.12);
+  border: 1px solid rgba(255,255,255,0.14);
 }
 
 .ranked-progress__bar{
   height: 100%;
   width: 0%;
-  background: rgba(0,255,136,0.85);
+  background: rgba(255,255,255,0.92);
   border-radius: 999px;
   transition: width .25s ease;
 }
@@ -126,10 +182,11 @@
 .ranked-progress__meta{
   display:flex;
   justify-content: space-between;
-  opacity: .85;
+  color: rgba(255,255,255,0.75);
   font-size: .92rem;
 }
 
+/* Tasks */
 .ranked-list{
   display:grid;
   gap: .85rem;
@@ -141,18 +198,21 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1rem;
-  border-radius: 18px;
-  border: 1px solid rgba(0,255,136,0.12);
-  background: rgba(0,0,0,0.38);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.22);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
 }
 
 .ranked-task__title{
   font-weight: 850;
   margin-bottom: .25rem;
+  color: rgba(255,255,255,0.92);
 }
 
 .ranked-task__desc{
-  opacity: .85;
+  color: rgba(255,255,255,0.72);
   line-height: 1.55;
 }
 
@@ -165,23 +225,24 @@
 
 .ranked-task__xp{
   font-size: .9rem;
-  opacity: .8;
+  color: rgba(255,255,255,0.70);
 }
 
+/* Footer */
 .ranked-footer{
   display:flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
   padding-top: .4rem;
-  border-top: 1px solid rgba(0,255,136,0.10);
+  border-top: 1px solid rgba(255,255,255,0.10);
 }
 
 .ranked-footer__left{
   display:flex;
   align-items: center;
   gap: .6rem;
-  opacity: .75;
+  color: rgba(255,255,255,0.70);
   font-size: .9rem;
 }
 
@@ -189,9 +250,10 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: rgba(0,255,136,0.9);
+  background: rgba(255,255,255,0.85);
 }
 
+/* Responsive */
 @media (max-width: 900px){
   .ranked-hero{
     flex-direction: column;
