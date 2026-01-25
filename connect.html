@@ -137,6 +137,8 @@
         document.getElementById('header-placeholder').innerHTML = html;
         if (typeof initHeaderScripts === "function") initHeaderScripts();
         if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+        // Trigger auth-state.js to apply header UI
+        window.dispatchEvent(new CustomEvent('echtlucky:header-ready'));
       });
 
     // Footer laden
