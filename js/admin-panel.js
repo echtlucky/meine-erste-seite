@@ -1,6 +1,8 @@
 /* ======================================
-   Admin Panel Logic — echtlucky (final)
+   Admin Panel Logic — echtlucky (FINAL ✅)
    File: js/admin-panel.js
+   - KEIN role-write im Client (Security!)
+   - nur read role + enforce access
 ====================================== */
 (() => {
   "use strict";
@@ -86,38 +88,28 @@
   }
 
   // =========================
-  // FIX: Role bootstrap
+  // Auth / Role helpers
   // =========================
-  async function ensureUserDocAndRole(user) {
+  async function ensureUserDocExists(user) {
     if (!user?.uid) return;
-
     const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
 
-    const baseUpdate = {
+    const base = {
       email: user.email || "",
       username: user.displayName || "",
       lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
 
     if (!snap.exists) {
+      // role NICHT hier "hochziehen" – nur baseline anlegen
       await ref.set({
-        ...baseUpdate,
-        role: (user.email === ADMIN_EMAIL ? "admin" : "user"),
+        ...base,
+        role: "user",
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
-      return;
-    }
-
-    // existiert: update basics
-    await ref.update(baseUpdate);
-
-    // 🔥 WICHTIG: Wenn du Admin-Mail bist, erzwinge role=admin (nur bei dir!)
-    if (user.email === ADMIN_EMAIL) {
-      const currentRole = snap.data()?.role || "user";
-      if (currentRole !== "admin") {
-        await ref.update({ role: "admin" });
-      }
+    } else {
+      await ref.update(base);
     }
   }
 
@@ -128,10 +120,10 @@
   }
 
   async function canModerate(user) {
-    if (!user) return false;
-    if (user.email === ADMIN_EMAIL) return true; // fallback
-    const role = await getRole(user);
-    return role === "admin" || role === "mod";
+    // fallback: Admin-Mail darf rein, auch wenn role doc kaputt ist
+    if (user?.email === ADMIN_EMAIL) return true;
+    const r = await getRole(user);
+    return r === "admin" || r === "mod" || r === "moderator";
   }
 
   // =========================
@@ -421,7 +413,7 @@
     } catch (err) {
       setStatus(`Fehler beim Laden der Sperren: ${err.message}`, "error");
       if (String(err.message || "").toLowerCase().includes("permission")) {
-        setStatus("Permissions-Fehler: Prüfe users/{deinUID}.role = 'admin' oder 'mod' (Rules brauchen das).", "error");
+        setStatus("Permissions-Fehler: users/{uid}.role muss 'admin' oder 'mod' sein (Rules).", "error");
       }
     }
   }
@@ -463,16 +455,15 @@
   if (publishBtn) publishBtn.addEventListener("click", saveOrUpdatePost);
   if (banAddBtn) banAddBtn.addEventListener("click", addBan);
 
-  // =========================
   // Auth Guard + Init
-  // =========================
   authRef.onAuthStateChanged(async (user) => {
     if (!user) {
       window.location.href = "login.html";
       return;
     }
 
-    await ensureUserDocAndRole(user);
+    // nur sicherstellen, dass users-doc existiert (ohne role push)
+    await ensureUserDocExists(user);
 
     const ok = await canModerate(user);
     if (!ok) {
