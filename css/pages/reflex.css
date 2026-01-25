@@ -1,16 +1,31 @@
 /* =========================
-   Reflex Lab — Premium UI (Apple clean x echtlucky)
+   Reflex Lab — Premium UI (Apple clean x echtlucky) — v2
    File: css/pages/reflex-lab.css
+   Fixes:
+   - sauberes Grid (links: Settings, rechts: Stats)
+   - keine "weißen" UI-Fragmente
+   - Slider + Segmented im Website-Style
+   - besseres Spacing + klare Hierarchie
 ========================= */
 
-:root{
-  --lab-glass: rgba(0,0,0,.56);
+/* WICHTIG:
+   Bitte im reflex.html Body diese Klasse setzen:
+   <body class="page-transition reflex-page">
+*/
+
+.reflex-page{
+  /* Page scope (damit nix global reinballert) */
+}
+
+/* Tokens (nur Lab) */
+.reflex-page{
+  --lab-glass: rgba(0,0,0,.58);
   --lab-glass-2: rgba(255,255,255,.05);
-  --lab-border: rgba(0,255,136,.14);
-  --lab-border-2: rgba(0,255,136,.10);
+  --lab-border: rgba(0,255,136,.18);
+  --lab-border-soft: rgba(0,255,136,.12);
 
   --lab-shadow: 0 26px 90px rgba(0,0,0,.55);
-  --lab-shadow-soft: 0 16px 50px rgba(0,0,0,.42);
+  --lab-shadow-soft: 0 16px 52px rgba(0,0,0,.45);
 
   --lab-radius-xl: 26px;
   --lab-radius-lg: 18px;
@@ -20,28 +35,29 @@
   --lab-muted: rgba(224,255,224,.72);
 }
 
+/* Wrapper */
 .reflex-wrap{
-  width:min(1100px, 92%);
-  margin:0 auto;
+  width: min(1100px, 92%);
+  margin: 0 auto;
   padding: clamp(1.6rem, 3vw, 2.4rem) 0;
-  display:grid;
+  display: grid;
   gap: 1.2rem;
 }
 
-/* ===== Hero */
+/* ===== HERO (dein oberes Card-Ding bleibt ähnlich, nur cleaner) */
 .reflex-hero{
   border-radius: var(--lab-radius-xl);
-  border: 1px solid var(--lab-border-2);
-  background: linear-gradient(135deg, rgba(255,255,255,.04), rgba(0,0,0,.72));
+  border: 1px solid var(--lab-border-soft);
+  background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(0,0,0,.74));
   box-shadow: var(--lab-shadow);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(18px);
   padding: 1.25rem 1.25rem;
   display:flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   position: relative;
-  overflow:hidden;
+  overflow: hidden;
 }
 
 .reflex-hero::before{
@@ -63,8 +79,8 @@
   gap:.6rem;
   padding:.55rem .95rem;
   border-radius:999px;
-  border:1px solid rgba(0,255,136,.16);
-  background: rgba(0,0,0,.40);
+  border: 1px solid rgba(0,255,136,.18);
+  background: rgba(0,0,0,.42);
   color: var(--lab-text);
   font-weight: 820;
   width:fit-content;
@@ -81,6 +97,7 @@
   margin:0;
   color: var(--lab-muted);
   line-height: 1.6;
+  max-width: 62ch;
 }
 
 .reflex-heroActions{
@@ -90,23 +107,25 @@
   justify-content:flex-end;
 }
 
-/* ===== Main Cards */
+/* ===== MAIN GRID */
 .lab-grid{
   display:grid;
-  grid-template-columns: 1.2fr .8fr;
+  grid-template-columns: 1.15fr .85fr;
   gap: 1.2rem;
+  align-items: start;
 }
 
 @media (max-width: 980px){
   .lab-grid{ grid-template-columns: 1fr; }
 }
 
+/* ===== CARD */
 .lab-card{
   border-radius: var(--lab-radius-xl);
-  border: 1px solid var(--lab-border-2);
-  background: linear-gradient(135deg, rgba(255,255,255,.04), rgba(0,0,0,.72));
+  border: 1px solid var(--lab-border-soft);
+  background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(0,0,0,.74));
   box-shadow: var(--lab-shadow);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(18px);
   padding: 1.15rem;
   position:relative;
   overflow:hidden;
@@ -129,7 +148,7 @@
   align-items:flex-start;
   justify-content:space-between;
   gap: 1rem;
-  margin-bottom: .9rem;
+  margin-bottom: .95rem;
 }
 
 .lab-head h2{
@@ -137,17 +156,45 @@
   font-size: 1.2rem;
   letter-spacing:-.35px;
 }
+
 .lab-hint{
   margin:.25rem 0 0;
   color: var(--lab-muted);
   font-size:.95rem;
 }
 
+/* ===== "Top mini menu" (für Start/Mode/Save etc. sauber, statt random Text) */
+.lab-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: .8rem;
+  padding: .85rem .9rem;
+  border-radius: var(--lab-radius-lg);
+  border: 1px solid rgba(0,255,136,.12);
+  background: rgba(0,0,0,.42);
+  box-shadow: var(--lab-shadow-soft);
+  margin-bottom: .9rem;
+}
+
+.lab-topbar__left{
+  display:flex;
+  gap: .45rem;
+  flex-wrap: wrap;
+  align-items:center;
+}
+
+.lab-topbar__right{
+  display:flex;
+  gap: .45rem;
+  flex-wrap: wrap;
+  align-items:center;
+}
+
 /* ===== Controls */
 .lab-controls{
   display:grid;
   gap: .85rem;
-  margin-top: .9rem;
 }
 
 .control{
@@ -189,7 +236,7 @@
   gap:.45rem;
   padding: .42rem .7rem;
   border-radius: 999px;
-  border: 1px solid rgba(0,255,136,.16);
+  border: 1px solid rgba(0,255,136,.18);
   background: rgba(0,0,0,.45);
   color: rgba(224,255,224,.90);
   font-weight: 780;
@@ -204,7 +251,7 @@
   display:inline-block;
 }
 
-/* ===== Range Slider (Targets / Size / Spawn etc.) */
+/* ===== Range Slider (clean + consistent) */
 .range{
   -webkit-appearance:none;
   appearance:none;
@@ -214,12 +261,21 @@
   outline:none;
   cursor:pointer;
 
-  background:
-    linear-gradient(90deg,
-      rgba(0,255,136,.85) 0%,
-      rgba(0,255,136,.20) 0%); /* JS sets stop */
+  background: rgba(255,255,255,.06);
   border: 1px solid rgba(0,255,136,.12);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+}
+
+/* Optional: wenn du per JS die Fill-Farbe setzt, nutz CSS var:
+   element.style.setProperty('--fill', '50%')
+*/
+.range{
+  background:
+    linear-gradient(90deg,
+      rgba(0,255,136,.90) 0%,
+      rgba(0,255,136,.90) var(--fill, 0%),
+      rgba(255,255,255,.07) var(--fill, 0%),
+      rgba(255,255,255,.07) 100%);
 }
 
 .range::-webkit-slider-thumb{
@@ -234,9 +290,7 @@
   transition: transform .12s ease;
 }
 
-.range:active::-webkit-slider-thumb{
-  transform: scale(1.08);
-}
+.range:active::-webkit-slider-thumb{ transform: scale(1.10); }
 
 .range::-moz-range-thumb{
   width: 22px;
@@ -254,7 +308,7 @@
   border: 1px solid rgba(0,255,136,.12);
 }
 
-/* ===== Segmented buttons (Game mode / Difficulty style) */
+/* ===== Segmented buttons */
 .segmented{
   display:flex;
   gap:.45rem;
@@ -285,10 +339,10 @@
   box-shadow: 0 0 0 1px rgba(0,255,136,.10) inset;
 }
 
-/* ===== Targets list / Score */
+/* ===== Stats column */
 .lab-stats{
   display:grid;
-  gap:.75rem;
+  gap:.85rem;
 }
 
 .stat-tile{
@@ -313,15 +367,47 @@
 }
 
 .mini-note{
-  margin-top:.5rem;
+  margin-top:.45rem;
   color: rgba(224,255,224,.70);
   font-size:.92rem;
   line-height: 1.55;
 }
 
-/* ===== Small responsive tweaks */
+/* ===== Actions row (unten) */
+.lab-actions{
+  display:flex;
+  gap:.6rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items:center;
+  padding-top: .95rem;
+  margin-top: .95rem;
+  border-top: 1px solid rgba(0,255,136,.10);
+}
+
+/* ===== Cursor IMPORTANT
+   Du willst: Cursor sichtbar im Menü,
+   Crosshair + "hide cursor" NUR im Game Overlay/Fullscreen.
+   => Hier NICHT global cursor:none setzen.
+*/
+.reflex-page, .reflex-page *{
+  cursor: auto;
+}
+
+/* Wenn dein Spiel-Overlay z.B. #gameOverlay oder .reflex-game ist:
+   (Passe die Selector-Namen an deine echte Struktur an)
+*/
+.reflex-game.is-playing{
+  cursor: none !important;
+}
+.reflex-game.is-playing *{
+  cursor: none !important;
+}
+
+/* ===== Mobile */
 @media (max-width: 720px){
   .reflex-hero{ padding: 1.05rem; }
   .lab-card{ padding: 1rem; }
   .control{ padding: .85rem; }
+  .lab-topbar{ padding: .75rem .75rem; }
 }
