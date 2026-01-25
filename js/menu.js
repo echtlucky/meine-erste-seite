@@ -83,47 +83,55 @@
     });
   }
 
-  /* =========================
-     Header Auth UI
-  ========================= */
-  window.renderAuthUI = function renderAuthUI(user) {
-    const userNameDisplay = qs("user-name-display");
-    const dropdownMenu = qs("dropdown-menu");
-    const loginLink = qs("login-link");
-    const adminPanelLink = qs("admin-panel-link");
+/* =========================
+   Header Auth UI (UPDATED)
+========================= */
+window.renderAuthUI = function renderAuthUI(user) {
+  const userNameDisplay = qs("user-name-display");
+  const dropdownMenu = qs("dropdown-menu");
+  const loginLink = qs("login-link");
+  const adminPanelLink = qs("admin-panel-link");
 
-    // header may not exist yet
-    if (!loginLink && !userNameDisplay && !adminPanelLink) {
-      updateAccountCTAs(user);
-      return;
+  // Header noch nicht geladen? -> raus
+  if (!loginLink && !userNameDisplay && !adminPanelLink) return;
+
+  if (user) {
+    // Login-Link verstecken
+    if (loginLink) loginLink.style.display = "none";
+
+    // Username-Button zeigen + nur Text im Child setzen
+    if (userNameDisplay) {
+      const nameText = userNameDisplay.querySelector(".user-name-text");
+      const label =
+        user.displayName ||
+        (user.email ? user.email.split("@")[0] : "User");
+
+      if (nameText) nameText.textContent = label;
+      userNameDisplay.style.display = "inline-flex";
+
+      // A11y state reset (Dropdown zu beim Render)
+      userNameDisplay.setAttribute("aria-expanded", "false");
     }
 
-    if (user) {
-      // hide "Anmelden"
-      if (loginLink) loginLink.style.display = "none";
+    // Admin Link (email fallback)
+    const ADMIN_EMAIL = "lucassteckel04@gmail.com";
+    if (adminPanelLink) {
+      adminPanelLink.style.display =
+        user.email && user.email === ADMIN_EMAIL ? "block" : "none";
+    }
+  } else {
+    // Logout state
+    if (loginLink) loginLink.style.display = "inline-flex";
 
-      // show user
-      if (userNameDisplay) {
-        userNameDisplay.textContent = getUserLabel(user);
-        userNameDisplay.style.display = "inline-flex";
-      }
-
-      // Admin link (email fallback)
-      const ADMIN_EMAIL = "lucassteckel04@gmail.com";
-      if (adminPanelLink) {
-        adminPanelLink.style.display =
-          user.email && user.email === ADMIN_EMAIL ? "block" : "none";
-      }
-    } else {
-      if (loginLink) loginLink.style.display = "inline-flex";
-      if (userNameDisplay) userNameDisplay.style.display = "none";
-      if (dropdownMenu) dropdownMenu.classList.remove("show");
-      if (adminPanelLink) adminPanelLink.style.display = "none";
+    if (userNameDisplay) {
+      userNameDisplay.style.display = "none";
+      userNameDisplay.setAttribute("aria-expanded", "false");
     }
 
-    // also update CTA buttons on page
-    updateAccountCTAs(user);
+    if (dropdownMenu) dropdownMenu.classList.remove("show");
+    if (adminPanelLink) adminPanelLink.style.display = "none";
   }
+};
 
   /* =========================
      Wiring: Mobile menu + Dropdown
