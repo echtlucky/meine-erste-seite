@@ -1,38 +1,51 @@
 /* =========================
-   HOME • Airy Apple Premium
-   Goals:
-   - Hero card bigger
-   - badge perfectly centered (top & overall)
-   - smoother “fade” into dark while scrolling
+   HOME • Airy Apple Premium (v2)
+   Fixes:
+   - safer overlay layering (no conflict with style.css body::after)
+   - center stays stable
+   - smoother fade without breaking footer / header click
 ========================= */
 
-/* --------- Background fade smoothing (page-only overlay) ---------
-   We keep style.css background, but add a very soft long gradient layer
-   so the transition to darker areas is invisible when scrolling.
-*/
+/* Page token */
 body.home-page{
   position: relative;
 }
 
-/* smooth fade overlay */
-body.home-page::after{
+/* --------- Background fade smoothing (page-only overlay) ---------
+   IMPORTANT:
+   style.css already uses body::before + body::after.
+   So we DO NOT touch ::after here.
+   We add an extra overlay via ::before on home-page,
+   but we keep pointer-events none so it never blocks clicks.
+*/
+body.home-page::before{
   content:"";
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: -1;
+
+  /* Put it ABOVE global background layers (-2/-1) but BELOW content (0+) */
+  z-index: 0;
 
   /* Long, soft fade (no harsh step) */
   background:
-    radial-gradient(circle at 50% 10%, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.12) 45%, rgba(0,0,0,0.40) 85%),
+    radial-gradient(circle at 50% 10%, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.10) 45%, rgba(0,0,0,0.38) 85%),
     linear-gradient(to bottom,
-      rgba(0,0,0,0.05) 0%,
-      rgba(0,0,0,0.12) 22%,
-      rgba(0,0,0,0.22) 45%,
-      rgba(0,0,0,0.40) 75%,
-      rgba(0,0,0,0.56) 100%
+      rgba(0,0,0,0.04) 0%,
+      rgba(0,0,0,0.10) 22%,
+      rgba(0,0,0,0.20) 45%,
+      rgba(0,0,0,0.38) 75%,
+      rgba(0,0,0,0.54) 100%
     );
   opacity: 1;
+}
+
+/* Ensure main content is above home overlay */
+body.home-page main,
+body.home-page header,
+body.home-page footer{
+  position: relative;
+  z-index: 1;
 }
 
 /* Extra top breathing room after fixed header */
@@ -51,16 +64,14 @@ body.home-page main.container > section{
 }
 
 /* ======================================
-   HERO (first “container” bigger + centered)
+   HERO (bigger + centered)
 ====================================== */
 body.home-page .hero{
-  /* reset older hero backgrounds */
   background: none !important;
   border-bottom: none !important;
   min-height: unset !important;
   height: auto !important;
 
-  /* BIGGER card */
   width: min(1120px, calc(100% - 2rem));
   margin: clamp(1.6rem, 3.6vw, 2.6rem) auto clamp(1.8rem, 3.8vw, 2.8rem) auto !important;
 
@@ -88,7 +99,7 @@ body.home-page .hero::before{
     linear-gradient(135deg, rgba(255,255,255,0.06), rgba(0,0,0,0.76));
 }
 
-/* Subtle grid/glow (clean, not noisy) */
+/* Subtle grid/glow */
 body.home-page .hero::after{
   content:"";
   position:absolute;
@@ -104,21 +115,21 @@ body.home-page .hero::after{
   mix-blend-mode: screen;
 }
 
-/* Hero content = TRUE centered column */
+/* Hero content centered */
 body.home-page .hero-inner{
   position: relative;
   z-index: 2;
 
   display: flex;
   flex-direction: column;
-  align-items: center;   /* left/right centered */
+  align-items: center;
   justify-content: center;
   gap: 1.1rem;
 
   width: 100%;
 }
 
-/* Badge = perfectly centered and sits nicely at the top area */
+/* Badge centered */
 body.home-page .hero-badge{
   display: inline-flex;
   align-items: center;
@@ -136,7 +147,6 @@ body.home-page .hero-badge{
   letter-spacing: -0.2px;
   line-height: 1;
 
-  /* makes it feel “locked” in the center */
   transform: translateZ(0);
 }
 
@@ -164,7 +174,7 @@ body.home-page .hero .tagline{
   opacity: .96;
 }
 
-/* Buttons centered + slightly more Apple (less bulky) */
+/* Buttons */
 body.home-page .btn-group{
   width: 100%;
   display: flex;
@@ -181,7 +191,7 @@ body.home-page .discord-btn{
   padding: 1.02rem 1.45rem !important;
 }
 
-/* Pills centered */
+/* Pills */
 body.home-page .hero-stats{
   display: flex;
   justify-content: center;
@@ -204,7 +214,7 @@ body.home-page .stat-pill{
 }
 
 /* ======================================
-   SECTIONS — a bit wider to match bigger hero
+   SECTIONS wider to match hero
 ====================================== */
 body.home-page .community-teaser,
 body.home-page .bio,
@@ -252,7 +262,7 @@ body.home-page .twitch-section > *{
   z-index: 1;
 }
 
-/* Section head centered */
+/* Section head */
 body.home-page .section-head{
   display: flex;
   flex-direction: column;
@@ -260,12 +270,9 @@ body.home-page .section-head{
   gap: .38rem;
   margin-bottom: 1.15rem;
 }
+body.home-page .section-head p{ max-width: 72ch; }
 
-body.home-page .section-head p{
-  max-width: 72ch;
-}
-
-/* Features grid airy */
+/* Features grid */
 body.home-page .features{
   width: 100%;
   display: grid;
@@ -283,14 +290,13 @@ body.home-page .feature{
   text-align: left;
 }
 
-/* Actions centered */
+/* Actions */
 body.home-page .section-actions{
   display:flex;
   justify-content:center;
   margin-top: 1.25rem;
 }
 
-/* Link row centered */
 body.home-page .link-row{
   display:flex;
   justify-content:center;
@@ -299,7 +305,6 @@ body.home-page .link-row{
   margin-top: 1.25rem;
 }
 
-/* Prose more readable */
 body.home-page .prose{
   width: 100%;
   max-width: 80ch;
