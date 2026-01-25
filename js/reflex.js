@@ -1,90 +1,92 @@
 /* =========================
-   Reflex Lab — echtlucky (v2)
+   Reflex Lab — echtlucky (v3 CLEAN)
    FIX:
-   - Cursor sichtbar im UI
-   - Cursor hidden only in overlay
-   - Start -> fullscreen overlay
-   UI:
-   - segmented controls for size/spawn
+   - No duplicate UI logic
+   - Overlay stable + fullscreen best effort
+   - Cursor visible in UI, hidden only in overlay (is-playing)
+   - Crosshair STIFF (instant)
+   - Cleaner start/exit lifecycle
 ========================= */
 
 (() => {
   "use strict";
 
-  const LS_KEY = "echtlucky_reflex_v2";
+  const LS_KEY = "echtlucky_reflex_v3";
 
   // Firebase optional
   const authRef = window.echtlucky?.auth || window.auth || null;
   const dbRef   = window.echtlucky?.db   || window.db   || null;
 
-  // UI DOM
-  const bestValue = document.getElementById("bestValue");
-  const avgValue = document.getElementById("avgValue");
+  // ===== DOM (top stats)
+  const bestValue   = document.getElementById("bestValue");
+  const avgValue    = document.getElementById("avgValue");
   const ratingValue = document.getElementById("ratingValue");
 
+  // Controls
   const btnStart = document.getElementById("btnStart");
   const btnReset = document.getElementById("btnReset");
-  const btnHow = document.getElementById("btnHow");
+  const btnHow   = document.getElementById("btnHow");
 
-  const cfgTargets = document.getElementById("cfgTargets");
+  const cfgTargets    = document.getElementById("cfgTargets");
   const cfgTargetsVal = document.getElementById("cfgTargetsVal");
-  const saveStatus = document.getElementById("saveStatus");
+  const saveStatus    = document.getElementById("saveStatus");
 
-  const modeBtns = Array.from(document.querySelectorAll(".mode"));
-  const sizeSegs = Array.from(document.querySelectorAll(".seg[data-size]"));
+  const modeBtns  = Array.from(document.querySelectorAll(".mode"));
+  const sizeSegs  = Array.from(document.querySelectorAll(".seg[data-size]"));
   const spawnSegs = Array.from(document.querySelectorAll(".seg[data-spawn]"));
 
-  // Overlay DOM
-  const overlay = document.getElementById("gameOverlay");
-  const stage = document.getElementById("stage");
+  // Overlay
+  const overlay   = document.getElementById("gameOverlay");
+  const stage     = document.getElementById("stage");
   const crosshair = document.getElementById("crosshair");
   const centerMsg = document.getElementById("centerMsg");
-  const btnExit = document.getElementById("btnExit");
+  const btnExit   = document.getElementById("btnExit");
 
-  const hudMode = document.getElementById("hudMode");
+  // HUD
+  const hudMode     = document.getElementById("hudMode");
   const hudProgress = document.getElementById("hudProgress");
-  const hudLast = document.getElementById("hudLast");
-  const hudBest = document.getElementById("hudBest");
-  const hudAvg = document.getElementById("hudAvg");
+  const hudLast     = document.getElementById("hudLast");
+  const hudBest     = document.getElementById("hudBest");
+  const hudAvg      = document.getElementById("hudAvg");
 
   // Results
-  const resultCard = document.getElementById("resultCard");
+  const resultCard   = document.getElementById("resultCard");
   const resultRating = document.getElementById("resultRating");
-  const resAvg = document.getElementById("resAvg");
-  const resBest = document.getElementById("resBest");
-  const resCons = document.getElementById("resCons");
-  const resScore = document.getElementById("resScore");
-  const hitChips = document.getElementById("hitChips");
+  const resAvg       = document.getElementById("resAvg");
+  const resBest      = document.getElementById("resBest");
+  const resCons      = document.getElementById("resCons");
+  const resScore     = document.getElementById("resScore");
+  const hitChips     = document.getElementById("hitChips");
 
-  // Crosshair dot
-  if (crosshair && !crosshair.querySelector(".dot")) {
-    const d = document.createElement("div");
-    d.className = "dot";
-    crosshair.appendChild(d);
+  // Guard
+  if (!btnStart || !overlay || !stage) {
+    console.error("Reflex Lab: required DOM missing.");
+    return;
   }
 
-  // Game state
-  let mode = "reaction";
-  let sizeMode = "mixed"; // mixed|large|medium|small
-  let spawnMode = "safe"; // safe|full
+  // ===== State
+  let mode = "reaction";     // reaction | flick | precision
+  let sizeMode = "mixed";    // mixed | large | medium | small
+  let spawnMode = "safe";    // safe | full
 
   let running = false;
   let runTotal = 15;
   let runCount = 0;
   let hitTimes = [];
-  let currentSpawnAt = 0;
+  let spawnAt = 0;
+
   let lastPos = { x: 0.5, y: 0.5 };
 
-  // Crosshair tracking
-  let pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-  let cross = { x: pointer.x, y: pointer.y };
+  // pointer (used for crosshair position)
+  const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
+  // ===== Helpers
   function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
   function nowMs(){ return performance.now(); }
 
   function msToLabel(ms){
     if (!isFinite(ms)) return "—";
-    if (ms >= 1000) return (ms/1000).toFixed(2) + "s";
+    if (ms >= 1000) return (ms / 1000).toFixed(2) + "s";
     return Math.round(ms) + "ms";
   }
 
@@ -97,37 +99,38 @@
     localStorage.setItem(LS_KEY, JSON.stringify(data));
   }
 
-  function getRating(avgMs){
-    if (!isFinite(avgMs)) return { label:"—", grade:"—" };
-    if (avgMs <= 220) return { label:"Godlike", grade:"S+" };
-    if (avgMs <= 280) return { label:"Cracked", grade:"S" };
-    if (avgMs <= 340) return { label:"Insane", grade:"A" };
-    if (avgMs <= 420) return { label:"Solid", grade:"B" };
-    if (avgMs <= 520) return { label:"Okay", grade:"C" };
-    return { label:"Warmup needed", grade:"D" };
+  function ratingFromAvg(avgMs){
+    if (!isFinite(avgMs)) return { grade:"—", label:"—" };
+    if (avgMs <= 220) return { grade:"S+", label:"Godlike" };
+    if (avgMs <= 280) return { grade:"S",  label:"Cracked" };
+    if (avgMs <= 340) return { grade:"A",  label:"Insane" };
+    if (avgMs <= 420) return { grade:"B",  label:"Solid" };
+    if (avgMs <= 520) return { grade:"C",  label:"Okay" };
+    return { grade:"D", label:"Warmup needed" };
   }
 
   function calcStats(times){
     if (!times.length) return { avg: NaN, best: NaN, std: NaN, score: 0 };
+
     const avg = times.reduce((a,b)=>a+b,0) / times.length;
     const best = Math.min(...times);
-    const varr = times.reduce((s,t)=> s + Math.pow(t-avg,2), 0) / times.length;
-    const std = Math.sqrt(varr);
+
+    const variance = times.reduce((s,t)=> s + Math.pow(t-avg,2), 0) / times.length;
+    const std = Math.sqrt(variance);
 
     const speed = clamp(1000 - avg, 0, 1000);
     const cons  = clamp(600 - std, 0, 600);
-    const sizeBonus = (mode === "precision") ? 180 : (mode === "flick") ? 120 : 80;
-    const score = Math.round(speed + cons + sizeBonus + times.length * 12);
+    const bonus = (mode === "precision") ? 180 : (mode === "flick") ? 120 : 80;
+    const score = Math.round(speed + cons + bonus + times.length * 12);
 
     return { avg, best, std, score };
   }
 
   function renderTopStats(){
     const ls = loadLS();
-    bestValue.textContent = isFinite(ls?.bestMs) ? msToLabel(ls.bestMs) : "—";
-    avgValue.textContent  = isFinite(ls?.bestAvgMs) ? msToLabel(ls.bestAvgMs) : "—";
-    const r = getRating(ls?.bestAvgMs);
-    ratingValue.textContent = r.grade;
+    bestValue.textContent = isFinite(ls.bestMs) ? msToLabel(ls.bestMs) : "—";
+    avgValue.textContent  = isFinite(ls.bestAvgMs) ? msToLabel(ls.bestAvgMs) : "—";
+    ratingValue.textContent = ratingFromAvg(ls.bestAvgMs).grade;
   }
 
   function updateSaveStatus(){
@@ -143,7 +146,7 @@
 
   async function saveToAccountIfLoggedIn(payload){
     const user = window.__ECHTLUCKY_CURRENT_USER__ || null;
-    if (!user || !dbRef) return;
+    if (!user || !dbRef || typeof firebase === "undefined") return;
 
     try {
       await dbRef.collection("users").doc(user.uid).set({
@@ -155,8 +158,20 @@
     }
   }
 
+  // ===== UI: Slider fill
+  function paintTargetsRange(){
+    if (!cfgTargets) return;
+    const min = Number(cfgTargets.min || 0);
+    const max = Number(cfgTargets.max || 100);
+    const val = Number(cfgTargets.value || 0);
+    const pct = ((val - min) / (max - min)) * 100;
+    cfgTargets.style.setProperty("--fill", `${pct}%`);
+    if (cfgTargetsVal) cfgTargetsVal.textContent = String(val);
+  }
+
+  // ===== Game mechanics
   function clearStage(){
-    stage.querySelectorAll(".target").forEach(t => t.remove());
+    stage.querySelectorAll(".target").forEach(el => el.remove());
   }
 
   function sizePx(){
@@ -164,40 +179,42 @@
     if (sizeMode === "medium") return 54;
     if (sizeMode === "small") return 34;
 
-    // mixed
-    const pool = (mode === "precision")
-      ? [26, 28, 30, 32, 34]
-      : (mode === "flick")
-      ? [34, 40, 46, 52]
-      : [40, 46, 52, 58, 64];
+    // mixed: depends on mode
+    const pool =
+      mode === "precision" ? [26,28,30,32,34] :
+      mode === "flick"     ? [34,40,46,52] :
+                             [40,46,52,58,64];
 
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
   function spawnPoint(){
     const r = stage.getBoundingClientRect();
-    const pad = 46;
+    const pad = 60;
+    const w = Math.max(300, r.width);
+    const h = Math.max(300, r.height);
 
-    let x = pad + Math.random() * (r.width - pad*2);
-    let y = pad + Math.random() * (r.height - pad*2);
+    let x = pad + Math.random() * (w - pad * 2);
+    let y = pad + Math.random() * (h - pad * 2);
 
     if (spawnMode === "safe") {
-      const lx = lastPos.x * r.width;
-      const ly = lastPos.y * r.height;
-
+      const lx = lastPos.x * w;
+      const ly = lastPos.y * h;
       let tries = 0;
-      while (tries < 12) {
+
+      while (tries < 14) {
         const dx = x - lx;
         const dy = y - ly;
         const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist > r.width * 0.18) break;
-        x = pad + Math.random() * (r.width - pad*2);
-        y = pad + Math.random() * (r.height - pad*2);
+        if (dist > w * 0.18) break;
+
+        x = pad + Math.random() * (w - pad * 2);
+        y = pad + Math.random() * (h - pad * 2);
         tries++;
       }
     }
 
-    lastPos = { x: x / r.width, y: y / r.height };
+    lastPos = { x: x / w, y: y / h };
     return { x, y };
   }
 
@@ -214,10 +231,11 @@
     t.style.left = p.x + "px";
     t.style.top = p.y + "px";
 
+    // small pop-in
     t.animate(
       [{ transform: "translate3d(-50%,-50%,0) scale(0.92)", opacity: 0.0 },
        { transform: "translate3d(-50%,-50%,0) scale(1)", opacity: 1.0 }],
-      { duration: 120, easing: "cubic-bezier(.2,.9,.2,1)" }
+      { duration: 110, easing: "cubic-bezier(.2,.9,.2,1)" }
     );
 
     t.addEventListener("pointerdown", (e) => {
@@ -225,35 +243,40 @@
       e.stopPropagation();
       if (!running) return;
 
-      const hitMs = nowMs() - currentSpawnAt;
+      const hitMs = nowMs() - spawnAt;
       hitTimes.push(hitMs);
-      hudLast.textContent = "Last: " + msToLabel(hitMs);
+
+      if (hudLast) hudLast.textContent = "Last: " + msToLabel(hitMs);
 
       runCount++;
-      hudProgress.textContent = `${runCount}/${runTotal}`;
+      if (hudProgress) hudProgress.textContent = `${runCount}/${runTotal}`;
 
       if (runCount >= runTotal) finishRun();
       else nextTarget();
     });
 
     stage.appendChild(t);
-    currentSpawnAt = nowMs();
+    spawnAt = nowMs();
   }
 
   function nextTarget(){
+    if (!running) return;
+
     if (mode === "reaction") {
       clearStage();
       const delay = 260 + Math.random() * 760;
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (!running) return;
         createTarget();
       }, delay);
       return;
     }
+
+    // flick / precision: immediate chain
     createTarget();
   }
 
-  function setCenterText(title, text){
+  function setCenter(title, text){
     if (!centerMsg) return;
     const t = centerMsg.querySelector(".center-title");
     const p = centerMsg.querySelector(".center-text");
@@ -266,44 +289,45 @@
     if (centerMsg) centerMsg.style.display = "none";
   }
 
+  // ===== Overlay lifecycle
   async function openOverlay(){
-    if (!overlay) return;
     overlay.classList.add("show");
+    overlay.classList.add("is-playing");
     overlay.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
 
-    // fullscreen attempt (best effort)
+    // fullscreen best effort
     try {
-      if (!document.fullscreenElement) {
-        await overlay.requestFullscreen?.();
+      if (!document.fullscreenElement && overlay.requestFullscreen) {
+        await overlay.requestFullscreen();
       }
-    } catch (_) {
-      // ignore
-    }
+    } catch (_) {}
 
+    // ensure layout settled before spawn
+    await new Promise((r) => requestAnimationFrame(() => r()));
     stage.focus({ preventScroll: true });
-        // place crosshair instantly to current pointer or center
-    const cx = pointer.x || (window.innerWidth / 2);
-    const cy = pointer.y || (window.innerHeight / 2);
+
+    // snap crosshair to center immediately
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    pointer.x = cx; pointer.y = cy;
     setCrosshair(cx, cy);
   }
 
   async function closeOverlay(){
     running = false;
     clearStage();
-    if (!overlay) return;
 
+    overlay.classList.remove("is-playing");
     overlay.classList.remove("show");
     overlay.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
 
-    // exit fullscreen
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
     } catch (_) {}
 
-    // bring back UI
-    setCenterText("Ready?", "Targets erscheinen gleich. Klick so schnell wie möglich.");
+    setCenter("Ready?", "Targets erscheinen gleich. Klick so schnell wie möglich.");
   }
 
   function startRun(){
@@ -312,11 +336,11 @@
     runCount = 0;
     hitTimes = [];
 
-    hudProgress.textContent = `0/${runTotal}`;
-    hudMode.textContent = mode[0].toUpperCase() + mode.slice(1);
-    hudLast.textContent = "Last: —";
-    hudBest.textContent = "Best: —";
-    hudAvg.textContent  = "Avg: —";
+    if (hudProgress) hudProgress.textContent = `0/${runTotal}`;
+    if (hudMode) hudMode.textContent = mode[0].toUpperCase() + mode.slice(1);
+    if (hudLast) hudLast.textContent = "Last: —";
+    if (hudBest) hudBest.textContent = "Best: —";
+    if (hudAvg)  hudAvg.textContent  = "Avg: —";
 
     if (resultCard) resultCard.style.display = "none";
 
@@ -329,8 +353,8 @@
     clearStage();
 
     const stats = calcStats(hitTimes);
-    hudBest.textContent = "Best: " + msToLabel(stats.best);
-    hudAvg.textContent  = "Avg: " + msToLabel(stats.avg);
+    if (hudBest) hudBest.textContent = "Best: " + msToLabel(stats.best);
+    if (hudAvg)  hudAvg.textContent  = "Avg: "  + msToLabel(stats.avg);
 
     // save local bests
     const ls = loadLS();
@@ -342,9 +366,7 @@
       bestMs: improvedBest ? stats.best : ls.bestMs,
       bestAvgMs: improvedAvg ? stats.avg : ls.bestAvgMs,
       lastRun: {
-        mode,
-        sizeMode,
-        spawnMode,
+        mode, sizeMode, spawnMode,
         total: runTotal,
         times: hitTimes,
         avgMs: stats.avg,
@@ -356,11 +378,11 @@
     };
     saveLS(newLS);
 
-    // Results UI (outside overlay card)
-    const r = getRating(stats.avg);
+    // results UI
+    const r = ratingFromAvg(stats.avg);
     if (resultCard) resultCard.style.display = "grid";
     if (resultRating) resultRating.textContent = `${r.grade} • ${r.label}`;
-    if (resAvg) resAvg.textContent = msToLabel(stats.avg);
+    if (resAvg)  resAvg.textContent  = msToLabel(stats.avg);
     if (resBest) resBest.textContent = msToLabel(stats.best);
     if (resCons) resCons.textContent = isFinite(stats.std) ? Math.round(stats.std) + "ms" : "—";
     if (resScore) resScore.textContent = String(stats.score);
@@ -383,145 +405,116 @@
     });
 
     renderTopStats();
-    setCenterText("Run complete ✅", "Du kannst erneut starten oder Exit drücken.");
+
+    // notify
+    if (window.notify) notify.success(`Run complete • Avg ${msToLabel(stats.avg)}`, "Reflex Lab");
+    setCenter("Run complete ✅", "Du kannst erneut starten oder Exit drücken.");
   }
 
-  function resetStats(){
-    if (!confirm("Reflex Stats wirklich resetten?")) return;
-    localStorage.removeItem(LS_KEY);
-    renderTopStats();
-    if (resultCard) resultCard.style.display = "none";
-    alert("Reset done ✅");
-  }
-
-  function showHow(){
-    alert(
-      "Reflex Lab:\n\n" +
-      "• Reaction: Target spawnt nach Delay — klick ASAP.\n" +
-      "• Flick: Targets spawnen sofort — pure Flicks.\n" +
-      "• Precision: kleinere Targets — Accuracy & Control.\n\n" +
-      "Start öffnet Fullscreen. Cursor ist nur im Game unsichtbar."
-    );
-  }
-
-  // Crosshair (STIFF / instant)
+  // ===== Crosshair (STIFF / instant)
   function setCrosshair(x, y){
     if (!crosshair) return;
     crosshair.style.transform =
       `translate3d(${x}px, ${y}px, 0) translate3d(-50%, -50%, 0)`;
   }
 
-    function onPointerMove(e){
+  function onPointerMove(e){
     pointer.x = e.clientX;
     pointer.y = e.clientY;
 
-    // only update crosshair when overlay is active
-    if (overlay && overlay.classList.contains("show")) {
+    // update only when overlay visible
+    if (overlay.classList.contains("show")) {
       setCrosshair(pointer.x, pointer.y);
     }
   }
 
-
-  // Seg helpers
-  function setSegActive(list, matchValue){
-    list.forEach(btn => btn.classList.toggle("is-active", btn.dataset.size === matchValue || btn.dataset.spawn === matchValue));
+  // ===== UI actions
+  function setActive(list, btn){
+    list.forEach(x => x.classList.remove("is-active"));
+    btn.classList.add("is-active");
   }
 
-  // Wire config
-  cfgTargetsVal.textContent = cfgTargets.value;
-  cfgTargets.addEventListener("input", () => {
-    cfgTargetsVal.textContent = cfgTargets.value;
-  });
+  function showHow(){
+    if (window.notify) {
+      notify.info(
+        "Reaction: Target kommt nach Delay. Flick: sofortige Targets. Precision: kleiner + sweaty. ESC/Exit beendet.",
+        "How it works",
+        6500
+      );
+      return;
+    }
+    alert("Reaction: Delay • Flick: instant • Precision: kleiner • ESC/Exit beendet");
+  }
 
-  // Modes
+  function resetStats(){
+    const ok = confirm("Reflex Stats wirklich resetten?");
+    if (!ok) return;
+
+    localStorage.removeItem(LS_KEY);
+    renderTopStats();
+    if (resultCard) resultCard.style.display = "none";
+    if (window.notify) notify.success("Stats wurden resettet ✅", "Reflex Lab");
+  }
+
+  // ===== WIRING
+  paintTargetsRange();
+  cfgTargets.addEventListener("input", paintTargetsRange, { passive: true });
+
   modeBtns.forEach((b) => {
     b.addEventListener("click", () => {
       if (running) return;
-      modeBtns.forEach(x => x.classList.remove("is-active"));
-      b.classList.add("is-active");
+      setActive(modeBtns, b);
       mode = b.dataset.mode;
+      if (window.notify) notify.info(`Mode: ${mode}`, "Reflex Lab", 1400);
     });
   });
 
-  // Size segs
   sizeSegs.forEach((b) => {
     b.addEventListener("click", () => {
       if (running) return;
+      setActive(sizeSegs, b);
       sizeMode = b.dataset.size;
-      setSegActive(sizeSegs, sizeMode);
     });
   });
 
-  // Spawn segs
   spawnSegs.forEach((b) => {
     b.addEventListener("click", () => {
       if (running) return;
+      setActive(spawnSegs, b);
       spawnMode = b.dataset.spawn;
-      setSegActive(spawnSegs, spawnMode);
     });
   });
 
-  // Start: open overlay + run
   btnStart.addEventListener("click", async () => {
     await openOverlay();
     startRun();
   });
 
   btnExit.addEventListener("click", closeOverlay);
-
   btnReset.addEventListener("click", resetStats);
   btnHow.addEventListener("click", showHow);
 
-  // Stage pointer + prevent context menu
+  // pointer tracking (stage + window)
   stage.addEventListener("pointermove", onPointerMove, { passive: true });
   window.addEventListener("pointermove", onPointerMove, { passive: true });
   stage.addEventListener("contextmenu", (e) => e.preventDefault());
 
-  // Exit on ESC
+  // ESC handling
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && overlay.classList.contains("show")) {
-      // let browser exit fullscreen then we close overlay
+      // allow browser fullscreen exit first
       setTimeout(closeOverlay, 0);
     }
   });
 
-  // Auth save indicator updates
-  const auth = authRef;
-  if (auth && typeof auth.onAuthStateChanged === "function") {
-    auth.onAuthStateChanged(() => updateSaveStatus());
+  // Auth save indicator
+  if (authRef && typeof authRef.onAuthStateChanged === "function") {
+    authRef.onAuthStateChanged(() => updateSaveStatus());
   }
-
-  function paintRange(input){
-  const min = Number(input.min || 0);
-  const max = Number(input.max || 100);
-  const val = Number(input.value || 0);
-  const pct = ((val - min) / (max - min)) * 100;
-  input.style.background = `linear-gradient(90deg,
-    rgba(0,255,136,.85) ${pct}%,
-    rgba(0,255,136,.20) ${pct}%)`;
-}
-
-function wireRange(id, outId){
-  const el = document.getElementById(id);
-  const out = document.getElementById(outId);
-  if (!el) return;
-
-  const update = () => {
-    if (out) out.textContent = el.value;
-    paintRange(el);
-  };
-
-  el.addEventListener("input", update, { passive: true });
-  update();
-}
-
-// call once on page load:
-wireRange("targetsRange", "targetsVal");
-wireRange("sizeRange", "sizeVal");
-wireRange("spawnRange", "spawnVal");
 
   // Init
   renderTopStats();
   updateSaveStatus();
+  setCenter("Ready?", "Targets erscheinen gleich. Klick so schnell wie möglich.");
 
 })();

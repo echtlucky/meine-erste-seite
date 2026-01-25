@@ -14,36 +14,42 @@
   <div id="header-placeholder"></div>
 
   <main class="reflex-wrap">
+    <!-- HERO -->
     <section class="reflex-hero">
-      <div>
+      <div class="reflex-hero__left">
         <div class="reflex-badge">⚡ echtlucky • Reflex Lab</div>
         <h1 class="reflex-title">Reflex Lab</h1>
         <p class="reflex-sub">
-          Test deine Reflexe. Targets klicken → Zeit messen → Rating. Crosshair only im Spiel.
+          Targets klicken → Zeit messen → Rating. Crosshair only im Spiel.
         </p>
       </div>
 
-      <div class="reflex-stats">
-        <div class="stat">
-          <div class="stat-label">Best</div>
-          <div class="stat-value" id="bestValue">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Avg</div>
-          <div class="stat-value" id="avgValue">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Rating</div>
-          <div class="stat-value" id="ratingValue">—</div>
+      <div class="reflex-hero__right">
+        <div class="reflex-miniStats">
+          <div class="miniStat">
+            <div class="miniStat__label">Best</div>
+            <div class="miniStat__value" id="bestValue">—</div>
+          </div>
+          <div class="miniStat">
+            <div class="miniStat__label">Avg</div>
+            <div class="miniStat__value" id="avgValue">—</div>
+          </div>
+          <div class="miniStat">
+            <div class="miniStat__label">Rating</div>
+            <div class="miniStat__value" id="ratingValue">—</div>
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- MAIN CARD -->
     <section class="reflex-card">
       <header class="reflex-card__head">
         <div>
           <h2 class="reflex-card__title">Reflex Games</h2>
-          <p class="reflex-card__hint">Start öffnet ein Fullscreen-Spiel. Im Spiel ist der Cursor aus.</p>
+          <p class="reflex-card__hint">
+            Start öffnet ein Fullscreen-Spiel. Im Spiel ist der Cursor aus — nur Crosshair.
+          </p>
         </div>
 
         <div class="reflex-actions">
@@ -52,25 +58,33 @@
         </div>
       </header>
 
+      <!-- Modes -->
       <div class="reflex-modes" role="tablist" aria-label="Reflex Modes">
         <button class="mode is-active" data-mode="reaction" type="button">Reaction</button>
         <button class="mode" data-mode="flick" type="button">Flick</button>
         <button class="mode" data-mode="precision" type="button">Precision</button>
       </div>
 
-      <!-- Apple-ish Control Bar (inedinandergreifend) -->
+      <!-- Controls (inedinandergreifend) -->
       <div class="reflex-controls" aria-label="Game Settings">
-        <div class="ctl">
-          <div class="ctl-label">Targets</div>
-          <div class="ctl-pill">
-            <input id="cfgTargets" type="range" min="5" max="30" value="15" />
+        <div class="ctl ctl--wide">
+          <div class="ctl-label">
+            <strong>Targets</strong>
+            <span>Wie viele Ziele pro Run</span>
+          </div>
+
+          <div class="ctl-pill ctl-pill--range">
+            <input id="cfgTargets" class="range-mini" type="range" min="5" max="30" step="1" value="15" />
             <span class="ctl-value" id="cfgTargetsVal">15</span>
           </div>
         </div>
 
         <div class="ctl">
-          <div class="ctl-label">Size</div>
-          <div class="ctl-pill">
+          <div class="ctl-label">
+            <strong>Size</strong>
+            <span>Mixed / L / M / S</span>
+          </div>
+          <div class="ctl-pill ctl-pill--seg">
             <button class="seg is-active" data-size="mixed" type="button">Mixed</button>
             <button class="seg" data-size="large" type="button">L</button>
             <button class="seg" data-size="medium" type="button">M</button>
@@ -79,15 +93,21 @@
         </div>
 
         <div class="ctl">
-          <div class="ctl-label">Spawn</div>
-          <div class="ctl-pill">
+          <div class="ctl-label">
+            <strong>Spawn</strong>
+            <span>Safe / Random</span>
+          </div>
+          <div class="ctl-pill ctl-pill--seg">
             <button class="seg is-active" data-spawn="safe" type="button">Safe</button>
             <button class="seg" data-spawn="full" type="button">Random</button>
           </div>
         </div>
 
-        <div class="ctl ctl-save">
-          <div class="ctl-label">Save</div>
+        <div class="ctl">
+          <div class="ctl-label">
+            <strong>Save</strong>
+            <span>Auto (Local oder Account)</span>
+          </div>
           <div class="ctl-pill ctl-pill--save">
             <span class="save-pill" id="saveStatus">Local</span>
           </div>
@@ -103,69 +123,7 @@
       </footer>
     </section>
 
-    <section class="lab-card">
-  <div class="lab-head">
-    <div>
-      <h2>Reflex Settings</h2>
-      <p class="lab-hint">Stell dir dein Setup ein – clean, schnell, keine Ablenkung.</p>
-    </div>
-  </div>
-
-  <div class="lab-controls">
-
-    <div class="control">
-      <div class="control__top">
-        <div class="control__label">
-          <strong>Targets</strong>
-          <span>Wie viele Ziele pro Run</span>
-        </div>
-        <div class="value-pill"><i></i><span id="targetsVal">10</span></div>
-      </div>
-      <input id="targetsRange" class="range" type="range" min="5" max="50" step="1" value="10" />
-    </div>
-
-    <div class="control">
-      <div class="control__top">
-        <div class="control__label">
-          <strong>Target Size</strong>
-          <span>Trefferfläche: klein = sweaty</span>
-        </div>
-        <div class="value-pill"><i></i><span id="sizeVal">36</span>px</div>
-      </div>
-      <input id="sizeRange" class="range" type="range" min="18" max="80" step="1" value="36" />
-    </div>
-
-    <div class="control">
-      <div class="control__top">
-        <div class="control__label">
-          <strong>Spawn Delay</strong>
-          <span>Wie schnell das nächste Ziel kommt</span>
-        </div>
-        <div class="value-pill"><i></i><span id="spawnVal">250</span>ms</div>
-      </div>
-      <input id="spawnRange" class="range" type="range" min="0" max="800" step="10" value="250" />
-    </div>
-
-    <div class="control">
-      <div class="control__top">
-        <div class="control__label">
-          <strong>Mode</strong>
-          <span>Einfacher Einstieg oder full tryhard</span>
-        </div>
-      </div>
-
-      <div class="segmented" id="modeSegment">
-        <button class="seg-btn is-active" type="button" data-mode="classic">Classic</button>
-        <button class="seg-btn" type="button" data-mode="flick">Flick</button>
-        <button class="seg-btn" type="button" data-mode="micro">Micro</button>
-      </div>
-
-      <p class="mini-note">Tipp: Micro + kleine Targets fühlt sich wie Aim-Drill an.</p>
-    </div>
-
-  </div>
-</section>
-
+    <!-- RESULT -->
     <section class="reflex-result" id="resultCard" style="display:none;">
       <header class="reflex-result__head">
         <h2 class="reflex-result__title">Run Result</h2>
@@ -222,7 +180,11 @@
     </div>
 
     <!-- Crosshair overlay -->
-    <div class="crosshair" id="crosshair" aria-hidden="true"></div>
+    <div class="crosshair" id="crosshair" aria-hidden="true">
+      <div class="crosshair__h"></div>
+      <div class="crosshair__v"></div>
+      <div class="crosshair__dot"></div>
+    </div>
   </div>
 
   <div id="footer-placeholder"></div>
@@ -235,8 +197,8 @@
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/legal-modal.js"></script>
-  <script src="js/reflex.js"></script>
   <script src="js/notify.js"></script>
+  <script src="js/reflex.js"></script>
 
   <script>
     document.body.classList.add('loaded');
