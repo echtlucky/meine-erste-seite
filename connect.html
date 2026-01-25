@@ -199,6 +199,20 @@
      SCRIPTS
 ===================================================== -->
 <script src="firebase.js"></script>
+
+<!-- Load Header -->
+<script>
+  (async () => {
+    try {
+      const res = await fetch('header.html');
+      const html = await res.text();
+      document.getElementById('header-placeholder').innerHTML = html;
+    } catch (err) {
+      console.error('Failed to load header:', err);
+    }
+  })();
+</script>
+
 <script src="js/menu.js"></script>
 <script src="js/notify.js"></script>
 <script src="js/connect.js"></script>
