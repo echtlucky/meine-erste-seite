@@ -126,14 +126,16 @@
 
       <div class="home-actions">
         <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">Discord Community</a>
+
+        <!-- ✅ Dieser Button switcht automatisch via auth-state.js -->
         <a class="btn btn-secondary"
-            data-account-cta
-            data-cta-logged-out-text="Account erstellen"
-            data-cta-logged-in-text="Account verwalten"
-            data-cta-logged-out-href="login.html"
-            data-cta-logged-in-href="account.html"
-            href="login.html">
-            Account erstellen
+          data-account-cta
+          data-cta-logged-out-text="Account erstellen"
+          data-cta-logged-in-text="Account verwalten"
+          data-cta-logged-out-href="login.html"
+          data-cta-logged-in-href="account.html"
+          href="login.html">
+          Account erstellen
         </a>
       </div>
     </section>
@@ -228,37 +230,39 @@
   <!-- Footer via fetch -->
   <div id="footer-placeholder"></div>
 
-  <!-- Base Scripts -->
+  <!-- Scripts -->
   <script src="firebase.js"></script>
+  <script src="js/auth-state.js"></script>
+
   <script src="js/menu.js"></script>
   <script src="js/legal-modal.js"></script>
   <script src="js/login.js"></script>
   <script src="js/notify.js"></script>
 
   <script>
-    document.body.classList.add('loaded');
+    document.body.classList.add("loaded");
 
-    // Header laden + init
-    fetch('header.html')
-  .then(r => r.text())
-  .then(html => {
-    document.getElementById('header-placeholder').innerHTML = html;
+    // HEADER inject
+    fetch("header.html")
+      .then((r) => r.text())
+      .then((html) => {
+        document.getElementById("header-placeholder").innerHTML = html;
 
-    if (typeof initHeaderScripts === "function") initHeaderScripts();
-    if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+        if (typeof initHeaderScripts === "function") initHeaderScripts();
+        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
 
-    // ✅ FIX: nach Header-Inject sofort Auth UI setzen
-    if (typeof window.renderAuthUI === "function") {
-      window.renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__ || null);
-    }
-  });
+        // ✅ wichtig: signalisiert auth-state.js, dass DOM targets existieren
+        window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
+      })
+      .catch((err) => console.error("Header load failed:", err));
 
-    // Footer laden
-    fetch('footer.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      });
+    // FOOTER inject
+    fetch("footer.html")
+      .then((r) => r.text())
+      .then((html) => {
+        document.getElementById("footer-placeholder").innerHTML = html;
+      })
+      .catch((err) => console.error("Footer load failed:", err));
   </script>
 </body>
 </html>
