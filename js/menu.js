@@ -1,155 +1,194 @@
-// js/menu.js – FINAL (Header via fetch kompatibel)
+// js/menu.js — FINAL v2 (Fetch-Header kompatibel, anti-flicker, single auth listener)
+(function () {
+  "use strict";
 
-let authListenerInitialized = false;
+  // Prevent double load (if script is included twice by accident)
+  if (window.__ECHTLUCKY_MENU_JS_LOADED__) {
+    console.warn("menu.js already loaded – skipping");
+    return;
+  }
+  window.__ECHTLUCKY_MENU_JS_LOADED__ = true;
 
-/* =========================
-   Header: Menü, Dropdown, Active-Link, Auth
-   ========================= */
-function initHeaderScripts() {
-  // Header-Elemente (existieren erst nach fetch(header.html))
-  const userNameDisplay = document.getElementById('user-name-display');
-  const dropdownMenu = document.getElementById('dropdown-menu');
-  const loginLink = document.getElementById('login-link');
-  const adminPanelLink = document.getElementById('admin-panel-link');
-  const menuToggle = document.getElementById('menuToggle');
-  const mainNav = document.getElementById('mainNav');
+  // Global state
+  window.__ECHTLUCKY_CURRENT_USER__ = window.__ECHTLUCKY_CURRENT_USER__ || null;
 
   /* =========================
-     📱 Mobile Menü Toggle
-     ========================= */
-  if (menuToggle && mainNav) {
-    menuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      mainNav.classList.toggle('open');
-    });
-
-    // Klick außerhalb => Menü zu (nur auf Mobile relevant)
-    document.addEventListener('click', () => {
-      mainNav.classList.remove('open');
-    });
-
-    // Resize => Menü resetten
-    window.addEventListener('resize', () => {
-      if (window.innerWidth > 992) {
-        mainNav.classList.remove('open');
-      }
-    });
+     🧩 Helpers
+  ========================= */
+  function qs(id) {
+    return document.getElementById(id);
   }
 
-  /* =========================
-     👤 Dropdown (Click, Mobile-safe)
-     ========================= */
-  if (userNameDisplay && dropdownMenu) {
-    userNameDisplay.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdownMenu.classList.toggle('show');
-    });
+  // Re-render auth UI whenever header is (re)injected
+  function renderAuthUI(user) {
+    const userNameDisplay = qs("user-name-display");
+    const dropdownMenu = qs("dropdown-menu");
+    const loginLink = qs("login-link");
+    const adminPanelLink = qs("admin-panel-link");
 
-    document.addEventListener('click', (e) => {
-      if (!dropdownMenu.contains(e.target) && !userNameDisplay.contains(e.target)) {
-        dropdownMenu.classList.remove('show');
+    // If header not present yet, just return
+    if (!loginLink && !userNameDisplay && !adminPanelLink) return;
+
+    if (user) {
+      if (loginLink) loginLink.style.display = "none";
+
+      if (userNameDisplay) {
+        userNameDisplay.textContent =
+          user.displayName || (user.email ? user.email.split("@")[0] : "User");
+        userNameDisplay.style.display = "inline-flex";
       }
-    });
-  }
 
-  /* =========================
-     🔗 Active Link automatisch setzen
-     ========================= */
-  const currentPath = window.location.pathname.split("/").pop() || "index.html";
-
-  document.querySelectorAll(".nav-links a").forEach(link => {
-    const linkPath = link.getAttribute("href");
-    link.classList.remove("active");
-
-    if (linkPath === currentPath || (currentPath === "" && linkPath === "index.html")) {
-      link.classList.add("active");
+      // Admin Link (email fallback)
+      const ADMIN_EMAIL = "lucassteckel04@gmail.com";
+      if (adminPanelLink) {
+        adminPanelLink.style.display =
+          user.email && user.email === ADMIN_EMAIL ? "block" : "none";
+      }
+    } else {
+      if (loginLink) loginLink.style.display = "inline-flex";
+      if (userNameDisplay) userNameDisplay.style.display = "none";
+      if (dropdownMenu) dropdownMenu.classList.remove("show");
+      if (adminPanelLink) adminPanelLink.style.display = "none";
     }
-  });
+  }
 
-  /* =========================
-     🔐 Firebase Auth (nur 1x Listener)
-     ========================= */
-  if (!authListenerInitialized && typeof window.auth !== "undefined") {
-    authListenerInitialized = true;
-
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        if (loginLink) loginLink.style.display = 'none';
-
-        if (userNameDisplay) {
-          userNameDisplay.textContent = user.displayName || user.email.split('@')[0];
-          userNameDisplay.style.display = 'inline-block';
-        }
-
-        // Admin Link
-        const ADMIN_EMAIL = "lucassteckel04@gmail.com";
-        if (adminPanelLink) {
-          adminPanelLink.style.display = (user.email === ADMIN_EMAIL) ? 'block' : 'none';
-        }
-      } else {
-        if (loginLink) loginLink.style.display = 'inline-block';
-        if (userNameDisplay) userNameDisplay.style.display = 'none';
-        if (dropdownMenu) dropdownMenu.classList.remove('show');
-        if (adminPanelLink) adminPanelLink.style.display = 'none';
-      }
+  function setActiveNavLink() {
+    const currentPath = window.location.pathname.split("/").pop() || "index.html";
+    document.querySelectorAll(".nav-links a").forEach((link) => {
+      const linkPath = link.getAttribute("href");
+      link.classList.toggle(
+        "active",
+        linkPath === currentPath || (currentPath === "" && linkPath === "index.html")
+      );
     });
   }
-}
 
-/* =========================
-   🚪 Logout global (für onclick im header.html)
-   ========================= */
-function logout() {
-  if (typeof window.auth === "undefined") return;
+  /* =========================
+     ✅ Public init (call after fetch(header.html))
+  ========================= */
+  window.initHeaderScripts = function initHeaderScripts() {
+    // Header elements exist only after fetch(header.html)
+    const userNameDisplay = qs("user-name-display");
+    const dropdownMenu = qs("dropdown-menu");
+    const menuToggle = qs("menuToggle");
+    const mainNav = qs("mainNav");
 
-  auth.signOut()
-    .then(() => {
-      window.location.href = 'index.html';
-    })
-    .catch((err) => {
-      alert('Ausloggen fehlgeschlagen: ' + err.message);
-    });
-}
+    /* 📱 Mobile Menü Toggle */
+    if (menuToggle && mainNav && !menuToggle.__wired) {
+      menuToggle.__wired = true;
 
-/* =========================
-   🧠 Smart Header Scroll (BOMBENFEST)
-   ========================= */
-let __smartHeaderInited = false;
+      menuToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        mainNav.classList.toggle("open");
+      });
 
-function initSmartHeaderScroll() {
-  if (__smartHeaderInited) return;
-  __smartHeaderInited = true;
+      document.addEventListener("click", () => {
+        mainNav.classList.remove("open");
+      });
 
-  const header = document.querySelector('header.site-header');
-  if (!header) return;
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 992) mainNav.classList.remove("open");
+      });
+    }
 
-  let lastY = window.scrollY;
-  let downAcc = 0;
+    /* 👤 Dropdown */
+    if (userNameDisplay && dropdownMenu && !userNameDisplay.__wired) {
+      userNameDisplay.__wired = true;
 
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
-    const diff = y - lastY;
+      userNameDisplay.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle("show");
+      });
 
-    // ganz oben immer sichtbar
-    if (y <= 10) {
-      header.classList.remove('header-hidden');
-      downAcc = 0;
-      lastY = y;
+      document.addEventListener("click", (e) => {
+        if (!dropdownMenu.contains(e.target) && !userNameDisplay.contains(e.target)) {
+          dropdownMenu.classList.remove("show");
+        }
+      });
+    }
+
+    /* 🔗 Active Link */
+    setActiveNavLink();
+
+    /* 🔐 Apply current auth state immediately (prevents header blink) */
+    renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
+  };
+
+  /* =========================
+     🔐 SINGLE Auth Listener (global)
+     - attaches once per page load
+  ========================= */
+  function ensureAuthListener() {
+    if (window.__ECHTLUCKY_AUTH_LISTENER_SET__) return;
+    window.__ECHTLUCKY_AUTH_LISTENER_SET__ = true;
+
+    const auth = window.auth || window.echtlucky?.auth;
+    if (!auth || typeof auth.onAuthStateChanged !== "function") {
+      console.warn("Auth not ready yet – auth listener will not attach.");
       return;
     }
 
-    // runter scrollen -> nach etwas Strecke ausblenden
-    if (diff > 0) {
-      downAcc += diff;
-      if (downAcc > 25) header.classList.add('header-hidden');
-    }
+    auth.onAuthStateChanged((user) => {
+      window.__ECHTLUCKY_CURRENT_USER__ = user || null;
+      renderAuthUI(user || null);
+    });
+  }
 
-    // hoch scrollen -> sofort einblenden
-    if (diff < 0) {
-      header.classList.remove('header-hidden');
-      downAcc = 0;
-    }
+  // Try immediately (firebase.js might already be loaded)
+  ensureAuthListener();
 
-    lastY = y;
-  }, { passive: true });
-}
+  /* =========================
+     🚪 Logout global (used by header.html onclick)
+  ========================= */
+  window.logout = function logout() {
+    const auth = window.auth || window.echtlucky?.auth;
+    if (!auth) return;
+
+    auth
+      .signOut()
+      .then(() => (window.location.href = "index.html"))
+      .catch((err) => alert("Ausloggen fehlgeschlagen: " + err.message));
+  };
+
+  /* =========================
+     🧠 Smart Header Scroll (single init)
+  ========================= */
+  window.initSmartHeaderScroll = function initSmartHeaderScroll() {
+    if (window.__ECHTLUCKY_SMART_HEADER__) return;
+    window.__ECHTLUCKY_SMART_HEADER__ = true;
+
+    const header = document.querySelector("header.site-header");
+    if (!header) return;
+
+    let lastY = window.scrollY;
+    let downAcc = 0;
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        const y = window.scrollY;
+        const diff = y - lastY;
+
+        if (y <= 10) {
+          header.classList.remove("header-hidden");
+          downAcc = 0;
+          lastY = y;
+          return;
+        }
+
+        if (diff > 0) {
+          downAcc += diff;
+          if (downAcc > 25) header.classList.add("header-hidden");
+        }
+
+        if (diff < 0) {
+          header.classList.remove("header-hidden");
+          downAcc = 0;
+        }
+
+        lastY = y;
+      },
+      { passive: true }
+    );
+  };
+})();

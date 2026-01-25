@@ -203,7 +203,7 @@
       <button class="admin-modal__close" type="button" id="closeNewPostModal" aria-label="Schließen">×</button>
 
       <header class="admin-modal__head">
-        <h2 class="admin-modal__title">Neuen Beitrag erstellen</h2>
+        <h2 class="admin-modal__title" id="postModalTitle">Neuen Beitrag erstellen</h2>
         <p class="admin-hint">Markdown/Plaintext geht klar – wird im Blog sauber angezeigt.</p>
       </header>
 
@@ -253,33 +253,39 @@
   <div id="footer-placeholder"></div>
 
   <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-  <!-- Your setup -->
-  <script src="firebase.js"></script>
-  <script src="js/menu.js"></script>
-  <script src="js/legal-modal.js"></script>
-  <script src="js/admin-panel.js"></script>
-  <script src="js/login.js"></script>
+  <!-- App Scripts (defer = stabil, keine Race Conditions) -->
+  <script defer src="firebase.js"></script>
+  <script defer src="js/menu.js"></script>
+  <script defer src="js/legal-modal.js"></script>
+  <script defer src="js/admin-panel.js"></script>
 
+  <!-- Header/Footer Fetch AFTER DOM -->
   <script>
-    document.body.classList.add('loaded');
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.classList.add("loaded");
 
-    fetch('header.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-        if (typeof initHeaderScripts === "function") initHeaderScripts();
-        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-      });
+      fetch("header.html")
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById("header-placeholder").innerHTML = html;
 
-    fetch('footer.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      });
+          // Header JS initialisieren (menu.js)
+          if (typeof initHeaderScripts === "function") initHeaderScripts();
+          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+        })
+        .catch(() => { /* optional: console.warn("Header failed"); */ });
+
+      fetch("footer.html")
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById("footer-placeholder").innerHTML = html;
+        })
+        .catch(() => { /* optional: console.warn("Footer failed"); */ });
+    });
   </script>
 </body>
 </html>

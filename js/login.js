@@ -1,25 +1,38 @@
 /* =========================
-   login.js — echtlucky
+   login.js — echtlucky (stable)
    - Tabs (Login/Register)
    - Email OR Username login
    - Register creates:
      - users/{uid}
      - usernames/{usernameLower}
    - Google Sign-In creates the same docs
+   - FIX: kein onAuthStateChanged-Redirect Loop
+   - FIX: Admin-Mail bekommt role=admin beim ersten Create + Bootstrap Update
 ========================= */
 
 (function () {
-  // ---- Safety: wait for DOM + Firebase globals
+  "use strict";
+
   document.addEventListener("DOMContentLoaded", () => {
-    // Expect these to exist from firebase.js:
-    // window.auth (firebase.auth())
-    // window.db   (firebase.firestore()) OR global db
-    // firebase (SDK)
-    const authRef = window.auth || (typeof auth !== "undefined" ? auth : null);
-    const dbRef   = window.db   || (typeof db !== "undefined" ? db : null);
+    const authRef =
+      window.echtlucky?.auth ||
+      window.auth ||
+      (typeof auth !== "undefined" ? auth : null);
+
+    const dbRef =
+      window.echtlucky?.db ||
+      window.db ||
+      (typeof db !== "undefined" ? db : null);
+
+    const googleProvider =
+      window.echtlucky?.googleProvider ||
+      window.googleProvider ||
+      null;
+
+    const ADMIN_EMAIL = "lucassteckel04@gmail.com";
 
     if (!authRef || !dbRef || typeof firebase === "undefined") {
-      console.error("login.js: auth/db/firebase missing. Check firebase.js includes + globals.");
+      console.error("login.js: auth/db/firebase missing. Prüfe firebase.js + Includes.");
       return;
     }
 
@@ -32,6 +45,7 @@
 
     const loginIdentifier = document.getElementById("loginIdentifier");
     const loginPassword = document.getElementById("loginPassword");
+
     const regUsername = document.getElementById("regUsername");
     const regEmail = document.getElementById("regEmail");
     const regPassword = document.getElementById("regPassword");
@@ -72,11 +86,20 @@
     tabLogin?.addEventListener("click", () => setTab("login"));
     tabRegister?.addEventListener("click", () => setTab("register"));
 
-    // ---- Username validation
+    // ---- Username validation + sanitize
     function isValidUsername(u) {
       const v = (u || "").trim();
       if (v.length < 3 || v.length > 20) return false;
       return /^[a-zA-Z0-9_.-]+$/.test(v);
+    }
+
+    function sanitizeUsername(raw) {
+      return String(raw || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/[^a-z0-9_.-]/g, "")
+        .slice(0, 20);
     }
 
     // ---- Resolve username -> email
@@ -93,35 +116,57 @@
       return data.email;
     }
 
-    // ---- Ensure user docs exist (users + usernames)
-    async function ensureUserDocs({ uid, email, username }) {
-      const userDoc = dbRef.collection("users").doc(uid);
-      const userSnap = await userDoc.get();
+    // ---- Ensure user doc exists (users + usernames)
+    async function ensureUserDocs(user, usernameMaybe) {
+      if (!user?.uid) return;
 
-      if (!userSnap.exists) {
+      const uid = user.uid;
+      const email = user.email || "";
+      const username = (usernameMaybe || user.displayName || "").trim();
+
+      const userDoc = dbRef.collection("users").doc(uid);
+      const snap = await userDoc.get();
+
+      if (!snap.exists) {
+        // ✅ Role beim ersten Create setzen (Admin-Mail wird admin)
         await userDoc.set({
-          email: email || "",
-          username: username || "",
-          role: "user",
+          email,
+          username,
+          role: (email === ADMIN_EMAIL ? "admin" : "user"),
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
       } else {
+        // niemals role anfassen
         await userDoc.update({
           lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
+          email,
+          username: username || snap.data()?.username || "",
         });
       }
 
-      if (username) {
-        const unameLower = username.toLowerCase();
-        const unameDoc = dbRef.collection("usernames").doc(unameLower);
-        const unameSnap = await unameDoc.get();
+      // Username mapping optional (nur wenn vorhanden + frei/owner)
+      const unameLower = sanitizeUsername(username);
+      if (unameLower && unameLower.length >= 3) {
+        const unameRef = dbRef.collection("usernames").doc(unameLower);
+        const unameSnap = await unameRef.get();
+
         if (!unameSnap.exists) {
-          await unameDoc.set({
+          await unameRef.set({
             uid,
-            email: email || "",
+            email,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
+        }
+      }
+
+      // ✅ Bootstrap: falls dein Admin früher als "user" angelegt wurde, einmalig auf admin heben
+      // (geht nur mit den neuen Rules, nur für deine Admin-Mail)
+      if (email === ADMIN_EMAIL) {
+        try {
+          await userDoc.set({ role: "admin" }, { merge: true });
+        } catch (_) {
+          // wenn Rules noch nicht deployed sind, ignoriere hier
         }
       }
     }
@@ -138,13 +183,10 @@
         const email = await resolveEmailFromIdentifier(identifier);
         const cred = await authRef.signInWithEmailAndPassword(email, password);
 
-        // Try to update user doc login time (optional)
-        const u = cred.user;
-        const username = u?.displayName || "";
-        await ensureUserDocs({ uid: u.uid, email: u.email, username });
+        await ensureUserDocs(cred.user);
 
         showMsg("Eingeloggt. Weiterleitung…", "success");
-        setTimeout(() => (window.location.href = "index.html"), 650);
+        setTimeout(() => (window.location.href = "index.html"), 450);
       } catch (err) {
         showMsg(err?.message || "Login fehlgeschlagen.");
       }
@@ -155,78 +197,75 @@
       e.preventDefault();
       clearMsg();
 
-      const username = (regUsername?.value || "").trim();
+      const usernameRaw = (regUsername?.value || "").trim();
       const email = (regEmail?.value || "").trim();
       const password = regPassword?.value || "";
 
-      if (!isValidUsername(username)) {
+      if (!isValidUsername(usernameRaw)) {
         showMsg("Username ungültig. Erlaubt: A-Z, 0-9, _ . - (3–20 Zeichen).");
         return;
       }
 
       try {
-        const unameLower = username.toLowerCase();
+        const unameLower = sanitizeUsername(usernameRaw);
 
-        // Check username availability
         const existing = await dbRef.collection("usernames").doc(unameLower).get();
         if (existing.exists) {
           showMsg("Username ist schon vergeben.");
           return;
         }
 
-        // Create auth user
         const cred = await authRef.createUserWithEmailAndPassword(email, password);
-        await cred.user.updateProfile({ displayName: username });
 
-        // Create Firestore docs
-        await ensureUserDocs({ uid: cred.user.uid, email, username });
+        // displayName setzen
+        await cred.user.updateProfile({ displayName: usernameRaw });
+
+        // docs
+        await ensureUserDocs(cred.user, usernameRaw);
 
         showMsg("Account erstellt. Weiterleitung…", "success");
-        setTimeout(() => (window.location.href = "index.html"), 650);
+        setTimeout(() => (window.location.href = "index.html"), 450);
       } catch (err) {
         showMsg(err?.message || "Registrierung fehlgeschlagen.");
       }
     });
 
-    // ---- GOOGLE SIGN-IN (works for both buttons)
+    // ---- GOOGLE SIGN-IN
     async function googleSignIn() {
       clearMsg();
 
       try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: "select_account" });
+        const provider =
+          googleProvider ||
+          new firebase.auth.GoogleAuthProvider();
+
+        if (provider.setCustomParameters) {
+          provider.setCustomParameters({ prompt: "select_account" });
+        }
 
         const result = await authRef.signInWithPopup(provider);
         const u = result.user;
 
-        // Create a stable username candidate
+        // username candidate
         let username = (u?.displayName || "").trim();
-
-        // If no displayName, derive from email local-part
         if (!username && u?.email) username = u.email.split("@")[0];
 
-        // sanitize username
-        username = username
-          .toLowerCase()
-          .replace(/\s+/g, "")
-          .replace(/[^a-z0-9_.-]/g, "")
-          .slice(0, 20);
-
-        // If empty after sanitize, fallback
+        username = sanitizeUsername(username);
         if (!username) username = "user" + (u?.uid || "").slice(0, 6);
 
-        // Only create usernames/{username} if free, otherwise skip mapping (still allow login via email)
-        const unameDoc = await dbRef.collection("usernames").doc(username).get();
-        const finalUsername = unameDoc.exists ? "" : username;
+        // Wenn username belegt ist: kein mapping erzwingen (Login via Email bleibt ok)
+        const unameSnap = await dbRef.collection("usernames").doc(username).get();
+        const finalUsername = unameSnap.exists ? "" : username;
 
-        await ensureUserDocs({
-          uid: u.uid,
-          email: u.email || "",
-          username: finalUsername,
-        });
+        // optional displayName updaten wenn frei
+        if (finalUsername) {
+          try { await u.updateProfile({ displayName: finalUsername }); } catch (_) {}
+        }
+
+        await ensureUserDocs(u, finalUsername);
 
         showMsg("Mit Google eingeloggt. Weiterleitung…", "success");
-        setTimeout(() => (window.location.href = "index.html"), 650);
+        setTimeout(() => (window.location.href = "index.html"), 450);
       } catch (err) {
         showMsg(err?.message || "Google Login fehlgeschlagen.");
       }
@@ -255,9 +294,8 @@
       }
     });
 
-    // ---- Optional: redirect if logged in
-    authRef.onAuthStateChanged((user) => {
-      if (user) window.location.href = "index.html";
-    });
+    // ✅ WICHTIG: KEIN authRef.onAuthStateChanged Redirect hier!
+    // Der Header (menu.js) kümmert sich ums UI,
+    // Redirect passiert NUR nach erfolgreichem Login/Register/Google.
   });
 })();
