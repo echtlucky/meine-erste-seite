@@ -7,8 +7,10 @@
       await messaging.requestPermission?.();
       const token = await messaging.getToken();
       // Token kann im User-Dokument gespeichert werden
-      if (auth?.currentUser && token) {
-        await db.collection("users").doc(auth.currentUser.uid).update({ fcmToken: token });
+      const currentAuth = window.auth;
+      const currentDb = window.db;
+      if (currentAuth?.currentUser && token && currentDb) {
+        await currentDb.collection("users").doc(currentAuth.currentUser.uid).update({ fcmToken: token });
       }
       messaging.onMessage((payload) => {
         // Zeige Notification bei eingehendem Call
@@ -33,7 +35,7 @@
     console.log("[Push] Sende Call-Push an", toUid, title, body, data);
   }
 // js/voice-chat.js — echtlucky Voice Integration
-// WebRTC + Firebase Signaling für Group & 1:1 Calls
+// WebRTC + Firebase Signaling für Gruppen-Calls (Direct Calls sind in diesem Projekt derzeit deaktiviert)
 
 /*
 ==============================
@@ -52,34 +54,15 @@ groups/{groupId}/voice-calls/{callId} {
   type: "group"
 }
 
-// Für 1:1-Calls (direkt unter /calls):
-calls/{callId} {
-  initiator: <uid>,
-  recipient: <uid>,
-  createdAt: <timestamp>,
-  status: "pending" | "ringing" | "accepted" | "rejected" | "ended",
-  type: "direct"
-}
+// (Hinweis) Direktanrufe (/calls) und users/{uid}/callRequests werden hier nicht genutzt,
+// da die aktuellen Firestore Rules diese Schreibpfade nicht freigeben.
 
-// Anruf-Requests (für eingehende Anrufe):
-users/{uid}/callRequests/{callRequestId} {
-  from: <uid>,
-  fromName: <string>,
-  callId: <string>,
-  groupId?: <string>,
-  type: "group" | "direct",
-  createdAt: <timestamp>,
-  status: "pending" | "accepted" | "rejected"
-}
-
-// Ablauf:
-// 1. Anruf starten: callRequest bei Empfänger anlegen, Call-Dokument anlegen
-// 2. Empfänger sieht Modal + Klingelton, kann annehmen/ablehnen
-// 3. Bei Annahme: Call-Status auf "accepted", WebRTC-Setup wie bisher
-// 4. Bei Ablehnung: Call-Status auf "rejected", Modal/Klingelton schließen
-// 5. Bei Gruppen: alle Teilnehmer bekommen callRequest
-// 6. Bei 1:1: nur recipient bekommt callRequest
-// 7. Call-Status-Updates werden in Echtzeit überwacht
+// Ablauf (Gruppenanruf):
+// 1. Initiator startet Call: status="ringing" im group voice-call Doc
+// 2. Andere Mitglieder sehen Modal + Klingelton, können annehmen/ablehnen
+// 3. Bei Annahme: status="active", Teilnehmer wird zu participants hinzugefügt
+// 4. Bei Ablehnung: eigener UID wird zu rejectedBy hinzugefügt
+// 5. Status/Teilnehmer werden in Echtzeit überwacht
 
 // Klingelton: Audio-Element, das bei eingehendem Anruf abgespielt wird, bis angenommen/abgelehnt
 // Modal: Zeigt Anrufer, Gruppe/Name, Buttons für Annehmen/Ablehnen
@@ -158,76 +141,117 @@ users/{uid}/callRequests/{callRequestId} {
 
   if (btnAcceptCall) btnAcceptCall.onclick = async () => {
     if (!activeCallRequest) return;
-    const { callRequestId, type, groupId, callId } = activeCallRequest;
-    const reqRef = db.collection("users").doc(auth.currentUser.uid).collection("callRequests").doc(callRequestId);
-    await reqRef.update({ status: "accepted" });
+    const { type, groupId, callId } = activeCallRequest;
+
+    if (type !== "group" || !groupId || !callId) return;
+
     hideIncomingCallModal();
-    // Starte Call automatisch
-    if (type === "group" && groupId && callId) {
-      // Teilnehmer zur Call-Teilnehmerliste hinzufügen
-      try {
-        await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).update({
-          participants: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
-        });
-      } catch(e) { console.warn("Teilnehmer konnte nicht hinzugefügt werden", e); }
-      window.echtlucky?.voiceChat?.joinCall?.(groupId, callId);
-    } else if (type === "direct" && callId) {
-      // 1:1-Call: Teilnehmer im Call-Dokument ergänzen und joinen
-      try {
-        await db.collection("calls").doc(callId).update({
-          recipientAccepted: true
-        });
-      } catch(e) { console.warn("1:1-Call: recipientAccepted konnte nicht gesetzt werden", e); }
-      // joinCall für 1:1-Calls (nutzt groupId als null)
-      window.echtlucky?.voiceChat?.joinCall?.(null, callId);
+
+    try {
+      await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).update({
+        status: "active",
+        participants: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+      });
+    } catch (e) {
+      console.warn("Teilnehmer konnte nicht hinzugefügt werden", e);
     }
+
+    window.echtlucky?.voiceChat?.joinCall?.(groupId, callId);
   };
   if (btnRejectCall) btnRejectCall.onclick = async () => {
     if (!activeCallRequest) return;
-    const { callRequestId, type } = activeCallRequest;
-    const reqRef = db.collection("users").doc(auth.currentUser.uid).collection("callRequests").doc(callRequestId);
-    await reqRef.update({ status: "rejected" });
-    hideIncomingCallModal();
+    const { type, groupId, callId } = activeCallRequest;
+
+    if (type !== "group" || !groupId || !callId) {
+      hideIncomingCallModal();
+      return;
+    }
+
+    try {
+      await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).update({
+        rejectedBy: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+      });
+    } catch (e) {
+      console.warn("Reject konnte nicht gespeichert werden", e);
+    } finally {
+      hideIncomingCallModal();
+    }
   };
 
-  // ========== LISTEN FOR INCOMING CALL REQUESTS =============
-  function listenForIncomingCalls() {
-    if (!auth || !db) return;
-    db.collection("users").doc(auth.currentUser.uid).collection("callRequests")
-      .where("status", "in", ["pending", "accepted", "rejected"])
-      .orderBy("createdAt", "desc")
+  // ========== LISTEN FOR INCOMING GROUP CALLS =============
+  // Firestore Rules in this project only allow group-member reads/writes in /groups/...,
+  // so users/{uid}/callRequests and the top-level /calls collection are intentionally not used here.
+  let incomingGroupUnsubscribe = null;
+  let incomingWatcherTimer = null;
+  let watchedGroupId = null;
+
+  function attachIncomingGroupListener(groupId) {
+    if (incomingGroupUnsubscribe) {
+      incomingGroupUnsubscribe();
+      incomingGroupUnsubscribe = null;
+    }
+
+    if (!groupId) return;
+
+    const callsRef = db.collection("groups").doc(groupId).collection("voice-calls");
+
+    incomingGroupUnsubscribe = callsRef
+      .where("status", "==", "ringing")
       .limit(1)
       .onSnapshot(async (snap) => {
         if (snap.empty) {
+          if (activeCallRequest?.type === "group" && activeCallRequest?.groupId === groupId) {
+            hideIncomingCallModal();
+          }
+          return;
+        }
+
+        const doc = snap.docs[0];
+        const data = doc.data() || {};
+
+        if (!auth?.currentUser?.uid) return;
+        const currentUid = auth.currentUser.uid;
+
+        if (data.initiator === currentUid) return;
+        if (Array.isArray(data.participants) && data.participants.includes(currentUid)) {
           hideIncomingCallModal();
           return;
         }
-        const req = snap.docs[0];
-        const data = req.data();
-        // Hole ggf. Gruppennamen
+        if (Array.isArray(data.rejectedBy) && data.rejectedBy.includes(currentUid)) {
+          hideIncomingCallModal();
+          return;
+        }
+
         let groupName = "";
-        if (data.type === "group" && data.groupId) {
-          try {
-            const groupDoc = await db.collection("groups").doc(data.groupId).get();
-            groupName = groupDoc.exists ? (groupDoc.data().name || "Gruppe") : "Gruppe";
-          } catch {}
-        }
+        try {
+          const groupDoc = await db.collection("groups").doc(groupId).get();
+          groupName = groupDoc.exists ? (groupDoc.data()?.name || "Gruppe") : "Gruppe";
+        } catch {}
+
         activeCallRequest = {
-          userUid: auth.currentUser.uid,
-          callRequestId: req.id,
-          type: data.type,
-          groupId: data.groupId,
-          callId: data.callId
+          type: "group",
+          groupId,
+          callId: doc.id
         };
-        // Status-Handling
-        if (data.status === "pending") {
-          showIncomingCallModal({ fromName: data.fromName, groupName, type: data.type });
-        } else if (data.status === "accepted") {
-          hideIncomingCallModal();
-        } else if (data.status === "rejected") {
-          hideIncomingCallModal();
-        }
+
+        showIncomingCallModal({
+          fromName: data.initiatorName || "Unbekannt",
+          groupName,
+          type: "group"
+        });
       });
+  }
+
+  function startIncomingGroupCallWatcher() {
+    if (incomingWatcherTimer) return;
+
+    incomingWatcherTimer = setInterval(() => {
+      const nextGroupId = window.__ECHTLUCKY_SELECTED_GROUP__ || null;
+      if (nextGroupId !== watchedGroupId) {
+        watchedGroupId = nextGroupId;
+        attachIncomingGroupListener(watchedGroupId);
+      }
+    }, 600);
   }
 
   let initialized = false;
@@ -258,6 +282,7 @@ users/{uid}/callRequests/{callRequestId} {
   const voiceStatus = document.getElementById("voiceStatus");
   const voiceParticipants = document.getElementById("voiceParticipants");
   const btnStartVoiceCall = document.getElementById("btnStartVoice");
+  const btnStartRingingCall = document.getElementById("btnStartCall");
   const btnEndVoiceCall = document.getElementById("btnEndVoice");
   const btnToggleMic = document.getElementById("btnToggleMic");
 
@@ -550,6 +575,98 @@ users/{uid}/callRequests/{callRequestId} {
   // START VOICE CALL (Initiator)
   // ============================================
 
+  async function startRingingGroupCall(groupId) {
+    try {
+      if (!auth.currentUser) {
+        window.notify?.show({
+          type: "error",
+          title: "Authentifizierung erforderlich",
+          message: "Du musst eingeloggt sein",
+          duration: 4500
+        });
+        return;
+      }
+
+      if (!groupId) {
+        window.notify?.show({
+          type: "error",
+          title: "Nicht unterstützt",
+          message: "Direktanrufe sind aktuell nicht aktiviert. Bitte starte/joine einen Gruppenanruf.",
+          duration: 5000
+        });
+        return;
+      }
+
+      if (currentVoiceCall) {
+        window.notify?.show({
+          type: "warn",
+          title: "Voice Chat",
+          message: "Beende erst den aktuellen Anruf",
+          duration: 3500
+        });
+        return;
+      }
+
+      localStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          typingNoiseDetection: true
+        },
+        video: false
+      });
+
+      const callId = `call_${Date.now()}_${auth.currentUser.uid}`;
+      const user = auth.currentUser;
+
+      currentVoiceCall = {
+        groupId,
+        callId,
+        isInitiator: true
+      };
+
+      await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).set({
+        initiator: user.uid,
+        initiatorName: user.displayName || "User",
+        createdAt: new Date(),
+        participants: [user.uid],
+        status: "ringing",
+        type: "group",
+        rejectedBy: []
+      });
+
+      listenForJoiningUsers(groupId, callId);
+      listenForOffers(groupId, callId);
+      listenForAnswers(groupId, callId);
+      listenForIceCandidates(groupId, callId);
+
+      updateVoiceUI(true, "Ruft an… (klingelt)");
+
+      window.notify?.show({
+        type: "info",
+        title: "Anruf",
+        message: "Anruf gestartet – warte auf Annahme",
+        duration: 4500
+      });
+    } catch (err) {
+      console.error("startRingingGroupCall error:", err);
+      const errorMsg =
+        err.name === "NotAllowedError"
+          ? "Mikrofonzugriff verweigert. Bitte erlaube Audiovorbereitung!"
+          : err.name === "NotFoundError"
+            ? "Kein Mikrofon gefunden. Bitte überprüfe dein Gerät!"
+            : "Fehler beim Starten des Anrufs";
+
+      window.notify?.show({
+        type: "error",
+        title: "Anruf Fehler",
+        message: errorMsg,
+        duration: 5000
+      });
+    }
+  }
+
   async function startVoiceCall(groupId) {
     try {
       if (!auth.currentUser) {
@@ -677,24 +794,15 @@ users/{uid}/callRequests/{callRequestId} {
         isInitiator: false
       };
 
-      let callRef, callDoc, existingParticipants = [];
-      if (groupId) {
-        // Gruppen-Call
-        callRef = db.collection("groups").doc(groupId).collection("voice-calls").doc(callId);
-        // Add self to participants
-        await callRef.update({
-          participants: window.firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
-        });
-        callDoc = await callRef.get();
-        existingParticipants = callDoc.data()?.participants || [];
-      } else {
-        // 1:1-Call
-        callRef = db.collection("calls").doc(callId);
-        callDoc = await callRef.get();
-        // Initiator und Empfänger
-        const callData = callDoc.data();
-        existingParticipants = [callData.initiator, callData.recipient];
-      }
+      const callRef = db.collection("groups").doc(groupId).collection("voice-calls").doc(callId);
+
+      // Add self to participants
+      await callRef.update({
+        participants: window.firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+      });
+
+      const callDoc = await callRef.get();
+      const existingParticipants = callDoc.data()?.participants || [];
 
       // Create offers for each existing participant (they will answer)
       for (const participantUid of existingParticipants) {
@@ -847,11 +955,13 @@ users/{uid}/callRequests/{callRequestId} {
     if (isActive) {
       if (voiceStatus) voiceStatus.textContent = statusText;
       if (btnStartVoiceCall) btnStartVoiceCall.style.display = "none";
+      if (btnStartRingingCall) btnStartRingingCall.style.display = "none";
       if (btnEndVoiceCall) btnEndVoiceCall.style.display = "block";
       if (btnToggleMic) btnToggleMic.style.display = "block";
     } else {
-      if (voiceStatus) voiceStatus.textContent = "Not in a call";
+      if (voiceStatus) voiceStatus.textContent = "Nicht im Call";
       if (btnStartVoiceCall) btnStartVoiceCall.style.display = "block";
+      if (btnStartRingingCall) btnStartRingingCall.style.display = "block";
       if (btnEndVoiceCall) btnEndVoiceCall.style.display = "none";
       if (btnToggleMic) btnToggleMic.style.display = "none";
     }
@@ -893,7 +1003,7 @@ users/{uid}/callRequests/{callRequestId} {
 
     isMicMuted = !isMicMuted;
     btnToggleMic.classList.toggle("is-muted", isMicMuted);
-    btnToggleMic.textContent = isMicMuted ? "🔇 Unmute" : "🎤 Mute";
+    btnToggleMic.textContent = isMicMuted ? "🔊 Entstummen" : "🔇 Stummschalten";
   }
 
   // ============================================
@@ -932,12 +1042,27 @@ users/{uid}/callRequests/{callRequestId} {
       btnEndVoiceCall.addEventListener("click", endVoiceCall);
     }
 
+    if (btnStartRingingCall) {
+      btnStartRingingCall.addEventListener("click", () => {
+        if (!window.__ECHTLUCKY_SELECTED_GROUP__) {
+          window.notify?.show({
+            type: "error",
+            title: "Keine Gruppe ausgewählt",
+            message: "Bitte wähle eine Gruppe aus",
+            duration: 4500
+          });
+          return;
+        }
+        startRingingGroupCall(window.__ECHTLUCKY_SELECTED_GROUP__);
+      });
+    }
+
     if (btnToggleMic) {
       btnToggleMic.addEventListener("click", toggleMic);
     }
 
     // Start incoming call listener
-    listenForIncomingCalls();
+    startIncomingGroupCallWatcher();
     // Push-Benachrichtigungen initialisieren
     initPushNotifications();
 

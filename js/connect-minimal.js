@@ -1,4 +1,4 @@
-// js/connect-minimal.js v2 — 3-Column Layout Controller
+﻿// js/connect-minimal.js v2 — 3-Column Layout Controller
 // Manages groups list (left column), group selection, and auth state
 
 (function () {
@@ -109,7 +109,7 @@
               <div class="group-item-meta">${group.members?.length || 0} Members</div>
             `;
 
-            div.addEventListener("click", () => selectGroup(doc.id, group));
+            div.addEventListener("click", () => selectGroup(doc.id, group, div));
             groupsListPanel.appendChild(div);
           });
         });
@@ -121,7 +121,7 @@
   }
 
   // Select a group
-  function selectGroup(groupId, groupData) {
+  function selectGroup(groupId, groupData, clickedEl) {
     selectedGroupId = groupId;
     
     // Store globally for voice-chat.js
@@ -131,7 +131,7 @@
     document.querySelectorAll(".group-item").forEach((item) => {
       item.classList.remove("is-active");
     });
-    event.currentTarget?.classList.add("is-active");
+    clickedEl?.classList.add("is-active");
 
     // Show chat container
     const chatContainer = document.getElementById("chatContainer");
@@ -140,14 +140,15 @@
     if (emptyChatState) emptyChatState.style.display = "none";
 
     // Update chat header
-    document.getElementById("chatGroupTitle").textContent =
-      groupData.name || "Gruppe";
+    const chatGroupTitle = document.getElementById("chatGroupTitle");
+    if (chatGroupTitle) chatGroupTitle.textContent = groupData.name || "Gruppe";
 
     // Update member settings
-    document.getElementById("groupNameInput").value =
-      groupData.name || "Gruppe";
-    document.getElementById("groupMemberCount").value =
-      groupData.members?.length || 0;
+    const groupNameInput = document.getElementById("groupNameInput");
+    if (groupNameInput) groupNameInput.value = groupData.name || "Gruppe";
+
+    const groupMemberCount = document.getElementById("groupMemberCount");
+    if (groupMemberCount) groupMemberCount.value = groupData.members?.length || 0;
 
     // Dispatch event for connect.js
     window.dispatchEvent(
@@ -327,7 +328,7 @@
       return;
     }
 
-    console.log("✅ User logged in:", currentUser.email);
+    console.log("… User logged in:", currentUser.email);
     statusLabel.textContent = `Hallo, ${currentUser.displayName || currentUser.email?.split("@")[0] || "User"}!`;
     btnLogin.style.display = "none";
     authStatusCard.style.display = "none";
@@ -339,6 +340,16 @@
 
   // Setup event listeners (after Firebase ready)
   function init() {
+    if (btnLogin) {
+      btnLogin.addEventListener("click", () => {
+        try {
+          const file = (window.location.pathname || "").split("/").pop() || "connect.html";
+          const returnTo = file + (window.location.search || "") + (window.location.hash || "");
+          sessionStorage.setItem("echtlucky:returnTo", returnTo);
+        } catch (_) {}
+        window.location.href = "login.html";
+      });
+    }
     console.log("🟢 connect-minimal.js: init() called");
 
     // Create group button
@@ -404,3 +415,5 @@
 
   console.log("✅ connect-minimal.js initialized");
 })();
+
+

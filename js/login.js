@@ -113,6 +113,27 @@
       msgBox.className = "msg";
     }
 
+    function redirectAfterAuth() {
+      let target = "account.html";
+      try {
+        const returnTo = sessionStorage.getItem("echtlucky:returnTo") || "";
+        sessionStorage.removeItem("echtlucky:returnTo");
+
+        const cleaned = String(returnTo || "").trim();
+        if (
+          cleaned &&
+          !cleaned.includes("://") &&
+          !cleaned.startsWith("//") &&
+          !cleaned.toLowerCase().includes("login.html") &&
+          /^[a-z0-9._/\\-]+\\.html(\\?.*)?(#.*)?$/i.test(cleaned)
+        ) {
+          target = cleaned;
+        }
+      } catch (_) {}
+
+      window.location.href = target;
+    }
+
     function setTab(mode) {
       clearMsg();
       if (mode === "login") {
@@ -256,7 +277,7 @@
         await ensureUsernameMapping(u, u?.displayName || "");
 
         showMsg("Eingeloggt. Weiterleitung…", "success");
-        setTimeout(() => (window.location.href = "account.html"), 450);
+        setTimeout(() => redirectAfterAuth(), 450);
       } catch (err) {
         showMsg(err?.message || "Login fehlgeschlagen.");
       }
@@ -296,7 +317,7 @@
         await ensureUsernameMapping(cred.user, unameLower);
 
         showMsg("Account erstellt. Weiterleitung…", "success");
-        setTimeout(() => (window.location.href = "account.html"), 450);
+        setTimeout(() => redirectAfterAuth(), 450);
       } catch (err) {
         showMsg(err?.message || "Registrierung fehlgeschlagen.");
       }
@@ -345,7 +366,7 @@
         await ensureUsernameMapping(u, finalUsername || "");
 
         showMsg("Mit Google eingeloggt. Weiterleitung…", "success");
-        setTimeout(() => (window.location.href = "account.html"), 450);
+        setTimeout(() => redirectAfterAuth(), 450);
       } catch (err) {
         showMsg(err?.message || "Google Login fehlgeschlagen.");
       }
