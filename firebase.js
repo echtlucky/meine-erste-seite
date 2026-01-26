@@ -207,6 +207,12 @@
   window.isAdmin = isAdminByEmail;
   window.saveUsername = saveUsername;
 
+  // ✅ Dispatch ready event so other scripts can wait for it
+  window.firebaseReady = true;
+  const event = new CustomEvent('firebaseReady', { detail: { auth, db } });
+  window.dispatchEvent(event);
+  document.dispatchEvent(event);
+
   console.log("🔥 Firebase initialisiert (echtlucky v2.2)", {
     auth: !!auth,
     firestore: !!db,

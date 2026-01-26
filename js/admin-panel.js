@@ -1,18 +1,46 @@
 ﻿/* =========================
-   admin-panel.js — echtlucky (v2)
-   Vollständiges Admin-Panel
+   admin-panel.js — echtlucky (v3)
+   Vollständiges Admin-Panel mit Event-waiting
 ========================= */
 
 (() => {
   "use strict";
 
-  const auth = window.auth || window.echtlucky?.auth;
-  const db = window.db || window.echtlucky?.db;
+  let auth = null;
+  let db = null;
   const ADMIN_EMAIL = "lucassteckel04@gmail.com";
 
-  if (!auth || !db) {
-    console.error("❌ Admin Panel: Firebase nicht initialisiert");
-    return;
+  // Wait for Firebase to be ready
+  function waitForFirebase() {
+    return new Promise((resolve) => {
+      if (window.firebaseReady && window.auth && window.db) {
+        auth = window.auth;
+        db = window.db;
+        console.log("✅ Admin Panel: Firebase already ready");
+        resolve();
+        return;
+      }
+
+      const handleReady = (event) => {
+        auth = window.auth || event.detail?.auth;
+        db = window.db || event.detail?.db;
+        console.log("✅ Admin Panel: Firebase ready via event");
+        resolve();
+      };
+
+      window.addEventListener("firebaseReady", handleReady, { once: true });
+      document.addEventListener("firebaseReady", handleReady, { once: true });
+
+      // Timeout fallback
+      setTimeout(() => {
+        if (window.auth && window.db) {
+          auth = window.auth;
+          db = window.db;
+          console.log("✅ Admin Panel: Firebase ready via timeout");
+          resolve();
+        }
+      }, 3000);
+    });
   }
 
   // DOM ELEMENTS
@@ -483,9 +511,71 @@
   }
 
   // Start initialization
+  async function startInit() {
+    console.log("🔵 Admin Panel starting...");
+    await waitForFirebase();
+
+    if (!auth || !db) {
+      console.error("❌ Firebase NOT available");
+      notify("Firebase nicht initialisiert!", "error");
+      return;
+    }
+
+    console.log("✅ Firebase is ready, setting up listeners");
+    setupListeners();
+
+    // Check auth state
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        console.log("⚠️ No user, going to login");
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        console.log("🔵 Checking admin access for:", user.email);
+        const userSnap = await db.collection("users").doc(user.uid).get();
+        const userData = userSnap.data() || {};
+        const isAdmin = user.email === ADMIN_EMAIL || userData.role === "admin";
+
+        if (!isAdmin) {
+          console.warn("⛔ Not admin");
+          notify("Nicht als Admin berechtigt", "error");
+          setTimeout(() => (window.location.href = "index.html"), 2000);
+          return;
+        }
+
+        console.log("✅ Admin confirmed");
+        if (adminStatus) adminStatus.textContent = `✅ Admin (${user.email})`;
+
+        await logAdminAction("panel_opened", "Admin-Panel geöffnet");
+        await loadPosts();
+        await loadUsers();
+        await loadBans();
+        await loadAdminLogs();
+        await loadStatistics();
+        loadSettings();
+
+        console.log("✅ Admin panel fully ready");
+
+        setInterval(async () => {
+          try {
+            await loadAdminLogs();
+            await loadStatistics();
+          } catch (e) {
+            console.warn("Refresh error:", e);
+          }
+        }, 30000);
+      } catch (err) {
+        console.error("Auth check error:", err);
+        notify(`Fehler: ${err.message}`, "error");
+      }
+    });
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", startInit);
   } else {
-    init();
+    startInit();
   }
 })();

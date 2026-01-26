@@ -19,8 +19,8 @@
   const USER_COLLECTION = "users";
   const COOLDOWN_DAYS = 7;
 
-  const auth = window.echtlucky?.auth || window.auth || null;
-  const db   = window.echtlucky?.db   || window.db   || null;
+  let auth = null;
+  let db = null;
 
   const el = (id) => document.getElementById(id);
 
@@ -536,6 +536,24 @@
   }
 
   async function boot() {
+    // Wait for Firebase to be ready
+    if (!auth || !db) {
+      if (window.firebaseReady && window.auth && window.db) {
+        auth = window.auth;
+        db = window.db;
+      } else {
+        await new Promise((resolve) => {
+          const handler = () => {
+            auth = window.auth;
+            db = window.db;
+            resolve();
+          };
+          window.addEventListener("firebaseReady", handler, { once: true });
+          setTimeout(() => resolve(), 5000);
+        });
+      }
+    }
+
     renderLocalOnly();
 
     if (!auth || typeof auth.onAuthStateChanged !== "function") {
@@ -644,5 +662,10 @@
     });
   }
 
-  boot();
+  // Initialize on DOM load
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => boot());
+  } else {
+    boot();
+  }
 })();

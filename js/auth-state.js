@@ -8,17 +8,47 @@
 (function () {
   "use strict";
 
-  // ✅ Fix: konsistenter Guard-Name (bei dir war ein Tippfehler drin)
+  // ✅ Fix: konsistenter Guard-Name
   if (window.__ECHTLUCKY_AUTH_WIRED__) return;
   window.__ECHTLUCKY_AUTH_WIRED__ = true;
 
   const appNS = (window.echtlucky = window.echtlucky || {});
-  const auth = window.auth || appNS.auth;
-  const db = window.db || appNS.db;
 
-  if (!auth || typeof auth.onAuthStateChanged !== "function") {
-    console.error("auth-state.js: auth fehlt. firebase.js muss vorher geladen werden.");
-    return;
+  // Wait for Firebase to be ready
+  let auth = null;
+  let db = null;
+
+  function waitForFirebase() {
+    return new Promise((resolve) => {
+      if (window.auth && window.db) {
+        auth = window.auth;
+        db = window.db;
+        console.log("✅ auth-state.js: Firebase ready");
+        resolve();
+        return;
+      }
+
+      const handler = () => {
+        auth = window.auth;
+        db = window.db;
+        console.log("✅ auth-state.js: Firebase ready via event");
+        resolve();
+      };
+
+      window.addEventListener("firebaseReady", handler, { once: true });
+
+      setTimeout(() => {
+        if (window.auth && window.db) {
+          auth = window.auth;
+          db = window.db;
+          console.log("✅ auth-state.js: Firebase ready via timeout");
+          resolve();
+        } else {
+          console.error("❌ auth-state.js: Firebase timeout");
+          resolve();
+        }
+      }, 5000);
+    });
   }
 
   // globale Quelle der Wahrheit
@@ -157,54 +187,36 @@
 
     if (adminPanelLink) {
       adminPanelLink.style.display = "none";
-      const role = await resolveRole(user);
-      if (role === "admin") adminPanelLink.style.display = "block";
-    }
-  }
-
-  function emitAuthEvent(user) {
-    window.dispatchEvent(new CustomEvent("echtlucky:auth", { detail: { user } }));
-  }
-
-  // -----------------------------
-  // Anti-Flicker
-  // -----------------------------
-  let lastUid = "__init__";
-  let lastTs = 0;
-
-  function shouldSkip(uid) {
-    const now = Date.now();
-    const tooFast = (now - lastTs) < 180;
-    const same = uid === lastUid;
-    if (same && tooFast) return true;
-    lastUid = uid;
-    lastTs = now;
-    return false;
-  }
-
-  // -----------------------------
-  // Main listener
-  // -----------------------------
-  auth.onAuthStateChanged(async (user) => {
-    const uid = user?.uid || null;
-    if (shouldSkip(uid)) return;
-
-    window.__ECHTLUCKY_CURRENT_USER__ = user || null;
-
-  // optional: ensure user doc exists / lastLoginAt update
-    if (user && typeof appNS.ensureUserDoc === "function") {
-      try { await appNS.ensureUserDoc(user); } catch (_) {}
-    }
-
-    // Update presence status (isOnline)
-    if (user && db && db.collection) {
       try {
-        await db.collection("users").doc(user.uid).update({
-          isOnline: true,
-          lastSeen: new Date()
-        });
-      } catch (err) {
-        // User doc might not exist yet, create it
+        const role = await resolveRole(user);
+        if (role === "admin") {
+          adminPanelLink.style.display = "inline-flex";
+        }
+      } catch (_) {}
+    }
+  }
+
+  // Init when ready
+  async function init() {
+    console.log("🔵 auth-state.js initializing");
+    await waitForFirebase();
+
+    if (!auth) {
+      console.error("❌ auth-state.js: auth still not ready");
+      return;
+    }
+
+    console.log("✅ auth-state.js setup complete");
+
+    auth.onAuthStateChanged(async (user) => {
+      window.__ECHTLUCKY_CURRENT_USER__ = user || null;
+      
+      // Update presence
+      let lastUid = localStorage.getItem("__echtlucky_lastuid") || "__init__";
+      
+      if (user && db && db.collection) {
+        lastUid = user.uid;
+        localStorage.setItem("__echtlucky_lastuid", user.uid);
         try {
           await db.collection("users").doc(user.uid).set({
             isOnline: true,
@@ -215,10 +227,7 @@
             createdAt: new Date()
           }, { merge: true });
         } catch (_) {}
-      }
-    } else if (!user) {
-      // User logged out - set isOnline to false for last known uid
-      if (lastUid && lastUid !== "__init__" && db && db.collection) {
+      } else if (!user && db && db.collection && lastUid !== "__init__") {
         try {
           await db.collection("users").doc(lastUid).update({
             isOnline: false,
@@ -226,27 +235,32 @@
           });
         } catch (_) {}
       }
-    }
 
-    await applyHeaderState(user || null);
-    applyAccountCTAs(user || null);
+      await applyHeaderState(user || null);
+      applyAccountCTAs(user || null);
+      emitAuthEvent(user || null);
+    });
 
-    emitAuthEvent(user || null);
-  });
+    // Header injected later (fetch)
+    window.addEventListener("echtlucky:header-ready", async () => {
+      const u = auth.currentUser || null;
+      window.__ECHTLUCKY_CURRENT_USER__ = u;
+      await applyHeaderState(u);
+      applyAccountCTAs(u);
+    });
 
-  // Header injected later (fetch)
-  window.addEventListener("echtlucky:header-ready", async () => {
-    const u = auth.currentUser || null;
-    window.__ECHTLUCKY_CURRENT_USER__ = u;
-    await applyHeaderState(u);
-    applyAccountCTAs(u);
-  });
+    // fallback
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!headerReady()) return;
+      const u = auth.currentUser || window.__ECHTLUCKY_CURRENT_USER__ || null;
+      await applyHeaderState(u);
+      applyAccountCTAs(u);
+    });
+  }
 
-  // fallback: falls event nie gefeuert wird
-  document.addEventListener("DOMContentLoaded", async () => {
-    if (!headerReady()) return;
-    const u = auth.currentUser || window.__ECHTLUCKY_CURRENT_USER__ || null;
-    await applyHeaderState(u);
-    applyAccountCTAs(u);
-  });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();

@@ -6,20 +6,64 @@
 (() => {
   "use strict";
 
+  let db = null;
   const PAGE_SIZE = 5;
   let lastVisible = null;
   let isLoading = false;
 
+  // Wait for Firebase to be ready
+  function waitForFirebase() {
+    return new Promise((resolve) => {
+      if (window.firebaseReady && window.db) {
+        db = window.db;
+        console.log("✅ blog.js: Firebase ready");
+        resolve();
+        return;
+      }
+
+      const handler = () => {
+        db = window.db;
+        console.log("✅ blog.js: Firebase ready via event");
+        resolve();
+      };
+
+      window.addEventListener("firebaseReady", handler, { once: true });
+
+      setTimeout(() => {
+        if (window.db) {
+          db = window.db;
+          console.log("✅ blog.js: Firebase ready via timeout");
+          resolve();
+        } else {
+          console.error("❌ blog.js: Firebase timeout");
+          resolve();
+        }
+      }, 5000);
+    });
+  }
+
   // ==================== Initialization ====================
-  function init() {
-    console.log("🔵 blog.js initialized");
-    
+  async function init() {
+    console.log("🔵 blog.js initializing");
+    await waitForFirebase();
+
+    if (!db) {
+      console.error("❌ blog.js: Firebase NOT ready");
+      return;
+    }
+
+    console.log("✅ blog.js setup complete");
     loadPosts();
     setupEventListeners();
     loadHeader();
   }
 
-  // ==================== DOM Elements ====================
+  // Start when DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
   function getElements() {
     return {
       blogList: document.getElementById("blog-list"),
@@ -356,12 +400,5 @@
       sharePost(postId);
     }
   });
-
-  // ==================== DOMContentLoaded ====================
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
 
 })();

@@ -20,23 +20,51 @@
   }
   window.__ECHTLUCKY_LOGIN_LOADED__ = true;
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const authRef =
-      window.echtlucky?.auth ||
-      window.auth ||
-      (typeof auth !== "undefined" ? auth : null);
+  // Wait for Firebase to be ready
+  function waitForFirebase() {
+    return new Promise((resolve) => {
+      if (window.firebaseReady && window.auth && window.db && window.firebase) {
+        console.log("✅ login.js: Firebase ready");
+        resolve();
+        return;
+      }
 
-    const dbRef =
-      window.echtlucky?.db ||
-      window.db ||
-      (typeof db !== "undefined" ? db : null);
+      const handler = () => {
+        console.log("✅ login.js: Firebase ready via event");
+        resolve();
+      };
 
-    const ADMIN_EMAIL = "lucassteckel04@gmail.com";
+      window.addEventListener("firebaseReady", handler, { once: true });
 
-    if (!authRef || !dbRef || typeof firebase === "undefined") {
-      console.error("login.js: auth/db/firebase missing. Prüfe firebase.js + SDK includes.");
+      setTimeout(() => {
+        if (window.auth && window.db && window.firebase) {
+          console.log("✅ login.js: Firebase ready via timeout");
+          resolve();
+        } else {
+          console.warn("⚠️ login.js: Firebase timeout - may be delayed");
+          resolve();
+        }
+      }, 5000);
+    });
+  }
+
+  async function initLoginForm() {
+    await waitForFirebase();
+
+    const authRef = window.auth || window.echtlucky?.auth;
+    const dbRef = window.db || window.echtlucky?.db;
+    const firebaseObj = window.firebase;
+
+    if (!authRef || !dbRef || !firebaseObj) {
+      console.error("❌ login.js: Firebase dependencies missing after wait");
       return;
     }
+
+    console.log("🔵 login.js initializing");
+    initLogin(authRef, dbRef, firebaseObj);
+  }
+
+  function initLogin(authRef, dbRef, firebaseObj) {
 
     // ---- DOM
     const tabLogin = document.getElementById("tabLogin");
@@ -347,5 +375,12 @@
     });
 
     // ✅ Absichtlich KEIN auth.onAuthStateChanged Redirect hier
-  });
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initLoginForm);
+  } else {
+    initLoginForm();
+  }
 })();
