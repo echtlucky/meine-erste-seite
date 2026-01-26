@@ -1,4 +1,4 @@
-/* Settings Card & Switches */
+/* Group Settings Modal Sections */
 .settings-section {
   background: #23272a;
   border-radius: 1.2rem;
@@ -7,367 +7,47 @@
   color: #fff;
   margin-bottom: 0;
 }
-.settings-user-card {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  background: #18191c;
-  border-radius: 0.8rem;
-  padding: 1rem 1.2rem;
-  margin-bottom: 1.2rem;
-}
-.settings-user-card .avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #5865f2;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-}
-.settings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-}
-.setting-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #18191c;
-  border-radius: 0.7rem;
-  padding: 1rem 1.2rem;
-}
-.switch-label {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #fff;
-}
-.switch {
-  position: relative;
-  width: 40px;
-  height: 22px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: #40444b;
-  outline: none;
-  border-radius: 22px;
-  box-shadow: 0 0 2px #23272a;
-  transition: background 0.2s;
-  margin-left: 1rem;
-}
-.switch:checked {
-  background: #5865f2;
-}
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0;
-  right: 0; bottom: 0;
-  background: transparent;
-  border-radius: 22px;
-  transition: .4s;
-}
-.switch:before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #fff;
-  transition: .4s;
-}
-.switch:checked:before {
-  left: 22px;
-}
-.theme-select {
-  background: #23272a;
-  color: #fff;
-  border: 1px solid #40444b;
-  border-radius: 0.5rem;
-  padding: 0.4rem 1rem;
-  font-size: 1rem;
-  margin-left: 1rem;
-}
 @media (max-width: 700px) {
   .settings-section {
     padding: 1rem 0.7rem 0.7rem 0.7rem;
     border-radius: 12px;
   }
-  .settings-user-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.7rem;
-    padding: 0.7rem 0.7rem;
-  }
-  .setting-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.7rem;
-    padding: 0.7rem 0.7rem;
-  }
 }
-/* Discord-Style: Single Card Connect */
+
+/* Connect: Single Main Card Shell */
 .connect-single-card-shell {
-  max-width: 600px;
+  width: 100%;
+  max-width: 1200px;
   margin: 2.5rem auto 2rem auto;
   padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-.discord-card.connect-main-card {
-  background: #23272a;
-  border-radius: 1.2rem;
-  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
-  padding: 1.5rem 1.5rem 1.2rem 1.5rem;
-  margin-bottom: 0;
-  color: #fff;
-  min-height: 60dvh;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
+
+.auth-status-card {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.25rem 1.25rem;
+  backdrop-filter: blur(10px);
 }
-.connect-header-row {
+
+.auth-status-card__row {
   display: flex;
+  gap: 0.8rem;
   align-items: center;
   justify-content: space-between;
-  gap: 1.2rem;
-}
-.connect-user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-.connect-user-info .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #5865f2;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-}
-.connect-actions {
-  display: flex;
-  gap: 0.7rem;
-}
-.connect-tabs-row {
-  display: flex;
-  gap: 0.7rem;
-  margin-bottom: 0.5rem;
-  flex-wrap: wrap;
-}
-.connect-tab {
-  background: #23272a;
-  color: #fff;
-  border: none;
-  padding: 0.7rem 1.3rem;
-  border-radius: 0.8rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.connect-tab.is-active,
-.connect-tab:hover {
-  background: #5865f2;
-  color: #fff;
-}
-.user-status {
-  display: block;
-  font-size: 0.98rem;
-  color: #b9bbbe;
 }
 @media (max-width: 700px) {
   .connect-single-card-shell {
-    padding: 0 0.3rem;
-  }
-  .discord-card.connect-main-card {
-    padding: 1rem 0.7rem 0.7rem 0.7rem;
-    border-radius: 12px;
-  }
-  .connect-header-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.7rem;
-  }
-  .connect-tabs-row {
-    gap: 0.3rem;
-  }
-  .sidebar {
-    background: var(--bg-sidebar);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem 0;
-    box-shadow: var(--shadow);
-    z-index: 10;
+    padding: 0 0.75rem;
   }
 }
 
-
-.sidebar {
-  background: var(--bg-sidebar);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem 0;
-  box-shadow: var(--shadow);
-  z-index: 10;
-}
-.sidebar-logo {
-  font-size: 2rem;
-  color: var(--accent);
-  margin-bottom: 2rem;
-}
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
-}
-.sidebar-nav-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.3rem;
-  padding: 1rem 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  cursor: pointer;
-  transition: color 0.2s, background 0.2s;
-}
-.sidebar-nav-btn.is-active,
-.sidebar-nav-btn:hover {
-  color: var(--accent);
-  background: var(--bg-card);
-}
-.sidebar-nav-btn span {
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-.sidebar-user {
-  margin-top: auto;
-  padding: 1rem 0 0 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-top: 1px solid var(--border);
-}
-.sidebar-user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--accent-light);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-.sidebar-user-info {
-  text-align: center;
-}
-#sidebarUserName {
-  font-weight: 700;
-  font-size: 1rem;
-}
-.user-status {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-.user-status.online { color: var(--success); }
-.user-status.offline { color: var(--danger); }
-
-/* Main Panel */
-.connect-main-panel {
-  flex: 1 1 0%;
-  background: var(--bg-panel);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  padding: 0;
-  overflow: hidden;
-}
-#connectContent {
-  padding: 2rem 2.5rem;
-  height: 100%;
-  overflow-y: auto;
-}
-
-/* Right Panel */
-.connect-right-panel {
-  width: 340px;
-  background: var(--bg-card);
-  border-left: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  min-width: 240px;
-  max-width: 400px;
-  padding: 2rem 1.5rem;
-  overflow-y: auto;
-}
-#connectDetails {
-  width: 100%;
-}
-
-/* Card Styles */
-.discord-card {
-  background: var(--bg-card);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 2rem;
-  margin-bottom: 2rem;
-  border: 1px solid var(--border);
-}
-.discord-card h2 {
-  margin-top: 0;
-  color: var(--accent);
-  font-size: 1.5rem;
-  font-weight: 800;
-}
-
-/* Button Styles */
-.btn, .btn-primary, .btn-danger, .btn-success {
-  border-radius: 8px;
-  font-weight: 700;
-  padding: 0.7em 1.4em;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-}
-.btn-primary:hover {
-  background: var(--accent-light);
-}
-.btn-danger {
-  background: var(--danger);
-  color: #fff;
-}
-.btn-success {
-  background: var(--success);
-  color: #fff;
-}
+/* Buttons
+   Base styles come from css/style.css (.btn).
+   Keep Connect CSS focused on layout/states only. */
 
 /* Input Styles */
 input, select, textarea {
@@ -386,74 +66,9 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--accent);
 }
 
-/* Responsive & Mobile */
-@media (max-width: 1200px) {
-  .connect-right-panel {
-    display: none;
-  }
-}
-@media (max-width: 900px) {
-  .connect-discord-shell {
-    flex-direction: column;
-  }
-  .connect-sidebar {
-    flex-direction: row;
-    width: 100vw;
-    height: 60px;
-    padding: 0;
-    justify-content: space-between;
-    align-items: center;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    box-shadow: 0 -2px 16px 0 rgba(0,0,0,0.18);
-  }
-  .sidebar-logo { display: none; }
-  .sidebar-nav {
-    flex-direction: row;
-    gap: 0.5rem;
-    width: auto;
-  }
-  .sidebar-nav-btn {
-    font-size: 1.2rem;
-    padding: 0.5rem 0.7rem;
-    flex-direction: column;
-    gap: 0.1rem;
-  }
-  .sidebar-user { display: none; }
-  .connect-main-panel {
-    padding: 0.5rem;
-  }
-  #connectContent {
-    padding: 1rem 0.5rem;
-  }
-}
-@media (max-width: 600px) {
-  .discord-card {
-    padding: 1rem;
-    border-radius: 10px;
-  }
-  .connect-main-panel {
-    padding: 0;
-  }
-  #connectContent {
-    padding: 0.5rem 0.2rem;
-  }
-
-
 /* ==========================================
    3-COLUMN LAYOUT
    ========================================== */
-
-
-
-.sidebar-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--accent);
-}
 .connect-layout {
   display: grid;
   grid-template-columns: 280px 1fr 320px;
@@ -752,6 +367,10 @@ input:focus, select:focus, textarea:focus {
   border-top-right-radius: 6px;
 }
 
+.message.is-mine .message-author {
+  display: none;
+}
+
 .message:not(.is-mine) {
   border-top-left-radius: 6px;
 }
@@ -761,7 +380,11 @@ input:focus, select:focus, textarea:focus {
 }
 
 .message-author {
-  display: none;
+  display: block;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
 }
 
 .message-text {
@@ -830,6 +453,48 @@ input:focus, select:focus, textarea:focus {
 .empty-chat-inner h3 {
   margin: 0.5rem 0 0.25rem 0;
   color: var(--text);
+}
+
+.empty-chat-icon {
+  font-size: 2rem;
+  margin: 0 0 1rem 0;
+}
+
+.settings-separator {
+  margin: 1rem 0;
+  border: none;
+  border-top: 1px solid rgba(0, 255, 136, 0.15);
+}
+
+.incoming-call-dialog {
+  max-width: 370px;
+}
+
+.incoming-call-center {
+  text-align: center;
+}
+
+.incoming-call-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.incoming-call-from {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #00ff88;
+  margin-bottom: 0.5rem;
+}
+
+.incoming-call-group {
+  font-size: 1rem;
+  color: rgba(224, 255, 224, 0.7);
+  margin-bottom: 1.2rem;
+}
+
+.modal-btn--reject {
+  background: linear-gradient(135deg, #ff3366, #ff1a4d);
+  color: #fff;
 }
 
 /* Voice Section */
@@ -960,6 +625,34 @@ input:focus, select:focus, textarea:focus {
   font-weight: 600;
   color: var(--text);
   font-size: 0.95rem;
+}
+
+.member-status-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.member-presence-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(224, 255, 224, 0.35);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+}
+
+.member-presence-dot[data-state="online"] {
+  background: #00ff88;
+}
+
+.member-presence-dot[data-state="away"] {
+  background: #ffd54a;
+}
+
+.member-presence-dot[data-state="offline"] {
+  background: rgba(224, 255, 224, 0.25);
 }
 
 .member-role {
@@ -1245,39 +938,9 @@ input:focus, select:focus, textarea:focus {
    VOICE BUTTON STYLES
    ========================================== */
 
-#btnToggleMic {
-  padding: 0.6rem 1rem;
-  background: rgba(0, 255, 136, 0.15);
-  border: 1px solid rgba(0, 255, 136, 0.3);
-  border-radius: 8px;
-  color: var(--accent);
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  display: none;
-}
-
-#btnToggleMic:disabled,
-#btnToggleMic[disabled] {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-#btnToggleMic:hover {
-  background: rgba(0, 255, 136, 0.25);
-  border-color: var(--accent);
-}
-
 #btnToggleMic.is-muted {
-  background: rgba(255, 51, 102, 0.15);
   border-color: rgba(255, 51, 102, 0.3);
   color: #ff3366;
-}
-
-#btnToggleMic.is-muted:hover {
-  background: rgba(255, 51, 102, 0.25);
-  border-color: #ff3366;
 }
 
 /* ==========================================
@@ -1341,6 +1004,10 @@ input:focus, select:focus, textarea:focus {
   .auth-status-card {
     padding: 1rem;
   }
+  .auth-status-card__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
   .groups-header, .members-header {
     flex-direction: column;
     gap: 0.5rem;
@@ -1379,7 +1046,7 @@ input:focus, select:focus, textarea:focus {
     border: 1px solid rgba(0, 255, 136, 0.12);
     padding: calc(0.6rem + env(safe-area-inset-bottom)) 0.4rem 0.6rem 0.4rem;
   }
-  .btn, .btn-primary, .btn-lg, .btn-xs {
+  .connect-page .btn, .connect-page .btn-lg, .connect-page .btn-xs {
     min-height: 48px;
     font-size: 1.08em;
     border-radius: 14px;

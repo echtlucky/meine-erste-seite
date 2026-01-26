@@ -57,6 +57,120 @@
   let messagesUnsubscribe = null;
   let friendSearchTimeout = null;
   let currentUserFriends = [];
+  const userCache = new Map(); // uid -> { displayName, email }
+
+  // Presence (Firestone rules allow write only to /presence/{uid})
+  let presenceHeartbeatTimer = null;
+  let presenceListenersBound = false;
+  const presenceCache = new Map(); // uid -> { state, lastActiveAtMs }
+  const presenceCacheFetchedAt = new Map(); // uid -> ms
+  const presenceCacheInFlight = new Set(); // uid
+
+  async function writePresence(state) {
+    if (!auth?.currentUser?.uid || !db || !firebase) return;
+
+    try {
+      await db.collection("presence").doc(auth.currentUser.uid).set(
+        {
+          state,
+          page: "connect",
+          lastActiveAt: firebase.firestore.FieldValue.serverTimestamp()
+        },
+        { merge: true }
+      );
+    } catch (e) {
+      console.warn("Presence update fehlgeschlagen", e);
+    }
+  }
+
+  function stopPresenceHeartbeat() {
+    if (presenceHeartbeatTimer) {
+      clearInterval(presenceHeartbeatTimer);
+      presenceHeartbeatTimer = null;
+    }
+  }
+
+  function startPresenceHeartbeat() {
+    stopPresenceHeartbeat();
+
+    // Immediate update + heartbeat (stale-data friendly; clients can treat old timestamps as offline)
+    writePresence(document.hidden ? "away" : "online");
+
+    presenceHeartbeatTimer = setInterval(() => {
+      writePresence(document.hidden ? "away" : "online");
+    }, 30000);
+
+    if (!presenceListenersBound) {
+      presenceListenersBound = true;
+
+      document.addEventListener("visibilitychange", () => {
+        writePresence(document.hidden ? "away" : "online");
+      });
+
+      window.addEventListener("beforeunload", () => {
+        // Best-effort; might not complete, but helps on normal navigations.
+        writePresence("offline");
+      });
+    }
+  }
+
+  async function refreshPresence(uids) {
+    if (!auth?.currentUser?.uid || !db) return false;
+
+    const now = Date.now();
+    const unique = Array.from(new Set(uids || [])).filter(Boolean);
+
+    const toFetch = unique.filter((uid) => {
+      if (presenceCacheInFlight.has(uid)) return false;
+      const last = presenceCacheFetchedAt.get(uid) || 0;
+      return now - last > 20000;
+    });
+
+    if (!toFetch.length) return false;
+
+    toFetch.forEach((uid) => presenceCacheInFlight.add(uid));
+
+    let changed = false;
+    await Promise.all(
+      toFetch.map(async (uid) => {
+        try {
+          const snap = await db.collection("presence").doc(uid).get();
+          const data = snap.exists ? snap.data() : null;
+          const state = (data?.state && String(data.state)) || "offline";
+
+          const ts = data?.lastActiveAt;
+          const lastActiveAtMs =
+            ts && typeof ts.toDate === "function" ? ts.toDate().getTime() : null;
+
+          const next = { state, lastActiveAtMs };
+          const prev = presenceCache.get(uid);
+          if (!prev || prev.state !== next.state || prev.lastActiveAtMs !== next.lastActiveAtMs) {
+            presenceCache.set(uid, next);
+            changed = true;
+          }
+        } catch (_) {
+          // Ignore presence fetch failures; default display stays "offline".
+        } finally {
+          presenceCacheFetchedAt.set(uid, now);
+          presenceCacheInFlight.delete(uid);
+        }
+      })
+    );
+
+    return changed;
+  }
+
+  function getPresenceState(uid) {
+    const cached = presenceCache.get(uid);
+    if (!cached?.lastActiveAtMs) return "offline";
+
+    const ageMs = Date.now() - cached.lastActiveAtMs;
+    if (ageMs > 90000) return "offline";
+
+    if (cached.state === "away") return "away";
+    return "online";
+  }
+  const userCacheInFlight = new Set(); // uid
 
   // Escape HTML
   function escapeHtml(str) {
@@ -157,7 +271,7 @@
     attachSelectedGroupListener(groupId);
     attachMessagesListener(groupId);
 
-    // Dispatch event for connect.js
+    // Dispatch event for other listeners (e.g. voice-chat)
     window.dispatchEvent(
       new CustomEvent("echtlucky:group-selected", {
         detail: { groupId, groupData }
@@ -180,6 +294,59 @@
     return false;
   }
 
+  function getCachedUserLabel(uid) {
+    if (!uid) return { label: "User", initials: "U" };
+
+    const cached = userCache.get(uid);
+    const displayName =
+      cached?.displayName ||
+      cached?.email?.split("@")?.[0] ||
+      `User ${String(uid).slice(0, 6)}`;
+
+    const initials = String(displayName || "U")
+      .trim()
+      .split(/\s+/)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+
+    return { label: displayName, initials: initials || "U" };
+  }
+
+  async function fetchUserProfiles(uids) {
+    if (!db) return;
+
+    const toFetch = Array.from(new Set(uids || []))
+      .filter(Boolean)
+      .filter((uid) => !userCache.has(uid))
+      .filter((uid) => !userCacheInFlight.has(uid));
+
+    if (!toFetch.length) return;
+
+    toFetch.forEach((uid) => userCacheInFlight.add(uid));
+
+    try {
+      await Promise.all(
+        toFetch.map(async (uid) => {
+          try {
+            const snap = await db.collection("users").doc(uid).get();
+            const data = snap.exists ? snap.data() : null;
+            const displayName = data?.displayName || "";
+            const email = data?.email || "";
+            userCache.set(uid, { displayName, email });
+          } catch (_) {
+            userCache.set(uid, { displayName: "", email: "" });
+          } finally {
+            userCacheInFlight.delete(uid);
+          }
+        })
+      );
+    } catch (_) {
+      toFetch.forEach((uid) => userCacheInFlight.delete(uid));
+    }
+  }
+
   function renderMembers(groupDoc) {
     const membersList = document.getElementById("membersList");
     const membersCount = document.getElementById("membersCount");
@@ -195,17 +362,39 @@
 
     const uid = auth?.currentUser?.uid;
 
+    // Fetch missing profiles in background and re-render after load.
+    const missing = members.filter((m) => m && !userCache.has(m) && m !== uid);
+    if (missing.length) {
+      fetchUserProfiles(missing).then(() => {
+        if (selectedGroupId === groupDoc?.id || selectedGroupId) {
+          // Re-render to show names once cache is warm
+          renderMembers(groupDoc);
+        }
+      });
+    }
+
+    // Presence fetch in background and re-render after cache update.
+    refreshPresence(members).then((changed) => {
+      if (changed && selectedGroupId) renderMembers(groupDoc);
+    });
+
     membersList.innerHTML = members
       .map((memberUid) => {
-        const label = memberUid === uid ? "Du" : `User ${String(memberUid).slice(0, 6)}`;
-        const initials = label.slice(0, 2).toUpperCase();
+        const { label: cachedLabel, initials: cachedInitials } = getCachedUserLabel(memberUid);
+        const label = memberUid === uid ? "Du" : cachedLabel;
+        const initials = memberUid === uid ? "DU" : cachedInitials;
+        const presenceState = memberUid === uid ? (document.hidden ? "away" : "online") : getPresenceState(memberUid);
+        const presenceText = presenceState === "online" ? "Online" : presenceState === "away" ? "Abwesend" : "Offline";
         return `
           <div class="member-item">
             <div class="member-info">
               <div class="member-avatar">${escapeHtml(initials)}</div>
               <div class="member-details">
                 <div class="member-name">${escapeHtml(label)}</div>
-                <div class="member-status">${escapeHtml(String(memberUid).slice(0, 10))}</div>
+                <div class="member-status-row">
+                  <span class="member-presence-dot" data-state="${escapeHtml(presenceState)}"></span>
+                  <span class="member-status-text">${escapeHtml(presenceText)}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -269,6 +458,12 @@
 
     const myUid = auth?.currentUser?.uid;
 
+    const ids = (messages || []).map((m) => m?.authorUid).filter(Boolean);
+    const missing = ids.filter((uid) => uid && uid !== myUid && !userCache.has(uid) && !userCacheInFlight.has(uid));
+    if (missing.length) {
+      fetchUserProfiles(missing).then(() => renderMessages(messages));
+    }
+
     const formatTime = (createdAt) => {
       try {
         const d =
@@ -283,7 +478,8 @@
 
     list.innerHTML = messages
       .map((m) => {
-        const author = m.authorName || "User";
+        const authorUid = m.authorUid;
+        const author = authorUid === myUid ? "Du" : (userCache.get(authorUid)?.displayName || m.authorName || `User ${String(authorUid || "").slice(0, 6)}`);
         const text = m.text || "";
         const isMine = m.authorUid === myUid;
         const time = formatTime(m.createdAt);
@@ -448,11 +644,11 @@
       }
 
       if (!query || query.trim().length < 2) {
-        targetEl.innerHTML = '<div class="empty-state"><p>🔍 Suche...</p></div>';
+        targetEl.innerHTML = '<div class="empty-state"><p>🔍 Suche…</p></div>';
         return;
       }
 
-      targetEl.innerHTML = '<div class="empty-state"><p>🔍 Suche...</p></div>';
+      targetEl.innerHTML = '<div class="empty-state"><p>🔍 Suche…</p></div>';
 
       let users = [];
       try {
@@ -480,7 +676,7 @@
           return `
             <div class="member-search-item">
               <div>${escapeHtml(initials)} ${escapeHtml(u.displayName)}</div>
-              <button class="btn btn-primary btn-sm" data-add-member="${escapeHtml(u.uid)}">➕</button>
+              <button class="btn btn-sm" data-add-member="${escapeHtml(u.uid)}">➕</button>
             </div>
           `;
         })
@@ -705,7 +901,7 @@
                   </div>
                   <div class="friend-search-item-name">${escapeHtml(user.displayName)}</div>
                   <div class="friend-search-item-action">
-                    <button class="btn btn-primary btn-sm" data-friend-uid="${escapeHtml(user.uid)}" data-friend-name="${escapeHtml(user.displayName)}">
+                    <button class="btn btn-sm" data-friend-uid="${escapeHtml(user.uid)}" data-friend-name="${escapeHtml(user.displayName)}">
                       ➕ Hinzufügen
                     </button>
                   </div>
@@ -751,7 +947,7 @@
 
       friendSearchInput.value = "";
       friendsSearchResults.innerHTML =
-        '<div class="empty-state"><p>🔍 Suche...</p></div>';
+        '<div class="empty-state"><p>🔍 Suche…</p></div>';
     } catch (err) {
       window.notify?.show({
         type: "error",
@@ -768,7 +964,7 @@
 
     echtluckyModal.input({
       title: "Neue Gruppe erstellen",
-      placeholder: "Gruppennamen eingeben...",
+      placeholder: "Gruppennamen eingeben…",
       confirmText: "Erstellen",
       cancelText: "Abbrechen"
     }).then(groupName => {
@@ -874,7 +1070,7 @@
 
         if (query.length < 2) {
           friendsSearchResults.innerHTML =
-            '<div class="empty-state"><p>🔍 Suche...</p></div>';
+            '<div class="empty-state"><p>🔍 Suche…</p></div>';
           return;
         }
 
@@ -889,6 +1085,9 @@
       console.log("🔵 connect-minimal.js: Auth state changed. User:", user ? user.email : "null");
       updateAuthStatus();
       updateChatControls();
+
+      if (user) startPresenceHeartbeat();
+      else stopPresenceHeartbeat();
     });
 
     // Reload groups event
