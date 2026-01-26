@@ -1,37 +1,46 @@
-// Discord-style Connect: Single Card, Tabs, Clean Chat, Adden, Settings
-document.addEventListener('DOMContentLoaded', () => {
-  const content = document.getElementById('connectContent');
-  const tabs = document.querySelectorAll('.connect-tab');
-  const addFriendBtn = document.getElementById('addFriendBtn');
-  const settingsBtn = document.getElementById('settingsBtn');
-  let currentTab = 'friends';
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('is-active'));
-      tab.classList.add('is-active');
-      currentTab = tab.dataset.tab;
-      renderTab(currentTab);
+// CONNECT.JS – Discord/WhatsApp-Style Modular State & UI
+document.addEventListener('DOMContentLoaded', () => {
+  // State
+  let currentSection = 'friends';
+  let currentGroupId = null;
+  let callStatus = 'idle'; // idle | ringing | in-call | ended
+  let chatState = { messages: [] };
+
+  // DOM
+  const mainCard = document.getElementById('mainCardContent');
+  const sidebar = document.getElementById('connectSidebar');
+  const rightPanel = document.getElementById('rightPanelContent');
+
+  // Sidebar Navigation
+  sidebar.querySelectorAll('.sidebar-nav-item').forEach(item => {
+    item.addEventListener('click', e => {
+      sidebar.querySelectorAll('.sidebar-nav-item').forEach(i => i.classList.remove('is-active'));
+      item.classList.add('is-active');
+      currentSection = item.dataset.section;
+      renderSection();
     });
   });
-  if (addFriendBtn) addFriendBtn.onclick = () => renderAddFriend();
-  if (settingsBtn) settingsBtn.onclick = () => renderTab('settings');
 
-  function renderTab(tab) {
-    switch (tab) {
+  // Main Render Dispatcher
+  function renderSection() {
+    switch (currentSection) {
       case 'friends': renderFriends(); break;
       case 'groups': renderGroups(); break;
       case 'requests': renderRequests(); break;
       case 'settings': renderSettings(); break;
-      default: content.innerHTML = '<div class="discord-card"><h2>Unbekannter Bereich</h2></div>';
+      default: mainCard.innerHTML = '<div class="discord-card"><h2>Unbekannter Bereich</h2></div>';
     }
+    rightPanel.innerHTML = '';
   }
 
+  // FRIENDS SECTION
   function renderFriends() {
-    content.innerHTML = `
+    mainCard.innerHTML = `
       <div class="friends-list-section">
         <h2>Freunde</h2>
         <div id="friendsList"></div>
+        <button class="btn btn-primary" id="addFriendBtn"><i class="fa fa-user-plus"></i> Freund hinzufügen</button>
       </div>
       <div class="chat-section">
         <div class="chat-header-row">
@@ -47,8 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     `;
+    document.getElementById('addFriendBtn').onclick = renderAddFriend;
     document.getElementById('callBtn').onclick = () => {
-      alert('Anruf gestartet! (Demo)');
+      // Start Call-Logik (Demo: Statuswechsel)
+      callStatus = 'ringing';
+      updateCallUI();
     };
     document.getElementById('btnSendMessage').onclick = () => {
       const input = document.getElementById('messageInput');
@@ -62,10 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
         list.scrollTop = list.scrollHeight;
       }
     };
+    updateCallUI();
   }
 
+  // ADD FRIEND SECTION
   function renderAddFriend() {
-    content.innerHTML = `
+    mainCard.innerHTML = `
       <div class="add-friend-section">
         <h2>Freund hinzufügen</h2>
         <input type="text" id="addFriendInput" placeholder="Benutzername#Tag" autocomplete="off" />
@@ -92,14 +106,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // GROUPS SECTION
   function renderGroups() {
-    content.innerHTML = `<div class="groups-section"><h2>Gruppen</h2><div id="groupsList"></div></div>`;
+    mainCard.innerHTML = `<div class="groups-section"><h2>Gruppen</h2><div id="groupsList"></div></div>`;
   }
+
+  // REQUESTS SECTION
   function renderRequests() {
-    content.innerHTML = `<div class="requests-section"><h2>Anfragen</h2><div id="requestsList"></div></div>`;
+    mainCard.innerHTML = `<div class="requests-section"><h2>Anfragen</h2><div id="requestsList"></div></div>`;
   }
+
+  // SETTINGS SECTION
   function renderSettings() {
-    content.innerHTML = `
+    mainCard.innerHTML = `
       <div class="settings-section">
         <h2 style="margin-bottom:1.2rem;">Einstellungen</h2>
         <div class="settings-user-card">
@@ -147,5 +166,28 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
   }
-  renderTab(currentTab);
+
+  // Call/Voice UI-Status-Handling (Demo/Platzhalter)
+  function updateCallUI() {
+    // Hier kann die Integration mit voice-chat.js erfolgen (z.B. window.echtlucky.voiceChat)
+    // Für Demo: Zeige Call-Status im Chat-Header
+    const chatHeader = mainCard.querySelector('.chat-header-row');
+    if (!chatHeader) return;
+    let status = '';
+    switch (callStatus) {
+      case 'idle': status = '';
+        break;
+      case 'ringing': status = '<span class="call-status ringing">Klingelt...</span>';
+        break;
+      case 'in-call': status = '<span class="call-status in-call">Im Anruf</span>';
+        break;
+      case 'ended': status = '<span class="call-status ended">Anruf beendet</span>';
+        break;
+    }
+    chatHeader.querySelectorAll('.call-status').forEach(e => e.remove());
+    if (status) chatHeader.insertAdjacentHTML('beforeend', status);
+  }
+
+  // Initial Render
+  renderSection();
 });
