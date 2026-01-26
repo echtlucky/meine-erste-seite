@@ -134,7 +134,10 @@
         userName.textContent = "";
         userName.style.display = "none";
       }
-      if (dropdown) dropdown.style.display = "none";
+      if (dropdown) {
+        dropdown.style.display = "none";
+        dropdown.classList.remove('show');
+      }
       if (adminPanelLink) adminPanelLink.style.display = "none";
       return;
     }
@@ -149,7 +152,10 @@
       userName.style.display = "inline-flex";
     }
 
-    if (dropdown) dropdown.style.display = "block";
+    if (dropdown) {
+      dropdown.style.display = "block";
+      dropdown.classList.remove('show');
+    }
 
     if (adminPanelLink) {
       adminPanelLink.style.display = "none";
