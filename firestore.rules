@@ -119,6 +119,57 @@ service cloud.firestore {
       allow update, delete: if request.auth != null && 
                               (request.auth.uid == resource.data.authorUid || isAdmin());
     }
+
+    // ==========================================
+    // POSTS COLLECTION (Admin Blog)
+    // ==========================================
+    match /posts/{documentId} {
+      // Everyone (authenticated) can read posts
+      allow read: if request.auth != null;
+      
+      // Only admin can write posts
+      allow create, update, delete: if isAdmin() && 
+                                        request.resource.data.author == request.auth.email;
+    }
+
+    // ==========================================
+    // BANS COLLECTION (Admin)
+    // ==========================================
+    match /bans/{documentId} {
+      // Only admin can read and write bans
+      allow read, write: if isAdmin();
+    }
+
+    // ==========================================
+    // ADMIN LOGS COLLECTION (Activity Logging)
+    // ==========================================
+    match /admin-logs/{logId} {
+      // Only admin can read logs
+      allow read: if isAdmin();
+      
+      // Admin or system can create logs
+      allow create: if isAdmin() || request.auth == null;
+    }
+
+    // ==========================================
+    // CHAT LOGS COLLECTION (Chat History/Comments)
+    // ==========================================
+    match /chat-logs/{logId} {
+      // Only admin can read chat logs
+      allow read: if isAdmin();
+      
+      // Anyone authenticated can create chat logs (for recording conversations)
+      allow create: if request.auth != null && 
+                       request.resource.data.userId == request.auth.uid;
+    }
+
+    // ==========================================
+    // ADMIN STATS COLLECTION (Statistics & Analytics)
+    // ==========================================
+    match /admin-stats/{statId} {
+      // Only admin can read/write stats
+      allow read, write: if isAdmin();
+    }
     
     // ==========================================
     // HELPER FUNCTIONS

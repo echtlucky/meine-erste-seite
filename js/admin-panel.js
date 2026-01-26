@@ -1,58 +1,98 @@
-/* ======================================
-   Admin Panel Logic — echtlucky (FINAL ✅)
-   File: js/admin-panel.js
-   - KEIN role-write im Client (Security!)
-   - nur read role + enforce access
-====================================== */
+﻿/* Admin Panel Logic  echtlucky 
+   - Permission-Logs
+   - Statistiken
+   - Chat-Verfolgung
+   - Enhanced Ban-System
+*/
 (() => {
   "use strict";
 
   const ADMIN_EMAIL = "lucassteckel04@gmail.com";
+  const authRef = window.auth || window.echtlucky?.auth;
+  const db = window.db || window.echtlucky?.db;
 
-  // Firebase
-  const authRef = window.echtlucky?.auth || window.auth || firebase.auth();
-  const db = window.echtlucky?.db || window.db || firebase.firestore();
+  if (!authRef || !db) {
+    console.error("Admin Panel: Firebase nicht initialisiert");
+    return;
+  }
 
-  // DOM
-  const adminBadge = document.getElementById("adminBadge");
-  const statusEl = document.getElementById("status");
+  // ==========================================
+  // DOM ELEMENTS
+  // ==========================================
+  const adminStatus = document.getElementById("adminStatus");
+  const navButtons = Array.from(document.querySelectorAll(".admin-nav__btn"));
+  const tabContents = Array.from(document.querySelectorAll(".admin-tab"));
 
-  const tabButtons = Array.from(document.querySelectorAll(".admin-nav__item, .admin-tabbtn"));
-  const tabs = Array.from(document.querySelectorAll(".admin-tab"));
-  const tabTitle = document.getElementById("tab-title");
-
+  // Blog
   const newPostBtn = document.getElementById("newPostBtn");
   const newPostModal = document.getElementById("newPostModal");
-  const closeNewPostModalBtn = document.getElementById("closeNewPostModal");
+  const closeNewPostModal = document.getElementById("closeNewPostModal");
   const cancelPublishBtn = document.getElementById("cancelPublishBtn");
   const publishBtn = document.getElementById("publishBtn");
-
-  const userInfoModal = document.getElementById("userInfoModal");
-  const closeUserInfoModalBtn = document.getElementById("closeUserInfoModal");
-  const userInfoContent = document.getElementById("user-info-content");
-
   const newTitle = document.getElementById("new-title");
   const newContent = document.getElementById("new-content");
   const newDate = document.getElementById("new-date");
   const charCount = document.getElementById("char-count");
-
   const postList = document.getElementById("post-list");
   const postsEmpty = document.getElementById("posts-empty");
 
+  // Users
   const userList = document.getElementById("user-list");
   const usersEmpty = document.getElementById("users-empty");
 
+  // Comments
+  const commentsList = document.getElementById("comments-list");
+  const commentsEmpty = document.getElementById("comments-empty");
+  const commentDetailModal = document.getElementById("commentDetailModal");
+  const closeCommentModal = document.getElementById("closeCommentModal");
+  const commentDetailContent = document.getElementById("comment-detail-content");
+
+  // Bans
   const banEmail = document.getElementById("ban-email");
   const banAddBtn = document.getElementById("banAddBtn");
   const banList = document.getElementById("ban-list");
   const bansEmpty = document.getElementById("bans-empty");
 
-  // UI Helpers
-  function setStatus(msg, type = "info") {
-    if (!statusEl) return;
-    statusEl.textContent = msg || "";
-    statusEl.classList.remove("admin-status--info", "admin-status--success", "admin-status--error");
-    statusEl.classList.add(`admin-status--${type}`);
+  // Logs
+  const logsList = document.getElementById("logs-list");
+  const logsEmpty = document.getElementById("logs-empty");
+
+  // Stats
+  const statTotalUsers = document.getElementById("stat-total-users");
+  const statActiveToday = document.getElementById("stat-active-today");
+  const statTotalPosts = document.getElementById("stat-total-posts");
+  const statTotalBans = document.getElementById("stat-total-bans");
+  const activityList = document.getElementById("activity-list");
+
+  // Settings
+  const maxLoginAttempts = document.getElementById("max-login-attempts");
+  const sessionTimeout = document.getElementById("session-timeout");
+  const enableComments = document.getElementById("enable-comments");
+  const moderationRequired = document.getElementById("moderation-required");
+  const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+  const resetSettingsBtn = document.getElementById("resetSettingsBtn");
+
+  // User Info Modal
+  const userInfoModal = document.getElementById("userInfoModal");
+  const closeUserInfoModal = document.getElementById("closeUserInfoModal");
+  const userInfoContent = document.getElementById("user-info-content");
+
+  // ==========================================
+  // UTILITIES
+  // ==========================================
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function formatDate(timestamp) {
+    try {
+      const d = timestamp?.toDate ? timestamp.toDate() : timestamp;
+      return d ? new Date(d).toLocaleString("de-DE") : "Unbekannt";
+    } catch {
+      return "Unbekannt";
+    }
   }
 
   function openModal(modal) {
@@ -69,125 +109,81 @@
     document.body.classList.remove("modal-open");
   }
 
-  function escapeHtml(str) {
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function fmtDateTime(ts) {
-    try {
-      const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
-      return d ? d.toLocaleString() : "Unbekannt";
-    } catch {
-      return "Unbekannt";
-    }
-  }
-
-  // =========================
-  // Auth / Role helpers
-  // =========================
-  async function ensureUserDocExists(user) {
-    if (!user?.uid) return;
-    const ref = db.collection("users").doc(user.uid);
-    const snap = await ref.get();
-
-    const base = {
-      email: user.email || "",
-      username: user.displayName || "",
-      lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
-    };
-
-    if (!snap.exists) {
-      // role NICHT hier "hochziehen" – nur baseline anlegen
-      await ref.set({
-        ...base,
-        role: "user",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-    } else {
-      await ref.update(base);
-    }
-  }
-
-  async function getRole(user) {
-    if (!user?.uid) return null;
-    const snap = await db.collection("users").doc(user.uid).get();
-    return snap.exists ? (snap.data()?.role || "user") : null;
-  }
-
-  async function canModerate(user) {
-    // fallback: Admin-Mail darf rein, auch wenn role doc kaputt ist
-    if (user?.email === ADMIN_EMAIL) return true;
-    const r = await getRole(user);
-    return r === "admin" || r === "mod" || r === "moderator";
-  }
-
-  // =========================
-  // Tabs
-  // =========================
   function setActiveTab(tabId) {
-    tabButtons.forEach((b) => b.classList.toggle("is-active", b.dataset.tab === tabId));
-    tabs.forEach((t) => t.classList.toggle("is-active", t.id === tabId));
-
-    const activeBtn = tabButtons.find((b) => b.dataset.tab === tabId);
-    if (tabTitle) tabTitle.textContent = activeBtn ? activeBtn.innerText.trim() : "Admin Panel";
-
-    if (newPostBtn) newPostBtn.style.display = (tabId === "blog-tab") ? "inline-flex" : "none";
+    navButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.tab === tabId));
+    tabContents.forEach((tab) => tab.classList.toggle("is-active", tab.id === tabId));
   }
 
-  tabButtons.forEach((btn) => btn.addEventListener("click", () => setActiveTab(btn.dataset.tab)));
+  // ==========================================
+  // ADMIN LOGGING (Permission Changes)
+  // ==========================================
+  async function logAdminAction(action, details, targetUser = null) {
+    try {
+      const user = authRef.currentUser;
+      if (!user) return;
 
-  // =========================
-  // Modal wiring
-  // =========================
-  function updateCharCount() {
-    if (!charCount || !newContent) return;
-    charCount.textContent = `${(newContent.value || "").length} Zeichen`;
-  }
-  if (newContent) newContent.addEventListener("input", updateCharCount);
-
-  if (newPostBtn) {
-    newPostBtn.addEventListener("click", () => {
-      if (newTitle) newTitle.value = "";
-      if (newContent) newContent.value = "";
-      if (newDate) newDate.value = "";
-      updateCharCount();
-
-      const modalTitle = document.getElementById("postModalTitle");
-      if (modalTitle) modalTitle.textContent = "Neuen Beitrag erstellen";
-
-      setEditMode(null);
-      openModal(newPostModal);
-    });
+      await db.collection("admin-logs").add({
+        adminUid: user.uid,
+        adminEmail: user.email,
+        action,
+        details,
+        targetUserUid: targetUser?.uid || null,
+        targetUserEmail: targetUser?.email || null,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        ip: "client-side"
+      });
+    } catch (err) {
+      console.error("Fehler beim Log-Eintrag:", err);
+    }
   }
 
-  if (closeNewPostModalBtn) closeNewPostModalBtn.addEventListener("click", () => closeModal(newPostModal));
-  if (cancelPublishBtn) cancelPublishBtn.addEventListener("click", () => closeModal(newPostModal));
-  if (closeUserInfoModalBtn) closeUserInfoModalBtn.addEventListener("click", () => closeModal(userInfoModal));
+  async function loadAdminLogs() {
+    if (!logsList || !logsEmpty) return;
+    logsList.innerHTML = "";
+    logsEmpty.style.display = "none";
 
-  if (newPostModal) newPostModal.addEventListener("click", (e) => { if (e.target === newPostModal) closeModal(newPostModal); });
-  if (userInfoModal) userInfoModal.addEventListener("click", (e) => { if (e.target === userInfoModal) closeModal(userInfoModal); });
+    try {
+      const snap = await db.collection("admin-logs").orderBy("timestamp", "desc").limit(50).get();
+      
+      if (snap.empty) {
+        logsEmpty.style.display = "block";
+        return;
+      }
 
-  // =========================
-  // Create/Edit mode
-  // =========================
+      snap.forEach((doc) => {
+        const data = doc.data();
+        const item = document.createElement("div");
+        item.className = "admin-log-item";
+        
+        let actionIcon = "";
+        if (data.action.includes("role")) actionIcon = "";
+        if (data.action.includes("ban")) actionIcon = "";
+        if (data.action.includes("delete")) actionIcon = "";
+
+        item.innerHTML = `
+          <div class="admin-log-header">
+            <span class="admin-log-action">${actionIcon} ${escapeHtml(data.action)}</span>
+            <span class="admin-log-time">${formatDate(data.timestamp)}</span>
+          </div>
+          <div class="admin-log-details">
+            <small>Admin: ${escapeHtml(data.adminEmail || "unknown")}</small>
+            ${data.targetUserEmail ? `<small>Betroffen: ${escapeHtml(data.targetUserEmail)}</small>` : ""}
+            ${data.details ? `<small>Details: ${escapeHtml(data.details)}</small>` : ""}
+          </div>
+        `;
+        logsList.appendChild(item);
+      });
+    } catch (err) {
+      logsEmpty.textContent = `Fehler: ${err.message}`;
+      logsEmpty.style.display = "block";
+    }
+  }
+
+  // ==========================================
+  // POSTS / BLOG
+  // ==========================================
   let editingPostId = null;
 
-  function setEditMode(postId) {
-    editingPostId = postId;
-    if (!publishBtn) return;
-    publishBtn.innerHTML = postId
-      ? `<i class="fa-solid fa-floppy-disk"></i> Update speichern`
-      : `<i class="fa-solid fa-paper-plane"></i> Veröffentlichen`;
-  }
-
-  // =========================
-  // Firestore Actions
-  // =========================
   async function loadPosts() {
     if (!postList || !postsEmpty) return;
     postList.innerHTML = "";
@@ -201,47 +197,42 @@
       }
 
       snap.forEach((doc) => {
-        const data = doc.data() || {};
+        const data = doc.data();
         const item = document.createElement("div");
-        item.className = "admin-item";
-
+        item.className = "admin-post-item";
         item.innerHTML = `
-          <div class="admin-item__meta">
-            <div class="admin-item__title">${escapeHtml(data.title || "Ohne Titel")}</div>
-            <div class="admin-item__sub">
-              ${escapeHtml(data.date || "")}${data.date ? " • " : ""}von ${escapeHtml(data.author || "Unbekannt")}
-            </div>
+          <div class="admin-post-meta">
+            <h3>${escapeHtml(data.title || "Ohne Titel")}</h3>
+            <small>${formatDate(data.createdAt)}</small>
           </div>
-
-          <div class="admin-item__actions">
-            <button class="btn btn-ghost btn-sm" type="button" data-edit="${doc.id}">Bearbeiten</button>
-            <button class="btn btn-danger btn-sm" type="button" data-del="${doc.id}">
-              <i class="fa-solid fa-trash"></i> Löschen
-            </button>
+          <div class="admin-post-actions">
+            <button class="btn btn-sm btn-primary" data-edit="${doc.id}">Bearbeiten</button>
+            <button class="btn btn-sm btn-danger" data-delete="${doc.id}">Löschen</button>
           </div>
         `;
 
-        item.querySelector(`[data-del="${doc.id}"]`).addEventListener("click", () => deletePost(doc.id));
-        item.querySelector(`[data-edit="${doc.id}"]`).addEventListener("click", () => openEditPost(doc.id, data));
+        item.querySelector(`[data-edit="${doc.id}"]`).addEventListener("click", () => {
+          editingPostId = doc.id;
+          newTitle.value = data.title || "";
+          newContent.value = data.content || "";
+          newDate.value = data.date || "";
+          updateCharCount();
+          document.getElementById("postModalTitle").textContent = "Beitrag bearbeiten";
+          publishBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Speichern';
+          openModal(newPostModal);
+        });
+
+        item.querySelector(`[data-delete="${doc.id}"]`).addEventListener("click", () => {
+          if (confirm("Beitrag wirklich löschen?")) {
+            deletePost(doc.id, data.title);
+          }
+        });
 
         postList.appendChild(item);
       });
     } catch (err) {
-      setStatus(`Fehler beim Laden der Posts: ${err.message}`, "error");
+      console.error("Fehler beim Laden der Posts:", err);
     }
-  }
-
-  function openEditPost(id, data) {
-    if (newTitle) newTitle.value = data.title || "";
-    if (newContent) newContent.value = data.content || "";
-    if (newDate) newDate.value = data.date || "";
-    updateCharCount();
-
-    const modalTitle = document.getElementById("postModalTitle");
-    if (modalTitle) modalTitle.textContent = "Beitrag bearbeiten";
-
-    setEditMode(id);
-    openModal(newPostModal);
   }
 
   async function saveOrUpdatePost() {
@@ -251,47 +242,51 @@
     const date = (newDate?.value || "").trim();
 
     if (!title || !content || !date) {
-      setStatus("Bitte alle Felder ausfüllen.", "error");
+      alert("Bitte alle Felder ausfüllen");
       return;
     }
 
     try {
-      setStatus(editingPostId ? "Update wird gespeichert…" : "Post wird gespeichert…", "info");
-
       if (!editingPostId) {
         await db.collection("posts").add({
-          title, content, date,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          title,
+          content,
+          date,
           author: user?.email || "unknown",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
-        setStatus("Post veröffentlicht ✅", "success");
+        await logAdminAction("create_post", `Titel: ${title}`);
       } else {
         await db.collection("posts").doc(editingPostId).update({
-          title, content, date,
+          title,
+          content,
+          date,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
-        setStatus("Beitrag aktualisiert ✅", "success");
+        await logAdminAction("update_post", `Titel: ${title}`);
       }
 
       closeModal(newPostModal);
-      setEditMode(null);
+      editingPostId = null;
       await loadPosts();
     } catch (err) {
-      setStatus(`Fehler: ${err.message}`, "error");
+      alert(`Fehler: ${err.message}`);
     }
   }
 
-  async function deletePost(id) {
-    if (!confirm("Post wirklich löschen?")) return;
+  async function deletePost(id, title) {
     try {
       await db.collection("posts").doc(id).delete();
-      setStatus("Post gelöscht ✅", "success");
+      await logAdminAction("delete_post", `Titel: ${title}`);
       await loadPosts();
     } catch (err) {
-      setStatus(`Löschen fehlgeschlagen: ${err.message}`, "error");
+      alert(`Fehler: ${err.message}`);
     }
   }
 
+  // ==========================================
+  // USERS & ROLES
+  // ==========================================
   async function loadUsers() {
     if (!userList || !usersEmpty) return;
     userList.innerHTML = "";
@@ -305,84 +300,67 @@
       }
 
       snap.forEach((doc) => {
-        const data = doc.data() || {};
-        const email = data.email || "(ohne Email)";
+        const data = doc.data();
+        const email = data.email || "(keine Email)";
         const role = data.role || "user";
 
         const item = document.createElement("div");
-        item.className = "admin-item";
-
+        item.className = "admin-user-item";
         item.innerHTML = `
-          <div class="admin-item__meta">
-            <div class="admin-item__title">${escapeHtml(email)}</div>
-            <div class="admin-item__sub">Rolle: <strong>${escapeHtml(role)}</strong></div>
+          <div class="admin-user-info">
+            <h3>${escapeHtml(email)}</h3>
+            <small>Rolle: <strong>${escapeHtml(role)}</strong></small>
           </div>
-
-          <div class="admin-item__actions">
-            <button class="btn btn-ghost btn-sm" type="button" data-details="${doc.id}">Details</button>
-
-            <select class="select" data-role="${doc.id}">
+          <div class="admin-user-actions">
+            <select class="admin-select" data-role="${doc.id}">
               <option value="user" ${role === "user" ? "selected" : ""}>User</option>
               <option value="mod" ${role === "mod" ? "selected" : ""}>Mod</option>
               <option value="admin" ${role === "admin" ? "selected" : ""}>Admin</option>
             </select>
+            <button class="btn btn-sm btn-danger" data-delete-user="${doc.id}">Löschen</button>
           </div>
         `;
 
-        item.querySelector(`[data-details="${doc.id}"]`)
-          .addEventListener("click", () => showUserInfo(doc.id, email, role));
+        item.querySelector(`[data-role="${doc.id}"]`).addEventListener("change", (e) => {
+          changeRole(doc.id, email, e.target.value);
+        });
 
-        item.querySelector(`[data-role="${doc.id}"]`)
-          .addEventListener("change", (e) => changeRole(doc.id, e.target.value));
+        item.querySelector(`[data-delete-user="${doc.id}"]`).addEventListener("click", () => {
+          if (confirm(`Benutzer ${email} wirklich löschen?`)) {
+            deleteUser(doc.id, email);
+          }
+        });
 
         userList.appendChild(item);
       });
     } catch (err) {
-      setStatus(`Fehler beim Laden der Nutzer: ${err.message}`, "error");
+      console.error("Fehler beim Laden der Benutzer:", err);
     }
   }
 
-  async function changeRole(uidDocId, role) {
+  async function changeRole(userId, email, newRole) {
     try {
-      await db.collection("users").doc(uidDocId).update({ role });
-      setStatus("Rolle aktualisiert ✅", "success");
+      await db.collection("users").doc(userId).update({ role: newRole });
+      await logAdminAction("change_user_role", `Neue Rolle: ${newRole}`, { uid: userId, email });
+      console.log(` Rolle von ${email} zu ${newRole} geändert`);
+    } catch (err) {
+      alert(`Fehler: ${err.message}`);
+    }
+  }
+
+  async function deleteUser(userId, email) {
+    try {
+      await db.collection("users").doc(userId).delete();
+      await logAdminAction("delete_user", `Email: ${email}`, { uid: userId, email });
       await loadUsers();
     } catch (err) {
-      setStatus(`Fehler: ${err.message}`, "error");
+      alert(`Fehler: ${err.message}`);
     }
   }
 
-  function showUserInfo(uidDocId, email, role) {
-    if (!userInfoContent) return;
-
-    userInfoContent.innerHTML = `
-      <div class="admin-userinfo__row"><span>E-Mail</span><strong>${escapeHtml(email)}</strong></div>
-      <div class="admin-userinfo__row"><span>Rolle</span><strong>${escapeHtml(role)}</strong></div>
-      <div class="admin-divider"></div>
-      <button class="btn btn-danger" type="button" id="deleteUserBtn">
-        <i class="fa-solid fa-user-xmark"></i> Benutzer löschen
-      </button>
-    `;
-
-    userInfoContent.querySelector("#deleteUserBtn")
-      .addEventListener("click", () => deleteUser(uidDocId, email));
-
-    openModal(userInfoModal);
-  }
-
-  async function deleteUser(uidDocId, email) {
-    if (!confirm(`Benutzer ${email} wirklich löschen?`)) return;
-
-    try {
-      await db.collection("users").doc(uidDocId).delete();
-      setStatus("Benutzer gelöscht ✅", "success");
-      closeModal(userInfoModal);
-      await loadUsers();
-    } catch (err) {
-      setStatus(`Löschen fehlgeschlagen: ${err.message}`, "error");
-    }
-  }
-
+  // ==========================================
+  // BANS
+  // ==========================================
   async function loadBans() {
     if (!banList || !bansEmpty) return;
     banList.innerHTML = "";
@@ -396,94 +374,304 @@
       }
 
       snap.forEach((doc) => {
-        const data = doc.data() || {};
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-          <td>${escapeHtml(data.email || "")}</td>
-          <td>${escapeHtml(fmtDateTime(data.bannedAt))}</td>
-          <td class="col-actions">
-            <button class="btn btn-ghost btn-sm" type="button" data-unban="${doc.id}">Entsperren</button>
-          </td>
+        const data = doc.data();
+        const item = document.createElement("div");
+        item.className = "admin-ban-item";
+        item.innerHTML = `
+          <div class="admin-ban-info">
+            <strong>${escapeHtml(data.email)}</strong>
+            <small>${formatDate(data.bannedAt)}</small>
+            ${data.reason ? `<small>Grund: ${escapeHtml(data.reason)}</small>` : ""}
+          </div>
+          <button class="btn btn-sm btn-ghost" data-unban="${doc.id}">Entsperren</button>
         `;
 
-        tr.querySelector(`[data-unban="${doc.id}"]`).addEventListener("click", () => removeBan(doc.id));
-        banList.appendChild(tr);
+        item.querySelector(`[data-unban="${doc.id}"]`).addEventListener("click", () => {
+          if (confirm("Benutzer wirklich entsperren?")) {
+            removeBan(doc.id, data.email);
+          }
+        });
+
+        banList.appendChild(item);
       });
     } catch (err) {
-      setStatus(`Fehler beim Laden der Sperren: ${err.message}`, "error");
-      if (String(err.message || "").toLowerCase().includes("permission")) {
-        setStatus("Permissions-Fehler: users/{uid}.role muss 'admin' oder 'mod' sein (Rules).", "error");
-      }
+      console.error("Fehler beim Laden der Bans:", err);
     }
   }
 
   async function addBan() {
     const email = (banEmail?.value || "").trim();
+    const reason = prompt("Grund für Ban (optional):");
+
     if (!email) {
-      setStatus("Bitte E-Mail eingeben.", "error");
+      alert("Bitte E-Mail eingeben");
       return;
     }
 
     try {
       await db.collection("bans").add({
         email,
+        reason: reason || "",
         bannedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        bannedBy: authRef.currentUser?.email || "unknown"
       });
 
+      await logAdminAction("ban_user", `Email: ${email}, Grund: ${reason || "keine"}`);
       if (banEmail) banEmail.value = "";
-      setStatus("User gebannt ✅", "success");
       await loadBans();
     } catch (err) {
-      setStatus(`Fehler: ${err.message}`, "error");
+      alert(`Fehler: ${err.message}`);
     }
   }
 
-  async function removeBan(id) {
-    if (!confirm("Entsperren?")) return;
+  async function removeBan(banId, email) {
+    try {
+      await db.collection("bans").doc(banId).delete();
+      await logAdminAction("unban_user", `Email: ${email}`);
+      await loadBans();
+    } catch (err) {
+      alert(`Fehler: ${err.message}`);
+    }
+  }
+
+  // ==========================================
+  // CHAT LOGS (Comments Tracking)
+  // ==========================================
+  async function loadChatLogs() {
+    if (!commentsList || !commentsEmpty) return;
+    commentsList.innerHTML = "";
+    commentsEmpty.style.display = "none";
 
     try {
-      await db.collection("bans").doc(id).delete();
-      setStatus("Sperre entfernt ✅", "success");
-      await loadBans();
+      const snap = await db.collection("chat-logs").orderBy("timestamp", "desc").limit(30).get();
+      if (snap.empty) {
+        commentsEmpty.style.display = "block";
+        return;
+      }
+
+      snap.forEach((doc) => {
+        const data = doc.data();
+        const item = document.createElement("div");
+        item.className = "admin-comment-item";
+
+        const preview = (data.message || "").substring(0, 60) + (data.message?.length > 60 ? "..." : "");
+
+        item.innerHTML = `
+          <div class="admin-comment-meta">
+            <strong>${escapeHtml(data.userName || "Anonym")}</strong>
+            <small>${formatDate(data.timestamp)}</small>
+          </div>
+          <div class="admin-comment-preview">
+            ${escapeHtml(preview)}
+          </div>
+          <button class="btn btn-sm btn-primary" data-view-chat="${doc.id}">Chat ansehen</button>
+        `;
+
+        item.querySelector(`[data-view-chat="${doc.id}"]`).addEventListener("click", () => {
+          viewChatDetail(doc.id, data);
+        });
+
+        commentsList.appendChild(item);
+      });
     } catch (err) {
-      setStatus(`Fehler: ${err.message}`, "error");
+      console.error("Fehler beim Laden der Chat-Logs:", err);
     }
   }
 
-  // Events
-  if (publishBtn) publishBtn.addEventListener("click", saveOrUpdatePost);
-  if (banAddBtn) banAddBtn.addEventListener("click", addBan);
+  function viewChatDetail(logId, chatData) {
+    commentDetailContent.innerHTML = `
+      <div class="admin-chat-detail">
+        <div class="admin-detail-row">
+          <strong>Benutzer:</strong>
+          <span>${escapeHtml(chatData.userName || "Anonym")}</span>
+        </div>
+        <div class="admin-detail-row">
+          <strong>Zeit:</strong>
+          <span>${formatDate(chatData.timestamp)}</span>
+        </div>
+        <div class="admin-detail-row">
+          <strong>Nachricht:</strong>
+        </div>
+        <div class="admin-chat-content">
+          ${escapeHtml(chatData.message || "")}
+        </div>
+        <div class="admin-detail-row">
+          <button class="btn btn-sm btn-danger" id="deleteCommentBtn">Nachricht löschen</button>
+        </div>
+      </div>
+    `;
 
-  // Auth Guard + Init
+    document.getElementById("deleteCommentBtn").addEventListener("click", () => {
+      if (confirm("Nachricht wirklich löschen?")) {
+        db.collection("chat-logs").doc(logId).delete().then(() => {
+          closeModal(commentDetailModal);
+          loadChatLogs();
+        }).catch(err => alert(err.message));
+      }
+    });
+
+    openModal(commentDetailModal);
+  }
+
+  // ==========================================
+  // STATISTICS
+  // ==========================================
+  async function loadStatistics() {
+    try {
+      const usersSnap = await db.collection("users").get();
+      if (statTotalUsers) statTotalUsers.textContent = usersSnap.size;
+
+      const postsSnap = await db.collection("posts").get();
+      if (statTotalPosts) statTotalPosts.textContent = postsSnap.size;
+
+      const bansSnap = await db.collection("bans").get();
+      if (statTotalBans) statTotalBans.textContent = bansSnap.size;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const activeSnap = await db.collection("users")
+        .where("lastLoginAt", ">=", today)
+        .get();
+      if (statActiveToday) statActiveToday.textContent = activeSnap.size;
+
+      if (activityList) {
+        activityList.innerHTML = "";
+        const logsSnap = await db.collection("admin-logs").orderBy("timestamp", "desc").limit(10).get();
+        
+        logsSnap.forEach((doc) => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "admin-activity-item";
+          div.innerHTML = `
+            <span>${escapeHtml(data.action)}</span>
+            <small>${formatDate(data.timestamp)}</small>
+          `;
+          activityList.appendChild(div);
+        });
+      }
+    } catch (err) {
+      console.error("Fehler beim Laden der Statistiken:", err);
+    }
+  }
+
+  // ==========================================
+  // SETTINGS
+  // ==========================================
+  function loadSettings() {
+    try {
+      const settings = localStorage.getItem("admin-settings");
+      if (settings) {
+        const s = JSON.parse(settings);
+        if (maxLoginAttempts) maxLoginAttempts.value = s.maxLoginAttempts || 5;
+        if (sessionTimeout) sessionTimeout.value = s.sessionTimeout || 30;
+        if (enableComments) enableComments.checked = s.enableComments !== false;
+        if (moderationRequired) moderationRequired.checked = s.moderationRequired === true;
+      }
+    } catch (err) {
+      console.error("Fehler beim Laden der Einstellungen:", err);
+    }
+  }
+
+  function saveSettings() {
+    try {
+      const settings = {
+        maxLoginAttempts: parseInt(maxLoginAttempts?.value) || 5,
+        sessionTimeout: parseInt(sessionTimeout?.value) || 30,
+        enableComments: enableComments?.checked !== false,
+        moderationRequired: moderationRequired?.checked === true
+      };
+      localStorage.setItem("admin-settings", JSON.stringify(settings));
+      alert("Einstellungen gespeichert ");
+      logAdminAction("update_settings", JSON.stringify(settings));
+    } catch (err) {
+      alert(`Fehler: ${err.message}`);
+    }
+  }
+
+  function resetSettings() {
+    if (confirm("Einstellungen wirklich auf Standard zurücksetzen?")) {
+      localStorage.removeItem("admin-settings");
+      loadSettings();
+      alert("Einstellungen zurückgesetzt ");
+    }
+  }
+
+  // ==========================================
+  // EVENT LISTENERS
+  // ==========================================
+  navButtons.forEach((btn) => {
+    btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+  });
+
+  if (newPostBtn) newPostBtn.addEventListener("click", () => {
+    editingPostId = null;
+    newTitle.value = "";
+    newContent.value = "";
+    newDate.value = "";
+    updateCharCount();
+    document.getElementById("postModalTitle").textContent = "Neuen Beitrag erstellen";
+    publishBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Veröffentlichen';
+    openModal(newPostModal);
+  });
+
+  if (closeNewPostModal) closeNewPostModal.addEventListener("click", () => closeModal(newPostModal));
+  if (cancelPublishBtn) cancelPublishBtn.addEventListener("click", () => closeModal(newPostModal));
+  if (publishBtn) publishBtn.addEventListener("click", saveOrUpdatePost);
+  if (closeUserInfoModal) closeUserInfoModal.addEventListener("click", () => closeModal(userInfoModal));
+  if (closeCommentModal) closeCommentModal.addEventListener("click", () => closeModal(commentDetailModal));
+
+  if (newPostModal) newPostModal.addEventListener("click", (e) => { if (e.target === newPostModal) closeModal(newPostModal); });
+  if (userInfoModal) userInfoModal.addEventListener("click", (e) => { if (e.target === userInfoModal) closeModal(userInfoModal); });
+  if (commentDetailModal) commentDetailModal.addEventListener("click", (e) => { if (e.target === commentDetailModal) closeModal(commentDetailModal); });
+
+  if (newContent) {
+    newContent.addEventListener("input", () => {
+      if (charCount) charCount.textContent = newContent.value.length + " Zeichen";
+    });
+  }
+
+  function updateCharCount() {
+    if (charCount && newContent) charCount.textContent = newContent.value.length + " Zeichen";
+  }
+
+  if (banAddBtn) banAddBtn.addEventListener("click", addBan);
+  if (saveSettingsBtn) saveSettingsBtn.addEventListener("click", saveSettings);
+  if (resetSettingsBtn) resetSettingsBtn.addEventListener("click", resetSettings);
+
+  // ==========================================
+  // INITIALIZATION
+  // ==========================================
   authRef.onAuthStateChanged(async (user) => {
     if (!user) {
       window.location.href = "login.html";
       return;
     }
 
-    // nur sicherstellen, dass users-doc existiert (ohne role push)
-    await ensureUserDocExists(user);
+    const isAdmin = user.email === ADMIN_EMAIL || 
+                   (await db.collection("users").doc(user.uid).get()).data()?.role === "admin";
 
-    const ok = await canModerate(user);
-    if (!ok) {
-      if (window.notify?.error) {
-        window.notify.error("Keine Admin/Mod Rechte", "Zugriff verweigert", 4500);
-      } else {
-        alert("Zugriff verweigert – keine Admin/Mod Rechte.");
-      }
+    if (!isAdmin) {
+      alert("Zugriff verweigert");
       window.location.href = "index.html";
       return;
     }
 
-    if (adminBadge) adminBadge.textContent = "Admin ✓";
-    setStatus(`Admin-Zugriff erteilt: ${user.email}`, "success");
+    if (adminStatus) adminStatus.textContent = ` Admin (${user.email})`;
 
     setActiveTab("blog-tab");
-
     await loadPosts();
     await loadUsers();
     await loadBans();
+    await loadChatLogs();
+    await loadAdminLogs();
+    await loadStatistics();
+    loadSettings();
+
+    setInterval(async () => {
+      await loadAdminLogs();
+      await loadStatistics();
+    }, 30000);
   });
 
+  console.log(" Admin Panel initialized");
 })();
