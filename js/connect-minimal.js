@@ -64,6 +64,7 @@
           if (friendUIDs.length === 0) {
             const friendsOnlineSection = document.getElementById("friendsOnlineSection");
             if (friendsOnlineSection) friendsOnlineSection.style.display = "none";
+            if (friendsOnlineListener) friendsOnlineListener();
             return;
           }
 
@@ -107,29 +108,35 @@
                   .map((n) => n[0])
                   .join("")
                   .toUpperCase()
-              .substring(0, 2);
+                  .substring(0, 2);
 
-            return `
-              <img
-                class="friend-avatar"
-                src="${friend.avatar || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23000%22 width=%22100%25%22 height=%22100%25%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23fff%22%3E' + initials + '%3C/text%3E%3C/svg%3E'}"
-                alt="${friend.name}"
-                title="${friend.name}"
-                data-friend-id="${friend.uid}"
-                style="cursor: pointer;"
-              />
-            `;
-          }).join("");
+                const safeName = escapeHtml(friend.name);
+                const safeUid = escapeHtml(friend.uid);
 
-          // Add click handlers to open direct messages
-          friendsList.querySelectorAll(".friend-avatar").forEach((avatar) => {
-            avatar.addEventListener("click", (e) => {
-              const friendId = e.currentTarget.dataset.friendId;
-              openDirectMessage(friendId);
+                return `
+                  <img
+                    class="friend-avatar"
+                    src="${friend.avatar || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23000%22 width=%22100%25%22 height=%22100%25%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23fff%22%3E' + initials + '%3C/text%3E%3C/svg%3E'}"
+                    alt="${safeName}"
+                    title="${safeName}"
+                    data-friend-id="${safeUid}"
+                    style="cursor: pointer;"
+                  />
+                `;
+              }).join("");
+
+              // Add click handlers to open direct messages
+              friendsList.querySelectorAll(".friend-avatar").forEach((avatar) => {
+                avatar.addEventListener("click", (e) => {
+                  const friendId = e.currentTarget.dataset.friendId;
+                  openDirectMessage(friendId);
+                });
+              });
+            }, (error) => {
+              console.error("Error loading online friends:", error);
             });
-          });
         }, (error) => {
-          console.error("Error loading online friends:", error);
+          console.error("Error loading user friends list:", error);
         });
     } catch (error) {
       console.error("loadOnlineFriends error:", error);
@@ -146,7 +153,7 @@
     // Find or create DM group
     try {
       // First check if a DM group already exists between these users
-      db.collection("groups")
+      const unsubscribe = db.collection("groups")
         .where("isDM", "==", true)
         .where("dmParticipants", "array-contains", currentUser.uid)
         .onSnapshot((snapshot) => {
@@ -160,6 +167,9 @@
             }
           });
 
+          // Cleanup the listener immediately after getting result
+          if (unsubscribe) unsubscribe();
+
           if (dmGroup) {
             // DM exists, select it
             selectGroup(dmGroup.id, dmGroup.data());
@@ -167,6 +177,9 @@
             // Create new DM group
             createDirectMessageGroup(friendId);
           }
+        }, (error) => {
+          console.error("Error opening DM:", error);
+          if (unsubscribe) unsubscribe();
         });
     } catch (error) {
       console.error("Error opening DM:", error);
@@ -423,20 +436,32 @@
         .toUpperCase()
         .substring(0, 2);
 
+      const safeDisplayName = escapeHtml(user.displayName);
+      const safeUid = escapeHtml(user.uid);
+
       return `
         <div class="friend-search-item">
           <div class="friend-search-item-avatar" style="background: linear-gradient(135deg, var(--accent), #0088ff);">
             ${initials}
           </div>
-          <div class="friend-search-item-name">${escapeHtml(user.displayName)}</div>
+          <div class="friend-search-item-name">${safeDisplayName}</div>
           <div class="friend-search-item-action">
-            <button class="btn btn-primary btn-sm" onclick="window.echtluckyAddFriend('${user.uid}', '${user.displayName.replace(/'/g, "\\'")}')">
+            <button class="btn btn-primary btn-sm" data-friend-uid="${safeUid}" data-friend-name="${safeDisplayName}">
               ➕ Hinzufügen
             </button>
           </div>
         </div>
       `;
     }).join("");
+
+    // Add event listeners to buttons
+    friendsSearchResults.querySelectorAll("button[data-friend-uid]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const friendUid = e.currentTarget.dataset.friendUid;
+        const friendName = e.currentTarget.dataset.friendName;
+        window.echtluckyAddFriend(friendUid, friendName);
+      });
+    });
   }
 
   // Add friend to current user's friends list
