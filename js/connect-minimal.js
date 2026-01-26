@@ -63,6 +63,8 @@
   let friendSearchTimeout = null;
   let currentUserFriends = [];
   const userCache = new Map(); // uid -> { displayName, email }
+  const connectMainCard = document.querySelector(".connect-main-card");
+  const mobileSwitcher = document.querySelector(".connect-mobile-switcher");
 
   // Presence (Firestone rules allow write only to /presence/{uid})
   let presenceHeartbeatTimer = null;
@@ -258,6 +260,16 @@
     const emptyChatState = document.getElementById("emptyChatState");
     if (chatContainer) chatContainer.hidden = false;
     if (emptyChatState) emptyChatState.hidden = true;
+
+    // Mobile: jump into chat panel after selecting a group
+    if (connectMainCard && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
+      connectMainCard.setAttribute("data-mobile-panel", "middle");
+      document.querySelectorAll(".connect-mobile-tab").forEach((b) => {
+        const isActive = b.dataset.panel === "middle";
+        b.classList.toggle("is-active", isActive);
+        b.setAttribute("aria-selected", String(isActive));
+      });
+    }
 
     // Update chat header
     const chatGroupTitle = document.getElementById("chatGroupTitle");
@@ -1050,6 +1062,37 @@
     if (btnDeleteGroupModal) {
       btnDeleteGroupModal.addEventListener("click", () => {
         deleteSelectedGroup().catch((e) => console.error(e));
+      });
+    }
+
+    // Mobile panel switcher
+    if (mobileSwitcher && connectMainCard) {
+      const setMobilePanel = (panel) => {
+        const next = panel || "left";
+        connectMainCard.setAttribute("data-mobile-panel", next);
+
+        mobileSwitcher.querySelectorAll(".connect-mobile-tab").forEach((b) => {
+          const isActive = b.dataset.panel === next;
+          b.classList.toggle("is-active", isActive);
+          b.setAttribute("aria-selected", String(isActive));
+        });
+      };
+
+      if (!connectMainCard.hasAttribute("data-mobile-panel")) setMobilePanel("left");
+
+      mobileSwitcher.querySelectorAll(".connect-mobile-tab").forEach((btn) => {
+        btn.addEventListener("click", () => setMobilePanel(btn.dataset.panel || "left"));
+      });
+
+      // Keep state sane across resizes (e.g. rotating the phone)
+      window.addEventListener("resize", () => {
+        if (!window.matchMedia) return;
+        const isMobile = window.matchMedia("(max-width: 900px)").matches;
+        if (!isMobile) {
+          connectMainCard.removeAttribute("data-mobile-panel");
+        } else if (!connectMainCard.hasAttribute("data-mobile-panel")) {
+          setMobilePanel("left");
+        }
       });
     }
 

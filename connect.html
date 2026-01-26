@@ -51,6 +51,19 @@
 
             <!-- ONE Main Card for the whole Connect page -->
             <div class="connect-main-card">
+              <!-- Mobile panel switcher (CSS-only hidden on desktop) -->
+              <div class="connect-mobile-switcher" role="tablist" aria-label="Connect Bereiche">
+                <button class="connect-mobile-tab is-active" type="button" data-panel="left" aria-selected="true">
+                  Gruppen
+                </button>
+                <button class="connect-mobile-tab" type="button" data-panel="middle" aria-selected="false">
+                  Chat
+                </button>
+                <button class="connect-mobile-tab" type="button" data-panel="right" aria-selected="false">
+                  Mitglieder
+                </button>
+              </div>
+
               <!-- Auth Gate (connect-minimal.js) -->
               <div class="auth-status-card" id="authStatusCard" hidden>
                 <div class="auth-status-card__row">

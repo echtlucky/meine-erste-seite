@@ -15,7 +15,8 @@
   grid-area: topbar;
   position: sticky;
   top: 0;
-  z-index: 50;
+  /* Must stay above app panels (header contains fixed .site-header). */
+  z-index: 100001;
 }
 
 .app-rail {
@@ -70,10 +71,7 @@
   padding: 0;
 }
 
-/* Connect should behave like a desktop app: no footer. */
-.connect-page #footer-placeholder {
-  display: none;
-}
+/* Footer stays visible (user-requested). */
 
 /* Mobile: collapse the rail into a bottom bar later (next step). For now hide it. */
 @media (max-width: 900px) {
