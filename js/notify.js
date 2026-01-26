@@ -8,7 +8,7 @@
     type: "info",
     title: "",
     message: "",
-    duration: 4500, // ms (erhöht von 3200 auf 4500 für längere Sichtbarkeit)
+    duration: 6000, // ms (erhöht auf 6000 für längere Sichtbarkeit)
   };
 
   let stackEl = null;
@@ -84,7 +84,7 @@
     requestAnimationFrame(() => toast.classList.add("is-in"));
 
     // auto dismiss with progress
-    const duration = Number(o.duration ?? 3200);
+    const duration = Number(o.duration ?? 6000);
     const progressSpan = toast.querySelector(".notify__progress > span");
 
     let timer = null;

@@ -231,31 +231,65 @@
 
   // Change user role
   window.changeUserRole = function (groupId, memberId, newRole) {
-    if (!currentUser || currentUser.uid !== selectedGroupId.creator) {
+    if (!currentUser) {
       window.notify?.show({
         type: "error",
         title: "Fehler",
-        message: "Nur der Admin kann Rollen ändern",
-        duration: 3000
+        message: "Du musst eingeloggt sein",
+        duration: 4500
       });
       return;
     }
 
     try {
+      // Verify user is admin
       db.collection("groups")
         .doc(groupId)
-        .update({
-          [`roles.${memberId}`]: newRole
-        });
+        .get()
+        .then(doc => {
+          if (!doc.exists) {
+            window.notify?.show({
+              type: "error",
+              title: "Fehler",
+              message: "Gruppe nicht gefunden",
+              duration: 4000
+            });
+            return;
+          }
 
-      window.notify?.show({
-        type: "success",
-        title: "Erfolgreich",
-        message: `Rolle geändert zu ${newRole}`,
-        duration: 2000
-      });
+          if (doc.data().creator !== currentUser.uid) {
+            window.notify?.show({
+              type: "error",
+              title: "Fehler",
+              message: "Nur der Admin kann Rollen ändern",
+              duration: 4500
+            });
+            return;
+          }
+
+          // Update role
+          db.collection("groups")
+            .doc(groupId)
+            .update({
+              [`roles.${memberId}`]: newRole
+            })
+            .then(() => {
+              window.notify?.show({
+                type: "success",
+                title: "Erfolgreich",
+                message: `Rolle geändert zu ${newRole}`,
+                duration: 3500
+              });
+            });
+        });
     } catch (err) {
       console.error("Error changing role:", err);
+      window.notify?.show({
+        type: "error",
+        title: "Fehler",
+        message: "Konnte Rolle nicht ändern",
+        duration: 4500
+      });
     }
   };
 
@@ -291,7 +325,7 @@
         type: "success",
         title: "Erfolgreich",
         message: "Gruppe verlassen",
-        duration: 2000
+        duration: 3500
       });
 
       window.dispatchEvent(new CustomEvent("echtlucky:reload-groups"));
@@ -314,12 +348,118 @@
         type: "success",
         title: "Erfolgreich",
         message: "Gruppe gelöscht",
-        duration: 2000
+        duration: 3500
       });
 
       window.dispatchEvent(new CustomEvent("echtlucky:reload-groups"));
     } catch (err) {
       console.error("Error deleting group:", err);
+    }
+  }
+
+  // Search members for modal
+  function searchMembersForModal(query) {
+    if (!selectedGroupId) return;
+
+    try {
+      const lowerQuery = query.toLowerCase();
+      db.collection("users").get().then((snapshot) => {
+        const currentMembers = [];
+        const results = [];
+
+        // Get current group members
+        db.collection("groups").doc(selectedGroupId).get().then(doc => {
+          if (doc.exists) {
+            currentMembers.push(...(doc.data().members || []));
+          }
+
+          // Search users
+          snapshot.forEach((userDoc) => {
+            const user = userDoc.data();
+            const displayName = user.displayName || user.email?.split("@")[0] || "User";
+
+            if (currentMembers.includes(userDoc.id) || userDoc.id === currentUser.uid) {
+              return;
+            }
+
+            if (displayName.toLowerCase().includes(lowerQuery) || 
+                user.email?.toLowerCase().includes(lowerQuery)) {
+              results.push({
+                uid: userDoc.id,
+                displayName,
+                email: user.email
+              });
+            }
+          });
+
+          if (results.length === 0) {
+            modalMemberResults.innerHTML = '<div class="empty-state"><p>😞 Keine Benutzer gefunden</p></div>';
+            return;
+          }
+
+          modalMemberResults.innerHTML = results.map((user) => {
+            const initials = (user.displayName || "U")
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase()
+              .substring(0, 2);
+
+            return `
+              <div class="member-search-item" data-member-to-add="${user.uid}" data-member-name="${user.displayName}">
+                <div class="member-avatar">${initials}</div>
+                <div class="member-details">
+                  <div class="member-name">${escapeHtml(user.displayName)}</div>
+                  <div style="font-size: 0.8rem; color: rgba(224,255,224,0.6);">${escapeHtml(user.email)}</div>
+                </div>
+              </div>
+            `;
+          }).join("");
+
+          // Add click listeners
+          modalMemberResults.querySelectorAll('.member-search-item').forEach(item => {
+            item.addEventListener('click', () => {
+              modalMemberResults.querySelectorAll('.member-search-item').forEach(i => i.style.background = '');
+              item.style.background = 'rgba(0, 255, 136, 0.2)';
+              addMemberSearchInput.value = item.dataset.memberName;
+            });
+          });
+        });
+      });
+    } catch (err) {
+      console.error("Error searching members:", err);
+      modalMemberResults.innerHTML = '<div class="empty-state"><p>❌ Fehler</p></div>';
+    }
+  }
+
+  // Add member to group
+  function addMemberToGroup(memberId, memberName) {
+    if (!selectedGroupId || !currentUser) return;
+
+    try {
+      db.collection("groups").doc(selectedGroupId).update({
+        members: firebase.firestore.FieldValue.arrayUnion(memberId),
+        [`roles.${memberId}`]: "user"
+      });
+
+      window.notify?.show({
+        type: "success",
+        title: "Erfolgreich",
+        message: `${memberName} wurde hinzugefügt`,
+        duration: 3500
+      });
+
+      addMemberSearchInput.value = "";
+      modalMemberResults.innerHTML = '<div class="empty-state"><p>🔍 Suche...</p></div>';
+      
+    } catch (err) {
+      console.error("Error adding member:", err);
+      window.notify?.show({
+        type: "error",
+        title: "Fehler",
+        message: "Konnte Mitglied nicht hinzufügen",
+        duration: 4500
+      });
     }
   }
 
@@ -344,6 +484,37 @@
     }
     if (closeGroupSettings) {
       closeGroupSettings.addEventListener("click", closeSettingsModal);
+    }
+
+    // Add member search in modal
+    if (addMemberSearchInput) {
+      addMemberSearchInput.addEventListener("input", (e) => {
+        const query = e.target.value.trim();
+        if (query.length < 2) {
+          modalMemberResults.innerHTML = '<div class="empty-state"><p>🔍 Suche...</p></div>';
+          return;
+        }
+        searchMembersForModal(query);
+      });
+    }
+
+    // Add member button in modal
+    if (btnModalAddMember) {
+      btnModalAddMember.addEventListener("click", () => {
+        const selected = document.querySelector('[data-member-to-add]');
+        if (selected) {
+          const memberId = selected.dataset.memberToAdd;
+          const memberName = selected.dataset.memberName;
+          addMemberToGroup(memberId, memberName);
+        } else {
+          window.notify?.show({
+            type: "warn",
+            title: "Hinweis",
+            message: "Bitte wähle einen Benutzer aus",
+            duration: 4000
+          });
+        }
+      });
     }
 
     // Settings modal buttons

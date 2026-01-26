@@ -251,7 +251,7 @@
   position: fixed;
   top: 20px; /* Better positioning for modern layouts */
   right: 20px;
-  z-index: 99999;
+  z-index: 999999;
   display: grid;
   gap: 12px;
   width: min(420px, calc(100vw - 40px));

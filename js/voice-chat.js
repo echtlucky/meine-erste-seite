@@ -65,16 +65,17 @@
   // DOM ELEMENTS
   // ============================================
 
-  const voiceCallPanel = null; // Not used in new layout
   const voiceStatus = document.getElementById("voiceStatus");
   const voiceParticipants = document.getElementById("voiceParticipants");
   const btnStartVoiceCall = document.getElementById("btnStartVoice");
   const btnEndVoiceCall = document.getElementById("btnEndVoice");
   const btnToggleMic = document.getElementById("btnToggleMic");
 
-  if (!btnStartVoiceCall || !btnEndVoiceCall) {
-    console.warn("voice-chat.js: DOM elements missing – voice-chat skipped.");
-    return;
+  // Check if required elements exist
+  const hasRequiredElements = btnStartVoiceCall && btnEndVoiceCall;
+  
+  if (!hasRequiredElements) {
+    console.warn("voice-chat.js: Required DOM elements missing");
   }
 
   // ============================================
@@ -713,6 +714,35 @@
       return;
     }
 
+    // Setup event listeners if DOM elements exist
+    if (btnStartVoiceCall && btnEndVoiceCall) {
+      btnStartVoiceCall.addEventListener("click", () => {
+        if (!window.__ECHTLUCKY_SELECTED_GROUP__) {
+          window.notify?.show({
+            type: "error",
+            title: "Keine Gruppe ausgewählt",
+            message: "Bitte wähle eine Gruppe aus",
+            duration: 4500
+          });
+          return;
+        }
+        startVoiceCall(window.__ECHTLUCKY_SELECTED_GROUP__);
+      });
+
+      btnEndVoiceCall.addEventListener("click", endVoiceCall);
+    }
+
+    if (btnToggleMic) {
+      btnToggleMic.addEventListener("click", toggleMic);
+    }
+
+    // Cleanup on page unload
+    window.addEventListener("beforeunload", () => {
+      if (currentVoiceCall) {
+        endVoiceCall().catch(err => console.error("Cleanup error:", err));
+      }
+    });
+
     console.log("✅ voice-chat.js setup complete");
   }
 
@@ -721,36 +751,6 @@
   } else {
     initModule();
   }
-
-  // ============================================
-  // EVENT LISTENERS
-  // ============================================
-
-  btnStartVoiceCall.addEventListener("click", () => {
-    if (!window.__ECHTLUCKY_SELECTED_GROUP__) {
-      window.notify?.show({
-        type: "error",
-        title: "Keine Gruppe ausgewählt",
-        message: "Bitte wähle eine Gruppe aus",
-        duration: 4500
-      });
-      return;
-    }
-    startVoiceCall(window.__ECHTLUCKY_SELECTED_GROUP__);
-  });
-
-  btnEndVoiceCall.addEventListener("click", endVoiceCall);
-
-  if (btnToggleMic) {
-    btnToggleMic.addEventListener("click", toggleMic);
-  }
-
-  // Cleanup on page unload
-  window.addEventListener("beforeunload", () => {
-    if (currentVoiceCall) {
-      endVoiceCall();
-    }
-  });
 
   // ============================================
   // EXPORT API

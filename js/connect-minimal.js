@@ -123,6 +123,9 @@
   // Select a group
   function selectGroup(groupId, groupData) {
     selectedGroupId = groupId;
+    
+    // Store globally for voice-chat.js
+    window.__ECHTLUCKY_SELECTED_GROUP__ = groupId;
 
     // Update active state in list
     document.querySelectorAll(".group-item").forEach((item) => {
@@ -250,7 +253,7 @@
         type: "success",
         title: "Erfolgreich",
         message: `${friendName} wurde hinzugefügt!`,
-        duration: 3000
+        duration: 4500
       });
 
       friendSearchInput.value = "";
@@ -289,7 +292,7 @@
         type: "success",
         title: "Erfolgreich",
         message: `Gruppe "${groupName}" erstellt!`,
-        duration: 3000
+        duration: 4500
       });
     } catch (err) {
       window.notify?.show({
