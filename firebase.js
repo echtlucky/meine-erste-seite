@@ -12,86 +12,93 @@
   }
   window.__ECHTLUCKY_FIREBASE_LOADED__ = true;
 
-  if (!window.firebase) {
-    console.error("firebase.js: window.firebase fehlt. Du nutzt Firebase CDN/compat? Lade die Firebase Scripts VOR firebase.js.");
-    return;
+  // Wait for Firebase to be loaded
+  function initWhenReady() {
+    if (!window.firebase) {
+      console.warn("firebase.js: Waiting for Firebase CDN...");
+      setTimeout(initWhenReady, 50);
+      return;
+    }
+
+    doInit();
   }
 
-  /* =========================
-     ⚙️ Firebase Config
-  ========================= */
-  const firebaseConfig = {
-    apiKey: "AIzaSyCVOWzlu3_N3zd6yS90D2YY-U1ZL0VYHVo",
-    authDomain: "echtlucky-blog.firebaseapp.com",
-    projectId: "echtlucky-blog",
-    storageBucket: "echtlucky-blog.firebasestorage.app",
-    messagingSenderId: "411123885314",
-    appId: "1:411123885314:web:869d4cfabaaea3849d0e1b",
-    measurementId: "G-MEFF1FQDFF",
-  };
+  function doInit() {
+    /* =========================
+       ⚙️ Firebase Config
+    ========================= */
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVOWzlu3_N3zd6yS90D2YY-U1ZL0VYHVo",
+      authDomain: "echtlucky-blog.firebaseapp.com",
+      projectId: "echtlucky-blog",
+      storageBucket: "echtlucky-blog.firebasestorage.app",
+      messagingSenderId: "411123885314",
+      appId: "1:411123885314:web:869d4cfabaaea3849d0e1b",
+      measurementId: "G-MEFF1FQDFF",
+    };
 
-  /* =========================
-     🧠 Global Namespace
-  ========================= */
-  const appNS = (window.echtlucky = window.echtlucky || {});
+    /* =========================
+       🧠 Global Namespace
+    ========================= */
+    const appNS = (window.echtlucky = window.echtlucky || {});
 
-  /* =========================
-     🚀 Firebase Init
-  ========================= */
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    /* =========================
+       🚀 Firebase Init
+    ========================= */
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-  /* =========================
-     🔐 AUTH & FIRESTORE
-  ========================= */
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+    /* =========================
+       🔐 AUTH & FIRESTORE
+    ========================= */
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-  const googleProvider = new firebase.auth.GoogleAuthProvider();
-  googleProvider.setCustomParameters({ prompt: "select_account" });
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: "select_account" });
 
     // Optional persistence (robust / compat-safe)
-  // Multi-tab cache (best effort). Some environments block IndexedDB (private mode / strict settings).
-  try {
-    db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
-      // "failed-precondition" => multiple tabs open or persistence already enabled elsewhere
-      // "unimplemented"     => browser doesn't support persistence
-      // Both are safe to ignore for MVP
-      console.warn("Firestore persistence disabled:", err?.code || err?.message || err);
-    });
-  } catch (err) {
-    console.warn("Firestore persistence init failed:", err?.message || err);
-  }
-
-  /* =========================
-     👑 Admin / Roles
-  ========================= */
-  const ADMIN_EMAIL = "lucassteckel04@gmail.com";
-
-  function isAdminByEmail(user) {
-    return !!user && user.email === ADMIN_EMAIL;
-  }
-
-  async function getRole(uid) {
-    if (!uid) return "user";
+    // Multi-tab cache (best effort). Some environments block IndexedDB (private mode / strict settings).
     try {
-      const snap = await db.collection("users").doc(uid).get();
-      return snap.exists ? (snap.data()?.role || "user") : "user";
-    } catch (e) {
-      console.warn("getRole failed:", e);
-      return "user";
+      db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+        // "failed-precondition" => multiple tabs open or persistence already enabled elsewhere
+        // "unimplemented"     => browser doesn't support persistence
+        // Both are safe to ignore for MVP
+        console.warn("Firestore persistence disabled:", err?.code || err?.message || err);
+      });
+    } catch (err) {
+      console.warn("Firestore persistence init failed:", err?.message || err);
     }
-  }
 
-  async function isAdmin(user) {
-    if (!user) return false;
-    if (isAdminByEmail(user)) return true; // fallback
-    const r = await getRole(user.uid);
-    return r === "admin";
-  }
+    /* =========================
+       👑 Admin / Roles
+    ========================= */
+    const ADMIN_EMAIL = "lucassteckel04@gmail.com";
 
-  /* =========================
-     👤 Username Helpers
-  ========================= */
+    function isAdminByEmail(user) {
+      return !!user && user.email === ADMIN_EMAIL;
+    }
+
+    async function getRole(uid) {
+      if (!uid) return "user";
+      try {
+        const snap = await db.collection("users").doc(uid).get();
+        return snap.exists ? (snap.data()?.role || "user") : "user";
+      } catch (e) {
+        console.warn("getRole failed:", e);
+        return "user";
+      }
+    }
+
+    async function isAdmin(user) {
+      if (!user) return false;
+      if (isAdminByEmail(user)) return true; // fallback
+      const r = await getRole(user.uid);
+      return r === "admin";
+    }
+
+    /* =========================
+       👤 Username Helpers
+    ========================= */
   function sanitizeUsername(raw) {
     return String(raw || "")
       .trim()
@@ -206,4 +213,8 @@
     provider: !!googleProvider,
     ns: !!window.echtlucky,
   });
+  } // end doInit
+
+  // Start initialization
+  initWhenReady();
 })();
