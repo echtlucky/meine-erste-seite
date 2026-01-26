@@ -1,83 +1,164 @@
-// ========== CALL SYSTEM: 1:1-DIREKTANRUF =============
-    async function startDirectCall(targetUid, targetName) {
-      if (!currentUser || !targetUid || targetUid === currentUser.uid) return;
-      try {
-        const callId = `direct_${Date.now()}_${currentUser.uid}`;
-        // Call-Dokument anlegen
-        await db.collection("calls").doc(callId).set({
-          initiator: currentUser.uid,
-          recipient: targetUid,
-          createdAt: new Date(),
-          status: "pending",
-          type: "direct"
-        });
-        // CallRequest für Empfänger
-        await db.collection("users").doc(targetUid).collection("callRequests").add({
-          from: currentUser.uid,
-          fromName: currentUser.displayName || "User",
-          callId,
-          type: "direct",
-          createdAt: new Date(),
-          status: "pending"
-        });
-        // Push-Benachrichtigung (Demo, echtes Senden via Backend)
-        if (window.echtlucky?.voiceChat?.sendCallPush) {
-          window.echtlucky.voiceChat.sendCallPush(targetUid, "Eingehender Anruf", `${currentUser.displayName || "User"} ruft dich an.`, { callId, type: "direct" });
-        }
-        window.notify?.show({
-          type: "success",
-          title: "Anruf gestartet",
-          message: `Direktanruf an ${targetName}...`,
-          duration: 4000
-        });
-      } catch (err) {
-        console.error("Fehler beim Direktanruf:", err);
-        window.notify?.show({
-          type: "error",
-          title: "Fehler",
-          message: "Direktanruf konnte nicht gestartet werden",
-          duration: 4000
-        });
-      }
-    }
-  // ========== CALL SYSTEM: GRUPPEN-ANRUF STARTEN =============
-  async function startGroupCall() {
-    if (!selectedGroupId || !currentUser) return;
-    try {
-      // Hole Gruppenmitglieder
-      const groupDoc = await db.collection("groups").doc(selectedGroupId).get();
-      if (!groupDoc.exists) return;
-      const groupData = groupDoc.data();
-      const members = groupData.members || [];
-      const callId = `call_${Date.now()}_${currentUser.uid}`;
-      // Call-Dokument anlegen
-      await db.collection("groups").doc(selectedGroupId).collection("voice-calls").doc(callId).set({
-        initiator: currentUser.uid,
-        initiatorName: currentUser.displayName || "User",
-        createdAt: new Date(),
-        participants: [currentUser.uid],
-        status: "pending",
-        type: "group"
-      });
+// Discord-style Connect Page Logic
+// Modular, event-driven, dynamic content for sidebar navigation, friends, groups, requests, calls, and settings
 
-      // Überwache Call-Requests auf Annahme
-      db.collection("users").where("uid", "in", members.filter(uid => uid !== currentUser.uid)).get().then(snap => {
-        snap.forEach(userDoc => {
-          db.collection("users").doc(userDoc.id).collection("callRequests")
-            .where("callId", "==", callId)
-            .onSnapshot(async (reqSnap) => {
-              let accepted = false;
-              reqSnap.forEach(doc => {
-                if (doc.data().status === "accepted") accepted = true;
-              });
-              if (accepted) {
-                // Setze Call-Status auf 'ringing'
-                await db.collection("groups").doc(selectedGroupId).collection("voice-calls").doc(callId).update({ status: "ringing" });
-              }
-            });
-        });
-      });
-      // callRequests für alle Mitglieder (außer Initiator)
+document.addEventListener('DOMContentLoaded', () => {
+  // Sidebar navigation
+  const navBtns = document.querySelectorAll('.sidebar-nav-btn');
+  const content = document.getElementById('connectContent');
+  const details = document.getElementById('connectDetails');
+  let currentSection = 'friends';
+
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navBtns.forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      currentSection = btn.dataset.section;
+      renderSection(currentSection);
+    });
+  });
+
+  // Render main section
+  function renderSection(section) {
+    details.innerHTML = '';
+    switch (section) {
+      case 'friends':
+        renderFriends(); break;
+      case 'groups':
+        renderGroups(); break;
+      case 'requests':
+        renderRequests(); break;
+      case 'settings':
+        renderSettings(); break;
+      default:
+        content.innerHTML = '<div class="discord-card"><h2>Unbekannter Bereich</h2></div>';
+    }
+  }
+
+  // --- FRIENDS ---
+  function renderFriends() {
+    content.innerHTML = `
+      <div class="discord-card">
+        <h2>Freunde</h2>
+        <div id="friendsList"></div>
+        <button class="btn btn-primary" id="addFriendBtn"><i class="fa fa-user-plus"></i> Freund hinzufügen</button>
+        <div id="addFriendForm" style="display:none; margin-top:1.2rem;">
+          <input type="text" id="addFriendInput" placeholder="Benutzername#Tag" autocomplete="off" />
+          <button class="btn btn-success" id="submitAddFriend">Anfrage senden</button>
+          <div id="addFriendFeedback" style="margin-top:0.5rem; font-size:0.98em;"></div>
+        </div>
+      </div>
+      <div class="discord-card" id="friendRequestsCard">
+        <h2>Freundschaftsanfragen</h2>
+        <div id="requestsList"></div>
+      </div>
+      <div class="discord-card" id="callCard">
+        <h2>Anrufe</h2>
+        <div id="callStatus">Nicht verbunden</div>
+        <div style="display:flex; gap:1rem; margin:1.2rem 0;">
+          <button class="btn btn-primary" id="startDirectCallBtn"><i class="fa fa-phone"></i> 1:1 Call</button>
+          <button class="btn btn-primary" id="startGroupCallBtn"><i class="fa fa-users"></i> Gruppen-Call</button>
+          <button class="btn btn-danger" id="leaveCallBtn"><i class="fa fa-phone-slash"></i> Auflegen</button>
+        </div>
+        <div id="callParticipants" style="margin-top:0.5rem; color:#b9bbbe;"></div>
+      </div>
+    `;
+    // Add Friend Button
+    document.getElementById('addFriendBtn').onclick = () => {
+      const form = document.getElementById('addFriendForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    };
+    // Submit Add Friend
+    document.getElementById('submitAddFriend').onclick = async () => {
+      const input = document.getElementById('addFriendInput');
+      const feedback = document.getElementById('addFriendFeedback');
+      const value = input.value.trim();
+      if (!/^.{3,32}#\d{4}$/.test(value)) {
+        feedback.textContent = 'Bitte im Format Benutzername#1234 eingeben.';
+        feedback.style.color = '#ed4245';
+        return;
+      }
+      feedback.textContent = 'Sende Anfrage...';
+      feedback.style.color = '#b9bbbe';
+      // TODO: Backend-Request zum Hinzufügen
+      setTimeout(() => {
+        feedback.textContent = 'Anfrage gesendet!';
+        feedback.style.color = '#43b581';
+        input.value = '';
+      }, 1200);
+    };
+    // Call-Buttons
+    document.getElementById('startDirectCallBtn').onclick = () => {
+      document.getElementById('callStatus').textContent = 'Starte 1:1 Call...';
+      // TODO: Backend-Logik für Direktanruf
+      setTimeout(() => {
+        document.getElementById('callStatus').textContent = 'Im 1:1 Call (Demo)';
+        document.getElementById('callParticipants').textContent = 'Du, Freund';
+      }, 1200);
+    };
+    document.getElementById('startGroupCallBtn').onclick = () => {
+      document.getElementById('callStatus').textContent = 'Starte Gruppen-Call...';
+      // TODO: Backend-Logik für Gruppenanruf
+      setTimeout(() => {
+        document.getElementById('callStatus').textContent = 'Im Gruppen-Call (Demo)';
+        document.getElementById('callParticipants').textContent = 'Du, Freund 1, Freund 2';
+      }, 1200);
+    };
+    document.getElementById('leaveCallBtn').onclick = () => {
+      document.getElementById('callStatus').textContent = 'Nicht verbunden';
+      document.getElementById('callParticipants').textContent = '';
+    };
+    // TODO: Load friends and requests from backend, render lists
+    document.getElementById('friendsList').innerHTML = '<div style="color:#b9bbbe;">(Freunde werden geladen...)</div>';
+    document.getElementById('requestsList').innerHTML = '<div style="color:#b9bbbe;">(Anfragen werden geladen...)</div>';
+  }
+
+  // --- GROUPS ---
+  function renderGroups() {
+    content.innerHTML = `
+      <div class="discord-card">
+        <h2>Gruppen</h2>
+        <div id="groupsList"></div>
+        <button class="btn btn-primary" id="createGroupBtn"><i class="fa fa-plus"></i> Neue Gruppe</button>
+      </div>
+    `;
+    // TODO: Load groups, render list, handle create/join
+  }
+
+  // --- REQUESTS ---
+  function renderRequests() {
+    content.innerHTML = `
+      <div class="discord-card">
+        <h2>Freundschaftsanfragen</h2>
+        <div id="requestsList"></div>
+      </div>
+    `;
+    // TODO: Load friend requests, render accept/decline
+  }
+
+  // --- SETTINGS ---
+  function renderSettings() {
+    content.innerHTML = `
+      <div class="discord-card">
+        <h2>Einstellungen</h2>
+        <div>
+          <label>Benutzername</label>
+          <input type="text" id="settingsUsername" value="Gast" />
+          <label>Status</label>
+          <select id="settingsStatus">
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
+            <option value="dnd">Nicht stören</option>
+          </select>
+          <button class="btn btn-success" id="saveSettingsBtn">Speichern</button>
+        </div>
+      </div>
+    `;
+    // TODO: Save settings logic
+  }
+
+  // Initial render
+  renderSection(currentSection);
+});
       for (const uid of members) {
         if (uid === currentUser.uid) continue;
         await db.collection("users").doc(uid).collection("callRequests").add({

@@ -1,83 +1,259 @@
-/* ==========================================
-   CONNECT PAGE — 3-Column Layout
-   ========================================== */
-
+/* Discord-style Connect Redesign */
 :root {
-  --accent: #00ff88;
-  --text: #e0ffe0;
-  --text-muted: rgba(224, 255, 224, 0.6);
-  --bg-dark: rgba(0, 0, 0, 0.95);
-  --border: rgba(0, 255, 136, 0.15);
+  --accent: #5865f2;
+  --accent-light: #8ea1e1;
+  --danger: #ed4245;
+  --success: #43b581;
+  --bg-dark: #23272a;
+  --bg-sidebar: #2f3136;
+  --bg-panel: #36393f;
+  --bg-card: #40444b;
+  --text: #f6f6f7;
+  --text-muted: #b9bbbe;
+  --border: #202225;
+  --shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
 }
 
-/* ==========================================
-   LAYOUT & CONTAINER
-   ========================================== */
-
-.connect-shell {
-  max-width: 100%;
-  padding: 2rem 1rem;
+body.connect-page {
+  background: var(--bg-dark);
+  color: var(--text);
 }
 
-.connect-hero {
-  margin-bottom: 3rem;
-  text-align: center;
+.connect-discord-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  background: var(--bg-dark);
 }
 
-.connect-hero__inner {
+/* Sidebar */
+.connect-sidebar {
+  width: 80px;
+  background: var(--bg-sidebar);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  padding: 1rem 0;
+  box-shadow: var(--shadow);
+  z-index: 10;
 }
-
-.connect-badge {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 100px;
-  border: 1px solid var(--accent);
+.sidebar-logo {
+  font-size: 2rem;
   color: var(--accent);
-  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+.sidebar-nav-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  padding: 1rem 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.sidebar-nav-btn.is-active,
+.sidebar-nav-btn:hover {
+  color: var(--accent);
+  background: var(--bg-card);
+}
+.sidebar-nav-btn span {
+  font-size: 0.8rem;
   font-weight: 600;
 }
-
-.connect-title {
-  font-size: 3rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, var(--accent), #00ff88);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 0;
-  letter-spacing: -1px;
-}
-
-.connect-sub {
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  max-width: 600px;
-  margin: 0;
-}
-
-/* Auth Status Card */
-.auth-status-card {
-  background: rgba(0, 255, 136, 0.08);
-  border: 1px solid rgba(0, 255, 136, 0.25);
-  border-radius: 16px;
-  padding: 2rem;
-  margin-top: 2rem;
-  backdrop-filter: blur(10px);
-  max-width: 600px;
-}
-
-.auth-status-content {
+.sidebar-user {
+  margin-top: auto;
+  padding: 1rem 0 0 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  border-top: 1px solid var(--border);
+}
+.sidebar-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.sidebar-user-info {
+  text-align: center;
+}
+#sidebarUserName {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.user-status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.user-status.online { color: var(--success); }
+.user-status.offline { color: var(--danger); }
+
+/* Main Panel */
+.connect-main-panel {
+  flex: 1 1 0%;
+  background: var(--bg-panel);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+#connectContent {
+  padding: 2rem 2.5rem;
+  height: 100%;
+  overflow-y: auto;
 }
 
-.status-label {
+/* Right Panel */
+.connect-right-panel {
+  width: 340px;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  min-width: 240px;
+  max-width: 400px;
+  padding: 2rem 1.5rem;
+  overflow-y: auto;
+}
+#connectDetails {
+  width: 100%;
+}
+
+/* Card Styles */
+.discord-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+}
+.discord-card h2 {
+  margin-top: 0;
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+/* Button Styles */
+.btn, .btn-primary, .btn-danger, .btn-success {
+  border-radius: 8px;
+  font-weight: 700;
+  padding: 0.7em 1.4em;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--accent-light);
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+
+/* Input Styles */
+input, select, textarea {
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7em 1em;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Responsive & Mobile */
+@media (max-width: 1200px) {
+  .connect-right-panel {
+    display: none;
+  }
+}
+@media (max-width: 900px) {
+  .connect-discord-shell {
+    flex-direction: column;
+  }
+  .connect-sidebar {
+    flex-direction: row;
+    width: 100vw;
+    height: 60px;
+    padding: 0;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    box-shadow: 0 -2px 16px 0 rgba(0,0,0,0.18);
+  }
+  .sidebar-logo { display: none; }
+  .sidebar-nav {
+    flex-direction: row;
+    gap: 0.5rem;
+    width: auto;
+  }
+  .sidebar-nav-btn {
+    font-size: 1.2rem;
+    padding: 0.5rem 0.7rem;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .sidebar-user { display: none; }
+  .connect-main-panel {
+    padding: 0.5rem;
+  }
+  #connectContent {
+    padding: 1rem 0.5rem;
+  }
+}
+@media (max-width: 600px) {
+  .discord-card {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+  .connect-main-panel {
+    padding: 0;
+  }
+  #connectContent {
+    padding: 0.5rem 0.2rem;
+  }
+}
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--accent);

@@ -1,83 +1,68 @@
-<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connect | echtlucky</title>
-
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/connect.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-
 <body class="page-transition connect-page">
-  <!-- Header via fetch -->
   <div id="header-placeholder"></div>
-
-  <main class="container connect-shell">
-
-    <!-- HERO SECTION -->
-    <section class="connect-hero">
-      <div class="connect-hero__inner">
-        <div class="connect-badge">⚡ echtlucky • Community</div>
-        <h1 class="connect-title">Connect</h1>
-        <p class="connect-sub">
-          Echte Community, echter Grind. Gruppen, Chat, Voice — alles auf der Seite.
-        </p>
-
-        <!-- Auth Status Card -->
-        <div class="auth-status-card" id="authStatusCard">
-          <div class="auth-status-content">
-            <span class="status-label" id="statusLabel">Nicht eingeloggt</span>
-            <p class="status-info" style="font-size: 0.95rem; color: rgba(255,255,255,0.7); margin: 12px 0 16px 0; max-width: 500px;">
-              Melde dich an, um Gruppen zu erstellen, Freunde hinzuzufügen und über Voice zu kommunizieren. Sei Teil der echtlucky Community!
-            </p>
-            <a href="login.html" class="btn btn-primary btn-lg" id="btnLogin" style="display: inline-flex; gap: 8px; align-items: center;">
-              <span>🔐 Jetzt anmelden</span>
-            </a>
-          </div>
+  <main class="connect-discord-shell">
+    <aside class="connect-sidebar" id="connectSidebar">
+      <div class="sidebar-logo"> <i class="fa-brands fa-discord"></i> </div>
+      <nav class="sidebar-nav">
+        <button class="sidebar-nav-btn is-active" data-section="friends"><i class="fa fa-user-friends"></i><span>Freunde</span></button>
+        <button class="sidebar-nav-btn" data-section="groups"><i class="fa fa-users"></i><span>Gruppen</span></button>
+        <button class="sidebar-nav-btn" data-section="requests"><i class="fa fa-user-plus"></i><span>Anfragen</span></button>
+        <button class="sidebar-nav-btn" data-section="settings"><i class="fa fa-cog"></i><span>Einstellungen</span></button>
+      </nav>
+      <div class="sidebar-user" id="sidebarUser">
+        <div class="sidebar-user-avatar"><i class="fa fa-user"></i></div>
+        <div class="sidebar-user-info">
+          <span id="sidebarUserName">Gast</span>
+          <span id="sidebarUserStatus" class="user-status offline">Offline</span>
         </div>
       </div>
+    </aside>
+    <section class="connect-main-panel" id="connectMainPanel">
+      <!-- Dynamic content: friends, groups, requests, chat, etc. -->
+      <div id="connectContent"></div>
     </section>
-
-    <!-- 3-SPALTEN LAYOUT für angemeldete Nutzer -->
-    <div class="connect-layout" id="connectLayout" style="display:none;">
-
-      <!-- LINKE SPALTE: Gruppen/Chats -->
-      <div class="connect-column connect-column--left">
-        <div class="groups-header">
-          <h3 class="groups-title">Deine Gruppen</h3>
-          <button class="btn btn-primary btn-sm" id="btnCreateGroup">+ Neu</button>
-        </div>
-        <div class="groups-list" id="groupsListPanel">
-          <div class="empty-state">
-            <p>📭 Keine Gruppen</p>
-          </div>
-        </div>
-
-        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(0,255,136,0.15);">
-          <h3 class="friends-title">Freunde hinzufügen</h3>
-          <input 
-            type="text" 
-            id="friendSearchInput" 
-            class="friend-search-input" 
-            placeholder="Nach Benutzer suchen..." 
-            style="width: 100%;"
-          />
-          <div class="friends-search-results" id="friendsSearchResults" style="margin-top: 1rem;">
-            <div class="empty-state">
-              <p>🔍 Suche...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MITTLERE SPALTE: Chat -->
-      <div class="connect-column connect-column--middle">
-        <div class="chat-container" id="chatContainer" style="display:none;">
-          <div class="chat-header">
-            <div class="chat-group-info">
+    <aside class="connect-right-panel" id="connectRightPanel">
+      <!-- Details/settings for selected friend/group/call -->
+      <div id="connectDetails"></div>
+    </aside>
+  </main>
+  <div id="footer-placeholder"></div>
+  <script src="firebase.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/auth-state.js"></script>
+  <script src="js/notify.js"></script>
+  <script src="js/modal-dialog.js"></script>
+  <script src="js/connect-minimal.js"></script>
+  <script src="js/connect.js"></script>
+  <script src="js/voice-chat.js"></script>
+  <script>
+    document.body.classList.add('loaded');
+    fetch('header.html?v=' + Date.now())
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+        if (typeof initHeaderScripts === "function") initHeaderScripts();
+        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+        window.dispatchEvent(new CustomEvent('echtlucky:header-ready'));
+      });
+    fetch('footer.html?v=' + Date.now())
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      });
+  </script>
+</body>
+</html>
               <h2 class="chat-group-title" id="chatGroupTitle">Gruppe</h2>
               <button class="chat-settings-btn" id="btnGroupSettings" title="Einstellungen">
                 <i class="fas fa-cog"></i>
@@ -175,6 +160,61 @@
               class="setting-input" 
               placeholder="Benutzername..." 
             />
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connect | echtlucky</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages/connect.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body class="page-transition connect-page">
+  <div id="header-placeholder"></div>
+  <main class="connect-discord-layout">
+    <!-- SIDEBAR NAVIGATION -->
+    <nav class="connect-sidebar" id="connectSidebar">
+      <div class="sidebar-logo"> <i class="fab fa-discord"></i> </div>
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-item is-active" data-section="friends"><i class="fa fa-user-friends"></i><span>Freunde</span></li>
+        <li class="sidebar-nav-item" data-section="groups"><i class="fa fa-users"></i><span>Gruppen</span></li>
+        <li class="sidebar-nav-item" data-section="requests"><i class="fa fa-user-plus"></i><span>Anfragen</span></li>
+        <li class="sidebar-nav-item" data-section="settings"><i class="fa fa-cog"></i><span>Einstellungen</span></li>
+      </ul>
+      <div class="sidebar-user" id="sidebarUser"></div>
+    </nav>
+
+    <!-- MAIN CARD (Friends/Groups/Requests/Settings) -->
+    <section class="connect-main-card" id="connectMainCard">
+      <!-- Dynamischer Content wird per JS geladen -->
+      <div class="main-card-content" id="mainCardContent"></div>
+    </section>
+
+    <!-- RIGHT PANEL: Details/Settings/Call -->
+    <aside class="connect-right-panel" id="connectRightPanel">
+      <!-- Dynamischer Content (Friend/Group/Call Details, Settings) -->
+      <div class="right-panel-content" id="rightPanelContent"></div>
+    </aside>
+  </main>
+  <div id="footer-placeholder"></div>
+
+  <!-- Firebase SDKs & Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
+  <script src="firebase.js"></script>
+  <script src="js/auth-state.js"></script>
+  <script src="js/connect.js"></script>
+  <script src="js/voice-chat.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/legal-modal.js"></script>
+  <script src="js/notify.js"></script>
+  <script src="js/modal-dialog.js"></script>
+</body>
+</html>
             <button class="btn btn-primary btn-sm" id="btnModalAddMember">Hinzufügen</button>
           </div>
           <div class="modal-member-search-results" id="modalMemberResults"></div>
