@@ -1,6 +1,6 @@
 ﻿/* =========================
-   admin-panel.js — echtlucky (v3)
-   Vollständiges Admin-Panel mit Event-waiting
+   admin-panel.js — echtlucky (v4 - FIXED)
+   Vollständiges Admin-Panel mit korrekter Initialization
 ========================= */
 
 (() => {
@@ -8,22 +8,25 @@
 
   let auth = null;
   let db = null;
+  let firebase = null;
   const ADMIN_EMAIL = "lucassteckel04@gmail.com";
 
   // Wait for Firebase to be ready
-  function waitForFirebase() {
+  async function waitForFirebase() {
     return new Promise((resolve) => {
       if (window.firebaseReady && window.auth && window.db) {
         auth = window.auth;
         db = window.db;
+        firebase = window.firebase;
         console.log("✅ Admin Panel: Firebase already ready");
         resolve();
         return;
       }
 
-      const handleReady = (event) => {
-        auth = window.auth || event.detail?.auth;
-        db = window.db || event.detail?.db;
+      const handleReady = () => {
+        auth = window.auth;
+        db = window.db;
+        firebase = window.firebase;
         console.log("✅ Admin Panel: Firebase ready via event");
         resolve();
       };
@@ -36,46 +39,59 @@
         if (window.auth && window.db) {
           auth = window.auth;
           db = window.db;
+          firebase = window.firebase;
           console.log("✅ Admin Panel: Firebase ready via timeout");
+          resolve();
+        } else {
+          console.error("❌ Admin Panel: Firebase timeout");
           resolve();
         }
       }, 3000);
     });
   }
 
-  // DOM ELEMENTS
-  const adminStatus = document.getElementById("adminStatus");
-  const navButtons = document.querySelectorAll(".admin-nav__btn");
-  
-  // Blog
-  const newPostBtn = document.getElementById("newPostBtn");
-  const newPostModal = document.getElementById("newPostModal");
-  const publishBtn = document.getElementById("publishBtn");
-  const newTitle = document.getElementById("new-title");
-  const newContent = document.getElementById("new-content");
-  const postList = document.getElementById("post-list");
+  // DOM ELEMENTS - Get after DOM ready
+  let adminStatus, navButtons, newPostBtn, newPostModal, publishBtn, newTitle, newContent, postList;
+  let userList, banEmail, banReason, banAddBtn, banList;
+  let logsList, statTotalUsers, statTotalPosts, statTotalBans, activityList;
+  let saveSettingsBtn, resetSettingsBtn;
 
-  // Users
-  const userList = document.getElementById("user-list");
+  function initDOM() {
+    adminStatus = document.getElementById("adminStatus");
+    navButtons = document.querySelectorAll(".admin-nav__btn");
+    
+    // Blog
+    newPostBtn = document.getElementById("newPostBtn");
+    newPostModal = document.getElementById("newPostModal");
+    publishBtn = document.getElementById("publishBtn");
+    newTitle = document.getElementById("new-title");
+    newContent = document.getElementById("new-content");
+    postList = document.getElementById("post-list");
 
-  // Bans
-  const banEmail = document.getElementById("ban-email");
-  const banReason = document.getElementById("ban-reason");
-  const banAddBtn = document.getElementById("banAddBtn");
-  const banList = document.getElementById("ban-list");
+    // Users
+    userList = document.getElementById("user-list");
 
-  // Logs
-  const logsList = document.getElementById("logs-list");
+    // Bans
+    banEmail = document.getElementById("ban-email");
+    banReason = document.getElementById("ban-reason");
+    banAddBtn = document.getElementById("banAddBtn");
+    banList = document.getElementById("ban-list");
 
-  // Stats
-  const statTotalUsers = document.getElementById("stat-total-users");
-  const statTotalPosts = document.getElementById("stat-total-posts");
-  const statTotalBans = document.getElementById("stat-total-bans");
-  const activityList = document.getElementById("activity-list");
+    // Logs
+    logsList = document.getElementById("logs-list");
 
-  // Settings
-  const saveSettingsBtn = document.getElementById("saveSettingsBtn");
-  const resetSettingsBtn = document.getElementById("resetSettingsBtn");
+    // Stats
+    statTotalUsers = document.getElementById("stat-total-users");
+    statTotalPosts = document.getElementById("stat-total-posts");
+    statTotalBans = document.getElementById("stat-total-bans");
+    activityList = document.getElementById("activity-list");
+
+    // Settings
+    saveSettingsBtn = document.getElementById("saveSettingsBtn");
+    resetSettingsBtn = document.getElementById("resetSettingsBtn");
+
+    console.log("✅ DOM elements initialized");
+  }
 
   // UTILITIES
   function escapeHtml(str) {
@@ -372,40 +388,95 @@
     logAdminAction("settings_updated", "Admin-Einstellungen gespeichert");
   }
 
-  // Setup Event Listeners
+  // Show/Hide Tab Content
+  function showTab(tabName) {
+    // Hide all tabs
+    const allTabs = document.querySelectorAll(".admin-tab");
+    allTabs.forEach((tab) => {
+      tab.style.display = "none";
+    });
+
+    // Show selected tab
+    const selectedTab = document.querySelector(`.admin-tab[data-tab="${tabName}"]`);
+    if (selectedTab) {
+      selectedTab.style.display = "block";
+    }
+
+    // Load content
+    loadTabContent(tabName);
+  }
+
+  // Setup Event Listeners - MUST be called after initDOM
   function setupListeners() {
-    // Tab Navigation
+    console.log("🔵 Setting up event listeners...");
+    
+    if (!navButtons || navButtons.length === 0) {
+      console.error("❌ navButtons not found!");
+      return;
+    }
+
+    // Tab Navigation - WICHTIG: Correct event setup
     navButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const tabName = btn.dataset.tab;
+      btn.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const tabName = this.getAttribute("data-tab");
+        console.log("🔄 Switching to tab:", tabName);
+        
         if (!tabName) return;
 
-        navButtons.forEach((b) => b.classList.remove("is-active"));
-        btn.classList.add("is-active");
+        // Update active button
+        navButtons.forEach((b) => {
+          b.classList.remove("is-active");
+        });
+        this.classList.add("is-active");
 
-        loadTabContent(tabName);
+        // Show/hide tabs and load content
+        showTab(tabName);
       });
     });
 
-    // Blog
+    console.log("✅ Tab listeners initialized");
+
+    // Blog modal - Open
     if (newPostBtn) {
       newPostBtn.addEventListener("click", () => {
         window.editPostId = null;
-        newTitle.value = "";
-        newContent.value = "";
-        newPostModal.classList.add("show");
+        if (newTitle) newTitle.value = "";
+        if (newContent) newContent.value = "";
+        if (newPostModal) {
+          newPostModal.classList.add("show");
+          // Focus title input
+          setTimeout(() => newTitle?.focus(), 100);
+        }
       });
     }
 
-    const closeNewPostBtn = newPostModal?.querySelector(".admin-modal__close");
-    if (closeNewPostBtn) {
-      closeNewPostBtn.addEventListener("click", () => {
-        newPostModal.classList.remove("show");
+    // Blog modal - Close with X button
+    const closeNewPostModalBtn = document.getElementById("closeNewPostModal");
+    if (closeNewPostModalBtn) {
+      closeNewPostModalBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (newPostModal) {
+          newPostModal.classList.remove("show");
+        }
       });
     }
 
+    // Publish button
     if (publishBtn) {
       publishBtn.addEventListener("click", savePost);
+    }
+
+    // Cancel publish button
+    const cancelPublishBtn = document.getElementById("cancelPublishBtn");
+    if (cancelPublishBtn) {
+      cancelPublishBtn.addEventListener("click", () => {
+        if (newPostModal) {
+          newPostModal.classList.remove("show");
+        }
+      });
     }
 
     // Bans
@@ -427,10 +498,21 @@
 
     // Modal close on escape
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && newPostModal.classList.contains("show")) {
+      if (e.key === "Escape" && newPostModal && newPostModal.classList.contains("show")) {
         newPostModal.classList.remove("show");
       }
     });
+
+    // Modal click outside
+    if (newPostModal) {
+      newPostModal.addEventListener("click", (e) => {
+        if (e.target === newPostModal) {
+          newPostModal.classList.remove("show");
+        }
+      });
+    }
+
+    console.log("✅ All listeners setup complete");
   }
 
   async function loadTabContent(tabName) {
@@ -461,70 +543,27 @@
   }
 
   // Initialization
-  async function init() {
-    console.log("🔵 Admin Panel initializing...");
-
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
-
-      // Check admin access
-      try {
-        const userDoc = await db.collection("users").doc(user.uid).get();
-        const isAdmin = user.email === ADMIN_EMAIL || userDoc.data()?.role === "admin";
-
-        if (!isAdmin) {
-          notify("Zugriff verweigert - nicht Admin", "error");
-          setTimeout(() => {
-            window.location.href = "index.html";
-          }, 1500);
-          return;
-        }
-
-        if (adminStatus) adminStatus.textContent = `✅ Admin (${user.email})`;
-        await logAdminAction("admin_panel_access", "Admin-Panel geöffnet");
-
-        setupListeners();
-
-        // Load all tabs
-        await loadPosts();
-        await loadUsers();
-        await loadBans();
-        await loadAdminLogs();
-        await loadStatistics();
-        loadSettings();
-
-        // Auto-refresh logs every 30 seconds
-        setInterval(async () => {
-          await loadAdminLogs();
-          await loadStatistics();
-        }, 30000);
-
-        console.log("✅ Admin Panel ready");
-      } catch (err) {
-        console.error("❌ Admin init failed:", err);
-        notify(`Fehler: ${err.message}`, "error");
-      }
-    });
-  }
-
-  // Start initialization
   async function startInit() {
     console.log("🔵 Admin Panel starting...");
+    
+    // Step 1: Initialize DOM elements
+    initDOM();
+
+    // Step 2: Wait for Firebase
     await waitForFirebase();
 
     if (!auth || !db) {
-      console.error("❌ Firebase NOT available");
+      console.error("❌ Firebase NOT available after waiting");
       notify("Firebase nicht initialisiert!", "error");
       return;
     }
 
-    console.log("✅ Firebase is ready, setting up listeners");
+    console.log("✅ Firebase is ready");
+
+    // Step 3: Setup listeners (NACH DOM ready)
     setupListeners();
 
-    // Check auth state
+    // Step 4: Check auth state
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         console.log("⚠️ No user, going to login");
@@ -549,6 +588,9 @@
         if (adminStatus) adminStatus.textContent = `✅ Admin (${user.email})`;
 
         await logAdminAction("panel_opened", "Admin-Panel geöffnet");
+
+        // Load initial data
+        console.log("🔄 Loading initial data...");
         await loadPosts();
         await loadUsers();
         await loadBans();
@@ -558,6 +600,7 @@
 
         console.log("✅ Admin panel fully ready");
 
+        // Auto-refresh every 30 seconds
         setInterval(async () => {
           try {
             await loadAdminLogs();
@@ -573,6 +616,7 @@
     });
   }
 
+  // Initialization on DOMContentLoaded
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", startInit);
   } else {

@@ -23,25 +23,169 @@
     <nav class="admin-nav">
       <button class="admin-nav__btn is-active" data-tab="blog"><i class="fa-solid fa-blog"></i> Blog</button>
       <button class="admin-nav__btn" data-tab="users"><i class="fa-solid fa-users"></i> Benutzer</button>
-      <button class="admin-nav__btn" data-tab="comments"><i class="fa-solid fa-comments"></i> Kommentare</button>
       <button class="admin-nav__btn" data-tab="bans"><i class="fa-solid fa-ban"></i> Bans</button>
       <button class="admin-nav__btn" data-tab="logs"><i class="fa-solid fa-file-lines"></i> Logs</button>
       <button class="admin-nav__btn" data-tab="stats"><i class="fa-solid fa-chart-line"></i> Statistiken</button>
       <button class="admin-nav__btn" data-tab="settings"><i class="fa-solid fa-gear"></i> Einstellungen</button>
     </nav>
     <section class="admin-content">
-      <div id="blog-tab" data-tab="blog" class="admin-tab" style="display:block;"><div class="admin-card"><div class="admin-card__header"><h2 class="admin-card__title"> Blog verwalten</h2><button class="btn btn-primary btn-sm" id="newPostBtn"><i class="fa-solid fa-plus"></i> Neuer Beitrag</button></div><div id="post-list" class="admin-list"></div></div></div>
-      <div id="users-tab" data-tab="users" class="admin-tab" style="display:none;"><div class="admin-card"><div class="admin-card__header"><h2 class="admin-card__title"> Benutzer verwalten</h2></div><div id="user-list" class="admin-list"></div></div></div>
-      <div id="comments-tab" data-tab="comments" class="admin-tab" style="display:none;"><div class="admin-card"><div class="admin-card__header"><h2 class="admin-card__title"> Kommentare & Chat</h2></div><div id="comments-list" class="admin-list"></div></div></div>
-      <div id="bans-tab" data-tab="bans" class="admin-tab" style="display:none;"><div class="admin-card"><div class="admin-card__header"><h2 class="admin-card__title"> Gesperrte Nutzer</h2></div><div class="admin-ban-form"><input type="email" id="ban-email" class="admin-input" placeholder="user@example.com" /><input type="text" id="ban-reason" class="admin-input" placeholder="Grund für Ban (optional)" /><button class="btn btn-danger btn-sm" id="banAddBtn"><i class="fa-solid fa-ban"></i> Bannen</button></div><div id="ban-list" class="admin-list"></div></div></div>
-      <div id="logs-tab" data-tab="logs" class="admin-tab" style="display:none;"><div class="admin-card"><div class="admin-card__header"><h2 class="admin-card__title"> Admin-Logs</h2></div><div id="logs-list" class="admin-list"></div></div></div>
-      <div id="stats-tab" data-tab="stats" class="admin-tab" style="display:none;"><div class="admin-stats-grid"><div class="admin-card"><div class="admin-card__header"><h2 class="admin-card__title"> Übersicht</h2></div><div class="admin-stats"><div class="admin-stat"><span class="admin-stat__label">Nutzer</span><span class="admin-stat__value" id="stat-total-users">0</span></div><div class="admin-stat"><span class="admin-stat__label">Blog-Posts</span><span class="admin-stat__value" id="stat-total-posts">0</span></div><div class="admin-stat"><span class="admin-stat__label">Bans</span><span class="admin-stat__value" id="stat-total-bans">0</span></div></div></div><div class="admin-card"><div class="admin-card__header"><h2 class="admin-card__title"> Aktivität</h2></div><div id="activity-list" class="admin-activity"></div></div></div></div>
-      <div id="settings-tab" data-tab="settings" class="admin-tab" style="display:none;"><div class="admin-card"><div class="admin-card__header"><h2 class="admin-card__title"> Einstellungen</h2></div><div class="admin-settings-group"><h3> Sicherheit</h3><div class="admin-setting"><label for="max-login-attempts">Max. Login-Versuche</label><input type="number" id="max-login-attempts" value="5" min="1" max="20" /></div><div class="admin-setting"><label for="session-timeout">Session-Timeout (Min)</label><input type="number" id="session-timeout" value="30" min="5" max="480" /></div></div><div class="admin-settings-group"><h3> Kommentare</h3><div class="admin-setting"><label><input type="checkbox" id="enable-comments" checked /> Kommentare aktivieren</label></div><div class="admin-setting"><label><input type="checkbox" id="moderation-required" /> Kommentare moderieren</label></div></div><button class="btn btn-primary" id="saveSettingsBtn">Speichern</button><button class="btn btn-ghost" id="resetSettingsBtn">Zurücksetzen</button></div></div>
+      <!-- BLOG TAB -->
+      <div class="admin-tab is-active" data-tab="blog">
+        <div class="admin-card">
+          <div class="admin-card__header">
+            <h2 class="admin-card__title">📝 Blog verwalten</h2>
+            <button class="btn btn-primary btn-sm" id="newPostBtn"><i class="fa-solid fa-plus"></i> Neuer Beitrag</button>
+          </div>
+          <div id="post-list" class="admin-list"></div>
+        </div>
+      </div>
+
+      <!-- USERS TAB -->
+      <div class="admin-tab" data-tab="users" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card__header">
+            <h2 class="admin-card__title">👥 Benutzer verwalten</h2>
+          </div>
+          <div id="user-list" class="admin-list"></div>
+        </div>
+      </div>
+
+      <!-- BANS TAB -->
+      <div class="admin-tab" data-tab="bans" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card__header">
+            <h2 class="admin-card__title">⛔ Gesperrte Nutzer</h2>
+          </div>
+          <div class="admin-ban-form">
+            <input type="email" id="ban-email" class="admin-input" placeholder="user@example.com" />
+            <input type="text" id="ban-reason" class="admin-input" placeholder="Grund für Ban (optional)" />
+            <button class="btn btn-danger btn-sm" id="banAddBtn"><i class="fa-solid fa-ban"></i> Bannen</button>
+          </div>
+          <div id="ban-list" class="admin-list"></div>
+        </div>
+      </div>
+
+      <!-- LOGS TAB -->
+      <div class="admin-tab" data-tab="logs" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card__header">
+            <h2 class="admin-card__title">📋 Admin-Logs</h2>
+          </div>
+          <div id="logs-list" class="admin-list"></div>
+        </div>
+      </div>
+
+      <!-- STATS TAB -->
+      <div class="admin-tab" data-tab="stats" style="display:none;">
+        <div class="admin-stats-grid">
+          <div class="admin-card">
+            <div class="admin-card__header">
+              <h2 class="admin-card__title">📊 Übersicht</h2>
+            </div>
+            <div class="admin-stats">
+              <div class="admin-stat">
+                <span class="admin-stat__label">Nutzer</span>
+                <span class="admin-stat__value" id="stat-total-users">0</span>
+              </div>
+              <div class="admin-stat">
+                <span class="admin-stat__label">Blog-Posts</span>
+                <span class="admin-stat__value" id="stat-total-posts">0</span>
+              </div>
+              <div class="admin-stat">
+                <span class="admin-stat__label">Bans</span>
+                <span class="admin-stat__value" id="stat-total-bans">0</span>
+              </div>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card__header">
+              <h2 class="admin-card__title">🔥 Aktivität</h2>
+            </div>
+            <div id="activity-list" class="admin-activity"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div class="admin-tab" data-tab="settings" style="display:none;">
+        <div class="admin-card">
+          <div class="admin-card__header">
+            <h2 class="admin-card__title">⚙️ Einstellungen</h2>
+          </div>
+          <div class="admin-settings-group">
+            <h3>🔒 Sicherheit</h3>
+            <div class="admin-setting">
+              <label for="max-login-attempts">Max. Login-Versuche</label>
+              <input type="number" id="max-login-attempts" value="5" min="1" max="20" />
+            </div>
+            <div class="admin-setting">
+              <label for="session-timeout">Session-Timeout (Min)</label>
+              <input type="number" id="session-timeout" value="30" min="5" max="480" />
+            </div>
+          </div>
+          <div class="admin-settings-group">
+            <h3>💬 Blog</h3>
+            <div class="admin-setting">
+              <label>
+                <input type="checkbox" id="enable-blog" checked /> Blog aktivieren
+              </label>
+            </div>
+          </div>
+          <div class="admin-settings-actions">
+            <button class="btn btn-primary" id="saveSettingsBtn">Speichern</button>
+            <button class="btn btn-ghost" id="resetSettingsBtn">Zurücksetzen</button>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
-  <div id="newPostModal" class="admin-modal" aria-hidden="true"><div class="admin-modal__panel"><button class="admin-modal__close" id="closeNewPostModal"></button><h2 class="admin-modal__title" id="postModalTitle">Neuen Beitrag erstellen</h2><div class="admin-field"><label for="new-title">Titel</label><input type="text" id="new-title" class="admin-input" placeholder="Beitrag-Titel" /></div><div class="admin-field"><label for="new-content">Inhalt</label><textarea id="new-content" class="admin-input" rows="8" placeholder="Schreibe deinen Beitrag"></textarea><small id="char-count">0</small></div><div class="admin-field"><label for="new-date">Veröffentlichungsdatum</label><input type="date" id="new-date" class="admin-input" /></div><div class="admin-modal__actions"><button class="btn btn-primary" id="publishBtn"><i class="fa-solid fa-paper-plane"></i> Veröffentlichen</button><button class="btn btn-ghost" id="cancelPublishBtn">Abbrechen</button></div></div></div>
-  <div id="userInfoModal" class="admin-modal" aria-hidden="true"><div class="admin-modal__panel"><button class="admin-modal__close" id="closeUserInfoModal"></button><h2 class="admin-modal__title">Benutzer-Informationen</h2><div id="user-info-content" class="admin-userinfo"></div></div></div>
-  <div id="commentDetailModal" class="admin-modal" aria-hidden="true"><div class="admin-modal__panel"><button class="admin-modal__close" id="closeCommentModal"></button><h2 class="admin-modal__title">Chat-Verlauf</h2><div id="comment-detail-content" class="admin-comment-detail"></div></div></div>
+  <!-- New Post Modal -->
+  <div id="newPostModal" class="admin-modal" aria-hidden="true">
+    <div class="admin-modal__panel">
+      <button class="admin-modal__close" id="closeNewPostModal">×</button>
+      <div class="admin-modal__head">
+        <h2 class="admin-modal__title">📝 Neuen Beitrag erstellen</h2>
+      </div>
+      <div class="admin-field">
+        <label for="new-title">Titel</label>
+        <input type="text" id="new-title" class="admin-input" placeholder="Beitrag-Titel eingeben..." />
+      </div>
+      <div class="admin-field">
+        <label for="new-content">Inhalt</label>
+        <textarea id="new-content" class="admin-input admin-textarea" rows="10" placeholder="Schreibe deinen Beitrag hier..."></textarea>
+      </div>
+      <div class="admin-field">
+        <label for="new-date">Veröffentlichungsdatum</label>
+        <input type="date" id="new-date" class="admin-input" />
+      </div>
+      <div class="admin-modal__actions">
+        <button class="btn btn-ghost" id="cancelPublishBtn">Abbrechen</button>
+        <button class="btn btn-primary" id="publishBtn"><i class="fa-solid fa-paper-plane"></i> Veröffentlichen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Info Modal -->
+  <div id="userInfoModal" class="admin-modal" aria-hidden="true">
+    <div class="admin-modal__panel">
+      <button class="admin-modal__close" id="closeUserInfoModal">×</button>
+      <div class="admin-modal__head">
+        <h2 class="admin-modal__title">👤 Benutzer-Informationen</h2>
+      </div>
+      <div id="user-info-content" class="admin-userinfo"></div>
+    </div>
+  </div>
+
+  <!-- Comment Detail Modal -->
+  <div id="commentDetailModal" class="admin-modal" aria-hidden="true">
+    <div class="admin-modal__panel">
+      <button class="admin-modal__close" id="closeCommentModal">×</button>
+      <div class="admin-modal__head">
+        <h2 class="admin-modal__title">💬 Chat-Verlauf</h2>
+      </div>
+      <div id="comment-detail-content" class="admin-comment-detail"></div>
+    </div>
+  </div>
   <div id="footer-placeholder"></div>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
