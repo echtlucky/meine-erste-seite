@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/connect.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
 <body class="page-transition connect-page">
@@ -40,132 +41,168 @@
       </div>
     </section>
 
-    <!-- FRIENDS ONLINE SECTION -->
-    <section class="friends-online" id="friendsOnlineSection" style="display:none;">
-      <div class="friends-online__header">
-        <h3 class="friends-online__title">👥 Freunde online</h3>
-        <div class="friends-online__list" id="friendsOnlineList">
-          <!-- Dynamically populated -->
+    <!-- 3-SPALTEN LAYOUT für angemeldete Nutzer -->
+    <div class="connect-layout" id="connectLayout" style="display:none;">
+
+      <!-- LINKE SPALTE: Gruppen/Chats -->
+      <div class="connect-column connect-column--left">
+        <div class="groups-header">
+          <h3 class="groups-title">Deine Gruppen</h3>
+          <button class="btn btn-primary btn-sm" id="btnCreateGroup">+ Neu</button>
         </div>
-      </div>
-    </section>
-
-    <!-- GROUPS SECTION -->
-    <section class="connect-card" id="groupsSection" style="display:none;">
-      <div class="card-head">
-        <div>
-          <h2 class="card-title">Deine Gruppen</h2>
-          <p class="card-hint">Tritt einer Gruppe bei oder erstelle eine neue.</p>
+        <div class="groups-list" id="groupsListPanel">
+          <div class="empty-state">
+            <p>📭 Keine Gruppen</p>
+          </div>
         </div>
-        <button class="btn btn-primary btn-sm" id="btnCreateGroup">+ Neue Gruppe</button>
-      </div>
 
-      <div class="groups-container" id="groupsContainer">
-        <div class="empty-state">
-          <p>📭 Noch keine Gruppen</p>
-          <small>Erstelle eine neue Gruppe um zu starten</small>
-        </div>
-      </div>
-    </section>
-
-    <!-- ADD FRIENDS SECTION -->
-    <section class="connect-card" id="addFriendsSection" style="display:none;">
-      <div class="card-head">
-        <div>
-          <h2 class="card-title">👥 Freunde hinzufügen</h2>
-          <p class="card-hint">Füge andere Spieler zu deiner Freundesliste hinzu.</p>
-        </div>
-      </div>
-
-      <div class="friends-search">
-        <input 
-          type="text" 
-          id="friendSearchInput" 
-          class="friend-search-input" 
-          placeholder="Nach Benutzername suchen..." 
-        />
-      </div>
-
-      <div class="friends-search-results" id="friendsSearchResults">
-        <div class="empty-state">
-          <p>🔍 Suche nach Benutzern</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SELECTED GROUP SECTION -->
-    <section class="connect-card" id="selectedGroupSection" style="display:none;">
-      <div class="card-head">
-        <div>
-          <h2 class="card-title" id="groupTitle">Gruppe laden...</h2>
-          <p class="card-hint" id="groupDesc">Wähle einen Tab aus</p>
-        </div>
-      </div>
-
-      <!-- TAB NAVIGATION -->
-      <div class="group-tabs">
-        <button class="tab-btn is-active" data-tab="chat">💬 Chat</button>
-        <button class="tab-btn" data-tab="members">👥 Members</button>
-        <button class="tab-btn" data-tab="voice">🎤 Voice</button>
-        <button class="tab-btn" data-tab="settings">⚙️ Einstellungen</button>
-      </div>
-
-      <!-- CHAT TAB -->
-      <div class="tab-content is-active" data-tab="chat" id="chat-content">
-        <div class="chat-box">
-          <div class="messages-list" id="messagesList"></div>
-          <div class="chat-input-area">
-            <input type="text" id="messageInput" class="message-input" placeholder="Nachricht..." />
-            <button class="btn btn-primary btn-sm" id="btnSendMessage">Senden</button>
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(0,255,136,0.15);">
+          <h3 class="friends-title">Freunde hinzufügen</h3>
+          <input 
+            type="text" 
+            id="friendSearchInput" 
+            class="friend-search-input" 
+            placeholder="Nach Benutzer suchen..." 
+            style="width: 100%;"
+          />
+          <div class="friends-search-results" id="friendsSearchResults" style="margin-top: 1rem;">
+            <div class="empty-state">
+              <p>🔍 Suche...</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- MEMBERS TAB -->
-      <div class="tab-content" data-tab="members" id="members-content">
-        <div class="members-grid" id="membersList"></div>
-      </div>
-
-      <!-- VOICE TAB -->
-      <div class="tab-content" data-tab="voice" id="voice-content">
-        <div class="voice-section">
-          <div class="voice-status" id="voiceStatus">Nicht im Call</div>
-          <div class="voice-buttons">
-            <button class="btn btn-primary" id="btnStartVoice">🎤 Voice starten</button>
-            <button class="btn btn-danger" id="btnEndVoice" style="display:none;">☎️ Beenden</button>
+      <!-- MITTLERE SPALTE: Chat -->
+      <div class="connect-column connect-column--middle">
+        <div class="chat-container" id="chatContainer" style="display:none;">
+          <div class="chat-header">
+            <div class="chat-group-info">
+              <h2 class="chat-group-title" id="chatGroupTitle">Gruppe</h2>
+              <button class="chat-settings-btn" id="btnGroupSettings" title="Einstellungen">
+                <i class="fas fa-cog"></i>
+              </button>
+            </div>
           </div>
-          <div class="voice-participants" id="voiceParticipants"></div>
+
+          <!-- TAB NAVIGATION -->
+          <div class="chat-tabs">
+            <button class="chat-tab-btn is-active" data-tab="chat">💬 Chat</button>
+            <button class="chat-tab-btn" data-tab="voice">🎤 Voice</button>
+          </div>
+
+          <!-- CHAT TAB -->
+          <div class="chat-tab-content is-active" data-tab="chat">
+            <div class="messages-box">
+              <div class="messages-list" id="messagesList"></div>
+            </div>
+            <div class="chat-input-area">
+              <input type="text" id="messageInput" class="message-input" placeholder="Schreibe eine Nachricht..." />
+              <button class="btn btn-primary btn-sm" id="btnSendMessage">Senden</button>
+            </div>
+          </div>
+
+          <!-- VOICE TAB -->
+          <div class="chat-tab-content" data-tab="voice">
+            <div class="voice-section">
+              <div class="voice-status" id="voiceStatus">Nicht im Call</div>
+              <div class="voice-buttons">
+                <button class="btn btn-primary" id="btnStartVoice">🎤 Voice starten</button>
+                <button class="btn btn-danger" id="btnEndVoice" style="display:none;">☎️ Beenden</button>
+              </div>
+              <div class="voice-participants" id="voiceParticipants"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State when no group selected -->
+        <div class="empty-chat-state" id="emptyChatState">
+          <div class="empty-chat-inner">
+            <p style="font-size: 2rem; margin-bottom: 1rem;">💬</p>
+            <h3>Keine Gruppe ausgewählt</h3>
+            <p>Wähle eine Gruppe aus der linken Spalte um zu chatten</p>
+          </div>
         </div>
       </div>
 
-      <!-- SETTINGS TAB -->
-      <div class="tab-content" data-tab="settings" id="settings-content">
-        <div class="settings-section">
-          <h3>Mitglieder hinzufügen</h3>
-          <div class="setting-item">
-            <input type="text" id="addMemberInput" placeholder="Benutzername eingeben..." />
-            <button class="btn btn-primary btn-sm" id="btnAddMember">Hinzufügen</button>
-          </div>
+      <!-- RECHTE SPALTE: Mitglieder -->
+      <div class="connect-column connect-column--right">
+        <div class="members-header">
+          <h3 class="members-title">Mitglieder</h3>
+          <div class="members-count" id="membersCount">0</div>
+        </div>
+        
+        <div class="members-add-section" id="membersAddSection" style="display:none;">
+          <input 
+            type="text" 
+            id="addMemberInput" 
+            class="add-member-input" 
+            placeholder="Benutzer hinzufügen..." 
+          />
           <div class="members-search-results" id="addMemberResults"></div>
         </div>
 
-        <hr style="margin: 2rem 0; border: 1px solid rgba(255,255,255,0.1);">
-
-        <div class="settings-section">
-          <h3>Gruppeneinstellungen</h3>
-          <div class="setting-item">
-            <label>Gruppenlevel</label>
-            <input type="text" id="groupLevel" disabled />
-          </div>
-          <div class="setting-item">
-            <button class="btn btn-danger" id="btnDeleteGroup">🗑️ Gruppe löschen</button>
-            <button class="btn btn-secondary" id="btnLeaveGroup">👋 Gruppe verlassen</button>
+        <div class="members-list" id="membersList">
+          <div class="empty-state">
+            <p>Keine Mitglieder</p>
           </div>
         </div>
       </div>
-    </section>
+
+    </div>
 
   </main>
+
+  <!-- SETTINGS MODAL (klein, professional) -->
+  <div class="group-settings-modal" id="groupSettingsModal">
+    <div class="settings-modal-panel">
+      <button class="settings-modal-close" id="closeGroupSettings">×</button>
+      
+      <div class="settings-modal-header">
+        <h3>Gruppeneinstellungen</h3>
+      </div>
+
+      <div class="settings-modal-content">
+        <!-- Add Member Tab -->
+        <div class="settings-section">
+          <h4>👤 Mitglieder hinzufügen</h4>
+          <div class="setting-row">
+            <input 
+              type="text" 
+              id="addMemberSearchInput" 
+              class="setting-input" 
+              placeholder="Benutzername..." 
+            />
+            <button class="btn btn-primary btn-sm" id="btnModalAddMember">Hinzufügen</button>
+          </div>
+          <div class="modal-member-search-results" id="modalMemberResults"></div>
+        </div>
+
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(0,255,136,0.15);">
+
+        <!-- Group Info -->
+        <div class="settings-section">
+          <h4>⚙️ Informationen</h4>
+          <div class="setting-row">
+            <label>Gruppennavn</label>
+            <input type="text" id="groupNameInput" class="setting-input" disabled />
+          </div>
+          <div class="setting-row">
+            <label>Mitglieder</label>
+            <input type="number" id="groupMemberCount" class="setting-input" disabled />
+          </div>
+        </div>
+
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(0,255,136,0.15);">
+
+        <!-- Danger Zone -->
+        <div class="settings-section settings-danger">
+          <button class="btn btn-secondary" id="btnLeaveGroupModal">👋 Gruppe verlassen</button>
+          <button class="btn btn-danger" id="btnDeleteGroupModal">🗑️ Gruppe löschen</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer via fetch -->
   <div id="footer-placeholder"></div>
@@ -188,36 +225,33 @@
   <script>
     document.body.classList.add('loaded');
 
-    // Header laden (mit cache-buster)
+    // Header laden
     fetch('header.html?v=' + Date.now())
       .then(r => r.text())
       .then(html => {
         document.getElementById('header-placeholder').innerHTML = html;
         if (typeof initHeaderScripts === "function") initHeaderScripts();
         if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-        // Trigger auth-state.js to apply header UI
         window.dispatchEvent(new CustomEvent('echtlucky:header-ready'));
       });
 
-    // Footer laden (mit cache-buster)
+    // Footer laden
     fetch('footer.html?v=' + Date.now())
       .then(r => r.text())
       .then(html => {
         document.getElementById('footer-placeholder').innerHTML = html;
       });
 
-    // TAB SWITCHING
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    // Chat tab switching
+    document.querySelectorAll('.chat-tab-btn').forEach(btn => {
       btn.addEventListener('click', e => {
-        const tabName = e.target.dataset.tab;
+        const tabName = e.currentTarget.dataset.tab;
         
-        // Update buttons
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('is-active'));
-        e.target.classList.add('is-active');
+        document.querySelectorAll('.chat-tab-btn').forEach(b => b.classList.remove('is-active'));
+        e.currentTarget.classList.add('is-active');
         
-        // Update content
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('is-active'));
-        document.querySelector(`.tab-content[data-tab="${tabName}"]`).classList.add('is-active');
+        document.querySelectorAll('.chat-tab-content').forEach(c => c.classList.remove('is-active'));
+        document.querySelector(`.chat-tab-content[data-tab="${tabName}"]`).classList.add('is-active');
       });
     });
   </script>
