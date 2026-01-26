@@ -4,100 +4,70 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Konto verwalten | echtlucky</title>
-
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/account.css" />
 </head>
-
 <body class="page-transition account-page">
   <div id="header-placeholder"></div>
-
-  <main class="account-wrap">
-    <!-- HERO -->
-    <section class="account-hero">
-      <div class="account-hero__left">
-        <div class="account-badge"> echtlucky  Konto</div>
-        <h1 class="account-title">Account verwalten</h1>
-        <p class="account-sub">
-          Hier siehst du deine Stats & kannst Local  Account syncen.
-        </p>
-
-        <div class="account-pills">
-          <span class="pill" id="pillStatus">Status: </span>
-          <span class="pill" id="pillProvider">Login: </span>
-          <span class="pill" id="pillUpdated">Update: </span>
+  <main class="account-discord-shell">
+    <section class="discord-card account-profile-card">
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#5865f2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.2rem;">U</div>
+        <div>
+          <div style="font-weight:700;font-size:1.2rem;">Username#1234</div>
+          <div style="color:#b9bbbe;font-size:0.98rem;">Status: <span id="profileStatus">Online</span></div>
         </div>
       </div>
-
-      <div class="account-hero__right">
-        <div class="profile-card" id="profileCard">
-          <div class="profile-top">
-            <div class="avatar" id="avatarInitial">?</div>
-            <div class="profile-meta">
-              <div class="profile-name" id="profileName"></div>
-              <div class="profile-email" id="profileEmail"></div>
-            </div>
-          </div>
-
-          <div class="profile-actions">
-            <a class="btn btn-secondary btn-sm" href="index.html">Home</a>
-            <button class="btn btn-ghost btn-sm" id="btnSignOut" type="button">Ausloggen</button>
-          </div>
+      <div style="margin-top:1.5rem;">
+        <label>Benutzername</label>
+        <input type="text" id="profileUsername" value="Gast" />
+        <label>Status</label>
+        <select id="profileStatusSelect">
+          <option value="online">Online</option>
+          <option value="offline">Offline</option>
+          <option value="dnd">Nicht stören</option>
+        </select>
+        <button class="btn btn-success" id="saveProfileBtn">Speichern</button>
+      </div>
+      <div style="margin-top:1.2rem;display:flex;gap:1rem;">
+        <a class="btn btn-secondary" href="index.html">Home</a>
+        <button class="btn btn-danger" id="btnSignOut" type="button">Ausloggen</button>
+      </div>
+    </section>
+    <section class="discord-card account-stats-card">
+      <h2>Ranked Stats</h2>
+      <div class="stats-mini-grid">
+        <div class="stat-tile">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" id="rankedLevel"></div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">XP</div>
+          <div class="stat-value" id="rankedXp"></div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Streak</div>
+          <div class="stat-value" id="rankedStreak"></div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Last</div>
+          <div class="stat-value" id="rankedMeta"></div>
         </div>
       </div>
     </section>
-
-    <!-- LOGGED OUT CARD -->
-    <section class="account-card" id="loggedOutCard" style="display:none;">
-      <div class="card-head">
-        <div>
-          <h2 class="card-title">Du bist nicht eingeloggt</h2>
-          <p class="card-hint">Log dich ein, damit dein Fortschritt im Account landet.</p>
-        </div>
-      </div>
-
-      <div class="card-actions">
+    <section class="discord-card account-loggedout-card" id="loggedOutCard" style="display:none;">
+      <h2>Du bist nicht eingeloggt</h2>
+      <p>Log dich ein, damit dein Fortschritt im Account landet.</p>
+      <div style="margin-top:1.2rem;display:flex;gap:1rem;">
         <a class="btn btn-primary" href="login.html">Zum Login</a>
         <a class="btn btn-secondary" href="index.html">Zur Startseite</a>
       </div>
     </section>
-
-    <!-- MAIN GRID -->
-    <section class="account-grid" id="accountGrid" style="display:none;">
-      
-      <!-- RANKED STATS CARD -->
-      <div class="account-card">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title"> Ranked Mode</h2>
-            <p class="card-hint">Dein Ranked-Fortschritt</p>
-          </div>
-          <div class="chip" id="chipSync">Sync: </div>
-        </div>
-
-        <div class="stats-mini-grid">
-          <div class="stat-tile">
-            <div class="stat-label">Level</div>
-            <div class="stat-value" id="rankedLevel"></div>
-          </div>
-          <div class="stat-tile">
-            <div class="stat-label">XP</div>
-            <div class="stat-value" id="rankedXp"></div>
-          </div>
-          <div class="stat-tile">
-            <div class="stat-label">Streak</div>
-            <div class="stat-value" id="rankedStreak"></div>
-          </div>
-          <div class="stat-tile">
-            <div class="stat-label">Last</div>
-            <div class="stat-value" id="rankedMeta"></div>
-          </div>
-        </div>
-
-        <div class="divider-line"></div>
-
-        <div class="chart-container">
+  </main>
+  <div id="footer-placeholder"></div>
+</body>
+</html>
           <h3 class="chart-title">Rank Verlauf</h3>
           <canvas id="rankChartCanvas" style="max-height: 250px;"></canvas>
         </div>
