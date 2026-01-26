@@ -191,9 +191,41 @@
 
     window.__ECHTLUCKY_CURRENT_USER__ = user || null;
 
-    // optional: ensure user doc exists / lastLoginAt update
+  // optional: ensure user doc exists / lastLoginAt update
     if (user && typeof appNS.ensureUserDoc === "function") {
       try { await appNS.ensureUserDoc(user); } catch (_) {}
+    }
+
+    // Update presence status (isOnline)
+    if (user && db && db.collection) {
+      try {
+        await db.collection("users").doc(user.uid).update({
+          isOnline: true,
+          lastSeen: new Date()
+        });
+      } catch (err) {
+        // User doc might not exist yet, create it
+        try {
+          await db.collection("users").doc(user.uid).set({
+            isOnline: true,
+            lastSeen: new Date(),
+            email: user.email,
+            displayName: user.displayName || user.email?.split("@")[0],
+            uid: user.uid,
+            createdAt: new Date()
+          }, { merge: true });
+        } catch (_) {}
+      }
+    } else if (!user) {
+      // User logged out - set isOnline to false for last known uid
+      if (lastUid && lastUid !== "__init__" && db && db.collection) {
+        try {
+          await db.collection("users").doc(lastUid).update({
+            isOnline: false,
+            lastSeen: new Date()
+          });
+        } catch (_) {}
+      }
     }
 
     await applyHeaderState(user || null);

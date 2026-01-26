@@ -1,6 +1,7 @@
 /* =========================
    CONNECT • echtlucky
    - Hero: Badge + Title + Auth Status
+   - Friends Online: Horizontal scrollable friend list
    - Groups Card: List of user groups
    - Selected Group Card: Tabbed interface (Chat/Members/Voice/Settings)
    - Uses global CSS variables from style.css
@@ -28,6 +29,109 @@ body.connect-page::after {
       rgba(0,0,0,0.40) 75%,
       rgba(0,0,0,0.56) 100%
     );
+}
+
+/* ============ FRIENDS ONLINE (Horizontal Bar) ============ */
+.friends-online {
+  width: 100%;
+  background: linear-gradient(90deg, rgba(0,255,136,0.08) 0%, rgba(88,101,242,0.06) 100%);
+  border: 1px solid rgba(0,255,136,0.12);
+  border-radius: 16px;
+  padding: 1.2rem;
+  margin-bottom: var(--connect-gap);
+  overflow: hidden;
+}
+
+.friends-online__header {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.friends-online__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.friends-online__list {
+  display: flex;
+  gap: 0.8rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-right: 0.5rem;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+.friends-online__list::-webkit-scrollbar {
+  height: 4px;
+}
+
+.friends-online__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.friends-online__list::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 2px;
+  opacity: 0.3;
+}
+
+.friend-avatar {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #0088ff);
+  border: 2px solid rgba(0,255,136,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--bg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.friend-avatar:hover {
+  border-color: var(--accent);
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(0,255,136,0.4);
+}
+
+.friend-avatar::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: #00ff88;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+}
+
+.friend-avatar[title]::before {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: var(--text);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
 }
 
 /* Layout rhythm */
