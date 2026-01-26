@@ -135,7 +135,6 @@
         userName.style.display = "none";
       }
       if (dropdown) {
-        dropdown.style.display = "none";
         dropdown.classList.remove('show');
       }
       if (adminPanelLink) adminPanelLink.style.display = "none";
@@ -153,7 +152,6 @@
     }
 
     if (dropdown) {
-      dropdown.style.display = "block";
       dropdown.classList.remove('show');
     }
 
