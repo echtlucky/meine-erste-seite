@@ -349,52 +349,84 @@
   // Update auth status
   function updateAuthStatus() {
     currentUser = auth.currentUser;
+    console.log("🔵 updateAuthStatus: currentUser =", currentUser ? currentUser.email : null);
+
+    const groupsSection = document.getElementById("groupsSection");
+    const addFriendsSection = document.getElementById("addFriendsSection");
+    const friendsOnlineSection = document.getElementById("friendsOnlineSection");
 
     if (!currentUser) {
+      console.log("⚠️ No user logged in");
       statusLabel.textContent = "Nicht eingeloggt";
-      btnLogin.style.display = "inline-block";
+      btnLogin.style.display = "inline-flex";
       btnCreateGroup.disabled = true;
+      authStatusCard.style.display = "block";
+      
+      // Hide all sections for non-logged-in users
+      if (groupsSection) groupsSection.style.display = "none";
+      if (addFriendsSection) addFriendsSection.style.display = "none";
+      if (friendsOnlineSection) friendsOnlineSection.style.display = "none";
+      
       groupsContainer.innerHTML = '<div class="empty-state"><p>📭 Nicht eingeloggt</p><small>Melde dich an um Gruppen zu sehen</small></div>';
       return;
     }
 
+    console.log("✅ User logged in:", currentUser.email);
     statusLabel.textContent = `Hallo, ${currentUser.displayName || currentUser.email?.split("@")[0] || "User"}!`;
     btnLogin.style.display = "none";
     btnCreateGroup.disabled = false;
+    authStatusCard.style.display = "none";
+    
+    // Show sections for logged-in users
+    if (groupsSection) groupsSection.style.display = "block";
+    if (addFriendsSection) addFriendsSection.style.display = "block";
+    
     loadCurrentUserFriends();
     loadGroups();
     loadOnlineFriends();  // Load online friends when user logs in
   }
 
-  // Event listeners
-  btnCreateGroup.addEventListener("click", createGroup);
+  // ============================================
+  // SETUP EVENT LISTENERS
+  // ============================================
 
-  // Friend search
-  if (friendSearchInput) {
-    friendSearchInput.addEventListener("input", (e) => {
-      clearTimeout(friendSearchTimeout);
-      const query = e.target.value.trim();
-      
-      if (query.length < 2) {
-        friendsSearchResults.innerHTML = '<div class="empty-state"><p>🔍 Suche nach Benutzern</p></div>';
-        return;
-      }
+  function init() {
+    console.log("🟢 connect-minimal.js: init() called");
 
-      friendSearchTimeout = setTimeout(() => {
-        searchFriends(query);
-      }, 300);
+    // Event listeners
+    btnCreateGroup.addEventListener("click", createGroup);
+
+    // Friend search
+    if (friendSearchInput) {
+      friendSearchInput.addEventListener("input", (e) => {
+        clearTimeout(friendSearchTimeout);
+        const query = e.target.value.trim();
+        
+        if (query.length < 2) {
+          friendsSearchResults.innerHTML = '<div class="empty-state"><p>🔍 Suche nach Benutzern</p></div>';
+          return;
+        }
+
+        friendSearchTimeout = setTimeout(() => {
+          searchFriends(query);
+        }, 300);
+      });
+    }
+
+    // Listen to auth changes (NOW AFTER Firebase is ready!)
+    auth.onAuthStateChanged((user) => {
+      console.log("🔵 connect-minimal.js: Auth state changed. User:", user ? user.email : "null");
+      updateAuthStatus();
     });
-  }
 
-  // Listen to auth changes
-  auth.onAuthStateChanged((user) => {
+    // Listen to reload-groups event (from connect.js when group is deleted/left)
+    window.addEventListener("echtlucky:reload-groups", () => {
+      loadGroups();
+    });
+
+    // Initial auth status update
     updateAuthStatus();
-  });
-
-  // Listen to reload-groups event (from connect.js when group is deleted/left)
-  window.addEventListener("echtlucky:reload-groups", () => {
-    loadGroups();
-  });
+  }
 
   // ============================================
   // FRIEND SEARCH & ADD

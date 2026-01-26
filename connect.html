@@ -29,7 +29,12 @@
         <div class="auth-status-card" id="authStatusCard">
           <div class="auth-status-content">
             <span class="status-label" id="statusLabel">Nicht eingeloggt</span>
-            <a href="login.html" class="btn btn-primary" id="btnLogin">Anmelden</a>
+            <p class="status-info" style="font-size: 0.95rem; color: rgba(255,255,255,0.7); margin: 12px 0 16px 0; max-width: 500px;">
+              Melde dich an, um Gruppen zu erstellen, Freunde hinzuzufügen und über Voice zu kommunizieren. Sei Teil der echtlucky Community!
+            </p>
+            <a href="login.html" class="btn btn-primary btn-lg" id="btnLogin" style="display: inline-flex; gap: 8px; align-items: center;">
+              <span>🔐 Jetzt anmelden</span>
+            </a>
           </div>
         </div>
       </div>
@@ -46,7 +51,7 @@
     </section>
 
     <!-- GROUPS SECTION -->
-    <section class="connect-card" id="groupsSection">
+    <section class="connect-card" id="groupsSection" style="display:none;">
       <div class="card-head">
         <div>
           <h2 class="card-title">Deine Gruppen</h2>
@@ -64,7 +69,7 @@
     </section>
 
     <!-- ADD FRIENDS SECTION -->
-    <section class="connect-card" id="addFriendsSection">
+    <section class="connect-card" id="addFriendsSection" style="display:none;">
       <div class="card-head">
         <div>
           <h2 class="card-title">👥 Freunde hinzufügen</h2>

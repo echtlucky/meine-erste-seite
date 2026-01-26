@@ -63,6 +63,7 @@
       userName: document.getElementById("user-name-display"),
       dropdown: document.getElementById("dropdown-menu"),
       adminPanelLink: document.getElementById("admin-panel-link"),
+      connectNav: document.getElementById("connectNav"),
     };
   }
 
@@ -153,7 +154,7 @@
   // Apply Header UI
   // -----------------------------
   async function applyHeaderState(user) {
-    const { loginLink, userName, dropdown, adminPanelLink } = getHeaderEls();
+    const { loginLink, userName, dropdown, adminPanelLink, connectNav } = getHeaderEls();
 
     // Header noch nicht da? -> später via event
     if (!loginLink && !userName && !dropdown) return;
@@ -168,11 +169,13 @@
         dropdown.classList.remove('show');
       }
       if (adminPanelLink) adminPanelLink.style.display = "none";
+      if (connectNav) connectNav.style.display = "none";
       return;
     }
 
     // logged in
     if (loginLink) loginLink.style.display = "none";
+    if (connectNav) connectNav.style.display = "inline-flex";
 
     if (userName) {
       userName.textContent =
