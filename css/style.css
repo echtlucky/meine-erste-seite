@@ -34,6 +34,9 @@
   --header-h: 60px;
 }
 
+/* Ensure the HTML `hidden` attribute always wins (prevents invisible overlays from blocking clicks). */
+[hidden] { display: none !important; }
+
 /* ======================================
    BASE / RESET
 ====================================== */
