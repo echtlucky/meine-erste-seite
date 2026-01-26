@@ -139,8 +139,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderSettings() {
     content.innerHTML = `
       <div class="discord-card">
-        <h2>Einstellungen</h2>
-        <div>
+        <h2>Profil & Einstellungen</h2>
+        <div style="display:flex;align-items:center;gap:1.2rem;">
+          <div style="width:56px;height:56px;border-radius:50%;background:#5865f2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:2rem;">U</div>
+          <div>
+            <div style="font-weight:700;font-size:1.1rem;">Username#1234</div>
+            <div style="color:#b9bbbe;font-size:0.95rem;">Status: <span id="settingsStatusText">Online</span></div>
+          </div>
+        </div>
+        <div style="margin-top:1.5rem;">
           <label>Benutzername</label>
           <input type="text" id="settingsUsername" value="Gast" />
           <label>Status</label>
@@ -152,8 +159,20 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn btn-success" id="saveSettingsBtn">Speichern</button>
         </div>
       </div>
+      <div class="discord-card">
+        <h2>Gruppenverwaltung</h2>
+        <div id="groupsManageList"></div>
+        <button class="btn btn-primary" id="createGroupBtn"><i class="fa fa-plus"></i> Neue Gruppe</button>
+      </div>
     `;
-    // TODO: Save settings logic
+    // Save Settings
+    document.getElementById('saveSettingsBtn').onclick = () => {
+      document.getElementById('settingsStatusText').textContent = document.getElementById('settingsStatus').selectedOptions[0].text;
+      // TODO: Backend-Update für Profil/Status
+      window.notify?.show({type:'success',title:'Gespeichert',message:'Profil aktualisiert!',duration:3000});
+    };
+    // TODO: Gruppen laden, verwalten, erstellen
+    document.getElementById('groupsManageList').innerHTML = '<div style="color:#b9bbbe;">(Gruppen werden geladen...)</div>';
   }
 
   // Initial render
