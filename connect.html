@@ -16,16 +16,6 @@
 
   <main class="container connect-shell">
 
-    <!-- FRIENDS ONLINE SECTION -->
-    <section class="friends-online" id="friendsOnlineSection" style="display:none;">
-      <div class="friends-online__header">
-        <h3 class="friends-online__title">👥 Freunde online</h3>
-        <div class="friends-online__list" id="friendsOnlineList">
-          <!-- Dynamically populated -->
-        </div>
-      </div>
-    </section>
-
     <!-- HERO SECTION -->
     <section class="connect-hero">
       <div class="connect-hero__inner">
@@ -45,6 +35,16 @@
       </div>
     </section>
 
+    <!-- FRIENDS ONLINE SECTION -->
+    <section class="friends-online" id="friendsOnlineSection" style="display:none;">
+      <div class="friends-online__header">
+        <h3 class="friends-online__title">👥 Freunde online</h3>
+        <div class="friends-online__list" id="friendsOnlineList">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
     <!-- GROUPS SECTION -->
     <section class="connect-card" id="groupsSection">
       <div class="card-head">
@@ -59,6 +59,31 @@
         <div class="empty-state">
           <p>📭 Noch keine Gruppen</p>
           <small>Erstelle eine neue Gruppe um zu starten</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADD FRIENDS SECTION -->
+    <section class="connect-card" id="addFriendsSection">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">👥 Freunde hinzufügen</h2>
+          <p class="card-hint">Füge andere Spieler zu deiner Freundesliste hinzu.</p>
+        </div>
+      </div>
+
+      <div class="friends-search">
+        <input 
+          type="text" 
+          id="friendSearchInput" 
+          class="friend-search-input" 
+          placeholder="Nach Benutzername suchen..." 
+        />
+      </div>
+
+      <div class="friends-search-results" id="friendsSearchResults">
+        <div class="empty-state">
+          <p>🔍 Suche nach Benutzern</p>
         </div>
       </div>
     </section>

@@ -27,6 +27,8 @@
   const authStatusCard = document.getElementById("authStatusCard");
   const statusLabel = document.getElementById("statusLabel");
   const btnLogin = document.getElementById("btnLogin");
+  const friendSearchInput = document.getElementById("friendSearchInput");
+  const friendsSearchResults = document.getElementById("friendsSearchResults");
 
   if (!groupsContainer || !btnCreateGroup) {
     console.warn("connect-minimal.js: DOM elements missing");
@@ -36,8 +38,10 @@
   let currentUser = null;
   let selectedGroupId = null;
   let friendsOnlineListener = null;
+  let friendSearchTimeout = null;
+  let currentUserFriends = [];
 
-  // Load online friends with presence
+  // Load online friends with presence (only friends from user's friends list)
   function loadOnlineFriends() {
     if (!currentUser) {
       const friendsOnlineSection = document.getElementById("friendsOnlineSection");
@@ -49,45 +53,60 @@
       // Clean up previous listener
       if (friendsOnlineListener) friendsOnlineListener();
 
-      // Query: Get all users who are currently online
-      friendsOnlineListener = db.collection("users")
-        .where("isOnline", "==", true)
-        .onSnapshot((snapshot) => {
-          const friendsList = document.getElementById("friendsOnlineList");
-          const friendsOnlineSection = document.getElementById("friendsOnlineSection");
-          
-          if (!friendsList) return;
+      // First get current user's friends list
+      db.collection("users")
+        .doc(currentUser.uid)
+        .onSnapshot((userDoc) => {
+          const userData = userDoc.data();
+          const friendUIDs = userData?.friends || [];
 
-          // Filter out current user from online friends
-          const onlineFriends = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data();
-            if (doc.id !== currentUser.uid) {
-              onlineFriends.push({
-                uid: doc.id,
-                name: data.displayName || data.email?.split("@")[0] || "User",
-                avatar: data.photoURL || null,
-                lastSeen: data.lastSeen || null
-              });
-            }
-          });
-
-          // Show/hide section based on friends count
-          if (onlineFriends.length === 0) {
+          // If no friends, hide section
+          if (friendUIDs.length === 0) {
+            const friendsOnlineSection = document.getElementById("friendsOnlineSection");
             if (friendsOnlineSection) friendsOnlineSection.style.display = "none";
             return;
           }
 
-          if (friendsOnlineSection) friendsOnlineSection.style.display = "block";
+          // Now get only those friends who are online
+          friendsOnlineListener = db.collection("users")
+            .where("isOnline", "==", true)
+            .onSnapshot((snapshot) => {
+              const friendsList = document.getElementById("friendsOnlineList");
+              const friendsOnlineSection = document.getElementById("friendsOnlineSection");
+              
+              if (!friendsList) return;
 
-          // Populate friends list
-          friendsList.innerHTML = onlineFriends.map((friend) => {
-            // Get initials for avatar fallback
-            const initials = friend.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase()
+              // Filter: only show friends who are in user's friends list AND online
+              const onlineFriends = [];
+              snapshot.forEach((doc) => {
+                const data = doc.data();
+                // Check if this user is in current user's friends list
+                if (friendUIDs.includes(doc.id) && doc.id !== currentUser.uid) {
+                  onlineFriends.push({
+                    uid: doc.id,
+                    name: data.displayName || data.email?.split("@")[0] || "User",
+                    avatar: data.photoURL || null,
+                    lastSeen: data.lastSeen || null
+                  });
+                }
+              });
+
+              // Show/hide section based on friends count
+              if (onlineFriends.length === 0) {
+                if (friendsOnlineSection) friendsOnlineSection.style.display = "none";
+                return;
+              }
+
+              if (friendsOnlineSection) friendsOnlineSection.style.display = "block";
+
+              // Populate friends list
+              friendsList.innerHTML = onlineFriends.map((friend) => {
+                // Get initials for avatar fallback
+                const initials = friend.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()
               .substring(0, 2);
 
             return `
@@ -307,12 +326,30 @@
     statusLabel.textContent = `Hallo, ${currentUser.displayName || currentUser.email?.split("@")[0] || "User"}!`;
     btnLogin.style.display = "none";
     btnCreateGroup.disabled = false;
+    loadCurrentUserFriends();
     loadGroups();
     loadOnlineFriends();  // Load online friends when user logs in
   }
 
   // Event listeners
   btnCreateGroup.addEventListener("click", createGroup);
+
+  // Friend search
+  if (friendSearchInput) {
+    friendSearchInput.addEventListener("input", (e) => {
+      clearTimeout(friendSearchTimeout);
+      const query = e.target.value.trim();
+      
+      if (query.length < 2) {
+        friendsSearchResults.innerHTML = '<div class="empty-state"><p>🔍 Suche nach Benutzern</p></div>';
+        return;
+      }
+
+      friendSearchTimeout = setTimeout(() => {
+        searchFriends(query);
+      }, 300);
+    });
+  }
 
   // Listen to auth changes
   auth.onAuthStateChanged((user) => {
@@ -323,6 +360,151 @@
   window.addEventListener("echtlucky:reload-groups", () => {
     loadGroups();
   });
+
+  // ============================================
+  // FRIEND SEARCH & ADD
+  // ============================================
+
+  function searchFriends(query) {
+    if (!currentUser) return;
+
+    try {
+      // Search for users by displayName (case-insensitive)
+      const lowerQuery = query.toLowerCase();
+      
+      db.collection("users")
+        .get()
+        .then((snapshot) => {
+          const results = [];
+          
+          snapshot.forEach((doc) => {
+            const user = doc.data();
+            const displayName = user.displayName || user.email?.split("@")[0] || "User";
+            
+            // Skip current user and already-added friends
+            if (doc.id === currentUser.uid || currentUserFriends.includes(doc.id)) {
+              return;
+            }
+            
+            // Check if displayName matches query
+            if (displayName.toLowerCase().includes(lowerQuery) || 
+                user.email?.toLowerCase().includes(lowerQuery)) {
+              results.push({
+                uid: doc.id,
+                displayName: displayName,
+                email: user.email,
+                photoURL: user.photoURL
+              });
+            }
+          });
+
+          displaySearchResults(results);
+        })
+        .catch((err) => {
+          console.error("Friend search error:", err);
+          friendsSearchResults.innerHTML = '<div class="empty-state"><p>❌ Fehler bei der Suche</p></div>';
+        });
+    } catch (err) {
+      console.error("Search error:", err);
+    }
+  }
+
+  function displaySearchResults(results) {
+    if (results.length === 0) {
+      friendsSearchResults.innerHTML = '<div class="empty-state"><p>😞 Keine Benutzer gefunden</p></div>';
+      return;
+    }
+
+    friendsSearchResults.innerHTML = results.map((user) => {
+      const initials = (user.displayName || "U")
+        .split(" ")
+        .map(n => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2);
+
+      return `
+        <div class="friend-search-item">
+          <div class="friend-search-item-avatar" style="background: linear-gradient(135deg, var(--accent), #0088ff);">
+            ${initials}
+          </div>
+          <div class="friend-search-item-name">${escapeHtml(user.displayName)}</div>
+          <div class="friend-search-item-action">
+            <button class="btn btn-primary btn-sm" onclick="window.echtluckyAddFriend('${user.uid}', '${user.displayName.replace(/'/g, "\\'")}')">
+              ➕ Hinzufügen
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Add friend to current user's friends list
+  window.echtluckyAddFriend = function(friendUid, friendName) {
+    if (!currentUser) return;
+
+    try {
+      db.collection("users")
+        .doc(currentUser.uid)
+        .update({
+          friends: db.FieldValue.arrayUnion(friendUid)
+        })
+        .then(() => {
+          window.notify?.show({
+            type: "success",
+            title: "Freund hinzugefügt",
+            message: `${friendName} wurde zu deiner Freundesliste hinzugefügt!`,
+            duration: 3000
+          });
+          
+          // Update local friends list
+          currentUserFriends = [...currentUserFriends, friendUid];
+          
+          // Reload search results
+          const query = friendSearchInput.value.trim();
+          if (query.length >= 2) {
+            searchFriends(query);
+          }
+          
+          // Reload online friends
+          loadOnlineFriends();
+        })
+        .catch((err) => {
+          console.error("Add friend error:", err);
+          window.notify?.show({
+            type: "error",
+            title: "Fehler",
+            message: "Freund konnte nicht hinzugefügt werden",
+            duration: 3000
+          });
+        });
+    } catch (err) {
+      console.error("Add friend error:", err);
+    }
+  };
+
+  // Load current user's friends list
+  function loadCurrentUserFriends() {
+    if (!currentUser) {
+      currentUserFriends = [];
+      return;
+    }
+
+    db.collection("users")
+      .doc(currentUser.uid)
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          currentUserFriends = doc.data().friends || [];
+        }
+      });
+  }
+
+  // Helper function
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
 
   console.log("✅ connect-minimal.js initialized");
 })();

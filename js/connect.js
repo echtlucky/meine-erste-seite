@@ -329,12 +329,19 @@
   function leaveGroup() {
     if (!selectedGroupId || !auth.currentUser) return;
 
+    const confirmed = confirm("Bist du sicher, dass du die Gruppe verlassen möchtest?");
+    if (!confirmed) return;
+
     try {
       const groupRef = db.collection("groups").doc(selectedGroupId);
+      const userId = auth.currentUser.uid;
+      
+      // Use firebase.firestore.FieldValue for Compat SDK
+      const firebase = window.firebase;
       
       groupRef
         .update({
-          members: db.FieldValue.arrayRemove(auth.currentUser.uid)
+          members: firebase.firestore.FieldValue.arrayRemove(userId)
         })
         .then(() => {
           window.notify?.show({
@@ -349,6 +356,7 @@
           window.dispatchEvent(new CustomEvent("echtlucky:reload-groups"));
         })
         .catch((err) => {
+          console.error("Leave group error:", err);
           window.notify?.show({
             type: "error",
             title: "Fehler",
@@ -358,6 +366,12 @@
         });
     } catch (err) {
       console.error("Leave group error:", err);
+      window.notify?.show({
+        type: "error",
+        title: "Fehler",
+        message: "Fehler beim Verlassen der Gruppe",
+        duration: 4000
+      });
     }
   }
 

@@ -55,6 +55,15 @@
   const btnClearLocal   = el("btnClearLocal");
   const btnWipeCloud    = el("btnWipeCloud");
 
+  // Profile Edit Elements
+  const profileEditForm = el("profileEditForm");
+  const inputDisplayName = el("inputDisplayName");
+  const inputAddress = el("inputAddress");
+  const inputPhone = el("inputPhone");
+  const btnSaveProfile = el("btnSaveProfile");
+  const btnCancelEdit = el("btnCancelEdit");
+  const profileFormMsg = el("profileFormMsg");
+
   // Notify wrapper — einheitlich mit notify.js
   function toast(type, msg) {
     if (window.notify?.show) {
@@ -67,6 +76,15 @@
     }
     // Fallback
     console.log(`[${type.toUpperCase()}] ${msg}`);
+  }
+
+  function showFormMsg(text, type = "error") {
+    if (!profileFormMsg) return;
+    profileFormMsg.textContent = text;
+    profileFormMsg.className = `form-msg show ${type}`;
+    setTimeout(() => {
+      profileFormMsg.className = "form-msg";
+    }, 4000);
   }
 
   function msToLabel(ms) {
@@ -326,6 +344,72 @@
     toast("success", "Cloud Stats zurückgesetzt ✅");
   }
 
+  async function loadProfileData(user) {
+    if (!db) return;
+    try {
+      const doc = await db.collection(USER_COLLECTION).doc(user.uid).get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (inputDisplayName) inputDisplayName.value = data.displayName || "";
+        if (inputAddress) inputAddress.value = data.address || "";
+        if (inputPhone) inputPhone.value = data.phone || "";
+      }
+    } catch (e) {
+      console.warn("Fehler beim Laden der Profildaten:", e);
+    }
+  }
+
+  async function saveProfileData(user) {
+    if (!db) return showFormMsg("Firestore nicht bereit.", "error");
+
+    const displayName = inputDisplayName?.value?.trim() || "";
+    const address = inputAddress?.value?.trim() || "";
+    const phone = inputPhone?.value?.trim() || "";
+
+    if (!displayName) {
+      return showFormMsg("Name ist erforderlich.", "error");
+    }
+
+    try {
+      if (btnSaveProfile) {
+        btnSaveProfile.disabled = true;
+        btnSaveProfile.textContent = "Speichern...";
+      }
+
+      await db.collection(USER_COLLECTION).doc(user.uid).set({
+        displayName: displayName,
+        address: address || null,
+        phone: phone || null,
+        profileUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      // Update den UI auch
+      setLoggedInUI(user);
+
+      showFormMsg("Profil gespeichert ✅", "success");
+      toast("success", "Profil aktualisiert ✅");
+    } catch (e) {
+      console.error("Fehler beim Speichern:", e);
+      showFormMsg("Speichern fehlgeschlagen: " + (e?.message || "Unbekannt"), "error");
+    } finally {
+      if (btnSaveProfile) {
+        btnSaveProfile.disabled = false;
+        btnSaveProfile.textContent = "Speichern";
+      }
+    }
+  }
+
+  async function wipeCloud(user) {
+    if (!db) return toast("error", "Firestore nicht bereit (db fehlt).");
+    await db.collection(USER_COLLECTION).doc(user.uid).set({
+      rankedStats: firebase.firestore.FieldValue.delete(),
+      reflexStats: firebase.firestore.FieldValue.delete(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    toast("success", "Cloud Stats zurückgesetzt ✅");
+  }
+
   async function boot() {
     renderLocalOnly();
 
@@ -342,6 +426,9 @@
 
       showLoggedIn();
       setLoggedInUI(user);
+
+      // Load profile data
+      await loadProfileData(user);
 
       try {
         const localRanked = readLocalRanked();
@@ -413,6 +500,22 @@
         renderMerged(readLocalRanked(), readLocalReflex(), cloud);
       } catch (e) {
         toast("error", "Reset fehlgeschlagen: " + (e?.message || "Unbekannt"));
+      }
+    });
+
+    // Profile Edit Form
+    profileEditForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (!user) return toast("warn", "Bitte einloggen.");
+      await saveProfileData(user);
+    });
+
+    btnCancelEdit?.addEventListener("click", () => {
+      // Reset form to current values
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (user) {
+        loadProfileData(user);
       }
     });
   }

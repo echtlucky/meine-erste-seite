@@ -331,3 +331,106 @@
 .btn.danger:hover{
   background: rgba(255,51,102,.14) !important;
 }
+
+/* PROFILE EDIT SECTION */
+.profile-edit-section{
+  border-radius: var(--acc-radius-lg);
+  border: 1px solid rgba(0,255,136,.12);
+  background: rgba(0,0,0,.42);
+  padding: 1rem;
+  box-shadow: var(--acc-shadow-soft);
+}
+
+.section-head{
+  margin-bottom: 1rem;
+}
+
+.section-head h3{
+  margin: 0 0 .15rem;
+  font-size: 1.1rem;
+  letter-spacing: -.3px;
+  color: rgba(224,255,224,.95);
+}
+
+.section-head p{
+  margin: 0;
+  color: rgba(224,255,224,.70);
+  font-size: .92rem;
+}
+
+.profile-form{
+  display: grid;
+  gap: .85rem;
+}
+
+.form-group{
+  display: grid;
+  gap: .35rem;
+}
+
+.form-group label{
+  display: block;
+  color: rgba(224,255,224,.90);
+  font-weight: 720;
+  font-size: .95rem;
+}
+
+.form-group input{
+  border-radius: var(--acc-radius-md);
+  border: 1px solid rgba(0,255,136,.16);
+  background: rgba(0,0,0,.50);
+  color: rgba(224,255,224,.95);
+  padding: .65rem .85rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.25s ease;
+}
+
+.form-group input::placeholder{
+  color: rgba(224,255,224,.45);
+}
+
+.form-group input:focus{
+  outline: none;
+  border-color: rgba(0,255,136,.35);
+  background: rgba(0,0,0,.55);
+  box-shadow: 0 0 20px rgba(0,255,136,.15);
+}
+
+.form-hint{
+  display: block;
+  color: rgba(224,255,224,.60);
+  font-size: .85rem;
+  margin-top: .15rem;
+}
+
+.form-actions{
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+  margin-top: .5rem;
+}
+
+.form-msg{
+  margin-top: .75rem;
+  padding: .75rem .9rem;
+  border-radius: var(--acc-radius-md);
+  font-size: .92rem;
+  display: none;
+}
+
+.form-msg.show{
+  display: block;
+}
+
+.form-msg.success{
+  border: 1px solid rgba(0,255,136,.25);
+  background: rgba(0,255,136,.10);
+  color: rgba(0,255,136,.95);
+}
+
+.form-msg.error{
+  border: 1px solid rgba(255,51,102,.25);
+  background: rgba(255,51,102,.10);
+  color: rgba(255,51,102,.95);
+}
