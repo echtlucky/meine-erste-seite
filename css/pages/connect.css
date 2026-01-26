@@ -25,6 +25,23 @@
   gap: 1.5rem;
 }
 
+.connect-main-card {
+  background: rgba(0, 0, 0, 0.52);
+  border: 1px solid rgba(0, 255, 136, 0.14);
+  border-radius: 18px;
+  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+
+.connect-main-card .auth-status-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 1.25rem 1.25rem;
+  backdrop-filter: none;
+}
+
 .connect-hero {
   padding: 0.25rem 0 0.25rem 0;
 }
@@ -95,6 +112,12 @@ input:focus, select:focus, textarea:focus {
   align-items: stretch;
 }
 
+.connect-main-card .connect-layout {
+  margin-top: 0;
+  min-height: auto;
+  gap: 0;
+}
+
 @media (max-width: 1400px) {
   .connect-layout {
     grid-template-columns: 250px 1fr 280px;
@@ -109,21 +132,22 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
-.connect-column {
+.connect-panel {
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  backdrop-filter: blur(10px);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 1.25rem;
+  backdrop-filter: none;
   min-height: 0;
 }
 
 /* LEFT COLUMN: Groups & Friends */
-.connect-column--left {
+.connect-panel--left {
   min-height: 0;
   overflow-y: auto;
+  border-right: 1px solid rgba(0, 255, 136, 0.10);
 }
 
 .groups-header {
@@ -254,10 +278,11 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* MIDDLE COLUMN: Chat */
-.connect-column--middle {
+.connect-panel--middle {
   min-height: 0;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid rgba(0, 255, 136, 0.10);
 }
 
 .chat-container {
@@ -568,9 +593,30 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* RIGHT COLUMN: Members */
-.connect-column--right {
+.connect-panel--right {
   min-height: 0;
   overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+  .connect-panel--left,
+  .connect-panel--middle {
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.10);
+  }
+}
+
+.chat-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Settings only on mobile: hide on desktop */
+@media (min-width: 901px) {
+  #btnGroupSettings {
+    display: none;
+  }
 }
 
 .members-header {
@@ -999,7 +1045,10 @@ input:focus, select:focus, textarea:focus {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  .connect-column {
+  .connect-main-card .connect-layout {
+    gap: 0;
+  }
+  .connect-panel {
     padding: 1rem 0.5rem;
     min-width: 0;
   }

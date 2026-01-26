@@ -49,138 +49,151 @@
               </div>
             </div>
 
-            <!-- Auth Gate (connect-minimal.js) -->
-            <div class="auth-status-card" id="authStatusCard" hidden>
-              <div class="auth-status-card__row">
-                <div id="statusLabel">Status</div>
-                <button class="btn" id="btnLogin" type="button">Login</button>
+            <!-- ONE Main Card for the whole Connect page -->
+            <div class="connect-main-card">
+              <!-- Auth Gate (connect-minimal.js) -->
+              <div class="auth-status-card" id="authStatusCard" hidden>
+                <div class="auth-status-card__row">
+                  <div id="statusLabel">Status</div>
+                  <button class="btn" id="btnLogin" type="button">Login</button>
+                </div>
               </div>
-            </div>
 
-            <!-- 3-Column Layout (connect-minimal.js) -->
-            <div class="connect-layout" id="connectLayout" hidden>
-              <!-- LEFT: Groups & Friends -->
-              <aside class="connect-column connect-column--left" aria-label="Gruppen und Freunde">
-                <div class="groups-header">
-                  <h3 class="groups-title">Gruppen</h3>
-                  <button class="btn btn-sm" id="btnCreateGroup" type="button" title="Neue Gruppe">
-                    +
-                  </button>
-                </div>
-
-                <div class="groups-list" id="groupsListPanel"></div>
-
-                <h4 class="friends-title">Freunde hinzufügen</h4>
-                <input
-                  type="text"
-                  id="friendSearchInput"
-                  class="friend-search-input"
-                  placeholder="Benutzer suchen…"
-                  autocomplete="off"
-                />
-                <div class="friends-search-results" id="friendsSearchResults">
-                  <div class="empty-state"><p>🔍 Suche…</p></div>
-                </div>
-              </aside>
-
-              <!-- MIDDLE: Chat + Voice -->
-              <section class="connect-column connect-column--middle" aria-label="Chat und Voice">
-                <div class="chat-container" id="chatContainer" hidden>
-                  <div class="chat-header">
-                    <div class="chat-group-info">
-                      <h2 class="chat-group-title" id="chatGroupTitle">Gruppe</h2>
-                      <button
-                        class="chat-settings-btn"
-                        id="btnGroupSettings"
-                        type="button"
-                        title="Einstellungen"
-                        aria-label="Gruppeneinstellungen"
-                      >
-                        <i class="fas fa-cog"></i>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="chat-tabs" role="tablist" aria-label="Chat/Voice Tabs">
-                    <button
-                      class="chat-tab-btn is-active"
-                      type="button"
-                      data-tab="chat"
-                      role="tab"
-                      aria-selected="true"
-                    >
-                      💬 Chat
-                    </button>
-                    <button class="chat-tab-btn" type="button" data-tab="voice" role="tab" aria-selected="false">
-                      🎤 Voice
+              <!-- 3-Panel Layout INSIDE ONE card (connect-minimal.js) -->
+              <div class="connect-layout" id="connectLayout" hidden>
+                <!-- LEFT: Groups & Friends -->
+                <aside class="connect-panel connect-panel--left" aria-label="Gruppen und Freunde">
+                  <div class="groups-header">
+                    <h3 class="groups-title">Gruppen</h3>
+                    <button class="btn btn-sm" id="btnCreateGroup" type="button" title="Neue Gruppe">
+                      +
                     </button>
                   </div>
 
-                  <div class="chat-tab-content is-active" data-tab="chat" role="tabpanel">
-                    <div class="messages-box">
-                      <div class="messages-list" id="messagesList"></div>
-                    </div>
-                    <div class="chat-input-area">
-                      <input
-                        type="text"
-                        id="messageInput"
-                        class="message-input"
-                        placeholder="Schreibe eine Nachricht…"
-                        autocomplete="off"
-                      />
-                      <button class="btn btn-sm" id="btnSendMessage" type="button" aria-label="Senden">
-                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                      </button>
-                    </div>
-                  </div>
+                  <div class="groups-list" id="groupsListPanel"></div>
 
-                  <div class="chat-tab-content" data-tab="voice" role="tabpanel">
-                    <div class="voice-section">
-                      <div class="voice-status" id="voiceStatus">Nicht im Call</div>
-                      <div class="voice-buttons">
-                        <button class="btn btn-secondary" id="btnStartVoice" type="button">🎤 Voice beitreten</button>
-                        <button class="btn" id="btnStartCall" type="button">📞 Anruf starten</button>
-                        <button class="btn btn-danger" id="btnEndVoice" type="button" hidden>☎️ Beenden</button>
-                        <button class="btn btn-secondary" id="btnToggleMic" type="button" hidden>🔇 Stummschalten</button>
-                      </div>
-                      <div class="voice-participants" id="voiceParticipants"></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="empty-chat-state" id="emptyChatState">
-                  <div class="empty-chat-inner">
-                    <p class="empty-chat-icon">💬</p>
-                    <h3>Keine Gruppe ausgewählt</h3>
-                    <p>Wähle eine Gruppe aus der linken Spalte, um zu chatten.</p>
-                  </div>
-                </div>
-              </section>
-
-              <!-- RIGHT: Members -->
-              <aside class="connect-column connect-column--right" aria-label="Mitglieder">
-                <div class="members-header">
-                  <h3 class="members-title">Mitglieder</h3>
-                  <div class="members-count" id="membersCount">0</div>
-                </div>
-
-                <div class="members-add-section" id="membersAddSection" hidden>
+                  <h4 class="friends-title">Freunde hinzufügen</h4>
                   <input
                     type="text"
-                    id="addMemberInput"
-                    class="add-member-input"
-                    placeholder="Benutzer hinzufügen…"
+                    id="friendSearchInput"
+                    class="friend-search-input"
+                    placeholder="Benutzer suchen…"
                     autocomplete="off"
                   />
-                  <div class="members-search-results" id="addMemberResults"></div>
-                </div>
-
-                <div class="members-list" id="membersList">
-                  <div class="empty-state">
-                    <p>Keine Mitglieder</p>
+                  <div class="friends-search-results" id="friendsSearchResults">
+                    <div class="empty-state"><p>🔍 Suche…</p></div>
                   </div>
-                </div>
-              </aside>
+                </aside>
+
+                <!-- MIDDLE: Chat + Call -->
+                <section class="connect-panel connect-panel--middle" aria-label="Chat und Anrufe">
+                  <div class="chat-container" id="chatContainer" hidden>
+                    <div class="chat-header">
+                      <div class="chat-group-info">
+                        <h2 class="chat-group-title" id="chatGroupTitle">Gruppe</h2>
+                        <div class="chat-header-actions" aria-label="Chat Aktionen">
+                          <button
+                            class="chat-settings-btn"
+                            id="btnStartCall"
+                            type="button"
+                            title="Anruf starten"
+                            aria-label="Anruf starten"
+                          >
+                            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                          </button>
+                          <button
+                            class="chat-settings-btn"
+                            id="btnGroupSettings"
+                            type="button"
+                            title="Einstellungen"
+                            aria-label="Gruppeneinstellungen"
+                          >
+                            <i class="fas fa-cog" aria-hidden="true"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="chat-tabs" role="tablist" aria-label="Chat/Voice Tabs">
+                      <button
+                        class="chat-tab-btn is-active"
+                        type="button"
+                        data-tab="chat"
+                        role="tab"
+                        aria-selected="true"
+                      >
+                        💬 Chat
+                      </button>
+                      <button class="chat-tab-btn" type="button" data-tab="voice" role="tab" aria-selected="false">
+                        🎤 Voice
+                      </button>
+                    </div>
+
+                    <div class="chat-tab-content is-active" data-tab="chat" role="tabpanel">
+                      <div class="messages-box">
+                        <div class="messages-list" id="messagesList"></div>
+                      </div>
+                      <div class="chat-input-area">
+                        <input
+                          type="text"
+                          id="messageInput"
+                          class="message-input"
+                          placeholder="Schreibe eine Nachricht…"
+                          autocomplete="off"
+                        />
+                        <button class="btn btn-sm" id="btnSendMessage" type="button" aria-label="Senden">
+                          <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="chat-tab-content" data-tab="voice" role="tabpanel">
+                      <div class="voice-section">
+                        <div class="voice-status" id="voiceStatus">Nicht im Call</div>
+                        <div class="voice-buttons">
+                          <button class="btn btn-secondary" id="btnStartVoice" type="button">🎤 Voice beitreten</button>
+                          <button class="btn btn-danger" id="btnEndVoice" type="button" hidden>☎️ Beenden</button>
+                          <button class="btn btn-secondary" id="btnToggleMic" type="button" hidden>🔇 Stummschalten</button>
+                        </div>
+                        <div class="voice-participants" id="voiceParticipants"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="empty-chat-state" id="emptyChatState">
+                    <div class="empty-chat-inner">
+                      <p class="empty-chat-icon">💬</p>
+                      <h3>Keine Gruppe ausgewählt</h3>
+                      <p>Wähle eine Gruppe aus der linken Spalte, um zu chatten.</p>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- RIGHT: Members -->
+                <aside class="connect-panel connect-panel--right" aria-label="Mitglieder">
+                  <div class="members-header">
+                    <h3 class="members-title">Mitglieder</h3>
+                    <div class="members-count" id="membersCount">0</div>
+                  </div>
+
+                  <div class="members-add-section" id="membersAddSection" hidden>
+                    <input
+                      type="text"
+                      id="addMemberInput"
+                      class="add-member-input"
+                      placeholder="Benutzer hinzufügen…"
+                      autocomplete="off"
+                    />
+                    <div class="members-search-results" id="addMemberResults"></div>
+                  </div>
+
+                  <div class="members-list" id="membersList">
+                    <div class="empty-state">
+                      <p>Keine Mitglieder</p>
+                    </div>
+                  </div>
+                </aside>
+              </div>
             </div>
           </section>
         </main>
