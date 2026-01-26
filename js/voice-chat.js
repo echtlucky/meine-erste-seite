@@ -1,5 +1,55 @@
 // js/voice-chat.js — echtlucky Voice Integration
-// WebRTC + Firebase Signaling für Group Voice Calls
+// WebRTC + Firebase Signaling für Group & 1:1 Calls
+
+/*
+==============================
+ ANRUF-SYSTEM: KONZEPT & JSON-MODELLE
+==============================
+
+Firestore-Struktur für Calls:
+
+// Für Gruppen-Calls:
+groups/{groupId}/voice-calls/{callId} {
+  initiator: <uid>,
+  initiatorName: <string>,
+  createdAt: <timestamp>,
+  participants: [<uid>, ...],
+  status: "active" | "ended" | "ringing" | "pending",
+  type: "group"
+}
+
+// Für 1:1-Calls (direkt unter /calls):
+calls/{callId} {
+  initiator: <uid>,
+  recipient: <uid>,
+  createdAt: <timestamp>,
+  status: "pending" | "ringing" | "accepted" | "rejected" | "ended",
+  type: "direct"
+}
+
+// Anruf-Requests (für eingehende Anrufe):
+users/{uid}/callRequests/{callRequestId} {
+  from: <uid>,
+  fromName: <string>,
+  callId: <string>,
+  groupId?: <string>,
+  type: "group" | "direct",
+  createdAt: <timestamp>,
+  status: "pending" | "accepted" | "rejected"
+}
+
+// Ablauf:
+// 1. Anruf starten: callRequest bei Empfänger anlegen, Call-Dokument anlegen
+// 2. Empfänger sieht Modal + Klingelton, kann annehmen/ablehnen
+// 3. Bei Annahme: Call-Status auf "accepted", WebRTC-Setup wie bisher
+// 4. Bei Ablehnung: Call-Status auf "rejected", Modal/Klingelton schließen
+// 5. Bei Gruppen: alle Teilnehmer bekommen callRequest
+// 6. Bei 1:1: nur recipient bekommt callRequest
+// 7. Call-Status-Updates werden in Echtzeit überwacht
+
+// Klingelton: Audio-Element, das bei eingehendem Anruf abgespielt wird, bis angenommen/abgelehnt
+// Modal: Zeigt Anrufer, Gruppe/Name, Buttons für Annehmen/Ablehnen
+*/
 // Guard: prevent double-load
 
 (function () {
@@ -38,6 +88,104 @@
       window.addEventListener("firebaseReady", handler, { once: true });
       setTimeout(() => resolve(), 5000);
     });
+  }
+
+
+  // ========== INCOMING CALL MODAL & RINGTONE =============
+  const incomingCallModal = document.getElementById("incomingCallModal");
+  const incomingCallTitle = document.getElementById("incomingCallTitle");
+  const incomingCallFrom = document.getElementById("incomingCallFrom");
+  const incomingCallGroup = document.getElementById("incomingCallGroup");
+  const btnAcceptCall = document.getElementById("btnAcceptCall");
+  const btnRejectCall = document.getElementById("btnRejectCall");
+  const callRingtone = document.getElementById("callRingtone");
+
+  let activeCallRequest = null;
+
+  function showIncomingCallModal({ fromName, groupName, type }) {
+    if (!incomingCallModal) return;
+    incomingCallFrom.textContent = fromName || "Unbekannt";
+    incomingCallGroup.textContent = type === "group" ? (groupName ? `Gruppe: ${groupName}` : "Gruppenanruf") : "Direktanruf";
+    incomingCallModal.style.display = "flex";
+    setTimeout(() => incomingCallModal.classList.add("show"), 10);
+    if (callRingtone) {
+      callRingtone.currentTime = 0;
+      callRingtone.play().catch(()=>{});
+    }
+  }
+
+  function hideIncomingCallModal() {
+    if (!incomingCallModal) return;
+    incomingCallModal.classList.remove("show");
+    setTimeout(() => { incomingCallModal.style.display = "none"; }, 250);
+    if (callRingtone) callRingtone.pause();
+    activeCallRequest = null;
+  }
+
+  if (btnAcceptCall) btnAcceptCall.onclick = async () => {
+    if (!activeCallRequest) return;
+    const { callRequestId, type, groupId, callId } = activeCallRequest;
+    const reqRef = db.collection("users").doc(auth.currentUser.uid).collection("callRequests").doc(callRequestId);
+    await reqRef.update({ status: "accepted" });
+    hideIncomingCallModal();
+    // Starte Call automatisch
+    if (type === "group" && groupId && callId) {
+      // Teilnehmer zur Call-Teilnehmerliste hinzufügen
+      try {
+        await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).update({
+          participants: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+        });
+      } catch(e) { console.warn("Teilnehmer konnte nicht hinzugefügt werden", e); }
+      window.echtlucky?.voiceChat?.joinCall?.(groupId, callId);
+    }
+    // TODO: 1:1-Call-Logik
+  };
+  if (btnRejectCall) btnRejectCall.onclick = async () => {
+    if (!activeCallRequest) return;
+    const { callRequestId, type } = activeCallRequest;
+    const reqRef = db.collection("users").doc(auth.currentUser.uid).collection("callRequests").doc(callRequestId);
+    await reqRef.update({ status: "rejected" });
+    hideIncomingCallModal();
+  };
+
+  // ========== LISTEN FOR INCOMING CALL REQUESTS =============
+  function listenForIncomingCalls() {
+    if (!auth || !db) return;
+    db.collection("users").doc(auth.currentUser.uid).collection("callRequests")
+      .where("status", "in", ["pending", "accepted", "rejected"])
+      .orderBy("createdAt", "desc")
+      .limit(1)
+      .onSnapshot(async (snap) => {
+        if (snap.empty) {
+          hideIncomingCallModal();
+          return;
+        }
+        const req = snap.docs[0];
+        const data = req.data();
+        // Hole ggf. Gruppennamen
+        let groupName = "";
+        if (data.type === "group" && data.groupId) {
+          try {
+            const groupDoc = await db.collection("groups").doc(data.groupId).get();
+            groupName = groupDoc.exists ? (groupDoc.data().name || "Gruppe") : "Gruppe";
+          } catch {}
+        }
+        activeCallRequest = {
+          userUid: auth.currentUser.uid,
+          callRequestId: req.id,
+          type: data.type,
+          groupId: data.groupId,
+          callId: data.callId
+        };
+        // Status-Handling
+        if (data.status === "pending") {
+          showIncomingCallModal({ fromName: data.fromName, groupName, type: data.type });
+        } else if (data.status === "accepted") {
+          hideIncomingCallModal();
+        } else if (data.status === "rejected") {
+          hideIncomingCallModal();
+        }
+      });
   }
 
   let initialized = false;
@@ -735,6 +883,9 @@
     if (btnToggleMic) {
       btnToggleMic.addEventListener("click", toggleMic);
     }
+
+    // Start incoming call listener
+    listenForIncomingCalls();
 
     // Cleanup on page unload
     window.addEventListener("beforeunload", () => {

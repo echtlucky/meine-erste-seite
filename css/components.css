@@ -1,3 +1,37 @@
+/* ======================================
+   INCOMING CALL MODAL (echtlucky)
+====================================== */
+.modal-overlay#incomingCallModal {
+  z-index: 100000;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(12px);
+}
+.modal-dialog .modal-title#incomingCallTitle {
+  color: #00ff88;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+#btnAcceptCall {
+  background: linear-gradient(135deg, #00ff88, #00cc66);
+  color: #000;
+  border-color: #00ff88;
+  font-weight: 800;
+}
+#btnAcceptCall:hover {
+  background: linear-gradient(135deg, #00ff88, #00dd77);
+  box-shadow: 0 8px 24px rgba(0,255,136,0.25);
+}
+#btnRejectCall {
+  background: linear-gradient(135deg, #ff3366, #ff1a4d);
+  color: #fff;
+  border-color: #ff3366;
+  font-weight: 800;
+}
+#btnRejectCall:hover {
+  background: linear-gradient(135deg, #ff3366, #ff4d6b);
+  box-shadow: 0 8px 24px rgba(255,51,102,0.18);
+}
 /* =========================
    COMPONENTS • echtlucky UI
    airy spacing + crisp contrast

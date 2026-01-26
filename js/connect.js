@@ -1,3 +1,69 @@
+  // ========== CALL SYSTEM: GRUPPEN-ANRUF STARTEN =============
+  async function startGroupCall() {
+    if (!selectedGroupId || !currentUser) return;
+    try {
+      // Hole Gruppenmitglieder
+      const groupDoc = await db.collection("groups").doc(selectedGroupId).get();
+      if (!groupDoc.exists) return;
+      const groupData = groupDoc.data();
+      const members = groupData.members || [];
+      const callId = `call_${Date.now()}_${currentUser.uid}`;
+      // Call-Dokument anlegen
+      await db.collection("groups").doc(selectedGroupId).collection("voice-calls").doc(callId).set({
+        initiator: currentUser.uid,
+        initiatorName: currentUser.displayName || "User",
+        createdAt: new Date(),
+        participants: [currentUser.uid],
+        status: "pending",
+        type: "group"
+      });
+
+      // Überwache Call-Requests auf Annahme
+      db.collection("users").where("uid", "in", members.filter(uid => uid !== currentUser.uid)).get().then(snap => {
+        snap.forEach(userDoc => {
+          db.collection("users").doc(userDoc.id).collection("callRequests")
+            .where("callId", "==", callId)
+            .onSnapshot(async (reqSnap) => {
+              let accepted = false;
+              reqSnap.forEach(doc => {
+                if (doc.data().status === "accepted") accepted = true;
+              });
+              if (accepted) {
+                // Setze Call-Status auf 'ringing'
+                await db.collection("groups").doc(selectedGroupId).collection("voice-calls").doc(callId).update({ status: "ringing" });
+              }
+            });
+        });
+      });
+      // callRequests für alle Mitglieder (außer Initiator)
+      for (const uid of members) {
+        if (uid === currentUser.uid) continue;
+        await db.collection("users").doc(uid).collection("callRequests").add({
+          from: currentUser.uid,
+          fromName: currentUser.displayName || "User",
+          callId,
+          groupId: selectedGroupId,
+          type: "group",
+          createdAt: new Date(),
+          status: "pending"
+        });
+      }
+      window.notify?.show({
+        type: "success",
+        title: "Anruf gestartet",
+        message: "Die Mitglieder werden jetzt angerufen...",
+        duration: 4000
+      });
+    } catch (err) {
+      console.error("Fehler beim Starten des Anrufs:", err);
+      window.notify?.show({
+        type: "error",
+        title: "Fehler",
+        message: "Anruf konnte nicht gestartet werden",
+        duration: 4000
+      });
+    }
+  }
 // js/connect.js v2 — Chat, Members, Roles, and Settings for 3-Column Layout
 
 (function () {
@@ -537,6 +603,13 @@
           });
         }
       });
+    }
+
+
+    // Voice/Call Buttons
+    const btnStartCall = document.getElementById("btnStartCall");
+    if (btnStartCall) {
+      btnStartCall.addEventListener("click", startGroupCall);
     }
 
     // Settings modal buttons
