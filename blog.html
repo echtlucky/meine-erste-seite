@@ -67,8 +67,8 @@
   <script>
     document.body.classList.add('loaded');
 
-    // Header + Footer laden
-    fetch('header.html')
+    // Header + Footer laden (mit cache-buster)
+    fetch('header.html?v=' + Date.now())
       .then(r => r.text())
       .then(html => {
         document.getElementById('header-placeholder').innerHTML = html;
@@ -76,7 +76,7 @@
         initSmartHeaderScroll();
       });
 
-    fetch('footer.html')
+    fetch('footer.html?v=' + Date.now())
       .then(r => r.text())
       .then(html => {
         document.getElementById('footer-placeholder').innerHTML = html;

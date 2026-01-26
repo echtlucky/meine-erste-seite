@@ -135,8 +135,8 @@
   <script>
     document.body.classList.add('loaded');
 
-    // Header laden
-    fetch('header.html')
+    // Header laden (mit cache-buster)
+    fetch('header.html?v=' + Date.now())
       .then(r => r.text())
       .then(html => {
         document.getElementById('header-placeholder').innerHTML = html;
@@ -146,8 +146,8 @@
         window.dispatchEvent(new CustomEvent('echtlucky:header-ready'));
       });
 
-    // Footer laden
-    fetch('footer.html')
+    // Footer laden (mit cache-buster)
+    fetch('footer.html?v=' + Date.now())
       .then(r => r.text())
       .then(html => {
         document.getElementById('footer-placeholder').innerHTML = html;
