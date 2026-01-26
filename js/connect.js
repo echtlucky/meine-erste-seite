@@ -31,27 +31,41 @@
   let presenceUnsubscribe = null;
 
   // ============================================
-  // DOM ELEMENTS
+  // DOM ELEMENTS (new home-style layout)
   // ============================================
 
-  const groupsList = document.getElementById("groupsList");
+  const groupsContainer = document.getElementById("groupsContainer");
+  const messagesList = document.getElementById("messagesList");
   const messageInput = document.getElementById("messageInput");
   const btnSendMessage = document.getElementById("btnSendMessage");
-  const messagesArea = document.getElementById("messagesArea");
   const btnCreateGroup = document.getElementById("btnCreateGroup");
-  const btnCreateGroupWelcome = document.getElementById("btnCreateGroupWelcome");
-  const headerInfo = document.getElementById("headerInfo");
-  const onlineUsersContainer = document.getElementById("onlineUsers");
   const membersList = document.getElementById("membersList");
-  const statsGrid = document.getElementById("statsGrid");
-  const userInfo = document.getElementById("userInfo");
-  const btnUserMenu = document.getElementById("btnUserMenu");
+  const voiceParticipants = document.getElementById("voiceParticipants");
+  const voiceStatus = document.getElementById("voiceStatus");
+  const btnStartVoice = document.getElementById("btnStartVoice");
+  const btnEndVoice = document.getElementById("btnEndVoice");
+  const selectedGroupSection = document.getElementById("selectedGroupSection");
+  const groupTitle = document.getElementById("groupTitle");
+  const groupDesc = document.getElementById("groupDesc");
+  const groupLevel = document.getElementById("groupLevel");
+  const btnLeaveGroup = document.getElementById("btnLeaveGroup");
+  const authStatusCard = document.getElementById("authStatusCard");
+  const statusLabel = document.getElementById("statusLabel");
+  const btnLogin = document.getElementById("btnLogin");
+
+  // Guard: skip if old layout still in use
+  if (!groupsContainer || !messagesList) {
+    console.warn("connect.js: New layout elements not found – skipping initialization");
+    return;
+  }
 
   // ============================================
   // INITIALIZE
   // ============================================
 
   function init() {
+    if (!messageInput || !btnSendMessage) return;
+
     // Setup message send
     messageInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -62,22 +76,23 @@
 
     btnSendMessage.addEventListener("click", sendMessage);
 
-    // Create group buttons
-    btnCreateGroup.addEventListener("click", createGroupPrompt);
-    btnCreateGroupWelcome.addEventListener("click", createGroupPrompt);
+    // Create group button
+    if (btnCreateGroup) {
+      btnCreateGroup.addEventListener("click", createGroupPrompt);
+    }
 
-    // View navigation
-    document.querySelectorAll(".nav-item").forEach((item) => {
-      item.addEventListener("click", (e) => {
-        e.preventDefault();
-        const view = item.dataset.view;
-        if (view) switchView(view);
-      });
-    });
+    // Voice buttons
+    if (btnStartVoice) {
+      btnStartVoice.addEventListener("click", startVoiceCall);
+    }
+    if (btnEndVoice) {
+      btnEndVoice.addEventListener("click", endVoiceCall);
+    }
 
-    // Settings
-    document.querySelectorAll(".settings-form input").forEach((input) => {
-      input.addEventListener("change", (e) => {
+    // Leave group
+    if (btnLeaveGroup) {
+      btnLeaveGroup.addEventListener("click", leaveGroup);
+    }
         const key = e.target.id;
         localStorage.setItem(key, e.target.checked);
       });
