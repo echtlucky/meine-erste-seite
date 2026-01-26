@@ -1,3 +1,37 @@
+  // ========== PUSH-BENACHRICHTIGUNGEN (CALLS) =============
+  let messaging = null;
+  async function initPushNotifications() {
+    if (!window.firebase?.messaging) return;
+    try {
+      messaging = window.firebase.messaging();
+      await messaging.requestPermission?.();
+      const token = await messaging.getToken();
+      // Token kann im User-Dokument gespeichert werden
+      if (auth?.currentUser && token) {
+        await db.collection("users").doc(auth.currentUser.uid).update({ fcmToken: token });
+      }
+      messaging.onMessage((payload) => {
+        // Zeige Notification bei eingehendem Call
+        if (payload?.notification) {
+          window.notify?.show({
+            type: "info",
+            title: payload.notification.title,
+            message: payload.notification.body,
+            duration: 6000
+          });
+        }
+      });
+    } catch (e) {
+      console.warn("Push-Benachrichtigung konnte nicht aktiviert werden", e);
+    }
+  }
+
+  // Call: Push senden (Platzhalter, Backend muss FCM nutzen)
+  async function sendCallPush(toUid, title, body, data) {
+    // Hier müsste ein Cloud Function/Backend-Service das FCM-Token holen und Push senden
+    // (Demo: Log-Ausgabe)
+    console.log("[Push] Sende Call-Push an", toUid, title, body, data);
+  }
 // js/voice-chat.js — echtlucky Voice Integration
 // WebRTC + Firebase Signaling für Group & 1:1 Calls
 
@@ -137,8 +171,16 @@ users/{uid}/callRequests/{callRequestId} {
         });
       } catch(e) { console.warn("Teilnehmer konnte nicht hinzugefügt werden", e); }
       window.echtlucky?.voiceChat?.joinCall?.(groupId, callId);
+    } else if (type === "direct" && callId) {
+      // 1:1-Call: Teilnehmer im Call-Dokument ergänzen und joinen
+      try {
+        await db.collection("calls").doc(callId).update({
+          recipientAccepted: true
+        });
+      } catch(e) { console.warn("1:1-Call: recipientAccepted konnte nicht gesetzt werden", e); }
+      // joinCall für 1:1-Calls (nutzt groupId als null)
+      window.echtlucky?.voiceChat?.joinCall?.(null, callId);
     }
-    // TODO: 1:1-Call-Logik
   };
   if (btnRejectCall) btnRejectCall.onclick = async () => {
     if (!activeCallRequest) return;
@@ -635,16 +677,24 @@ users/{uid}/callRequests/{callRequestId} {
         isInitiator: false
       };
 
-      const callRef = db.collection("groups").doc(groupId).collection("voice-calls").doc(callId);
-
-      // Add self to participants
-      await callRef.update({
-        participants: window.firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
-      });
-
-      // Get existing participants
-      const callDoc = await callRef.get();
-      const existingParticipants = callDoc.data()?.participants || [];
+      let callRef, callDoc, existingParticipants = [];
+      if (groupId) {
+        // Gruppen-Call
+        callRef = db.collection("groups").doc(groupId).collection("voice-calls").doc(callId);
+        // Add self to participants
+        await callRef.update({
+          participants: window.firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+        });
+        callDoc = await callRef.get();
+        existingParticipants = callDoc.data()?.participants || [];
+      } else {
+        // 1:1-Call
+        callRef = db.collection("calls").doc(callId);
+        callDoc = await callRef.get();
+        // Initiator und Empfänger
+        const callData = callDoc.data();
+        existingParticipants = [callData.initiator, callData.recipient];
+      }
 
       // Create offers for each existing participant (they will answer)
       for (const participantUid of existingParticipants) {
@@ -658,14 +708,16 @@ users/{uid}/callRequests/{callRequestId} {
       listenForAnswers(groupId, callId);
       listenForIceCandidates(groupId, callId);
 
-      // Subscribe to participants list
-      callUnsubscribe = callRef.onSnapshot((snap) => {
-        const data = snap.data();
-        if (data?.participants) {
-          updateParticipantsList(data.participants);
-          updateVoiceUI(true, `${data.participants.length} Teilnehmer`);
-        }
-      });
+      // Subscribe to participants list (nur für Gruppen sinnvoll)
+      if (groupId) {
+        callUnsubscribe = callRef.onSnapshot((snap) => {
+          const data = snap.data();
+          if (data?.participants) {
+            updateParticipantsList(data.participants);
+            updateVoiceUI(true, `${data.participants.length} Teilnehmer`);
+          }
+        });
+      }
 
       updateVoiceUI(true, "Sprachchat - Verbindung wird hergestellt");
 
@@ -886,6 +938,8 @@ users/{uid}/callRequests/{callRequestId} {
 
     // Start incoming call listener
     listenForIncomingCalls();
+    // Push-Benachrichtigungen initialisieren
+    initPushNotifications();
 
     // Cleanup on page unload
     window.addEventListener("beforeunload", () => {

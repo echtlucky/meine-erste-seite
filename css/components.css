@@ -1,3 +1,145 @@
+/* Accessibility: Fokus-Outline für alle interaktiven Elemente */
+a, button, input, select, textarea, .btn, .btn-primary, .btn-lg, .btn-xs, .chat-tab-btn, .chat-settings-btn {
+  outline: none;
+}
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible,
+.btn:focus-visible, .btn-primary:focus-visible, .btn-lg:focus-visible, .btn-xs:focus-visible, .chat-tab-btn:focus-visible, .chat-settings-btn:focus-visible {
+  outline: 2.5px solid #00ff88;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px #00ff8833;
+}
+/* Lade-Spinner Utility */
+.spinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 4px solid #00ff88;
+  border-top: 4px solid #222;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Sanfte Fade-Transitions für Gruppenwechsel, Call-Start, Modal-Öffnung */
+.fade-in {
+  animation: fadeIn 0.32s cubic-bezier(.4,1.6,.6,1) both;
+}
+.fade-out {
+  animation: fadeOut 0.22s cubic-bezier(.4,1.6,.6,1) both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+/* Direktanruf-Button (1:1 Call) */
+.btn-xs.btn-direct-call {
+  padding: 0.28rem 0.85rem;
+  font-size: 1.05em;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #00ff88 60%, #00cc66 100%);
+  color: #000;
+  border: 2px solid #00ff88;
+  font-weight: 900;
+  margin-left: 2px;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,255,136,0.10);
+  transition: background .18s, box-shadow .18s, transform .13s;
+}
+.btn-xs.btn-direct-call:hover, .btn-xs.btn-direct-call:focus {
+  background: linear-gradient(135deg, #00ff88 80%, #00dd77 100%);
+  box-shadow: 0 4px 16px rgba(0,255,136,0.18);
+  transform: translateY(-2px) scale(1.04);
+  outline: 2px solid #00ff88;
+}
+.btn-xs.btn-direct-call:active {
+  transform: scale(0.97);
+}
+
+/* Call-to-Action Buttons */
+.btn-primary, .btn-lg, .btn {
+  box-shadow: 0 2px 16px rgba(0,255,136,0.10);
+  transition: box-shadow .18s, background .18s, transform .13s;
+}
+.btn-primary:hover, .btn-lg:hover, .btn:hover,
+.btn-primary:focus, .btn-lg:focus, .btn:focus {
+  box-shadow: 0 6px 32px rgba(0,255,136,0.18);
+  transform: translateY(-2px) scale(1.03);
+  outline: 2px solid #00ff88;
+}
+.btn-primary:active, .btn-lg:active, .btn:active {
+  transform: scale(0.98);
+}
+
+/* Card Hover/Focus */
+.card, .group-item, .member-item, .auth-status-card {
+  transition: box-shadow .18s, border-color .18s, background .18s, transform .13s;
+}
+.card:hover, .group-item:hover, .member-item:hover, .auth-status-card:hover,
+.card:focus-within, .group-item:focus-within, .member-item:focus-within, .auth-status-card:focus-within {
+  box-shadow: 0 8px 32px rgba(0,255,136,0.13);
+  border-color: #00ff88;
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* Input Fokus-States */
+input, select, textarea, .message-input, .add-member-input, .friend-search-input, .setting-input {
+  transition: border-color .18s, box-shadow .18s;
+}
+input:focus, select:focus, textarea:focus,
+.message-input:focus, .add-member-input:focus, .friend-search-input:focus, .setting-input:focus {
+  border-color: #00ff88 !important;
+  box-shadow: 0 0 0 2px #00ff8833;
+  outline: none;
+}
+
+/* Animierte Avatare */
+.member-avatar, .friend-search-item-avatar {
+  transition: box-shadow .18s, transform .13s;
+}
+.member-avatar:hover, .friend-search-item-avatar:hover {
+  box-shadow: 0 4px 16px rgba(0,255,136,0.18);
+  transform: scale(1.08) rotate(-2deg);
+}
+
+/* Notification Stack Animation */
+.notify-stack .notify {
+  animation: notifyFadeIn 0.32s cubic-bezier(.4,1.6,.6,1) both;
+}
+@keyframes notifyFadeIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Modal Animation */
+.modal-overlay, .modal-dialog {
+  transition: opacity .22s, transform .22s;
+}
+.modal-overlay[aria-hidden="false"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-overlay[aria-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.modal-dialog {
+  transform: translateY(0);
+}
+.modal-overlay[aria-hidden="false"] .modal-dialog {
+  animation: modalPopIn .22s cubic-bezier(.4,1.6,.6,1) both;
+}
+@keyframes modalPopIn {
+  from { opacity: 0; transform: translateY(32px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
 /* ======================================
    INCOMING CALL MODAL (echtlucky)
 ====================================== */

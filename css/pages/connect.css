@@ -897,18 +897,67 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .connect-title {
-    font-size: 2rem;
-  }
-
+@media (max-width: 900px) {
   .connect-layout {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
-
+  .connect-column {
+    padding: 1rem 0.5rem;
+    min-width: 0;
+  }
   .chat-settings-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 0.95rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+  .voice-section {
+    padding: 1rem 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .connect-title {
+    font-size: 1.3rem;
+  }
+  .connect-hero__inner {
+    gap: 0.5rem;
+  }
+  .auth-status-card {
+    padding: 1rem;
+  }
+  .groups-header, .members-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .group-item, .member-item {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.98em;
+  }
+  .voice-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .voice-section {
+    padding: 0.5rem 0.2rem;
+  }
+  .chat-header {
+    position: sticky;
+    top: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 10;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .voice-section {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+  .btn, .btn-primary, .btn-lg, .btn-xs {
+    min-height: 48px;
+    font-size: 1.08em;
+    border-radius: 14px;
   }
 }

@@ -1,3 +1,45 @@
+// ========== CALL SYSTEM: 1:1-DIREKTANRUF =============
+    async function startDirectCall(targetUid, targetName) {
+      if (!currentUser || !targetUid || targetUid === currentUser.uid) return;
+      try {
+        const callId = `direct_${Date.now()}_${currentUser.uid}`;
+        // Call-Dokument anlegen
+        await db.collection("calls").doc(callId).set({
+          initiator: currentUser.uid,
+          recipient: targetUid,
+          createdAt: new Date(),
+          status: "pending",
+          type: "direct"
+        });
+        // CallRequest für Empfänger
+        await db.collection("users").doc(targetUid).collection("callRequests").add({
+          from: currentUser.uid,
+          fromName: currentUser.displayName || "User",
+          callId,
+          type: "direct",
+          createdAt: new Date(),
+          status: "pending"
+        });
+        // Push-Benachrichtigung (Demo, echtes Senden via Backend)
+        if (window.echtlucky?.voiceChat?.sendCallPush) {
+          window.echtlucky.voiceChat.sendCallPush(targetUid, "Eingehender Anruf", `${currentUser.displayName || "User"} ruft dich an.`, { callId, type: "direct" });
+        }
+        window.notify?.show({
+          type: "success",
+          title: "Anruf gestartet",
+          message: `Direktanruf an ${targetName}...`,
+          duration: 4000
+        });
+      } catch (err) {
+        console.error("Fehler beim Direktanruf:", err);
+        window.notify?.show({
+          type: "error",
+          title: "Fehler",
+          message: "Direktanruf konnte nicht gestartet werden",
+          duration: 4000
+        });
+      }
+    }
   // ========== CALL SYSTEM: GRUPPEN-ANRUF STARTEN =============
   async function startGroupCall() {
     if (!selectedGroupId || !currentUser) return;
@@ -47,6 +89,10 @@
           createdAt: new Date(),
           status: "pending"
         });
+        // Push-Benachrichtigung (Demo, echtes Senden via Backend)
+        if (window.echtlucky?.voiceChat?.sendCallPush) {
+          window.echtlucky.voiceChat.sendCallPush(uid, "Eingehender Gruppenanruf", `${currentUser.displayName || "User"} ruft dich in einer Gruppe an.`, { callId, groupId: selectedGroupId, type: "group" });
+        }
       }
       window.notify?.show({
         type: "success",
@@ -260,6 +306,12 @@
                 .toUpperCase()
                 .substring(0, 2);
 
+
+              // Direktanruf-Button (außer man selbst)
+              const directCallBtn = memberId !== currentUser.uid
+                ? `<button class="btn btn-xs btn-direct-call" data-direct-call-uid="${memberId}" data-direct-call-name="${escapeHtml(userData.displayName || userData.email?.split("@")?.[0] || "User")}" title="Direktanruf"><span style="font-size:1.1em;">📞</span></button>`
+                : "";
+
               const roleSelect =
                 currentUser.uid === groupData.creator && memberId !== groupData.creator
                   ? `
@@ -272,17 +324,27 @@
                 `
                   : `<span class="member-role ${role}">${role.toUpperCase()}</span>`;
 
+
               div.innerHTML = `
                 <div class="member-info">
                   <div class="member-avatar">${initials}</div>
                   <div class="member-details">
-                    <div class="member-name">${escapeHtml(userData.displayName || userData.email?.split("@")[0])}</div>
+                    <div class="member-name">${escapeHtml(userData.displayName || (userData.email?.split("@")[0]))}</div>
                   </div>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                   ${roleSelect}
+                  ${directCallBtn}
                 </div>
               `;
+              // Direktanruf-Button Listener
+              if (div.querySelector('.btn-direct-call')) {
+                div.querySelector('.btn-direct-call').addEventListener('click', (e) => {
+                  const uid = e.currentTarget.getAttribute('data-direct-call-uid');
+                  const name = e.currentTarget.getAttribute('data-direct-call-name');
+                  startDirectCall(uid, name);
+                });
+              }
 
               membersList.appendChild(div);
             } catch (err) {
