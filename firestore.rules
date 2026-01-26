@@ -6,8 +6,8 @@ service cloud.firestore {
     // USERS COLLECTION
     // ==========================================
     match /users/{userId} {
-      // Anyone can read user data (for online friends, profiles)
-      allow read: if true;
+      // Users can read all user profiles (for online status, friends list)
+      allow read: if request.auth != null;
       
       // Users can only write their own data
       allow write: if request.auth != null && request.auth.uid == userId;
@@ -15,9 +15,23 @@ service cloud.firestore {
       // Admins can read and write all user data
       allow read, write: if isAdmin();
     }
+
+    // ==========================================
+    // USERNAMES COLLECTION (for username lookup)
+    // ==========================================
+    match /usernames/{usernameLower} {
+      // Anyone authenticated can read to check availability
+      allow read: if request.auth != null;
+      
+      // Only users can write their own username mapping
+      allow write: if request.auth != null && request.auth.uid == request.resource.data.uid;
+      
+      // Admins can manage all
+      allow read, write: if isAdmin();
+    }
     
     // ==========================================
-    // GROUPS COLLECTION (Global)
+    // GROUPS COLLECTION
     // ==========================================
     match /groups/{groupId} {
       // Read: user must be a member of the group OR admin
@@ -25,7 +39,8 @@ service cloud.firestore {
                      (request.auth.uid in resource.data.members || isAdmin());
       
       // Create: authenticated users can create groups
-      allow create: if request.auth != null;
+      allow create: if request.auth != null && 
+                       request.resource.data.createdBy == request.auth.uid;
       
       // Update/Delete: group creator or admin only
       allow update, delete: if request.auth != null && 
@@ -41,7 +56,12 @@ service cloud.firestore {
         
         // Create: members can add messages
         allow create: if request.auth != null && 
-                        request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+                        request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members &&
+                        request.resource.data.authorUid == request.auth.uid;
+        
+        // Update: message author or admin can update
+        allow update: if request.auth != null && 
+                        (request.auth.uid == resource.data.authorUid || isAdmin());
         
         // Delete: message author or admin can delete
         allow delete: if request.auth != null && 
@@ -75,14 +95,29 @@ service cloud.firestore {
     }
     
     // ==========================================
-    // PRESENCE COLLECTION (for online status tracking)
+    // PRESENCE COLLECTION (for online status)
     // ==========================================
     match /presence/{userId} {
-      // Users can read any presence (for online friends list)
-      allow read: if true;
+      // Users can read all presence data (for online friends list)
+      allow read: if request.auth != null;
       
       // Users can only write their own presence
       allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ==========================================
+    // BLOG COLLECTION
+    // ==========================================
+    match /blog/{documentId} {
+      // Everyone (authenticated) can read blog posts
+      allow read: if request.auth != null;
+      
+      // Only creator or admin can write blog posts
+      allow create: if request.auth != null && 
+                       request.resource.data.authorUid == request.auth.uid;
+      
+      allow update, delete: if request.auth != null && 
+                              (request.auth.uid == resource.data.authorUid || isAdmin());
     }
     
     // ==========================================
@@ -90,8 +125,8 @@ service cloud.firestore {
     // ==========================================
     function isAdmin() {
       return request.auth != null && 
-             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-              request.auth.email == 'lucassteckel04@gmail.com');
+             (request.auth.email == 'lucassteckel04@gmail.com' ||
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
   }
 }

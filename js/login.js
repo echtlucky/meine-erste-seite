@@ -228,7 +228,7 @@
         await ensureUsernameMapping(u, u?.displayName || "");
 
         showMsg("Eingeloggt. Weiterleitung…", "success");
-        setTimeout(() => (window.location.href = "index.html"), 450);
+        setTimeout(() => (window.location.href = "account.html"), 450);
       } catch (err) {
         showMsg(err?.message || "Login fehlgeschlagen.");
       }
@@ -268,7 +268,7 @@
         await ensureUsernameMapping(cred.user, unameLower);
 
         showMsg("Account erstellt. Weiterleitung…", "success");
-        setTimeout(() => (window.location.href = "index.html"), 450);
+        setTimeout(() => (window.location.href = "account.html"), 450);
       } catch (err) {
         showMsg(err?.message || "Registrierung fehlgeschlagen.");
       }
@@ -317,7 +317,7 @@
         await ensureUsernameMapping(u, finalUsername || "");
 
         showMsg("Mit Google eingeloggt. Weiterleitung…", "success");
-        setTimeout(() => (window.location.href = "index.html"), 450);
+        setTimeout(() => (window.location.href = "account.html"), 450);
       } catch (err) {
         showMsg(err?.message || "Google Login fehlgeschlagen.");
       }
