@@ -11,13 +11,35 @@
   }
   window.__ECHTLUCKY_CONNECT_EXT_LOADED__ = true;
 
-  const auth = window.auth || window.echtlucky?.auth;
-  const db = window.db || window.echtlucky?.db;
+  let auth = null;
+  let db = null;
+  let firebase = null;
 
-  if (!auth || !db) {
-    console.error("connect.js: auth/db missing. firebase.js must load first.");
-    return;
+  async function waitForFirebase() {
+    return new Promise((resolve) => {
+      if (window.firebaseReady && window.auth && window.db) {
+        auth = window.auth;
+        db = window.db;
+        firebase = window.firebase;
+        console.log("✅ connect.js: Firebase ready");
+        resolve();
+        return;
+      }
+
+      const handler = () => {
+        auth = window.auth;
+        db = window.db;
+        firebase = window.firebase;
+        console.log("✅ connect.js: Firebase ready via event");
+        resolve();
+      };
+
+      window.addEventListener("firebaseReady", handler, { once: true });
+      setTimeout(() => resolve(), 5000);
+    });
   }
+
+  let initialized = false;
 
   let selectedGroupId = null;
   let messagesUnsubscribe = null;
@@ -33,6 +55,9 @@
   const tabContents = document.querySelectorAll(".tab-content");
   const btnDeleteGroup = document.getElementById("btnDeleteGroup");
   const btnLeaveGroup = document.getElementById("btnLeaveGroup");
+  const addMemberInput = document.getElementById("addMemberInput");
+  const btnAddMember = document.getElementById("btnAddMember");
+  const addMemberResults = document.getElementById("addMemberResults");
 
   // ============================================
   // SETUP EVENT LISTENERS
@@ -72,6 +97,17 @@
     }
     if (btnLeaveGroup) {
       btnLeaveGroup.addEventListener("click", leaveGroup);
+    }
+
+    // Add member functionality
+    if (btnAddMember && addMemberInput) {
+      btnAddMember.addEventListener("click", searchAndAddMember);
+      addMemberInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          searchAndAddMember();
+        }
+      });
     }
 
     // Listen to group selection changes (from connect-minimal.js)
@@ -337,7 +373,10 @@
       const userId = auth.currentUser.uid;
       
       // Use firebase.firestore.FieldValue for Compat SDK
-      const firebase = window.firebase;
+      if (!firebase) {
+        console.error("Firebase not available");
+        return;
+      }
       
       groupRef
         .update({
@@ -375,6 +414,111 @@
     }
   }
 
+  // Search and add member to group
+  async function searchAndAddMember() {
+    if (!selectedGroupId || !addMemberInput || !addMemberResults) return;
+
+    const username = addMemberInput.value.trim().toLowerCase();
+    if (!username || username.length < 2) {
+      if (addMemberResults) {
+        addMemberResults.innerHTML = '<p style="color: var(--text-muted);">Bitte mindestens 2 Zeichen eingeben</p>';
+      }
+      return;
+    }
+
+    try {
+      // Search for username
+      const usernamesRef = db.collection("usernames");
+      const querySnapshot = await usernamesRef
+        .where("__name__", ">=", username)
+        .where("__name__", "<", username + "z")
+        .limit(10)
+        .get();
+
+      if (querySnapshot.empty) {
+        addMemberResults.innerHTML = '<p style="color: var(--text-muted);">🔍 Kein Benutzer gefunden</p>';
+        return;
+      }
+
+      // Get group data to check current members
+      const groupDoc = await db.collection("groups").doc(selectedGroupId).get();
+      const currentMembers = groupDoc.data()?.members || [];
+
+      // Render results
+      addMemberResults.innerHTML = '';
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const userId = data.uid;
+        const isAlreadyMember = currentMembers.includes(userId);
+
+        const resultItem = document.createElement('div');
+        resultItem.className = 'member-search-result';
+        resultItem.style.cssText = `
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.8rem 1rem;
+          background: rgba(255,255,255,0.05);
+          border-radius: 12px;
+          margin-bottom: 0.6rem;
+          border: 1px solid rgba(255,255,255,0.1);
+        `;
+
+        resultItem.innerHTML = `
+          <div style="flex: 1;">
+            <div style="font-weight: 600; color: white;">${doc.id}</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">${data.email || 'Kein Email'}</div>
+          </div>
+          <button class="btn btn-sm ${isAlreadyMember ? 'btn-secondary' : 'btn-primary'}" 
+                  ${isAlreadyMember ? 'disabled' : ''}
+                  onclick="window.echtluckyAddMemberToGroup('${userId}', '${doc.id}')">
+            ${isAlreadyMember ? '✓ Mitglied' : '+ Hinzufügen'}
+          </button>
+        `;
+
+        addMemberResults.appendChild(resultItem);
+      });
+    } catch (err) {
+      console.error("Search error:", err);
+      addMemberResults.innerHTML = `<p style="color: #ff6b6b;">❌ Suche fehlgeschlagen</p>`;
+    }
+  }
+
+  // Add member to group (global function)
+  window.echtluckyAddMemberToGroup = async function(userId, username) {
+    if (!selectedGroupId || !firebase) return;
+
+    try {
+      const groupRef = db.collection("groups").doc(selectedGroupId);
+      
+      await groupRef.update({
+        members: firebase.firestore.FieldValue.arrayUnion(userId)
+      });
+
+      window.notify?.show({
+        type: "success",
+        title: "Mitglied hinzugefügt",
+        message: `${username} wurde zur Gruppe hinzugefügt!`,
+        duration: 3000
+      });
+
+      // Reload members list
+      loadGroupMembers(selectedGroupId);
+      
+      // Clear search
+      if (addMemberInput) addMemberInput.value = '';
+      if (addMemberResults) addMemberResults.innerHTML = '';
+    } catch (err) {
+      console.error("Add member error:", err);
+      window.notify?.show({
+        type: "error",
+        title: "Fehler",
+        message: "Mitglied konnte nicht hinzugefügt werden",
+        duration: 3000
+      });
+    }
+  };
+
   // ============================================
   // UTILITIES
   // ============================================
@@ -389,10 +533,25 @@
   // STARTUP
   // ============================================
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
+  async function initModule() {
+    if (initialized) return;
+    initialized = true;
+
+    console.log("🔵 connect.js initializing");
+    await waitForFirebase();
+
+    if (!auth || !db) {
+      console.error("❌ connect.js: Firebase not ready");
+      return;
+    }
+
     init();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initModule);
+  } else {
+    initModule();
   }
 
   console.log("✅ connect.js extensions initialized");

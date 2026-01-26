@@ -775,6 +775,21 @@ body.connect-page::after {
   gap: 0.6rem;
 }
 
+.setting-item:has(input[type="text"]) {
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0.8rem;
+}
+
+.setting-item:has(input[type="text"]) input {
+  flex: 1;
+  margin: 0;
+}
+
+.setting-item:has(input[type="text"]) .btn {
+  white-space: nowrap;
+}
+
 .setting-item label {
   font-weight: 600;
   font-size: 0.95rem;
@@ -802,6 +817,36 @@ body.connect-page::after {
 .setting-item textarea {
   min-height: 80px;
   resize: vertical;
+}
+
+/* Member search results styling */
+#addMemberResults {
+  margin-top: 1.2rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+#addMemberResults::-webkit-scrollbar {
+  width: 6px;
+}
+
+#addMemberResults::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#addMemberResults::-webkit-scrollbar-thumb {
+  background: rgba(0,255,136,0.2);
+  border-radius: 3px;
+}
+
+.member-search-result {
+  transition: all 0.2s ease;
+}
+
+.member-search-result:hover {
+  background: rgba(0,255,136,0.1) !important;
+  border-color: rgba(0,255,136,0.3) !important;
 }
 
 /* ============ RESPONSIVE ============ */

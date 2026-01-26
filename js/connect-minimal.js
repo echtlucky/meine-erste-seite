@@ -10,13 +10,35 @@
   }
   window.__ECHTLUCKY_CONNECT_MINIMAL_LOADED__ = true;
 
-  const auth = window.auth || window.echtlucky?.auth;
-  const db = window.db || window.echtlucky?.db;
+  let auth = null;
+  let db = null;
+  let firebase = null;
 
-  if (!auth || !db) {
-    console.error("connect-minimal.js: auth/db missing. firebase.js must load first.");
-    return;
+  async function waitForFirebase() {
+    return new Promise((resolve) => {
+      if (window.firebaseReady && window.auth && window.db) {
+        auth = window.auth;
+        db = window.db;
+        firebase = window.firebase;
+        console.log("✅ connect-minimal.js: Firebase ready");
+        resolve();
+        return;
+      }
+
+      const handler = () => {
+        auth = window.auth;
+        db = window.db;
+        firebase = window.firebase;
+        console.log("✅ connect-minimal.js: Firebase ready via event");
+        resolve();
+      };
+
+      window.addEventListener("firebaseReady", handler, { once: true });
+      setTimeout(() => resolve(), 5000);
+    });
   }
+
+  let initialized = false;
 
   // DOM Elements
   const groupsContainer = document.getElementById("groupsContainer");
@@ -469,10 +491,14 @@
     if (!currentUser) return;
 
     try {
+      if (!firebase) {
+        console.error("Firebase not available for arrayUnion");
+        return;
+      }
       db.collection("users")
         .doc(currentUser.uid)
         .update({
-          friends: db.FieldValue.arrayUnion(friendUid)
+          friends: firebase.firestore.FieldValue.arrayUnion(friendUid)
         })
         .then(() => {
           window.notify?.show({
@@ -529,6 +555,29 @@
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  // Initialize module
+  async function initModule() {
+    if (initialized) return;
+    initialized = true;
+
+    console.log("🔵 connect-minimal.js initializing");
+    await waitForFirebase();
+
+    if (!auth || !db) {
+      console.error("❌ connect-minimal.js: Firebase not ready");
+      return;
+    }
+
+    init();
+  }
+
+  // Start initialization
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initModule);
+  } else {
+    initModule();
   }
 
   console.log("✅ connect-minimal.js initialized");

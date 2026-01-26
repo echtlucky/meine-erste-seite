@@ -12,13 +12,35 @@
   window.__ECHTLUCKY_VOICE_CHAT_LOADED__ = true;
 
   const appNS = (window.echtlucky = window.echtlucky || {});
-  const auth = window.auth || appNS.auth;
-  const db = window.db || appNS.db;
+  let auth = null;
+  let db = null;
+  let firebase = null;
 
-  if (!auth || !db) {
-    console.error("voice-chat.js: auth/db missing. firebase.js must load first.");
-    return;
+  async function waitForFirebase() {
+    return new Promise((resolve) => {
+      if (window.firebaseReady && window.auth && window.db) {
+        auth = window.auth;
+        db = window.db;
+        firebase = window.firebase;
+        console.log("✅ voice-chat.js: Firebase ready");
+        resolve();
+        return;
+      }
+
+      const handler = () => {
+        auth = window.auth;
+        db = window.db;
+        firebase = window.firebase;
+        console.log("✅ voice-chat.js: Firebase ready via event");
+        resolve();
+      };
+
+      window.addEventListener("firebaseReady", handler, { once: true });
+      setTimeout(() => resolve(), 5000);
+    });
   }
+
+  let initialized = false;
 
   // ============================================
   // STATE
@@ -671,6 +693,33 @@
     isMicMuted = !isMicMuted;
     btnToggleMic.classList.toggle("is-muted", isMicMuted);
     btnToggleMic.textContent = isMicMuted ? "🔇 Unmute" : "🎤 Mute";
+  }
+
+  // ============================================
+  // EVENT LISTENERS
+  // ============================================
+  // INITIALIZATION
+  // ============================================
+
+  async function initModule() {
+    if (initialized) return;
+    initialized = true;
+
+    console.log("🔵 voice-chat.js initializing");
+    await waitForFirebase();
+
+    if (!auth || !db) {
+      console.error("❌ voice-chat.js: Firebase not ready");
+      return;
+    }
+
+    console.log("✅ voice-chat.js setup complete");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initModule);
+  } else {
+    initModule();
   }
 
   // ============================================

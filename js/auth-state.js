@@ -238,7 +238,10 @@
 
       await applyHeaderState(user || null);
       applyAccountCTAs(user || null);
-      emitAuthEvent(user || null);
+      // Emit auth event for other listeners
+      const evt = new CustomEvent('echtlucky:auth-change', { detail: { user } });
+      window.dispatchEvent(evt);
+      document.dispatchEvent(evt);
     });
 
     // Header injected later (fetch)
