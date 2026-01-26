@@ -1,4 +1,4 @@
-  // ========== PUSH-BENACHRICHTIGUNGEN (CALLS) =============
+﻿  // ========== PUSH-BENACHRICHTIGUNGEN (CALLS) =============
   let messaging = null;
   async function initPushNotifications() {
     if (!window.firebase?.messaging) return;
@@ -30,21 +30,21 @@
 
   // Call: Push senden (Platzhalter, Backend muss FCM nutzen)
   async function sendCallPush(toUid, title, body, data) {
-    // Hier müsste ein Cloud Function/Backend-Service das FCM-Token holen und Push senden
+    // Hier mÃ¼sste ein Cloud Function/Backend-Service das FCM-Token holen und Push senden
     // (Demo: Log-Ausgabe)
     console.log("[Push] Sende Call-Push an", toUid, title, body, data);
   }
-// js/voice-chat.js — echtlucky Voice Integration
-// WebRTC + Firebase Signaling für Gruppen-Calls (Direct Calls sind in diesem Projekt derzeit deaktiviert)
+// js/voice-chat.js â€” echtlucky Voice Integration
+// WebRTC + Firebase Signaling fÃ¼r Gruppen-Calls (Direct Calls sind in diesem Projekt derzeit deaktiviert)
 
 /*
 ==============================
  ANRUF-SYSTEM: KONZEPT & JSON-MODELLE
 ==============================
 
-Firestore-Struktur für Calls:
+Firestore-Struktur fÃ¼r Calls:
 
-// Für Gruppen-Calls:
+// FÃ¼r Gruppen-Calls:
 groups/{groupId}/voice-calls/{callId} {
   initiator: <uid>,
   initiatorName: <string>,
@@ -59,13 +59,13 @@ groups/{groupId}/voice-calls/{callId} {
 
 // Ablauf (Gruppenanruf):
 // 1. Initiator startet Call: status="ringing" im group voice-call Doc
-// 2. Andere Mitglieder sehen Modal + Klingelton, können annehmen/ablehnen
-// 3. Bei Annahme: status="active", Teilnehmer wird zu participants hinzugefügt
-// 4. Bei Ablehnung: eigener UID wird zu rejectedBy hinzugefügt
-// 5. Status/Teilnehmer werden in Echtzeit überwacht
+// 2. Andere Mitglieder sehen Modal + Klingelton, kÃ¶nnen annehmen/ablehnen
+// 3. Bei Annahme: status="active", Teilnehmer wird zu participants hinzugefÃ¼gt
+// 4. Bei Ablehnung: eigener UID wird zu rejectedBy hinzugefÃ¼gt
+// 5. Status/Teilnehmer werden in Echtzeit Ã¼berwacht
 
 // Klingelton: Audio-Element, das bei eingehendem Anruf abgespielt wird, bis angenommen/abgelehnt
-// Modal: Zeigt Anrufer, Gruppe/Name, Buttons für Annehmen/Ablehnen
+// Modal: Zeigt Anrufer, Gruppe/Name, Buttons fÃ¼r Annehmen/Ablehnen
 */
 // Guard: prevent double-load
 
@@ -73,7 +73,7 @@ groups/{groupId}/voice-calls/{callId} {
   "use strict";
 
   if (window.__ECHTLUCKY_VOICE_CHAT_LOADED__) {
-    console.warn("voice-chat.js already loaded – skipping");
+    console.warn("voice-chat.js already loaded â€“ skipping");
     return;
   }
   window.__ECHTLUCKY_VOICE_CHAT_LOADED__ = true;
@@ -89,7 +89,7 @@ groups/{groupId}/voice-calls/{callId} {
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        console.log("✅ voice-chat.js: Firebase ready");
+        console.log("âœ… voice-chat.js: Firebase ready");
         resolve();
         return;
       }
@@ -98,7 +98,7 @@ groups/{groupId}/voice-calls/{callId} {
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        console.log("✅ voice-chat.js: Firebase ready via event");
+        console.log("âœ… voice-chat.js: Firebase ready via event");
         resolve();
       };
 
@@ -153,7 +153,7 @@ groups/{groupId}/voice-calls/{callId} {
         participants: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
       });
     } catch (e) {
-      console.warn("Teilnehmer konnte nicht hinzugefügt werden", e);
+      console.warn("Teilnehmer konnte nicht hinzugefÃ¼gt werden", e);
     }
 
     window.echtlucky?.voiceChat?.joinCall?.(groupId, callId);
@@ -250,6 +250,7 @@ groups/{groupId}/voice-calls/{callId} {
       if (nextGroupId !== watchedGroupId) {
         watchedGroupId = nextGroupId;
         attachIncomingGroupListener(watchedGroupId);
+        refreshVoiceStartLabels().catch(() => {});
       }
     }, 600);
   }
@@ -263,6 +264,7 @@ groups/{groupId}/voice-calls/{callId} {
   let currentVoiceCall = null; // { groupId, callId, isInitiator }
   let localStream = null;
   let isMicMuted = false;
+  let uiCallState = "idle"; // idle | ringing | active | ended
   let callUnsubscribe = null;
   let peerConnections = new Map(); // uid -> RTCPeerConnection
   let remoteStreams = new Map(); // uid -> MediaStream
@@ -553,6 +555,16 @@ groups/{groupId}/voice-calls/{callId} {
       }
 
       const data = snap.data();
+      if (data?.status === "ended") {
+        window.notify?.show({
+          type: "info",
+          title: "Anruf",
+          message: "Anruf beendet",
+          duration: 3000
+        });
+        endVoiceCall().catch(() => {});
+        return;
+      }
       if (data?.participants) {
         const newParticipants = data.participants.filter(p => p !== auth.currentUser.uid);
         
@@ -590,7 +602,7 @@ groups/{groupId}/voice-calls/{callId} {
       if (!groupId) {
         window.notify?.show({
           type: "error",
-          title: "Nicht unterstützt",
+          title: "Nicht unterstÃ¼tzt",
           message: "Direktanrufe sind aktuell nicht aktiviert. Bitte starte/joine einen Gruppenanruf.",
           duration: 5000
         });
@@ -641,12 +653,12 @@ groups/{groupId}/voice-calls/{callId} {
       listenForAnswers(groupId, callId);
       listenForIceCandidates(groupId, callId);
 
-      updateVoiceUI(true, "Ruft an… (klingelt)");
+      updateVoiceUI(true, "Ruft anâ€¦ (klingelt)", "ringing");
 
       window.notify?.show({
         type: "info",
         title: "Anruf",
-        message: "Anruf gestartet – warte auf Annahme",
+        message: "Anruf gestartet â€“ warte auf Annahme",
         duration: 4500
       });
     } catch (err) {
@@ -655,7 +667,7 @@ groups/{groupId}/voice-calls/{callId} {
         err.name === "NotAllowedError"
           ? "Mikrofonzugriff verweigert. Bitte erlaube Audiovorbereitung!"
           : err.name === "NotFoundError"
-            ? "Kein Mikrofon gefunden. Bitte überprüfe dein Gerät!"
+            ? "Kein Mikrofon gefunden. Bitte Ã¼berprÃ¼fe dein GerÃ¤t!"
             : "Fehler beim Starten des Anrufs";
 
       window.notify?.show({
@@ -725,12 +737,12 @@ groups/{groupId}/voice-calls/{callId} {
       listenForIceCandidates(groupId, callId);
 
       // Show voice panel
-      updateVoiceUI(true, "Sprachchat aktiv - wartend auf Teilnehmer");
+      updateVoiceUI(true, "Sprachchat aktiv - wartend auf Teilnehmer", "active");
 
       window.notify?.show({
         type: "success",
         title: "Voice Chat",
-        message: "Sprachchat gestartet - andere können jetzt beitreten",
+        message: "Sprachchat gestartet - andere kÃ¶nnen jetzt beitreten",
         duration: 4500
       });
 
@@ -739,7 +751,7 @@ groups/{groupId}/voice-calls/{callId} {
       const errorMsg = err.name === "NotAllowedError" 
         ? "Mikrofonzugriff verweigert. Bitte erlaube Audiovorbereitung!"
         : err.name === "NotFoundError"
-        ? "Kein Mikrofon gefunden. Bitte überprüfe dein Gerät!"
+        ? "Kein Mikrofon gefunden. Bitte Ã¼berprÃ¼fe dein GerÃ¤t!"
         : "Fehler beim Starten des Sprachchats";
       
       window.notify?.show({
@@ -816,18 +828,18 @@ groups/{groupId}/voice-calls/{callId} {
       listenForAnswers(groupId, callId);
       listenForIceCandidates(groupId, callId);
 
-      // Subscribe to participants list (nur für Gruppen sinnvoll)
+      // Subscribe to participants list (nur fÃ¼r Gruppen sinnvoll)
       if (groupId) {
         callUnsubscribe = callRef.onSnapshot((snap) => {
           const data = snap.data();
           if (data?.participants) {
             updateParticipantsList(data.participants);
-            updateVoiceUI(true, `${data.participants.length} Teilnehmer`);
+            updateVoiceUI(true, `${data.participants.length} Teilnehmer`, "active");
           }
         });
       }
 
-      updateVoiceUI(true, "Sprachchat - Verbindung wird hergestellt");
+      updateVoiceUI(true, "Sprachchat - Verbindung wird hergestellt", "active");
 
       window.notify?.show({
         type: "success",
@@ -888,12 +900,19 @@ groups/{groupId}/voice-calls/{callId} {
         callUnsubscribe = null;
       }
 
-      // Update Firestore: Remove self from call or delete call
+      // Update Firestore: mark ended (initiator) and remove self from call
       if (currentVoiceCall) {
         const groupRef = db.collection("groups").doc(currentVoiceCall.groupId);
         const callRef = groupRef.collection("voice-calls").doc(currentVoiceCall.callId);
 
         try {
+          if (currentVoiceCall.isInitiator) {
+            await callRef.update({
+              status: "ended",
+              endedAt: new Date()
+            });
+          }
+
           // Remove participant
           await callRef.update({
             participants: window.firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid)
@@ -931,9 +950,9 @@ groups/{groupId}/voice-calls/{callId} {
       isMicMuted = false;
 
       // Update UI
-      updateVoiceUI(false);
+      updateVoiceUI(false, undefined, "idle");
       btnToggleMic.classList.remove("is-muted");
-      btnToggleMic.textContent = "🎤";
+      btnToggleMic.textContent = "ðŸŽ¤";
 
       window.notify?.show({
         type: "success",
@@ -951,19 +970,61 @@ groups/{groupId}/voice-calls/{callId} {
   // UPDATE UI
   // ============================================
 
-  function updateVoiceUI(isActive, statusText) {
+  function updateVoiceUI(isActive, statusText, state) {
     if (isActive) {
       if (voiceStatus) voiceStatus.textContent = statusText;
+      uiCallState = state || uiCallState || "active";
+      if (voiceStatus) voiceStatus.setAttribute("data-state", uiCallState);
       if (btnStartVoiceCall) btnStartVoiceCall.style.display = "none";
       if (btnStartRingingCall) btnStartRingingCall.style.display = "none";
       if (btnEndVoiceCall) btnEndVoiceCall.style.display = "block";
       if (btnToggleMic) btnToggleMic.style.display = "block";
+      if (btnToggleMic) btnToggleMic.disabled = false;
+
+      if (btnEndVoiceCall) {
+        btnEndVoiceCall.textContent = uiCallState === "ringing" ? "Abbrechen" : "Beenden";
+      }
     } else {
       if (voiceStatus) voiceStatus.textContent = "Nicht im Call";
+      uiCallState = state || "idle";
+      if (voiceStatus) voiceStatus.removeAttribute("data-state");
       if (btnStartVoiceCall) btnStartVoiceCall.style.display = "block";
       if (btnStartRingingCall) btnStartRingingCall.style.display = "block";
       if (btnEndVoiceCall) btnEndVoiceCall.style.display = "none";
       if (btnToggleMic) btnToggleMic.style.display = "none";
+      if (btnToggleMic) btnToggleMic.disabled = true;
+
+      if (btnEndVoiceCall) btnEndVoiceCall.textContent = "Beenden";
+    }
+  }
+
+  async function refreshVoiceStartLabels() {
+    if (!btnStartVoiceCall) return;
+    if (!db) return;
+
+    const groupId = window.__ECHTLUCKY_SELECTED_GROUP__ || null;
+    if (!groupId) {
+      btnStartVoiceCall.textContent = "🎤 Voice beitreten";
+      return;
+    }
+
+    try {
+      const callsRef = db.collection("groups").doc(groupId).collection("voice-calls");
+      const ringingSnap = await callsRef.where("status", "==", "ringing").limit(1).get();
+      if (!ringingSnap.empty) {
+        btnStartVoiceCall.textContent = "🎤 Anruf beitreten";
+        return;
+      }
+
+      const activeSnap = await callsRef.where("status", "==", "active").limit(1).get();
+      if (!activeSnap.empty) {
+        btnStartVoiceCall.textContent = "🎤 Call beitreten";
+        return;
+      }
+
+      btnStartVoiceCall.textContent = "🎤 Voice beitreten";
+    } catch (_) {
+      btnStartVoiceCall.textContent = "🎤 Voice beitreten";
     }
   }
 
@@ -978,8 +1039,8 @@ groups/{groupId}/voice-calls/{callId} {
       el.id = `participant-${uid}`;
       
       const name = uid === currentUid ? "Du" : `User ${uid.slice(0, 6)}`;
-      const indicator = uid === currentUid ? "🎤" : "👤";
-      const connectionStatus = peerConnections.has(uid) ? " ✓" : "";
+      const indicator = uid === currentUid ? "ðŸŽ¤" : "ðŸ‘¤";
+      const connectionStatus = peerConnections.has(uid) ? " âœ“" : "";
       
       el.innerHTML = `
         <span class="voice-participant__dot"></span>
@@ -1003,7 +1064,7 @@ groups/{groupId}/voice-calls/{callId} {
 
     isMicMuted = !isMicMuted;
     btnToggleMic.classList.toggle("is-muted", isMicMuted);
-    btnToggleMic.textContent = isMicMuted ? "🔊 Entstummen" : "🔇 Stummschalten";
+    btnToggleMic.textContent = isMicMuted ? "ðŸ”Š Entstummen" : "ðŸ”‡ Stummschalten";
   }
 
   // ============================================
@@ -1016,17 +1077,17 @@ groups/{groupId}/voice-calls/{callId} {
     if (initialized) return;
     initialized = true;
 
-    console.log("🔵 voice-chat.js initializing");
+    console.log("ðŸ”µ voice-chat.js initializing");
     await waitForFirebase();
 
     if (!auth || !db) {
-      console.error("❌ voice-chat.js: Firebase not ready");
+      console.error("âŒ voice-chat.js: Firebase not ready");
       return;
     }
 
     // Setup event listeners if DOM elements exist
     if (btnStartVoiceCall && btnEndVoiceCall) {
-      btnStartVoiceCall.addEventListener("click", () => {
+      btnStartVoiceCall.addEventListener("click", async () => {
         if (!window.__ECHTLUCKY_SELECTED_GROUP__) {
           window.notify?.show({
             type: "error",
@@ -1036,7 +1097,33 @@ groups/{groupId}/voice-calls/{callId} {
           });
           return;
         }
-        startVoiceCall(window.__ECHTLUCKY_SELECTED_GROUP__);
+
+        try {
+          const groupId = window.__ECHTLUCKY_SELECTED_GROUP__;
+
+          const callsRef = db.collection("groups").doc(groupId).collection("voice-calls");
+          const ringingSnap = await callsRef.where("status", "==", "ringing").limit(1).get();
+          if (!ringingSnap.empty) {
+            await joinVoiceCall(groupId, ringingSnap.docs[0].id);
+            return;
+          }
+
+          const activeSnap = await callsRef.where("status", "==", "active").limit(1).get();
+          if (!activeSnap.empty) {
+            await joinVoiceCall(groupId, activeSnap.docs[0].id);
+            return;
+          }
+
+          await startVoiceCall(groupId);
+        } catch (e) {
+          console.error("btnStartVoiceCall click error:", e);
+          window.notify?.show({
+            type: "error",
+            title: "Voice",
+            message: "Konnte nicht beitreten/Starten.",
+            duration: 4500
+          });
+        }
       });
 
       btnEndVoiceCall.addEventListener("click", endVoiceCall);
@@ -1063,6 +1150,7 @@ groups/{groupId}/voice-calls/{callId} {
 
     // Start incoming call listener
     startIncomingGroupCallWatcher();
+    refreshVoiceStartLabels().catch(() => {});
     // Push-Benachrichtigungen initialisieren
     initPushNotifications();
 
@@ -1073,7 +1161,7 @@ groups/{groupId}/voice-calls/{callId} {
       }
     });
 
-    console.log("✅ voice-chat.js setup complete");
+    console.log("âœ… voice-chat.js setup complete");
   }
 
   if (document.readyState === "loading") {
@@ -1095,5 +1183,6 @@ groups/{groupId}/voice-calls/{callId} {
     getPeerCount: () => peerConnections.size
   };
 
-  console.log("✅ voice-chat.js initialized with full WebRTC support");
+  console.log("âœ… voice-chat.js initialized with full WebRTC support");
 })();
+
