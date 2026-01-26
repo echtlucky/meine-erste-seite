@@ -1,4 +1,4 @@
-// js/auth-state.js
+﻿// js/auth-state.js
 // Single source of truth für Auth-State (1 Listener, 1 UI-Update)
 // - Works with Firebase compat auth (window.auth)
 // - Handles header injected via fetch with "echtlucky:header-ready"
@@ -270,3 +270,4 @@
     init();
   }
 })();
+

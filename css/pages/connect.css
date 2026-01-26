@@ -733,20 +733,29 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+  padding-bottom: 0.5rem;
 }
 
 .message {
+  max-width: min(520px, 92%);
   padding: 0.8rem;
   background: rgba(0, 255, 136, 0.08);
   border-radius: 8px;
   border-left: 3px solid var(--accent);
 }
 
+.message.is-mine {
+  background: rgba(88, 101, 242, 0.14);
+  border-left-color: rgba(88, 101, 242, 0.9);
+  align-self: flex-end;
+}
+
+.message-text {
+  line-height: 1.35;
+}
+
 .message-author {
-  font-weight: 600;
-  color: var(--accent);
-  font-size: 0.9rem;
-  margin-bottom: 0.3rem;
+  display: none;
 }
 
 .message-text {
@@ -756,9 +765,10 @@ input:focus, select:focus, textarea:focus {
 }
 
 .message-time {
-  font-size: 0.8rem;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  margin-top: 0.3rem;
+  text-align: right;
 }
 
 .chat-input-area {
@@ -1031,7 +1041,8 @@ input:focus, select:focus, textarea:focus {
   animation: settingsModalFadeIn 0.25s ease;
 }
 
-.group-settings-modal.show {
+.group-settings-modal.show,
+.group-settings-modal.is-open {
   display: flex;
   animation: settingsModalFadeIn 0.25s ease;
 }

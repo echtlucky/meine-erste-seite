@@ -42,9 +42,33 @@ service cloud.firestore {
       allow create: if request.auth != null && 
                        request.resource.data.createdBy == request.auth.uid;
       
-      // Update/Delete: group creator or admin only
+      // Update/Delete: group creator, group admin, or global admin.
+      // Members may also leave a group (remove themselves) with a constrained update.
       allow update, delete: if request.auth != null && 
-                              (request.auth.uid == resource.data.createdBy || isAdmin());
+                              (isAdmin() || isGroupCreator() || isGroupAdmin() || canLeaveGroup());
+
+      function isGroupCreator() {
+        return request.auth != null && request.auth.uid == resource.data.createdBy;
+      }
+
+      function isGroupAdmin() {
+        return request.auth != null &&
+               ('roles' in resource.data) &&
+               (resource.data.roles[request.auth.uid] == 'admin');
+      }
+
+      // Allow a member to remove only themselves from the members array.
+      function canLeaveGroup() {
+        return request.auth != null &&
+               (request.auth.uid in resource.data.members) &&
+               // Only existing keys, and only "members" may change.
+               request.resource.data.keys().hasOnly(resource.data.keys()) &&
+               request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']) &&
+               // Must remove exactly one member (self), and must not add new members.
+               request.resource.data.members.size() == resource.data.members.size() - 1 &&
+               !(request.auth.uid in request.resource.data.members) &&
+               resource.data.members.hasAll(request.resource.data.members);
+      }
       
       // ==========================================
       // GROUP MESSAGES
