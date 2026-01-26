@@ -3,18 +3,68 @@
    Apple x Riot clean (darker)
 ========================= */
 
-/* Wichtig: body class = login-page */
-.login-page .auth-shell{
-  min-height: calc(100vh - 60px);
-  width: 100%;
-  padding: clamp(2rem, 4vw, 3.6rem);
-  position: relative;
-  isolation: isolate;
-
+/* Discord-Style Layout */
+.login-discord-shell {
+  max-width: 900px;
+  margin: 2.5rem auto 2rem auto;
+  padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: clamp(1.8rem, 3vw, 2.6rem);
+  gap: 1.5rem;
+}
+.discord-card {
+  background: #23272a;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
+  padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+  margin-bottom: 0;
+  color: #fff;
+}
+.login-hero-card {
+  background: linear-gradient(90deg, #5865f2 0%, #23272a 100%);
+  color: #fff;
+  box-shadow: 0 2px 16px 0 rgba(88,101,242,0.12);
+  padding: 2rem 2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.admin-stat {
+  background: #18191c;
+  border-radius: 0.8rem;
+  padding: 1.1rem 1.5rem;
+  min-width: 120px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.08);
+}
+.admin-stat__label {
+  font-size: 0.98rem;
+  color: #b9bbbe;
+}
+.admin-stat__value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0.3rem;
+  display: block;
+}
+.login-main-card {
+  margin-top: 0;
+}
+@media (max-width: 700px) {
+  .login-discord-shell {
+    padding: 0 0.3rem;
+  }
+  .login-hero-card {
+    padding: 1.2rem 0.7rem 1rem 0.7rem;
+  }
+  .discord-card {
+    padding: 1rem 0.7rem 0.7rem 0.7rem;
+  }
+  .admin-stat {
+    padding: 0.7rem 0.7rem;
+    min-width: 90px;
+  }
 }
 
 /* ===== Background ===== */

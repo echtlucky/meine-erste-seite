@@ -11,93 +11,76 @@
 </head>
 <body class="page-transition admin-page">
   <div id="header-placeholder"></div>
-  <main class="container admin-shell">
-    <section class="admin-hero">
-      <div class="admin-hero__content">
-        <div class="admin-badge"> echtlucky</div>
-        <h1 class="admin-title">Admin Panel</h1>
-        <p class="admin-subtitle">Management, Moderation & Statistiken</p>
-        <div id="adminStatus" class="admin-status-pill">Wird überprüft...</div>
+  <main class="admin-discord-shell">
+    <section class="discord-card admin-hero-card">
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <div style="width:56px;height:56px;border-radius:50%;background:#5865f2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:2rem;">
+          <i class="fa-solid fa-gear"></i>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:1.2rem;">Admin Panel</div>
+          <div style="color:#b9bbbe;font-size:0.98rem;">Management, Moderation & Statistiken</div>
+        </div>
+      </div>
+      <div style="margin-top:1.2rem;">
+        <span class="pill" id="adminStatus">Wird überprüft...</span>
       </div>
     </section>
-    <nav class="admin-nav">
-      <button class="admin-nav__btn is-active" data-tab="blog"><i class="fa-solid fa-blog"></i> Blog</button>
-      <button class="admin-nav__btn" data-tab="users"><i class="fa-solid fa-users"></i> Benutzer</button>
-      <button class="admin-nav__btn" data-tab="bans"><i class="fa-solid fa-ban"></i> Bans</button>
-      <button class="admin-nav__btn" data-tab="logs"><i class="fa-solid fa-file-lines"></i> Logs</button>
-      <button class="admin-nav__btn" data-tab="stats"><i class="fa-solid fa-chart-line"></i> Statistiken</button>
-      <button class="admin-nav__btn" data-tab="settings"><i class="fa-solid fa-gear"></i> Einstellungen</button>
+    <nav class="admin-discord-nav">
+      <button class="btn btn-secondary is-active" data-tab="blog"><i class="fa-solid fa-blog"></i> Blog</button>
+      <button class="btn btn-secondary" data-tab="users"><i class="fa-solid fa-users"></i> Benutzer</button>
+      <button class="btn btn-secondary" data-tab="bans"><i class="fa-solid fa-ban"></i> Bans</button>
+      <button class="btn btn-secondary" data-tab="logs"><i class="fa-solid fa-file-lines"></i> Logs</button>
+      <button class="btn btn-secondary" data-tab="stats"><i class="fa-solid fa-chart-line"></i> Statistiken</button>
+      <button class="btn btn-secondary" data-tab="settings"><i class="fa-solid fa-gear"></i> Einstellungen</button>
     </nav>
-    <section class="admin-content">
-      <!-- BLOG TAB -->
-      <div class="admin-tab is-active" data-tab="blog">
-        <div class="admin-card">
-          <div class="admin-card__header">
-            <h2 class="admin-card__title">📝 Blog verwalten</h2>
-            <button class="btn btn-primary btn-sm" id="newPostBtn"><i class="fa-solid fa-plus"></i> Neuer Beitrag</button>
+    <section class="admin-discord-content">
+      <div class="discord-card admin-tab is-active" data-tab="blog">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+          <h2>📝 Blog verwalten</h2>
+          <button class="btn btn-primary" id="newPostBtn"><i class="fa-solid fa-plus"></i> Neuer Beitrag</button>
+        </div>
+        <div id="post-list" class="admin-list"></div>
+      </div>
+      <div class="discord-card admin-tab" data-tab="users" style="display:none;">
+        <h2>👥 Benutzer verwalten</h2>
+        <div id="user-list" class="admin-list"></div>
+      </div>
+      <div class="discord-card admin-tab" data-tab="bans" style="display:none;">
+        <h2>⛔ Gesperrte Nutzer</h2>
+        <div class="admin-ban-form" style="margin-bottom:1.2rem;">
+          <input type="email" id="ban-email" class="admin-input" placeholder="user@example.com" />
+          <input type="text" id="ban-reason" class="admin-input" placeholder="Grund für Ban (optional)" />
+          <button class="btn btn-danger" id="banAddBtn"><i class="fa-solid fa-ban"></i> Bannen</button>
+        </div>
+        <div id="ban-list" class="admin-list"></div>
+      </div>
+      <div class="discord-card admin-tab" data-tab="logs" style="display:none;">
+        <h2>📋 Admin-Logs</h2>
+        <div id="logs-list" class="admin-list"></div>
+      </div>
+      <div class="discord-card admin-tab" data-tab="stats" style="display:none;">
+        <h2>📊 Übersicht</h2>
+        <div class="admin-stats" style="display:flex;gap:2rem;flex-wrap:wrap;">
+          <div class="admin-stat">
+            <span class="admin-stat__label">Nutzer</span>
+            <span class="admin-stat__value" id="stat-total-users">0</span>
           </div>
-          <div id="post-list" class="admin-list"></div>
+          <div class="admin-stat">
+            <span class="admin-stat__label">Blog-Posts</span>
+            <span class="admin-stat__value" id="stat-total-posts">0</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__label">Bans</span>
+            <span class="admin-stat__value" id="stat-total-bans">0</span>
+          </div>
         </div>
       </div>
-
-      <!-- USERS TAB -->
-      <div class="admin-tab" data-tab="users" style="display:none;">
-        <div class="admin-card">
-          <div class="admin-card__header">
-            <h2 class="admin-card__title">👥 Benutzer verwalten</h2>
-          </div>
-          <div id="user-list" class="admin-list"></div>
-        </div>
-      </div>
-
-      <!-- BANS TAB -->
-      <div class="admin-tab" data-tab="bans" style="display:none;">
-        <div class="admin-card">
-          <div class="admin-card__header">
-            <h2 class="admin-card__title">⛔ Gesperrte Nutzer</h2>
-          </div>
-          <div class="admin-ban-form">
-            <input type="email" id="ban-email" class="admin-input" placeholder="user@example.com" />
-            <input type="text" id="ban-reason" class="admin-input" placeholder="Grund für Ban (optional)" />
-            <button class="btn btn-danger btn-sm" id="banAddBtn"><i class="fa-solid fa-ban"></i> Bannen</button>
-          </div>
-          <div id="ban-list" class="admin-list"></div>
-        </div>
-      </div>
-
-      <!-- LOGS TAB -->
-      <div class="admin-tab" data-tab="logs" style="display:none;">
-        <div class="admin-card">
-          <div class="admin-card__header">
-            <h2 class="admin-card__title">📋 Admin-Logs</h2>
-          </div>
-          <div id="logs-list" class="admin-list"></div>
-        </div>
-      </div>
-
-      <!-- STATS TAB -->
-      <div class="admin-tab" data-tab="stats" style="display:none;">
-        <div class="admin-stats-grid">
-          <div class="admin-card">
-            <div class="admin-card__header">
-              <h2 class="admin-card__title">📊 Übersicht</h2>
-            </div>
-            <div class="admin-stats">
-              <div class="admin-stat">
-                <span class="admin-stat__label">Nutzer</span>
-                <span class="admin-stat__value" id="stat-total-users">0</span>
-              </div>
-              <div class="admin-stat">
-                <span class="admin-stat__label">Blog-Posts</span>
-                <span class="admin-stat__value" id="stat-total-posts">0</span>
-              </div>
-              <div class="admin-stat">
-                <span class="admin-stat__label">Bans</span>
-                <span class="admin-stat__value" id="stat-total-bans">0</span>
-              </div>
-            </div>
-          </div>
-          <div class="admin-card">
+    </section>
+  </main>
+  <div id="footer-placeholder"></div>
+</body>
+</html>
             <div class="admin-card__header">
               <h2 class="admin-card__title">🔥 Aktivität</h2>
             </div>

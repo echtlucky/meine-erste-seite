@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/login.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
 <body class="page-transition login-page">
@@ -19,135 +20,73 @@
 
       <div class="auth-grid">
 
-        <!-- Left: Visual / Content -->
-        <section class="auth-visual">
-          <div>
-            <div class="auth-badge">⚡ echtlucky • Competitive</div>
-
-            <h1>Willkommen zurück.</h1>
-
-            <p>
-              Log dich ein, join den Grind und bleib up-to-date bei Ballistic & Ranked.
-              Clean, schnell, ohne Drama.
-            </p>
-
-            <div class="bullets">
-              <div class="bullet">
-                <span class="dot"></span>
-                <div>
-                  <strong class="fw-820">Community</strong><br />
-                  <span class="hint">Scrims, Customs, VOD-Talk, Team-Suche.</span>
-                </div>
+        <main class="login-discord-shell">
+          <section class="discord-card login-hero-card">
+            <div style="display:flex;align-items:center;gap:1.5rem;">
+              <div style="width:56px;height:56px;border-radius:50%;background:#5865f2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:2rem;">
+                <i class="fa-solid fa-right-to-bracket"></i>
               </div>
-
-              <div class="bullet">
-                <span class="dot"></span>
-                <div>
-                  <strong class="fw-820">Blog</strong><br />
-                  <span class="hint">Updates, Guides, Insights — alles an einem Ort.</span>
-                </div>
-              </div>
-
-              <div class="bullet">
-                <span class="dot"></span>
-                <div>
-                  <strong class="fw-820">Account</strong><br />
-                  <span class="hint">Username, Admin-Features (wenn freigeschaltet).</span>
-                </div>
+              <div>
+                <div style="font-weight:700;font-size:1.2rem;">Willkommen zurück.</div>
+                <div style="color:#b9bbbe;font-size:0.98rem;">Log dich ein, join den Grind und bleib up-to-date bei Ballistic & Ranked. Clean, schnell, ohne Drama.</div>
               </div>
             </div>
-          </div>
-
-          <p class="hint hint--strong">
-            Tipp: Du kannst dich auch mit <strong class="fw-820">Username</strong> anmelden, wenn du einen gesetzt hast.
-          </p>
-        </section>
-
-        <!-- Right: Auth Card -->
-        <section class="auth-card">
-          <div class="auth-card__top">
-            <div class="tabs" role="tablist" aria-label="Auth Tabs">
-              <button class="tab active" id="tabLogin" type="button">Login</button>
-              <button class="tab" id="tabRegister" type="button">Registrieren</button>
+            <div style="margin-top:1.2rem;display:flex;gap:1.5rem;flex-wrap:wrap;">
+              <div class="admin-stat">
+                <span class="admin-stat__label"><i class="fa-solid fa-users"></i> Community</span>
+                <span class="admin-stat__value">Scrims, Customs, VOD-Talk, Team-Suche</span>
+              </div>
+              <div class="admin-stat">
+                <span class="admin-stat__label"><i class="fa-solid fa-blog"></i> Blog</span>
+                <span class="admin-stat__value">Updates, Guides, Insights</span>
+              </div>
+              <div class="admin-stat">
+                <span class="admin-stat__label"><i class="fa-solid fa-user"></i> Account</span>
+                <span class="admin-stat__value">Username, Admin-Features</span>
+              </div>
             </div>
-          </div>
-
-          <div class="auth-card__body">
-            <div id="msgBox" class="msg" style="display:none;"></div>
-
-            <!-- LOGIN FORM -->
-            <form id="loginForm">
-              <div class="field">
-                <label for="loginIdentifier">E-Mail oder Username</label>
-                <input
-                  id="loginIdentifier"
-                  class="input"
-                  type="text"
-                  autocomplete="username"
-                  placeholder="Nutzername: max1234 oder Email: maxmustermann@gmail.com"
-                  required
-                />
-                <div class="hint">Wenn du Username nutzt, wird er automatisch zu deiner E-Mail aufgelöst.</div>
-              </div>
-
-              <div class="field">
-                <label for="loginPassword">Passwort</label>
-                <input
-                  id="loginPassword"
-                  class="input"
-                  type="password"
-                  autocomplete="current-password"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-
-              <div class="row">
-                <a href="#" class="small-link" id="forgotPw">Passwort vergessen?</a>
-              </div>
-
-              <button class="btn-full" type="submit">Einloggen</button>
-
-              <div class="divider">oder</div>
-
-              <button class="btn-ghost" type="button" id="googleLoginBtn">
-                <span class="google-g">G</span> Mit Google anmelden
-              </button>
-            </form>
-
-            <!-- REGISTER FORM -->
-            <form id="registerForm" class="hidden">
-              <div class="field">
-                <label for="regUsername">Username</label>
-                <input
-                  id="regUsername"
-                  class="input"
-                  type="text"
-                  autocomplete="nickname"
-                  placeholder="z.B. echtlucky"
-                  required
-                />
-                <div class="hint">A-Z / 0-9 / _ / . / - • 3–20 Zeichen</div>
-              </div>
-
-              <div class="field">
-                <label for="regEmail">E-Mail</label>
-                <input
-                  id="regEmail"
-                  class="input"
-                  type="email"
-                  autocomplete="email"
-                  placeholder="name@email.de"
-                  required
-                />
-              </div>
-
-              <div class="field">
-                <label for="regPassword">Passwort</label>
-                <input
-                  id="regPassword"
-                  class="input"
-                  type="password"
+            <div style="margin-top:1.2rem;color:#b9bbbe;font-size:0.98rem;">
+              <i class="fa-solid fa-lightbulb"></i> Tipp: Du kannst dich auch mit <strong>Username</strong> anmelden, wenn du einen gesetzt hast.
+            </div>
+          </section>
+          <section class="discord-card login-main-card">
+            <div style="display:flex;align-items:center;justify-content:center;gap:1.5rem;">
+              <button class="btn btn-secondary is-active" id="tabLogin" type="button"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+              <button class="btn btn-secondary" id="tabRegister" type="button"><i class="fa-solid fa-user-plus"></i> Registrieren</button>
+            </div>
+            <div style="margin-top:2rem;">
+              <div id="msgBox" class="msg" style="display:none;"></div>
+              <form id="loginForm">
+                <div class="field">
+                  <label for="loginIdentifier">E-Mail oder Username</label>
+                  <input id="loginIdentifier" class="input" type="text" autocomplete="username" placeholder="Nutzername: max1234 oder Email: maxmustermann@gmail.com" required />
+                  <div class="hint">Wenn du Username nutzt, wird er automatisch zu deiner E-Mail aufgelöst.</div>
+                </div>
+                <div class="field">
+                  <label for="loginPassword">Passwort</label>
+                  <input id="loginPassword" class="input" type="password" autocomplete="current-password" placeholder="••••••••" required />
+                </div>
+                <div class="field field--actions" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                  <button class="btn btn-primary" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+                  <a href="#" class="link forgot-link" id="forgotLink"><i class="fa-solid fa-key"></i> Passwort vergessen?</a>
+                </div>
+              </form>
+              <form id="registerForm" style="display:none;">
+                <div class="field">
+                  <label for="registerEmail">E-Mail</label>
+                  <input id="registerEmail" class="input" type="email" autocomplete="email" placeholder="Deine E-Mail" required />
+                </div>
+                <div class="field">
+                  <label for="registerPassword">Passwort</label>
+                  <input id="registerPassword" class="input" type="password" autocomplete="new-password" placeholder="••••••••" required />
+                </div>
+                <div class="field field--actions" style="display:flex;align-items:center;justify-content:flex-end;gap:1rem;">
+                  <button class="btn btn-primary" type="submit"><i class="fa-solid fa-user-plus"></i> Registrieren</button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </main>
                   autocomplete="new-password"
                   placeholder="mind. 6 Zeichen"
                   required

@@ -4,54 +4,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ranked Challenge | echtlucky</title>
-
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/ranked.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-
-<body class="page-transition">
+<body class="page-transition ranked-page">
   <div id="header-placeholder"></div>
-
-  <main class="ranked-wrap">
-    <section class="ranked-hero">
-      <div>
-        <div class="ranked-badge">⚡ echtlucky • Competitive</div>
-        <h1 class="ranked-title">Ranked Challenge</h1>
-        <p class="ranked-sub">
-          Kleine Tasks, großer Effekt. Mach die Daily, halt die Streak, bleib im Grind.
-        </p>
+  <main class="ranked-discord-shell">
+    <section class="discord-card ranked-hero-card">
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <div style="width:56px;height:56px;border-radius:50%;background:#5865f2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:2rem;">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:1.2rem;">Ranked Challenge</div>
+          <div style="color:#b9bbbe;font-size:0.98rem;">Kleine Tasks, großer Effekt. Mach die Daily, halt die Streak, bleib im Grind.</div>
+        </div>
       </div>
-
-      <div class="ranked-stats">
-        <div class="stat">
-          <div class="stat-label">Streak</div>
-          <div class="stat-value" id="streakValue">0</div>
+      <div style="margin-top:1.2rem;display:flex;gap:1.5rem;flex-wrap:wrap;">
+        <div class="admin-stat">
+          <span class="admin-stat__label">Streak</span>
+          <span class="admin-stat__value" id="streakValue">0</span>
         </div>
-        <div class="stat">
-          <div class="stat-label">XP</div>
-          <div class="stat-value" id="xpValue">0</div>
+        <div class="admin-stat">
+          <span class="admin-stat__label">XP</span>
+          <span class="admin-stat__value" id="xpValue">0</span>
         </div>
-        <div class="stat">
-          <div class="stat-label">Level</div>
-          <div class="stat-value" id="levelValue">1</div>
+        <div class="admin-stat">
+          <span class="admin-stat__label">Level</span>
+          <span class="admin-stat__value" id="levelValue">1</span>
         </div>
       </div>
     </section>
-
-    <section class="ranked-card">
-      <header class="ranked-card__head">
+    <section class="discord-card ranked-main-card">
+      <header style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
         <div>
-          <h2 class="ranked-card__title">Heute</h2>
-          <p class="ranked-card__hint" id="todayLabel">Lädt…</p>
+          <h2>Heute</h2>
+          <p style="color:#b9bbbe;font-size:0.98rem;" id="todayLabel">Lädt…</p>
         </div>
-
-        <div class="ranked-actions">
-          <button class="btn btn-ghost" id="rerollBtn" type="button">Reroll</button>
-          <button class="btn btn-primary" id="resetBtn" type="button">Reset</button>
+        <div style="display:flex;gap:0.7rem;">
+          <button class="btn btn-ghost" id="rerollBtn" type="button"><i class="fa-solid fa-dice"></i> Reroll</button>
+          <button class="btn btn-primary" id="resetBtn" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
         </div>
       </header>
-
       <div class="ranked-progress">
         <div class="ranked-progress__bar" id="progressBar"></div>
       </div>
@@ -59,26 +55,20 @@
         <span id="progressText">0/3 erledigt</span>
         <span id="xpText">+0 XP</span>
       </div>
-
       <div class="ranked-list" id="taskList"></div>
-
-      <footer class="ranked-footer">
-        <div class="ranked-footer__left">
+      <footer style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.5rem;">
+        <div style="display:flex;align-items:center;gap:0.6rem;color:#b9bbbe;font-size:0.98rem;">
           <span class="dot"></span>
           <span>Alles wird lokal gespeichert (kein Login nötig).</span>
         </div>
-        <button class="btn btn-ghost" id="completeBtn" type="button">Day complete ✅</button>
+        <button class="btn btn-ghost" id="completeBtn" type="button"><i class="fa-solid fa-check"></i> Day complete</button>
       </footer>
     </section>
   </main>
-
   <div id="footer-placeholder"></div>
-
-  <!-- Firebase SDKs (optional, aber bei dir Standard) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
   <script src="firebase.js"></script>
   <script src="js/auth-state.js"></script>
   <script src="js/menu.js"></script>
@@ -86,10 +76,8 @@
   <script src="js/ranked.js"></script>
   <script src="js/notify.js"></script>
   <script src="js/modal-dialog.js"></script>
-
   <script>
     document.body.classList.add('loaded');
-
     fetch('header.html')
       .then(r => r.text())
       .then(html => {

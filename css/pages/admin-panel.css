@@ -52,169 +52,140 @@ body.admin-page{
 }
 
 .admin-subtitle{
-  margin: 0;
-  color: var(--text-soft);
-  opacity: .9;
-}
-
-.admin-hero__right{
-  display: flex;
-  flex-direction: column;
-  gap: .6rem;
-  align-items: flex-end;
-}
-
-.admin-statusline{
-  display: flex;
-  gap: .7rem;
-  align-items: center;
-  padding: .55rem .9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(0,255,136,0.16);
-  background: rgba(255,255,255,0.03);
-}
-
-.admin-statusline__label{
-  color: var(--text-muted);
-  font-size: .9rem;
-}
-
-.admin-statusline__value{
-  color: var(--accent);
-  font-weight: 800;
-  letter-spacing: -0.3px;
-}
-
-/* Status message */
-.admin-status{
-  padding: .6rem .9rem;
-  border-radius: 14px;
-  border: 1px solid rgba(0,255,136,0.14);
-  background: rgba(0,0,0,0.35);
-  color: var(--text-soft);
-  font-size: .95rem;
-  min-height: 2.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  text-align: right;
-  max-width: 520px;
-}
-
-.admin-status--success{
-  border-color: rgba(0,255,136,0.26);
-  background: rgba(0,255,136,0.06);
-}
-
-.admin-status--error{
-  border-color: rgba(255,51,102,0.28);
-  background: rgba(255,51,102,0.06);
-}
-
-.admin-status--info{
-  opacity: .92;
-}
-
-/* Tabs (horizontal nav) */
-.admin-tabs{
-  margin-top: 1rem;
-
-  display: flex;
-  align-items: center;
-  gap: .65rem;
-  flex-wrap: wrap;
-
-  padding: .9rem 1rem;
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(0,255,136,0.14);
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(12px);
-}
-
-.admin-tabbtn{
-  appearance: none;
-  border: 1px solid rgba(0,255,136,0.14);
-  background: rgba(255,255,255,0.04);
-  color: var(--text-soft);
-
-  padding: .65rem .9rem;
-  border-radius: 999px;
-
-  display: inline-flex;
-  align-items: center;
-  gap: .55rem;
-
-  font-weight: 700;
-  font-size: .95rem;
-  cursor: pointer;
-
-  transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
-}
-
-.admin-tabbtn i{
-  font-size: 1rem;
-  opacity: .9;
-}
-
-.admin-tabbtn:hover{
-  transform: translateY(-1px);
-  background: rgba(0,255,136,0.08);
-  border-color: rgba(0,255,136,0.22);
-  color: var(--accent);
-}
-
-.admin-tabbtn.is-active{
-  background: rgba(0,255,136,0.14);
-  border-color: rgba(0,255,136,0.28);
-  color: var(--accent);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
-}
-
-.admin-tabs__spacer{
-  flex: 1 1 auto;
-}
-
-.admin-action{
-  border-radius: 999px !important;
-  padding: .75rem 1rem !important;
-  font-size: .95rem !important;
-}
-
-/* Content */
-.admin-content{
-  margin-top: 1rem;
-}
-
-/* Tabs content */
-.admin-tab{ display: none; }
-.admin-tab.is-active{ display: block; }
-
-/* Card */
-.admin-card{
-  padding: clamp(1.2rem, 2.2vw, 1.8rem);
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(0,255,136,0.16);
-  background: linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,0,0,0.62));
-  backdrop-filter: blur(10px);
-  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
-}
-
-.admin-card__head{
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.1rem;
-}
-
-.admin-card__title{
-  margin: 0;
-  color: var(--accent);
-  letter-spacing: -0.6px;
-  font-size: 1.5rem;
-}
-
-.admin-card__hint{
+  /* Discord-Style Admin Panel */
+  .admin-discord-shell {
+    max-width: 900px;
+    margin: 2.5rem auto 2rem auto;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .discord-card {
+    background: #23272a;
+    border-radius: 1.2rem;
+    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
+    padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+    margin-bottom: 0;
+    color: #fff;
+  }
+  .admin-hero-card {
+    background: linear-gradient(90deg, #5865f2 0%, #23272a 100%);
+    color: #fff;
+    box-shadow: 0 2px 16px 0 rgba(88,101,242,0.12);
+    padding: 2rem 2rem 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .pill {
+    background: #23272a;
+    color: #fff;
+    font-size: 0.98rem;
+    padding: 0.3rem 1.1rem;
+    border-radius: 1.2rem;
+    display: inline-block;
+  }
+  .admin-discord-nav {
+    display: flex;
+    gap: 0.7rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .admin-discord-nav .btn {
+    background: #23272a;
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.3rem;
+    border-radius: 0.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .admin-discord-nav .btn.is-active,
+  .admin-discord-nav .btn:hover {
+    background: #5865f2;
+    color: #fff;
+  }
+  .admin-discord-content {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .admin-tab {
+    display: none;
+  }
+  .admin-tab.is-active {
+    display: block;
+  }
+  .admin-list {
+    margin-top: 0.7rem;
+  }
+  .admin-ban-form {
+    display: flex;
+    gap: 0.7rem;
+    margin-bottom: 1.2rem;
+  }
+  .admin-input {
+    background: #18191c;
+    color: #fff;
+    border: 1px solid #23272a;
+    border-radius: 0.7rem;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.15s;
+  }
+  .admin-input:focus {
+    border: 1px solid #5865f2;
+  }
+  .admin-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .admin-stat {
+    background: #18191c;
+    border-radius: 0.8rem;
+    padding: 1.1rem 1.5rem;
+    min-width: 120px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.08);
+  }
+  .admin-stat__label {
+    font-size: 0.98rem;
+    color: #b9bbbe;
+  }
+  .admin-stat__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 0.3rem;
+    display: block;
+  }
+  @media (max-width: 700px) {
+    .admin-discord-shell {
+      padding: 0 0.3rem;
+    }
+    .admin-hero-card {
+      padding: 1.2rem 0.7rem 1rem 0.7rem;
+    }
+    .discord-card {
+      padding: 1rem 0.7rem 0.7rem 0.7rem;
+    }
+    .admin-discord-nav {
+      gap: 0.3rem;
+    }
+    .admin-ban-form {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .admin-stats {
+      gap: 0.7rem;
+    }
+  }
   margin: .35rem 0 0 0;
   color: var(--text-muted);
   font-size: .95rem;

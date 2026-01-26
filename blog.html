@@ -1,102 +1,4 @@
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blog | echtlucky</title>
-
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/pages/blog.css" />
-</head>
-
-<body class="page-transition">
-
-  <!-- Header (extern) -->
-  <div id="header-placeholder"></div>
-
-  <main class="container">
-    <div class="page-head">
-      <h1>Blog</h1>
-      <p>Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind – clean, kurz, auf den Punkt.</p>
-    </div>
-
-    <div class="blog-toolbar">
-      <div class="pill" id="postCountPill">📝 0 Posts</div>
-      <div class="hint">Tipp: Klick auf „Lesen“, um den Beitrag im Pop-Up zu öffnen.</div>
-    </div>
-
-    <div id="blog-list" class="blog-list">
-      <div class="loading-spinner">
-        <div class="spinner"></div>
-        <p class="loading-text">Posts werden geladen...</p>
-      </div>
-    </div>
-
-    <div class="load-more-wrap">
-      <a href="#" class="btn load-more" id="loadMoreBtn">Mehr laden</a>
-    </div>
-  </main>
-
-  <!-- Modal -->
-  <div id="postModal" class="modal" aria-hidden="true">
-    <div class="modal-content">
-      <span class="modal-close" id="modalCloseBtn">×</span>
-      <h2 id="post-title"></h2>
-      <p class="meta" id="post-meta"></p>
-      <div class="post-content" id="post-content"></div>
-      <button class="delete-btn" id="delete-post-btn">Post löschen</button>
-    </div>
-  </div>
-
-  <!-- Footer (extern) -->
-  <div id="footer-placeholder"></div>
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
-  <!-- Dein Firebase Setup -->
-  <script src="firebase.js"></script>
-  <script src="js/auth-state.js"></script>
-  <script src="js/menu.js"></script>
-  <script src="js/legal-modal.js"></script>
-  <script src="js/login.js"></script>
-  <script src="js/notify.js"></script>
-  <script src="js/modal-dialog.js"></script>
-
-  <script>
-    document.body.classList.add('loaded');
-
-    // Header + Footer laden (mit cache-buster)
-    fetch('header.html?v=' + Date.now())
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-        initHeaderScripts();
-        initSmartHeaderScroll();
-      });
-
-    fetch('footer.html?v=' + Date.now())
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      });
-
-    // ===== Settings
-    const ADMIN_EMAIL = "lucassteckel04@gmail.com";
-    const PAGE_SIZE = 6;
-
-    // ===== State
-    let lastDoc = null;
-    let hasMore = true;
-    let loading = false;
-    let currentPostId = null;
-    let canDelete = false;
-    let totalRendered = 0;
-
-    // ===== DOM
-    const blogList = document.getElementById('blog-list');
+...existing code...
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -106,17 +8,25 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/blog.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body class="page-transition blog-page">
   <div id="header-placeholder"></div>
   <main class="blog-discord-shell">
     <section class="discord-card blog-head-card">
-      <h2>Blog</h2>
-      <p>Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind – clean, kurz, auf den Punkt.</p>
+      <div style="display:flex;align-items:center;gap:1.2rem;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#5865f2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">
+          <i class="fa-solid fa-blog"></i>
+        </div>
+        <div>
+          <h2 style="margin:0;">Blog</h2>
+          <p style="color:#b9bbbe;font-size:0.98rem;margin:0;">Meine Gedanken, Erfahrungen und Tipps zum Ballistic- und Ranked-Grind – clean, kurz, auf den Punkt.</p>
+        </div>
+      </div>
     </section>
-    <section class="discord-card blog-toolbar-card">
-      <div class="pill" id="postCountPill">📝 0 Posts</div>
-      <div class="hint">Tipp: Klick auf „Lesen“, um den Beitrag im Pop-Up zu öffnen.</div>
+    <section class="discord-card blog-toolbar-card" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div class="pill" id="postCountPill"><i class="fa-solid fa-pen-nib"></i> 0 Posts</div>
+      <div class="hint"><i class="fa-solid fa-lightbulb"></i> Tipp: Klick auf „Lesen“, um den Beitrag im Pop-Up zu öffnen.</div>
     </section>
     <section class="blog-list" id="blog-list">
       <div class="loading-spinner">
@@ -124,8 +34,8 @@
         <p class="loading-text">Posts werden geladen...</p>
       </div>
     </section>
-    <section class="blog-loadmore-card">
-      <a href="#" class="btn load-more" id="loadMoreBtn">Mehr laden</a>
+    <section class="blog-loadmore-card" style="text-align:center;">
+      <a href="#" class="btn load-more" id="loadMoreBtn"><i class="fa-solid fa-angles-down"></i> Mehr laden</a>
     </section>
   </main>
   <div id="postModal" class="modal" aria-hidden="true">

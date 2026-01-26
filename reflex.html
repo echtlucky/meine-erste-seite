@@ -4,81 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reflex Lab | echtlucky</title>
-
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/reflex.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-
 <body class="page-transition reflex-page">
   <div id="header-placeholder"></div>
-
-  <main class="reflex-wrap">
-    <!-- HERO -->
-    <section class="reflex-hero">
-      <div class="reflex-hero__left">
-        <div class="reflex-badge">⚡ echtlucky • Reflex Lab</div>
-        <h1 class="reflex-title">Reflex Lab</h1>
-        <p class="reflex-sub">
-          Targets klicken → Zeit messen → Rating. Crosshair only im Spiel.
-        </p>
+  <main class="reflex-discord-shell">
+    <section class="discord-card reflex-hero-card">
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <div style="width:56px;height:56px;border-radius:50%;background:#43e97b;color:#23272a;display:flex;align-items:center;justify-content:center;font-size:2rem;">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:1.2rem;">Reflex Lab</div>
+          <div style="color:#b9bbbe;font-size:0.98rem;">Targets klicken → Zeit messen → Rating. Crosshair only im Spiel.</div>
+        </div>
       </div>
-
-      <div class="reflex-hero__right">
-        <div class="reflex-miniStats">
-          <div class="miniStat">
-            <div class="miniStat__label">Best</div>
-            <div class="miniStat__value" id="bestValue">—</div>
-          </div>
-          <div class="miniStat">
-            <div class="miniStat__label">Avg</div>
-            <div class="miniStat__value" id="avgValue">—</div>
-          </div>
-          <div class="miniStat">
-            <div class="miniStat__label">Rating</div>
-            <div class="miniStat__value" id="ratingValue">—</div>
-          </div>
+      <div style="margin-top:1.2rem;display:flex;gap:1.5rem;flex-wrap:wrap;">
+        <div class="admin-stat">
+          <span class="admin-stat__label">Best</span>
+          <span class="admin-stat__value" id="bestValue">—</span>
+        </div>
+        <div class="admin-stat">
+          <span class="admin-stat__label">Avg</span>
+          <span class="admin-stat__value" id="avgValue">—</span>
+        </div>
+        <div class="admin-stat">
+          <span class="admin-stat__label">Rating</span>
+          <span class="admin-stat__value" id="ratingValue">—</span>
         </div>
       </div>
     </section>
-
-    <!-- MAIN CARD -->
-    <section class="reflex-card">
-      <header class="reflex-card__head">
+    <section class="discord-card reflex-main-card">
+      <header style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
         <div>
-          <h2 class="reflex-card__title">Reflex Games</h2>
-          <p class="reflex-card__hint">
-            Start öffnet ein Fullscreen-Spiel. Im Spiel ist der Cursor aus — nur Crosshair.
-          </p>
+          <h2>Reflex Games</h2>
+          <p style="color:#b9bbbe;font-size:0.98rem;">Start öffnet ein Fullscreen-Spiel. Im Spiel ist der Cursor aus — nur Crosshair.</p>
         </div>
-
-        <div class="reflex-actions">
-          <button class="btn btn-ghost" id="btnHow" type="button">How</button>
-          <button class="btn btn-primary" id="btnStart" type="button">Start</button>
+        <div style="display:flex;gap:0.7rem;">
+          <button class="btn btn-ghost" id="btnHow" type="button"><i class="fa-solid fa-question"></i> How</button>
+          <button class="btn btn-primary" id="btnStart" type="button"><i class="fa-solid fa-play"></i> Start</button>
         </div>
       </header>
-
-      <!-- Modes -->
       <div class="reflex-modes" role="tablist" aria-label="Reflex Modes">
-        <button class="mode is-active" data-mode="reaction" type="button">Reaction</button>
-        <button class="mode" data-mode="flick" type="button">Flick</button>
-        <button class="mode" data-mode="precision" type="button">Precision</button>
+        <button class="mode is-active" data-mode="reaction" type="button"><i class="fa-solid fa-bolt"></i> Reaction</button>
+        <button class="mode" data-mode="flick" type="button"><i class="fa-solid fa-crosshairs"></i> Flick</button>
+        <button class="mode" data-mode="precision" type="button"><i class="fa-solid fa-bullseye"></i> Precision</button>
       </div>
-
-      <!-- Controls (inedinandergreifend) -->
       <div class="reflex-controls" aria-label="Game Settings">
         <div class="ctl ctl--wide">
           <div class="ctl-label">
             <strong>Targets</strong>
             <span>Wie viele Ziele pro Run</span>
           </div>
-
           <div class="ctl-pill ctl-pill--range">
             <input id="cfgTargets" class="range-mini" type="range" min="5" max="30" step="1" value="15" />
             <span class="ctl-value" id="cfgTargetsVal">15</span>
           </div>
         </div>
-
         <div class="ctl">
           <div class="ctl-label">
             <strong>Size</strong>
@@ -91,7 +76,6 @@
             <button class="seg" data-size="small" type="button">S</button>
           </div>
         </div>
-
         <div class="ctl">
           <div class="ctl-label">
             <strong>Spawn</strong>
