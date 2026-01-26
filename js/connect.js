@@ -31,6 +31,8 @@
   const btnEndVoice = document.getElementById("btnEndVoice");
   const groupTabs = document.querySelectorAll(".tab-btn");
   const tabContents = document.querySelectorAll(".tab-content");
+  const btnDeleteGroup = document.getElementById("btnDeleteGroup");
+  const btnLeaveGroup = document.getElementById("btnLeaveGroup");
 
   // ============================================
   // SETUP EVENT LISTENERS
@@ -64,10 +66,22 @@
       btnEndVoice.addEventListener("click", endVoiceCall);
     }
 
+    // Settings buttons
+    if (btnDeleteGroup) {
+      btnDeleteGroup.addEventListener("click", deleteGroup);
+    }
+    if (btnLeaveGroup) {
+      btnLeaveGroup.addEventListener("click", leaveGroup);
+    }
+
     // Listen to group selection changes (from connect-minimal.js)
     window.addEventListener("echtlucky:group-selected", (e) => {
       selectedGroupId = e.detail?.groupId;
       if (selectedGroupId) {
+        // Enable message input when group selected
+        if (messageInput) messageInput.disabled = false;
+        if (btnSendMessage) btnSendMessage.disabled = false;
+        
         loadGroupMessages();
         loadGroupMembers();
       }
@@ -271,6 +285,80 @@
     });
 
     window.dispatchEvent(new CustomEvent("echtlucky:voice-end"));
+  }
+
+  // ============================================
+  // GROUP SETTINGS
+  // ============================================
+
+  function deleteGroup() {
+    if (!selectedGroupId || !auth.currentUser) return;
+
+    const confirmed = confirm("Bist du sicher? Die Gruppe wird gelöscht (alle Daten!)");
+    if (!confirmed) return;
+
+    try {
+      db.collection("groups")
+        .doc(selectedGroupId)
+        .delete()
+        .then(() => {
+          window.notify?.show({
+            type: "success",
+            title: "Gruppe gelöscht",
+            message: "Deine Gruppe wurde gelöscht",
+            duration: 3000
+          });
+          selectedGroupId = null;
+          document.getElementById("selectedGroupSection").style.display = "none";
+          // Reload groups list
+          window.dispatchEvent(new CustomEvent("echtlucky:reload-groups"));
+        })
+        .catch((err) => {
+          window.notify?.show({
+            type: "error",
+            title: "Fehler",
+            message: "Gruppe konnte nicht gelöscht werden: " + err.message,
+            duration: 4000
+          });
+        });
+    } catch (err) {
+      console.error("Delete group error:", err);
+    }
+  }
+
+  function leaveGroup() {
+    if (!selectedGroupId || !auth.currentUser) return;
+
+    try {
+      const groupRef = db.collection("groups").doc(selectedGroupId);
+      
+      groupRef
+        .update({
+          members: db.FieldValue.arrayRemove(auth.currentUser.uid)
+        })
+        .then(() => {
+          window.notify?.show({
+            type: "success",
+            title: "Gruppe verlassen",
+            message: "Du hast die Gruppe verlassen",
+            duration: 3000
+          });
+          selectedGroupId = null;
+          document.getElementById("selectedGroupSection").style.display = "none";
+          // Reload groups list
+          window.dispatchEvent(new CustomEvent("echtlucky:reload-groups"));
+        })
+        .catch((err) => {
+          window.notify?.show({
+            type: "error",
+            title: "Fehler",
+            message: "Fehler beim Verlassen: " + err.message,
+            duration: 4000
+          });
+        });
+    } catch (err) {
+      console.error("Leave group error:", err);
+    }
   }
 
   // ============================================

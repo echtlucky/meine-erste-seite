@@ -246,6 +246,57 @@ main{ flex:1; }
   transform: translateY(-1px);
 }
 
+/* Live/Connect Button */
+.nav-live{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap: 0.4rem;
+
+  color: #fff;
+  font-weight: 700;
+  text-decoration:none;
+  font-size: 0.85rem;
+
+  padding: 0.48rem 0.85rem;
+  border-radius: 8px;
+
+  border: 1px solid rgba(255,0,0,0.4);
+  background: rgba(255,0,0,0.08);
+
+  transition: background .18s ease, transform .14s ease, border-color .18s ease, box-shadow .18s ease;
+  cursor:pointer !important;
+  user-select:none;
+}
+
+.nav-live:hover{
+  background: rgba(255,0,0,0.15);
+  border-color: rgba(255,0,0,0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(255,0,0,0.3);
+}
+
+/* Live Status Dot */
+.live-dot{
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff0000;
+  display: inline-block;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 4px #ff0000;
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 8px rgba(255,0,0,0.5);
+  }
+}
+
 /* Dropdown */
 .user-dropdown-wrapper{ position:relative; display:flex; align-items:center; }
 
@@ -445,6 +496,24 @@ main{ flex:1; }
   background: rgba(255,255,255,0.05);
   color: var(--text);
   border: 1px solid rgba(0,255,136,0.14);
+}
+
+.btn.btn-danger{
+  background: rgba(255,50,50,0.85);
+  color:#fff;
+  border: 1px solid rgba(255,0,0,0.3);
+}
+
+.btn.btn-danger:hover{
+  background: rgba(255,80,80,0.95);
+  filter: brightness(1.1);
+}
+
+.btn.btn-sm{
+  padding: 0.56rem 1.05rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border-radius: 12px;
 }
 
 .discord-btn{

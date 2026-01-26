@@ -319,5 +319,10 @@
     updateAuthStatus();
   });
 
+  // Listen to reload-groups event (from connect.js when group is deleted/left)
+  window.addEventListener("echtlucky:reload-groups", () => {
+    loadGroups();
+  });
+
   console.log("✅ connect-minimal.js initialized");
 })();

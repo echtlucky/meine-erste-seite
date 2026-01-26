@@ -81,23 +81,23 @@
       </div>
 
       <!-- CHAT TAB -->
-      <div class="tab-content is-active" data-tab="chat">
+      <div class="tab-content is-active" data-tab="chat" id="chat-content">
         <div class="chat-box">
           <div class="messages-list" id="messagesList"></div>
           <div class="chat-input-area">
-            <input type="text" id="messageInput" class="message-input" placeholder="Nachricht..." disabled />
-            <button class="btn btn-primary btn-sm" id="btnSendMessage" disabled>Senden</button>
+            <input type="text" id="messageInput" class="message-input" placeholder="Nachricht..." />
+            <button class="btn btn-primary btn-sm" id="btnSendMessage">Senden</button>
           </div>
         </div>
       </div>
 
       <!-- MEMBERS TAB -->
-      <div class="tab-content" data-tab="members">
+      <div class="tab-content" data-tab="members" id="members-content">
         <div class="members-grid" id="membersList"></div>
       </div>
 
       <!-- VOICE TAB -->
-      <div class="tab-content" data-tab="voice">
+      <div class="tab-content" data-tab="voice" id="voice-content">
         <div class="voice-section">
           <div class="voice-status" id="voiceStatus">Nicht im Call</div>
           <div class="voice-buttons">
@@ -109,7 +109,7 @@
       </div>
 
       <!-- SETTINGS TAB -->
-      <div class="tab-content" data-tab="settings">
+      <div class="tab-content" data-tab="settings" id="settings-content">
         <div class="settings-section">
           <h3>Gruppeneinstellungen</h3>
           <div class="setting-item">
@@ -117,7 +117,8 @@
             <input type="text" id="groupLevel" disabled />
           </div>
           <div class="setting-item">
-            <button class="btn btn-secondary" id="btnLeaveGroup">Gruppe verlassen</button>
+            <button class="btn btn-danger" id="btnDeleteGroup">🗑️ Gruppe löschen</button>
+            <button class="btn btn-secondary" id="btnLeaveGroup">👋 Gruppe verlassen</button>
           </div>
         </div>
       </div>
