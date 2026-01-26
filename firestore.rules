@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // USERS COLLECTION
+    // ==========================================
+    match /users/{userId} {
+      // Anyone can read user data (for online friends, profiles)
+      allow read: if true;
+      
+      // Users can only write their own data
+      allow write: if request.auth != null && request.auth.uid == userId;
+      
+      // Admins can read and write all user data
+      allow read, write: if isAdmin();
+    }
+    
+    // ==========================================
+    // GROUPS COLLECTION (Global)
+    // ==========================================
+    match /groups/{groupId} {
+      // Read: user must be a member of the group OR admin
+      allow read: if request.auth != null && 
+                     (request.auth.uid in resource.data.members || isAdmin());
+      
+      // Create: authenticated users can create groups
+      allow create: if request.auth != null;
+      
+      // Update/Delete: group creator or admin only
+      allow update, delete: if request.auth != null && 
+                              (request.auth.uid == resource.data.createdBy || isAdmin());
+      
+      // ==========================================
+      // GROUP MESSAGES
+      // ==========================================
+      match /messages/{messageId} {
+        // Read: members of parent group can read
+        allow read: if request.auth != null && 
+                       request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+        
+        // Create: members can add messages
+        allow create: if request.auth != null && 
+                        request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+        
+        // Delete: message author or admin can delete
+        allow delete: if request.auth != null && 
+                        (request.auth.uid == resource.data.authorUid || isAdmin());
+      }
+      
+      // ==========================================
+      // VOICE CALLS
+      // ==========================================
+      match /voice-calls/{callId} {
+        // Read/Write: group members only
+        allow read, write: if request.auth != null && 
+                             request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+        
+        // Subcollections for signaling
+        match /offers/{offerId} {
+          allow read, write: if request.auth != null && 
+                               request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+        }
+        
+        match /answers/{answerId} {
+          allow read, write: if request.auth != null && 
+                               request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+        }
+        
+        match /ice-candidates/{candidateId} {
+          allow read, write: if request.auth != null && 
+                               request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+        }
+      }
+    }
+    
+    // ==========================================
+    // PRESENCE COLLECTION (for online status tracking)
+    // ==========================================
+    match /presence/{userId} {
+      // Users can read any presence (for online friends list)
+      allow read: if true;
+      
+      // Users can only write their own presence
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+    function isAdmin() {
+      return request.auth != null && 
+             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+              request.auth.email == 'lucassteckel04@gmail.com');
+    }
+  }
+}

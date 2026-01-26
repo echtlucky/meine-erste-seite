@@ -46,11 +46,11 @@
   const voiceCallPanel = null; // Not used in new layout
   const voiceStatus = document.getElementById("voiceStatus");
   const voiceParticipants = document.getElementById("voiceParticipants");
-  const btnStartVoiceCall = document.getElementById("btnStartVoiceCall");
-  const btnEndVoiceCall = document.getElementById("btnEndVoiceCall");
+  const btnStartVoiceCall = document.getElementById("btnStartVoice");
+  const btnEndVoiceCall = document.getElementById("btnEndVoice");
   const btnToggleMic = document.getElementById("btnToggleMic");
 
-  if (!btnStartVoiceCall) {
+  if (!btnStartVoiceCall || !btnEndVoiceCall) {
     console.warn("voice-chat.js: DOM elements missing – voice-chat skipped.");
     return;
   }
@@ -692,7 +692,9 @@
 
   btnEndVoiceCall.addEventListener("click", endVoiceCall);
 
-  btnToggleMic.addEventListener("click", toggleMic);
+  if (btnToggleMic) {
+    btnToggleMic.addEventListener("click", toggleMic);
+  }
 
   // Cleanup on page unload
   window.addEventListener("beforeunload", () => {
