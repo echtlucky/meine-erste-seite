@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -17,16 +17,16 @@
     <!-- HERO -->
     <section class="account-hero">
       <div class="account-hero__left">
-        <div class="account-badge">⚡ echtlucky • Konto</div>
+        <div class="account-badge"> echtlucky  Konto</div>
         <h1 class="account-title">Account verwalten</h1>
         <p class="account-sub">
-          Hier siehst du deine Stats & kannst Local ↔ Account syncen.
+          Hier siehst du deine Stats & kannst Local  Account syncen.
         </p>
 
         <div class="account-pills">
-          <span class="pill" id="pillStatus">Status: —</span>
-          <span class="pill" id="pillProvider">Login: —</span>
-          <span class="pill" id="pillUpdated">Update: —</span>
+          <span class="pill" id="pillStatus">Status: </span>
+          <span class="pill" id="pillProvider">Login: </span>
+          <span class="pill" id="pillUpdated">Update: </span>
         </div>
       </div>
 
@@ -35,8 +35,8 @@
           <div class="profile-top">
             <div class="avatar" id="avatarInitial">?</div>
             <div class="profile-meta">
-              <div class="profile-name" id="profileName">—</div>
-              <div class="profile-email" id="profileEmail">—</div>
+              <div class="profile-name" id="profileName"></div>
+              <div class="profile-email" id="profileEmail"></div>
             </div>
           </div>
 
@@ -65,135 +65,177 @@
 
     <!-- MAIN GRID -->
     <section class="account-grid" id="accountGrid" style="display:none;">
-      <!-- LEFT: YOUR STATS -->
+      
+      <!-- RANKED STATS CARD -->
       <div class="account-card">
         <div class="card-head">
           <div>
-            <h2 class="card-title">Deine Stats</h2>
-            <p class="card-hint">Local (dieses Gerät) vs. Account (Cloud).</p>
+            <h2 class="card-title"> Ranked Mode</h2>
+            <p class="card-hint">Dein Ranked-Fortschritt</p>
           </div>
-          <div class="chip" id="chipSync">Sync: —</div>
+          <div class="chip" id="chipSync">Sync: </div>
         </div>
 
-        <div class="stats-grid">
+        <div class="stats-mini-grid">
           <div class="stat-tile">
-            <div class="stat-label">Ranked • Level</div>
-            <div class="stat-value" id="rankedLevel">—</div>
-            <div class="stat-sub" id="rankedMeta">—</div>
+            <div class="stat-label">Level</div>
+            <div class="stat-value" id="rankedLevel"></div>
           </div>
-
           <div class="stat-tile">
-            <div class="stat-label">Ranked • XP</div>
-            <div class="stat-value" id="rankedXp">—</div>
-            <div class="stat-sub" id="rankedStreak">—</div>
+            <div class="stat-label">XP</div>
+            <div class="stat-value" id="rankedXp"></div>
           </div>
-
           <div class="stat-tile">
-            <div class="stat-label">Reflex • Best Avg</div>
-            <div class="stat-value" id="reflexAvg">—</div>
-            <div class="stat-sub" id="reflexRating">—</div>
+            <div class="stat-label">Streak</div>
+            <div class="stat-value" id="rankedStreak"></div>
           </div>
-
           <div class="stat-tile">
-            <div class="stat-label">Reflex • Best Hit</div>
-            <div class="stat-value" id="reflexBest">—</div>
-            <div class="stat-sub" id="reflexLast">—</div>
+            <div class="stat-label">Last</div>
+            <div class="stat-value" id="rankedMeta"></div>
           </div>
         </div>
 
         <div class="divider-line"></div>
 
-        <!-- PROFILE EDIT SECTION -->
-        <div class="profile-edit-section">
-          <div class="section-head">
-            <h3>Profil bearbeiten</h3>
-            <p>Deine Accountinformationen für Authentifikation</p>
+        <div class="chart-container">
+          <h3 class="chart-title">Rank Verlauf</h3>
+          <canvas id="rankChartCanvas" style="max-height: 250px;"></canvas>
+        </div>
+      </div>
+
+      <!-- REFLEX STATS CARD -->
+      <div class="account-card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title"> Reflex Mode</h2>
+            <p class="card-hint">Deine Reflex-Bestleistungen</p>
           </div>
-
-          <form id="profileEditForm" class="profile-form">
-            <div class="form-group">
-              <label for="inputDisplayName">Display Name</label>
-              <input type="text" id="inputDisplayName" placeholder="Dein Name" />
-              <span class="form-hint">Öffentlich sichtbar</span>
-            </div>
-
-            <div class="form-group">
-              <label for="inputAddress">Adresse</label>
-              <input type="text" id="inputAddress" placeholder="z.B. Musterstraße 1, 10115 Berlin" />
-              <span class="form-hint">Für Account-Authentifikation</span>
-            </div>
-
-            <div class="form-group">
-              <label for="inputPhone">Telefon</label>
-              <input type="tel" id="inputPhone" placeholder="z.B. +49 123 4567890" />
-              <span class="form-hint">Optional, für Kontakt</span>
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary" id="btnSaveProfile">Speichern</button>
-              <button type="button" class="btn btn-secondary" id="btnCancelEdit">Abbrechen</button>
-            </div>
-
-            <div id="profileFormMsg" class="form-msg"></div>
-          </form>
         </div>
 
-        <div class="divider-line"></div>
+        <div class="stats-mini-grid">
+          <div class="stat-tile">
+            <div class="stat-label">Best Avg</div>
+            <div class="stat-value" id="reflexAvg"></div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-label">Best Hit</div>
+            <div class="stat-value" id="reflexBest"></div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-label">Rating</div>
+            <div class="stat-value" id="reflexRating"></div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-label">Last Run</div>
+            <div class="stat-value" id="reflexLast"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNT SETTINGS CARD -->
+      <div class="account-card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title"> Account Einstellungen</h2>
+            <p class="card-hint">Ändere deine Accountdaten</p>
+          </div>
+        </div>
+
+        <form id="accountSettingsForm" class="profile-form">
+          <div class="form-group">
+            <label for="inputUsername">Benutzername</label>
+            <div class="form-input-group">
+              <input type="text" id="inputUsername" placeholder="Dein Benutzername" />
+              <span class="form-status" id="usernameStatus"></span>
+            </div>
+            <span class="form-hint" id="usernameHint">Öffentlich sichtbar  Änderbar alle 7 Tage</span>
+          </div>
+
+          <div class="form-group">
+            <label for="inputEmail">Email Adresse</label>
+            <div class="form-input-group">
+              <input type="email" id="inputEmail" placeholder="Deine Email" />
+              <span class="form-status" id="emailStatus"></span>
+            </div>
+            <span class="form-hint" id="emailHint">Du kannst deine Email ändern</span>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="btnSaveSettings">Speichern</button>
+            <button type="button" class="btn btn-secondary" id="btnCancelSettings">Abbrechen</button>
+          </div>
+
+          <div id="settingsFormMsg" class="form-msg"></div>
+        </form>
+      </div>
+
+      <!-- DATA SYNC CARD -->
+      <div class="account-card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title"> Daten Synchronisierung</h2>
+            <p class="card-hint">Local  Cloud Sync</p>
+          </div>
+        </div>
+
+        <div class="sync-info-box">
+          <p>Synchronisiere deine Stats zwischen lokalem Gerät und Cloud-Account.</p>
+        </div>
 
         <div class="sync-actions">
-          <button class="btn btn-primary" id="btnUploadLocal" type="button">Local → Account speichern</button>
-          <button class="btn btn-secondary" id="btnDownloadCloud" type="button">Account → Local übernehmen</button>
-          <button class="btn btn-ghost" id="btnClearLocal" type="button">Local Stats löschen</button>
+          <button class="btn btn-primary" id="btnUploadLocal" type="button"> Local  Account</button>
+          <button class="btn btn-secondary" id="btnDownloadCloud" type="button"> Account  Local</button>
+          <button class="btn btn-ghost" id="btnClearLocal" type="button"> Local löschen</button>
         </div>
 
         <p class="mini-note">
-          Hinweis: „Account → Local“ überschreibt deine lokalen Werte.
+           Account  Local überschreibt deine lokalen Werte.
         </p>
       </div>
 
-      <!-- RIGHT: DETAILS / PREVIEW -->
+      <!-- ACCOUNT DATA PREVIEW CARD -->
       <div class="account-card">
         <div class="card-head">
           <div>
-            <h2 class="card-title">Account Daten</h2>
-            <p class="card-hint">Was im Firestore gespeichert ist (Preview).</p>
+            <h2 class="card-title"> Cloud Daten</h2>
+            <p class="card-hint">Im Firestore gespeichert</p>
           </div>
         </div>
 
         <div class="preview">
           <div class="preview-row">
             <div class="preview-k">UID</div>
-            <div class="preview-v" id="pvUid">—</div>
+            <div class="preview-v" id="pvUid"></div>
           </div>
           <div class="preview-row">
-            <div class="preview-k">Ranked (cloud)</div>
-            <div class="preview-v" id="pvRanked">—</div>
+            <div class="preview-k">Ranked</div>
+            <div class="preview-v" id="pvRanked"></div>
           </div>
           <div class="preview-row">
-            <div class="preview-k">Reflex (cloud)</div>
-            <div class="preview-v" id="pvReflex">—</div>
+            <div class="preview-k">Reflex</div>
+            <div class="preview-v" id="pvReflex"></div>
           </div>
           <div class="preview-row">
             <div class="preview-k">Updated</div>
-            <div class="preview-v" id="pvUpdated">—</div>
+            <div class="preview-v" id="pvUpdated"></div>
           </div>
-        </div>
-
-        <div class="divider-line"></div>
-
-        <div class="danger-zone">
-          <div class="dz-head">
-            <div>
-              <h3>Danger Zone</h3>
-              <p>Nur wenn du sicher bist.</p>
-            </div>
-          </div>
-
-          <button class="btn btn-ghost danger" id="btnWipeCloud" type="button">
-            Cloud Stats zurücksetzen
-          </button>
         </div>
       </div>
+
+      <!-- DANGER ZONE CARD -->
+      <div class="account-card danger-card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title"> Danger Zone</h2>
+            <p class="card-hint">Löschungen sind nicht rückgängig zu machen</p>
+          </div>
+        </div>
+
+        <button class="btn btn-ghost danger" id="btnWipeCloud" type="button">
+           Cloud Stats zurücksetzen
+        </button>
+      </div>
+
     </section>
   </main>
 
@@ -203,6 +245,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+  <!-- Chart.js für Rank-Verlauf -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <script src="firebase.js"></script>
   <script src="js/menu.js"></script>

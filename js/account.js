@@ -1,19 +1,23 @@
-/* =========================
-   account.js — echtlucky
+﻿/* =========================
+   account.js  echtlucky
    - zeigt Local + Cloud Stats
    - Sync Buttons (Local -> Cloud, Cloud -> Local)
-   - Requires Firebase Auth/Firestore (optional graceful)
+   - Username + Email Änderung
+   - Rank History Chart
+   - Requires Firebase Auth/Firestore
 ========================= */
 
 (() => {
   "use strict";
 
-  // LocalStorage Keys aus deinen bestehenden Systemen
+  // LocalStorage Keys
   const LS_RANKED = "echtlucky_ranked_v1";
   const LS_REFLEX = "echtlucky_reflex_v2";
+  const LS_USERNAME_CHANGE = "echtlucky_username_change_ts";
 
   // Firestore path
   const USER_COLLECTION = "users";
+  const COOLDOWN_DAYS = 7;
 
   const auth = window.echtlucky?.auth || window.auth || null;
   const db   = window.echtlucky?.db   || window.db   || null;
@@ -34,8 +38,8 @@
 
   const rankedLevel = el("rankedLevel");
   const rankedXp    = el("rankedXp");
-  const rankedMeta  = el("rankedMeta");
   const rankedStreak= el("rankedStreak");
+  const rankedMeta  = el("rankedMeta");
 
   const reflexAvg   = el("reflexAvg");
   const reflexBest  = el("reflexBest");
@@ -55,16 +59,22 @@
   const btnClearLocal   = el("btnClearLocal");
   const btnWipeCloud    = el("btnWipeCloud");
 
-  // Profile Edit Elements
-  const profileEditForm = el("profileEditForm");
-  const inputDisplayName = el("inputDisplayName");
-  const inputAddress = el("inputAddress");
-  const inputPhone = el("inputPhone");
-  const btnSaveProfile = el("btnSaveProfile");
-  const btnCancelEdit = el("btnCancelEdit");
-  const profileFormMsg = el("profileFormMsg");
+  // Account Settings Elements
+  const accountSettingsForm = el("accountSettingsForm");
+  const inputUsername = el("inputUsername");
+  const inputEmail = el("inputEmail");
+  const usernameStatus = el("usernameStatus");
+  const emailStatus = el("emailStatus");
+  const usernameHint = el("usernameHint");
+  const emailHint = el("emailHint");
+  const btnSaveSettings = el("btnSaveSettings");
+  const btnCancelSettings = el("btnCancelSettings");
+  const settingsFormMsg = el("settingsFormMsg");
 
-  // Notify wrapper — einheitlich mit notify.js
+  // Chart
+  let rankChart = null;
+
+  // Notify wrapper
   function toast(type, msg) {
     if (window.notify?.show) {
       return window.notify.show({
@@ -74,21 +84,20 @@
         duration: 4500
       });
     }
-    // Fallback
     console.log(`[${type.toUpperCase()}] ${msg}`);
   }
 
   function showFormMsg(text, type = "error") {
-    if (!profileFormMsg) return;
-    profileFormMsg.textContent = text;
-    profileFormMsg.className = `form-msg show ${type}`;
+    if (!settingsFormMsg) return;
+    settingsFormMsg.textContent = text;
+    settingsFormMsg.className = `form-msg show ${type}`;
     setTimeout(() => {
-      profileFormMsg.className = "form-msg";
+      settingsFormMsg.className = "form-msg";
     }, 4000);
   }
 
   function msToLabel(ms) {
-    if (!isFinite(ms)) return "—";
+    if (!isFinite(ms)) return "";
     if (ms >= 1000) return (ms / 1000).toFixed(2) + "s";
     return Math.round(ms) + "ms";
   }
@@ -123,8 +132,6 @@
     const data = safeParse(raw || "{}") || {};
     const bestMs = Number(data.bestMs);
     const bestAvgMs = Number(data.bestAvgMs);
-
-    // optional lastRun
     const lastRun = data.lastRun || null;
 
     return {
@@ -136,7 +143,7 @@
   }
 
   function ratingFromAvg(avgMs) {
-    if (!isFinite(avgMs)) return { grade: "—", label: "—" };
+    if (!isFinite(avgMs)) return { grade: "", label: "" };
     if (avgMs <= 220) return { grade: "S+", label: "Godlike" };
     if (avgMs <= 280) return { grade: "S",  label: "Cracked" };
     if (avgMs <= 340) return { grade: "A",  label: "Insane" };
@@ -148,7 +155,7 @@
   function setLoggedInUI(user) {
     const display = user.displayName || (user.email ? user.email.split("@")[0] : "User");
     profileName.textContent = display;
-    profileEmail.textContent = user.email || "—";
+    profileEmail.textContent = user.email || "";
     avatarInitial.textContent = (display?.[0] || "?").toUpperCase();
 
     pillStatus.textContent = "Status: Eingeloggt";
@@ -157,8 +164,8 @@
 
   function setLoggedOutUI() {
     pillStatus.textContent = "Status: Nicht eingeloggt";
-    pillProvider.textContent = "Login: —";
-    pillUpdated.textContent = "Update: —";
+    pillProvider.textContent = "Login: ";
+    pillUpdated.textContent = "Update: ";
   }
 
   function showLoggedOut() {
@@ -173,9 +180,9 @@
   }
 
   function fmtDate(ts) {
-    if (!ts) return "—";
+    if (!ts) return "";
     const d = ts instanceof Date ? ts : new Date(ts);
-    if (isNaN(d.getTime())) return "—";
+    if (isNaN(d.getTime())) return "";
     const dd = String(d.getDate()).padStart(2, "0");
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const yy = d.getFullYear();
@@ -191,15 +198,16 @@
 
     rankedLevel.textContent = String(r.level);
     rankedXp.textContent = String(r.totalXp);
-    rankedMeta.textContent = r.lastCompletedDay ? `Last complete: ${r.lastCompletedDay}` : "Last complete: —";
-    rankedStreak.textContent = `Streak: ${r.streak}`;
+    rankedMeta.textContent = r.lastCompletedDay ? `Zuletzt: ${r.lastCompletedDay}` : "Zuletzt: ";
+    rankedStreak.textContent = `${r.streak}`;
 
     reflexAvg.textContent = msToLabel(f.bestAvgMs);
     reflexBest.textContent = msToLabel(f.bestMs);
-    reflexRating.textContent = `Rating: ${fr.grade} • ${fr.label}`;
-    reflexLast.textContent = f.lastRun?.at ? `Last run: ${fmtDate(f.lastRun.at)}` : "Last run: —";
+    reflexRating.textContent = `${fr.grade}  ${fr.label}`;
+    reflexLast.textContent = f.lastRun?.at ? `${fmtDate(f.lastRun.at)}` : "";
 
     chipSync.textContent = "Sync: Local";
+    drawRankChart([r.level], ["Jetzt"]);
   }
 
   async function loadCloud(user) {
@@ -209,13 +217,13 @@
   }
 
   function renderCloudPreview(user, cloud) {
-    pvUid.textContent = user.uid || "—";
+    pvUid.textContent = user.uid || "";
 
     const rankedCloud = cloud?.rankedStats || cloud?.ranked || null;
     const reflexCloud = cloud?.reflexStats || cloud?.reflex || null;
 
-    pvRanked.textContent = rankedCloud ? "vorhanden ✅" : "—";
-    pvReflex.textContent = reflexCloud ? "vorhanden ✅" : "—";
+    pvRanked.textContent = rankedCloud ? "vorhanden " : "";
+    pvReflex.textContent = reflexCloud ? "vorhanden " : "";
 
     const updatedAt =
       cloud?.updatedAt?.toDate?.() ||
@@ -223,8 +231,8 @@
       cloud?.rankedUpdatedAt?.toDate?.() ||
       null;
 
-    pvUpdated.textContent = updatedAt ? fmtDate(updatedAt) : "—";
-    pillUpdated.textContent = "Update: " + (updatedAt ? fmtDate(updatedAt) : "—");
+    pvUpdated.textContent = updatedAt ? fmtDate(updatedAt) : "";
+    pillUpdated.textContent = "Update: " + (updatedAt ? fmtDate(updatedAt) : "");
   }
 
   function chooseBetter(localVal, cloudVal, smallerIsBetter = false) {
@@ -239,13 +247,11 @@
   }
 
   function renderMerged(localRanked, localReflex, cloud) {
-    // Ranked: wir nehmen XP/Streak aus Cloud wenn vorhanden, sonst Local.
     const rankedCloud = cloud?.rankedStats || cloud?.ranked || null;
     const totalXp = rankedCloud?.totalXp ?? localRanked.totalXp;
     const streak  = rankedCloud?.streak ?? localRanked.streak;
     const lastCompletedDay = rankedCloud?.lastCompletedDay ?? localRanked.lastCompletedDay;
 
-    // Reflex: bestAvg und bestMs -> kleiner ist besser
     const reflexCloud = cloud?.reflexStats || cloud?.reflex || null;
     const bestAvgMs = chooseBetter(localReflex.bestAvgMs, reflexCloud?.bestAvgMs, true);
     const bestMs    = chooseBetter(localReflex.bestMs, reflexCloud?.bestMs, true);
@@ -254,19 +260,204 @@
 
     rankedLevel.textContent = String(calcLevel(totalXp));
     rankedXp.textContent = String(Number(totalXp || 0));
-    rankedMeta.textContent = lastCompletedDay ? `Last complete: ${lastCompletedDay}` : "Last complete: —";
-    rankedStreak.textContent = `Streak: ${Number(streak || 0)}`;
+    rankedMeta.textContent = lastCompletedDay ? `Zuletzt: ${lastCompletedDay}` : "Zuletzt: ";
+    rankedStreak.textContent = `${Number(streak || 0)}`;
 
     reflexAvg.textContent = msToLabel(bestAvgMs);
     reflexBest.textContent = msToLabel(bestMs);
-    reflexRating.textContent = `Rating: ${fr.grade} • ${fr.label}`;
+    reflexRating.textContent = `${fr.grade}  ${fr.label}`;
 
     const cloudLastAt = reflexCloud?.lastRun?.at || cloud?.reflexUpdatedAt?.toDate?.()?.getTime?.();
     const localLastAt = localReflex.lastRun?.at || null;
     const lastAt = cloudLastAt || localLastAt;
-    reflexLast.textContent = lastAt ? `Last run: ${fmtDate(lastAt)}` : "Last run: —";
+    reflexLast.textContent = lastAt ? `${fmtDate(lastAt)}` : "";
 
     chipSync.textContent = cloud ? "Sync: Account + Local" : "Sync: Local";
+    
+    // Draw rank chart with some history
+    const levels = [calcLevel(totalXp)];
+    const labels = ["Aktuell"];
+    drawRankChart(levels, labels);
+  }
+
+  function drawRankChart(levels, labels) {
+    const canvas = el("rankChartCanvas");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    
+    if (rankChart) {
+      rankChart.destroy();
+    }
+
+    rankChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Rank Level",
+          data: levels,
+          borderColor: "rgba(0, 255, 136, 0.9)",
+          backgroundColor: "rgba(0, 255, 136, 0.1)",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: "rgba(0, 255, 136, 0.95)",
+          pointBorderColor: "#00ff88",
+          pointBorderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: "rgba(224, 255, 224, 0.9)",
+              font: { size: 12, weight: "600" }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: "rgba(224, 255, 224, 0.7)", stepSize: 1 },
+            grid: { color: "rgba(0, 255, 136, 0.08)" }
+          },
+          x: {
+            ticks: { color: "rgba(224, 255, 224, 0.7)" },
+            grid: { color: "rgba(0, 255, 136, 0.08)" }
+          }
+        }
+      }
+    });
+  }
+
+  // Username cooldown check
+  function checkUsernameCooldown() {
+    const lastChange = localStorage.getItem(LS_USERNAME_CHANGE);
+    if (!lastChange) {
+      return { canChange: true, daysLeft: 0 };
+    }
+
+    const lastTs = Number(lastChange);
+    const nowTs = Date.now();
+    const daysPassed = (nowTs - lastTs) / (1000 * 60 * 60 * 24);
+
+    if (daysPassed >= COOLDOWN_DAYS) {
+      return { canChange: true, daysLeft: 0 };
+    }
+
+    const daysLeft = Math.ceil(COOLDOWN_DAYS - daysPassed);
+    return { canChange: false, daysLeft };
+  }
+
+  function updateUsernameStatus(canChange, daysLeft) {
+    if (canChange) {
+      usernameStatus.textContent = "Änderbar";
+      usernameStatus.className = "form-status available";
+      usernameHint.textContent = "Öffentlich sichtbar  Änderbar alle 7 Tage";
+      inputUsername.disabled = false;
+    } else {
+      usernameStatus.textContent = `Noch ${daysLeft}d`;
+      usernameStatus.className = "form-status locked";
+      usernameHint.textContent = `Nächste Änderung in ${daysLeft} Tag(en) möglich`;
+      inputUsername.disabled = true;
+    }
+  }
+
+  async function loadSettingsData(user) {
+    if (!db) return;
+    try {
+      const doc = await db.collection(USER_COLLECTION).doc(user.uid).get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (inputUsername) inputUsername.value = data.username || data.displayName || "";
+        if (inputEmail) inputEmail.value = user.email || "";
+
+        // Check if Google auth
+        const isGoogleAuth = user.providerData?.some(p => p.providerId === "google.com");
+        if (isGoogleAuth && inputEmail) {
+          inputEmail.disabled = true;
+          emailHint.textContent = "Mit Google angemeldet  Email nicht änderbar";
+        } else if (inputEmail) {
+          inputEmail.disabled = false;
+          emailHint.textContent = "Du kannst deine Email ändern";
+        }
+
+        // Check username cooldown
+        const cooldown = checkUsernameCooldown();
+        updateUsernameStatus(cooldown.canChange, cooldown.daysLeft);
+      }
+    } catch (e) {
+      console.warn("Fehler beim Laden der Einstellungen:", e);
+    }
+  }
+
+  async function saveSettings(user) {
+    if (!db) return showFormMsg("Firestore nicht bereit.", "error");
+
+    const username = inputUsername?.value?.trim() || "";
+    const email = inputEmail?.value?.trim() || "";
+
+    if (!username) {
+      return showFormMsg("Benutzername ist erforderlich.", "error");
+    }
+
+    if (!email) {
+      return showFormMsg("Email ist erforderlich.", "error");
+    }
+
+    // Check username cooldown
+    const cooldown = checkUsernameCooldown();
+    if (!cooldown.canChange) {
+      return showFormMsg(`Benutzername noch ${cooldown.daysLeft} Tag(e) gesperrt.`, "error");
+    }
+
+    try {
+      if (btnSaveSettings) {
+        btnSaveSettings.disabled = true;
+        btnSaveSettings.textContent = "Speichern...";
+      }
+
+      // Update username in Firestore
+      await db.collection(USER_COLLECTION).doc(user.uid).set({
+        username: username,
+        displayName: username,
+        settingsUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      // Set username change cooldown
+      localStorage.setItem(LS_USERNAME_CHANGE, Date.now().toString());
+
+      // Update user profile if email changed
+      if (email !== user.email) {
+        try {
+          await user.verifyBeforeUpdateEmail(email);
+          showFormMsg("Bestätigungslink wurde an neue Email gesendet ", "success");
+          toast("success", "Bestätigungslink versendet!");
+        } catch (emailErr) {
+          console.warn("Email Änderung:", emailErr);
+          showFormMsg("Email konnte nicht geändert werden: " + emailErr.message, "error");
+        }
+      } else {
+        showFormMsg("Einstellungen gespeichert ", "success");
+      }
+
+      // Reload settings
+      await loadSettingsData(user);
+      toast("success", "Einstellungen aktualisiert ");
+    } catch (e) {
+      console.error("Fehler beim Speichern:", e);
+      showFormMsg("Speichern fehlgeschlagen: " + (e?.message || "Unbekannt"), "error");
+    } finally {
+      if (btnSaveSettings) {
+        btnSaveSettings.disabled = false;
+        btnSaveSettings.textContent = "Speichern";
+      }
+    }
   }
 
   async function uploadLocalToCloud(user) {
@@ -292,7 +483,7 @@
     };
 
     await db.collection(USER_COLLECTION).doc(user.uid).set(payload, { merge: true });
-    toast("success", "Gespeichert ✅ Local → Account");
+    toast("success", "Gespeichert  Local  Account");
   }
 
   async function downloadCloudToLocal(user) {
@@ -324,13 +515,13 @@
       localStorage.setItem(LS_REFLEX, JSON.stringify(localReflex));
     }
 
-    toast("success", "Übernommen ✅ Account → Local");
+    toast("success", "Übernommen  Account  Local");
   }
 
   function clearLocal() {
     localStorage.removeItem(LS_RANKED);
     localStorage.removeItem(LS_REFLEX);
-    toast("success", "Local Stats gelöscht ✅");
+    toast("success", "Local Stats gelöscht ");
   }
 
   async function wipeCloud(user) {
@@ -341,73 +532,7 @@
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
 
-    toast("success", "Cloud Stats zurückgesetzt ✅");
-  }
-
-  async function loadProfileData(user) {
-    if (!db) return;
-    try {
-      const doc = await db.collection(USER_COLLECTION).doc(user.uid).get();
-      if (doc.exists) {
-        const data = doc.data();
-        if (inputDisplayName) inputDisplayName.value = data.displayName || "";
-        if (inputAddress) inputAddress.value = data.address || "";
-        if (inputPhone) inputPhone.value = data.phone || "";
-      }
-    } catch (e) {
-      console.warn("Fehler beim Laden der Profildaten:", e);
-    }
-  }
-
-  async function saveProfileData(user) {
-    if (!db) return showFormMsg("Firestore nicht bereit.", "error");
-
-    const displayName = inputDisplayName?.value?.trim() || "";
-    const address = inputAddress?.value?.trim() || "";
-    const phone = inputPhone?.value?.trim() || "";
-
-    if (!displayName) {
-      return showFormMsg("Name ist erforderlich.", "error");
-    }
-
-    try {
-      if (btnSaveProfile) {
-        btnSaveProfile.disabled = true;
-        btnSaveProfile.textContent = "Speichern...";
-      }
-
-      await db.collection(USER_COLLECTION).doc(user.uid).set({
-        displayName: displayName,
-        address: address || null,
-        phone: phone || null,
-        profileUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      }, { merge: true });
-
-      // Update den UI auch
-      setLoggedInUI(user);
-
-      showFormMsg("Profil gespeichert ✅", "success");
-      toast("success", "Profil aktualisiert ✅");
-    } catch (e) {
-      console.error("Fehler beim Speichern:", e);
-      showFormMsg("Speichern fehlgeschlagen: " + (e?.message || "Unbekannt"), "error");
-    } finally {
-      if (btnSaveProfile) {
-        btnSaveProfile.disabled = false;
-        btnSaveProfile.textContent = "Speichern";
-      }
-    }
-  }
-
-  async function wipeCloud(user) {
-    if (!db) return toast("error", "Firestore nicht bereit (db fehlt).");
-    await db.collection(USER_COLLECTION).doc(user.uid).set({
-      rankedStats: firebase.firestore.FieldValue.delete(),
-      reflexStats: firebase.firestore.FieldValue.delete(),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    }, { merge: true });
-
-    toast("success", "Cloud Stats zurückgesetzt ✅");
+    toast("success", "Cloud Stats zurückgesetzt ");
   }
 
   async function boot() {
@@ -427,8 +552,8 @@
       showLoggedIn();
       setLoggedInUI(user);
 
-      // Load profile data
-      await loadProfileData(user);
+      // Load settings
+      await loadSettingsData(user);
 
       try {
         const localRanked = readLocalRanked();
@@ -439,7 +564,7 @@
         renderMerged(localRanked, localReflex, cloud);
       } catch (e) {
         console.warn(e);
-        toast("warn", "Konnte Cloud-Daten nicht laden (siehe Console).");
+        toast("warn", "Konnte Cloud-Daten nicht laden.");
       }
     });
 
@@ -447,7 +572,7 @@
     btnSignOut?.addEventListener("click", async () => {
       try {
         await auth.signOut();
-        toast("success", "Ausgeloggt ✅");
+        toast("success", "Ausgeloggt ");
         window.location.href = "index.html";
       } catch (e) {
         toast("error", "Ausloggen fehlgeschlagen: " + (e?.message || "Unbekannt"));
@@ -470,7 +595,7 @@
     btnDownloadCloud?.addEventListener("click", async () => {
       const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
       if (!user) return toast("warn", "Bitte einloggen.");
-      if (!confirm("Account → Local überschreibt deine lokalen Werte. Fortfahren?")) return;
+      if (!confirm("Account  Local überschreibt deine lokalen Werte. Fortfahren?")) return;
 
       try {
         await downloadCloudToLocal(user);
@@ -503,19 +628,18 @@
       }
     });
 
-    // Profile Edit Form
-    profileEditForm?.addEventListener("submit", async (e) => {
+    // Settings Form
+    accountSettingsForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
       if (!user) return toast("warn", "Bitte einloggen.");
-      await saveProfileData(user);
+      await saveSettings(user);
     });
 
-    btnCancelEdit?.addEventListener("click", () => {
-      // Reset form to current values
+    btnCancelSettings?.addEventListener("click", () => {
       const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
       if (user) {
-        loadProfileData(user);
+        loadSettingsData(user);
       }
     });
   }
