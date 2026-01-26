@@ -18,11 +18,28 @@
 .connect-single-card-shell {
   width: 100%;
   max-width: 1200px;
-  margin: 2.5rem auto 2rem auto;
+  margin: 1.25rem auto 2rem auto;
   padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.connect-hero {
+  padding: 0.25rem 0 0.25rem 0;
+}
+
+.connect-hero__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.connect-title {
+  margin: 0;
+  font-size: 1.55rem;
+  letter-spacing: -0.3px;
 }
 
 .auth-status-card {
@@ -73,8 +90,9 @@ input:focus, select:focus, textarea:focus {
   display: grid;
   grid-template-columns: 280px 1fr 320px;
   gap: 2rem;
-  margin-top: 2rem;
-  min-height: 70vh;
+  margin-top: 1rem;
+  min-height: calc(100dvh - 240px);
+  align-items: stretch;
 }
 
 @media (max-width: 1400px) {
@@ -99,11 +117,12 @@ input:focus, select:focus, textarea:focus {
   border-radius: 16px;
   padding: 1.5rem;
   backdrop-filter: blur(10px);
+  min-height: 0;
 }
 
 /* LEFT COLUMN: Groups & Friends */
 .connect-column--left {
-  min-height: 600px;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -236,7 +255,7 @@ input:focus, select:focus, textarea:focus {
 
 /* MIDDLE COLUMN: Chat */
 .connect-column--middle {
-  min-height: 600px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -550,7 +569,7 @@ input:focus, select:focus, textarea:focus {
 
 /* RIGHT COLUMN: Members */
 .connect-column--right {
-  min-height: 600px;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -997,9 +1016,6 @@ input:focus, select:focus, textarea:focus {
 @media (max-width: 600px) {
   .connect-title {
     font-size: 1.3rem;
-  }
-  .connect-hero__inner {
-    gap: 0.5rem;
   }
   .auth-status-card {
     padding: 1rem;

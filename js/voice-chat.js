@@ -32,7 +32,7 @@
   async function sendCallPush(toUid, title, body, data) {
     // Hier müsste ein Cloud Function/Backend-Service das FCM-Token holen und Push senden
     // (Demo: Log-Ausgabe)
-    console.log("[Push] Sende Call-Push an", toUid, title, body, data);
+    log("[Push] Sende Call-Push an", toUid, title, body, data);
   }
 // js/voice-chat.js — echtlucky Voice Integration
 // WebRTC + Firebase Signaling für Gruppen-Calls (Direct Calls sind in diesem Projekt derzeit deaktiviert)
@@ -72,6 +72,11 @@ groups/{groupId}/voice-calls/{callId} {
 (function () {
   "use strict";
 
+  const DEBUG = false;
+  const log = (...args) => {
+    if (DEBUG) console.log(...args);
+  };
+
   if (window.__ECHTLUCKY_VOICE_CHAT_LOADED__) {
     console.warn("voice-chat.js already loaded – skipping");
     return;
@@ -89,7 +94,7 @@ groups/{groupId}/voice-calls/{callId} {
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        console.log("✅ voice-chat.js: Firebase ready");
+        log("✅ voice-chat.js: Firebase ready");
         resolve();
         return;
       }
@@ -98,7 +103,7 @@ groups/{groupId}/voice-calls/{callId} {
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        console.log("✅ voice-chat.js: Firebase ready via event");
+        log("✅ voice-chat.js: Firebase ready via event");
         resolve();
       };
 
@@ -123,7 +128,7 @@ groups/{groupId}/voice-calls/{callId} {
     if (!incomingCallModal) return;
     incomingCallFrom.textContent = fromName || "Unbekannt";
     incomingCallGroup.textContent = type === "group" ? (groupName ? `Gruppe: ${groupName}` : "Gruppenanruf") : "Direktanruf";
-    incomingCallModal.style.display = "flex";
+    incomingCallModal.hidden = false;
     setTimeout(() => incomingCallModal.classList.add("show"), 10);
     if (callRingtone) {
       callRingtone.currentTime = 0;
@@ -134,7 +139,7 @@ groups/{groupId}/voice-calls/{callId} {
   function hideIncomingCallModal() {
     if (!incomingCallModal) return;
     incomingCallModal.classList.remove("show");
-    setTimeout(() => { incomingCallModal.style.display = "none"; }, 250);
+    setTimeout(() => { incomingCallModal.hidden = true; }, 250);
     if (callRingtone) callRingtone.pause();
     activeCallRequest = null;
   }
@@ -255,6 +260,10 @@ groups/{groupId}/voice-calls/{callId} {
     });
   }
 
+  function getSelectedGroupId() {
+    return watchedGroupId || window.__ECHTLUCKY_SELECTED_GROUP__ || null;
+  }
+
   let initialized = false;
 
   // ============================================
@@ -300,7 +309,7 @@ groups/{groupId}/voice-calls/{callId} {
   // ============================================
 
   function createPeerConnection(remoteUid) {
-    console.log(`Creating peer connection with ${remoteUid}`);
+    log(`Creating peer connection with ${remoteUid}`);
     
     const peerConnection = new RTCPeerConnection(peerConfig);
 
@@ -308,13 +317,13 @@ groups/{groupId}/voice-calls/{callId} {
     if (localStream) {
       localStream.getAudioTracks().forEach(track => {
         peerConnection.addTrack(track, localStream);
-        console.log(`Added local audio track to peer ${remoteUid}`);
+        log(`Added local audio track to peer ${remoteUid}`);
       });
     }
 
     // Handle incoming remote tracks
     peerConnection.ontrack = (event) => {
-      console.log("Remote track received from", remoteUid, event.track.kind);
+      log("Remote track received from", remoteUid, event.track.kind);
       const remoteStream = event.streams[0];
       remoteStreams.set(remoteUid, remoteStream);
       
@@ -325,12 +334,12 @@ groups/{groupId}/voice-calls/{callId} {
         audioElement.id = `remote-audio-${remoteUid}`;
         audioElement.autoplay = true;
         audioElement.playsinline = true;
-        audioElement.style.display = "none";
+        audioElement.hidden = true;
         document.body.appendChild(audioElement);
       }
       
       audioElement.srcObject = remoteStream;
-      audioElement.play().catch(e => console.log("Auto-play blocked:", e));
+      audioElement.play().catch(e => log("Auto-play blocked:", e));
     };
 
     // Handle ICE candidates
@@ -352,7 +361,7 @@ groups/{groupId}/voice-calls/{callId} {
 
     // Handle connection state changes
     peerConnection.onconnectionstatechange = () => {
-      console.log("Connection state with", remoteUid, ":", peerConnection.connectionState);
+      log("Connection state with", remoteUid, ":", peerConnection.connectionState);
       if (peerConnection.connectionState === "failed" || peerConnection.connectionState === "disconnected") {
         closePeerConnection(remoteUid);
         window.notify?.show({
@@ -366,7 +375,7 @@ groups/{groupId}/voice-calls/{callId} {
 
     // Handle ICE connection state
     peerConnection.oniceconnectionstatechange = () => {
-      console.log("ICE connection state with", remoteUid, ":", peerConnection.iceConnectionState);
+      log("ICE connection state with", remoteUid, ":", peerConnection.iceConnectionState);
     };
 
     peerConnections.set(remoteUid, peerConnection);
@@ -382,7 +391,7 @@ groups/{groupId}/voice-calls/{callId} {
     if (peerConnection) {
       peerConnection.close();
       peerConnections.delete(uid);
-      console.log(`Closed peer connection with ${uid}`);
+      log(`Closed peer connection with ${uid}`);
     }
 
     const audioElement = document.getElementById(`remote-audio-${uid}`);
@@ -401,7 +410,7 @@ groups/{groupId}/voice-calls/{callId} {
   async function createAndSendOffer(groupId, callId, remoteUid) {
     try {
       if (peerConnections.has(remoteUid)) {
-        console.log(`Offer already sent to ${remoteUid}`);
+        log(`Offer already sent to ${remoteUid}`);
         return;
       }
 
@@ -413,7 +422,7 @@ groups/{groupId}/voice-calls/{callId} {
       });
 
       await peerConnection.setLocalDescription(offer);
-      console.log(`Offer created for ${remoteUid}`);
+      log(`Offer created for ${remoteUid}`);
 
       // Store offer in Firestore
       const groupRef = db.collection("groups").doc(groupId);
@@ -426,7 +435,7 @@ groups/{groupId}/voice-calls/{callId} {
         createdAt: new Date()
       });
 
-      console.log(`Offer sent to ${remoteUid}`);
+      log(`Offer sent to ${remoteUid}`);
 
     } catch (error) {
       console.error("Offer creation error:", error);
@@ -446,7 +455,7 @@ groups/{groupId}/voice-calls/{callId} {
         const { from, sdp } = doc.data();
         
         if (!peerConnections.has(from)) {
-          console.log(`Received offer from ${from}`);
+          log(`Received offer from ${from}`);
           const peerConnection = createPeerConnection(from);
           
           try {
@@ -456,7 +465,7 @@ groups/{groupId}/voice-calls/{callId} {
 
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
-            console.log(`Answer created for ${from}`);
+            log(`Answer created for ${from}`);
 
             // Send answer back
             await callRef.collection("answers").doc(from).set({
@@ -466,7 +475,7 @@ groups/{groupId}/voice-calls/{callId} {
               createdAt: new Date()
             });
 
-            console.log(`Answer sent to ${from}`);
+            log(`Answer sent to ${from}`);
 
           } catch (error) {
             console.error("Answer creation error:", error);
@@ -493,12 +502,12 @@ groups/{groupId}/voice-calls/{callId} {
         const peerConnection = peerConnections.get(from);
 
         if (peerConnection && peerConnection.remoteDescription === null) {
-          console.log(`Received answer from ${from}`);
+          log(`Received answer from ${from}`);
           try {
             await peerConnection.setRemoteDescription(
               new RTCSessionDescription({ type: "answer", sdp })
             );
-            console.log(`Remote description set for ${from}`);
+            log(`Remote description set for ${from}`);
           } catch (error) {
             console.error("Setting remote description error:", error);
           }
@@ -528,7 +537,7 @@ groups/{groupId}/voice-calls/{callId} {
             peerConnection.addIceCandidate(
               new RTCIceCandidate({ candidate, sdpMLineIndex, sdpMid })
             );
-            console.log(`ICE candidate added from ${from}`);
+            log(`ICE candidate added from ${from}`);
           } catch (error) {
             console.error("ICE candidate error:", error);
           }
@@ -550,7 +559,7 @@ groups/{groupId}/voice-calls/{callId} {
     
     const unsubscribe = callRef.onSnapshot((snap) => {
       if (!snap.exists) {
-        console.log("Call document deleted");
+        log("Call document deleted");
         return;
       }
 
@@ -975,10 +984,10 @@ groups/{groupId}/voice-calls/{callId} {
       if (voiceStatus) voiceStatus.textContent = statusText;
       uiCallState = state || uiCallState || "active";
       if (voiceStatus) voiceStatus.setAttribute("data-state", uiCallState);
-      if (btnStartVoiceCall) btnStartVoiceCall.style.display = "none";
-      if (btnStartRingingCall) btnStartRingingCall.style.display = "none";
-      if (btnEndVoiceCall) btnEndVoiceCall.style.display = "block";
-      if (btnToggleMic) btnToggleMic.style.display = "block";
+      if (btnStartVoiceCall) btnStartVoiceCall.hidden = true;
+      if (btnStartRingingCall) btnStartRingingCall.hidden = true;
+      if (btnEndVoiceCall) btnEndVoiceCall.hidden = false;
+      if (btnToggleMic) btnToggleMic.hidden = false;
       if (btnToggleMic) btnToggleMic.disabled = false;
 
       if (btnEndVoiceCall) {
@@ -988,10 +997,10 @@ groups/{groupId}/voice-calls/{callId} {
       if (voiceStatus) voiceStatus.textContent = "Nicht im Call";
       uiCallState = state || "idle";
       if (voiceStatus) voiceStatus.removeAttribute("data-state");
-      if (btnStartVoiceCall) btnStartVoiceCall.style.display = "block";
-      if (btnStartRingingCall) btnStartRingingCall.style.display = "block";
-      if (btnEndVoiceCall) btnEndVoiceCall.style.display = "none";
-      if (btnToggleMic) btnToggleMic.style.display = "none";
+      if (btnStartVoiceCall) btnStartVoiceCall.hidden = false;
+      if (btnStartRingingCall) btnStartRingingCall.hidden = false;
+      if (btnEndVoiceCall) btnEndVoiceCall.hidden = true;
+      if (btnToggleMic) btnToggleMic.hidden = true;
       if (btnToggleMic) btnToggleMic.disabled = true;
 
       if (btnEndVoiceCall) btnEndVoiceCall.textContent = "Beenden";
@@ -1002,7 +1011,7 @@ groups/{groupId}/voice-calls/{callId} {
     if (!btnStartVoiceCall) return;
     if (!db) return;
 
-    const groupId = window.__ECHTLUCKY_SELECTED_GROUP__ || null;
+    const groupId = getSelectedGroupId();
     if (!groupId) {
       btnStartVoiceCall.textContent = "🎤 Voice beitreten";
       return;
@@ -1077,7 +1086,7 @@ groups/{groupId}/voice-calls/{callId} {
     if (initialized) return;
     initialized = true;
 
-    console.log("🔵 voice-chat.js initializing");
+    log("🔵 voice-chat.js initializing");
     await waitForFirebase();
 
     if (!auth || !db) {
@@ -1088,7 +1097,7 @@ groups/{groupId}/voice-calls/{callId} {
     // Setup event listeners if DOM elements exist
     if (btnStartVoiceCall && btnEndVoiceCall) {
       btnStartVoiceCall.addEventListener("click", async () => {
-        if (!window.__ECHTLUCKY_SELECTED_GROUP__) {
+        if (!getSelectedGroupId()) {
           window.notify?.show({
             type: "error",
             title: "Keine Gruppe ausgewählt",
@@ -1099,7 +1108,8 @@ groups/{groupId}/voice-calls/{callId} {
         }
 
         try {
-          const groupId = window.__ECHTLUCKY_SELECTED_GROUP__;
+          const groupId = getSelectedGroupId();
+          if (!groupId) return;
 
           const callsRef = db.collection("groups").doc(groupId).collection("voice-calls");
           const ringingSnap = await callsRef.where("status", "==", "ringing").limit(1).get();
@@ -1131,7 +1141,8 @@ groups/{groupId}/voice-calls/{callId} {
 
     if (btnStartRingingCall) {
       btnStartRingingCall.addEventListener("click", () => {
-        if (!window.__ECHTLUCKY_SELECTED_GROUP__) {
+        const groupId = getSelectedGroupId();
+        if (!groupId) {
           window.notify?.show({
             type: "error",
             title: "Keine Gruppe ausgewählt",
@@ -1140,7 +1151,7 @@ groups/{groupId}/voice-calls/{callId} {
           });
           return;
         }
-        startRingingGroupCall(window.__ECHTLUCKY_SELECTED_GROUP__);
+        startRingingGroupCall(groupId);
       });
     }
 
@@ -1150,7 +1161,7 @@ groups/{groupId}/voice-calls/{callId} {
 
     // Incoming calls + labels: event-driven (no polling)
     bindSelectedGroupEvents();
-    handleSelectedGroupChange(window.__ECHTLUCKY_SELECTED_GROUP__ || null);
+    handleSelectedGroupChange(getSelectedGroupId());
     // Push-Benachrichtigungen initialisieren
     initPushNotifications();
 
@@ -1161,7 +1172,7 @@ groups/{groupId}/voice-calls/{callId} {
       }
     });
 
-    console.log("✅ voice-chat.js setup complete");
+    log("✅ voice-chat.js setup complete");
   }
 
   if (document.readyState === "loading") {
@@ -1183,7 +1194,7 @@ groups/{groupId}/voice-calls/{callId} {
     getPeerCount: () => peerConnections.size
   };
 
-  console.log("✅ voice-chat.js initialized with full WebRTC support");
+  log("✅ voice-chat.js initialized with full WebRTC support");
 })();
 
 

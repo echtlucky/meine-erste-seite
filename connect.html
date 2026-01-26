@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/app-shell.css" />
     <link rel="stylesheet" href="css/pages/connect.css" />
     <link
       rel="stylesheet"
@@ -15,151 +16,176 @@
   </head>
 
   <body class="page-transition connect-page">
-    <div id="header-placeholder"></div>
+    <div class="app-shell">
+      <header class="app-topbar">
+        <div id="header-placeholder"></div>
+      </header>
 
-    <main class="connect-main">
-      <section class="connect-single-card-shell">
-        <div class="connect-hero">
-          <div class="connect-hero__inner">
-            <h1 class="connect-title">Connect</h1>
-          </div>
-        </div>
+      <nav class="app-rail" aria-label="Navigation">
+        <a class="app-rail__link" href="index.html" title="Home" aria-label="Home">
+          <i class="fa-solid fa-house" aria-hidden="true"></i>
+        </a>
+        <a class="app-rail__link is-active" href="connect.html" title="Connect" aria-label="Connect">
+          <i class="fa-solid fa-comments" aria-hidden="true"></i>
+        </a>
+        <a class="app-rail__link" href="blog.html" title="Blog" aria-label="Blog">
+          <i class="fa-solid fa-blog" aria-hidden="true"></i>
+        </a>
+        <a class="app-rail__link" href="ranked.html" title="Ranked" aria-label="Ranked">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+        </a>
+        <div class="app-rail__spacer"></div>
+        <a class="app-rail__link" href="account.html" title="Account" aria-label="Account">
+          <i class="fa-solid fa-user" aria-hidden="true"></i>
+        </a>
+      </nav>
 
-        <!-- Auth Gate (connect-minimal.js) -->
-        <div class="auth-status-card" id="authStatusCard" style="display: none">
-          <div class="auth-status-card__row">
-            <div id="statusLabel">Status</div>
-            <button class="btn" id="btnLogin" type="button">Login</button>
-          </div>
-        </div>
-
-        <!-- 3-Column Layout (connect-minimal.js) -->
-        <div class="connect-layout" id="connectLayout" style="display: none">
-          <!-- LEFT: Groups & Friends -->
-          <aside class="connect-column connect-column--left" aria-label="Gruppen und Freunde">
-            <div class="groups-header">
-              <h3 class="groups-title">Gruppen</h3>
-              <button class="btn btn-sm" id="btnCreateGroup" type="button" title="Neue Gruppe">
-                +
-              </button>
+      <div class="app-shell__main">
+        <main class="connect-main">
+          <section class="connect-single-card-shell">
+            <div class="connect-hero">
+              <div class="connect-hero__inner">
+                <h1 class="connect-title">Connect</h1>
+              </div>
             </div>
 
-            <div class="groups-list" id="groupsListPanel"></div>
-
-            <h4 class="friends-title">Freunde hinzufügen</h4>
-            <input
-              type="text"
-              id="friendSearchInput"
-              class="friend-search-input"
-              placeholder="Benutzer suchen…"
-              autocomplete="off"
-            />
-            <div class="friends-search-results" id="friendsSearchResults">
-              <div class="empty-state"><p>🔍 Suche…</p></div>
+            <!-- Auth Gate (connect-minimal.js) -->
+            <div class="auth-status-card" id="authStatusCard" hidden>
+              <div class="auth-status-card__row">
+                <div id="statusLabel">Status</div>
+                <button class="btn" id="btnLogin" type="button">Login</button>
+              </div>
             </div>
-          </aside>
 
-          <!-- MIDDLE: Chat + Voice -->
-          <section class="connect-column connect-column--middle" aria-label="Chat und Voice">
-            <div class="chat-container" id="chatContainer">
-              <div class="chat-header">
-                <div class="chat-group-info">
-                  <h2 class="chat-group-title" id="chatGroupTitle">Gruppe</h2>
-                  <button
-                    class="chat-settings-btn"
-                    id="btnGroupSettings"
-                    type="button"
-                    title="Einstellungen"
-                    aria-label="Gruppeneinstellungen"
-                  >
-                    <i class="fas fa-cog"></i>
+            <!-- 3-Column Layout (connect-minimal.js) -->
+            <div class="connect-layout" id="connectLayout" hidden>
+              <!-- LEFT: Groups & Friends -->
+              <aside class="connect-column connect-column--left" aria-label="Gruppen und Freunde">
+                <div class="groups-header">
+                  <h3 class="groups-title">Gruppen</h3>
+                  <button class="btn btn-sm" id="btnCreateGroup" type="button" title="Neue Gruppe">
+                    +
                   </button>
                 </div>
-              </div>
 
-              <div class="chat-tabs" role="tablist" aria-label="Chat/Voice Tabs">
-                <button
-                  class="chat-tab-btn is-active"
-                  type="button"
-                  data-tab="chat"
-                  role="tab"
-                  aria-selected="true"
-                >
-                  💬 Chat
-                </button>
-                <button class="chat-tab-btn" type="button" data-tab="voice" role="tab" aria-selected="false">
-                  🎤 Voice
-                </button>
-              </div>
+                <div class="groups-list" id="groupsListPanel"></div>
 
-              <div class="chat-tab-content is-active" data-tab="chat" role="tabpanel">
-                <div class="messages-box">
-                  <div class="messages-list" id="messagesList"></div>
+                <h4 class="friends-title">Freunde hinzufügen</h4>
+                <input
+                  type="text"
+                  id="friendSearchInput"
+                  class="friend-search-input"
+                  placeholder="Benutzer suchen…"
+                  autocomplete="off"
+                />
+                <div class="friends-search-results" id="friendsSearchResults">
+                  <div class="empty-state"><p>🔍 Suche…</p></div>
                 </div>
-                <div class="chat-input-area">
+              </aside>
+
+              <!-- MIDDLE: Chat + Voice -->
+              <section class="connect-column connect-column--middle" aria-label="Chat und Voice">
+                <div class="chat-container" id="chatContainer" hidden>
+                  <div class="chat-header">
+                    <div class="chat-group-info">
+                      <h2 class="chat-group-title" id="chatGroupTitle">Gruppe</h2>
+                      <button
+                        class="chat-settings-btn"
+                        id="btnGroupSettings"
+                        type="button"
+                        title="Einstellungen"
+                        aria-label="Gruppeneinstellungen"
+                      >
+                        <i class="fas fa-cog"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="chat-tabs" role="tablist" aria-label="Chat/Voice Tabs">
+                    <button
+                      class="chat-tab-btn is-active"
+                      type="button"
+                      data-tab="chat"
+                      role="tab"
+                      aria-selected="true"
+                    >
+                      💬 Chat
+                    </button>
+                    <button class="chat-tab-btn" type="button" data-tab="voice" role="tab" aria-selected="false">
+                      🎤 Voice
+                    </button>
+                  </div>
+
+                  <div class="chat-tab-content is-active" data-tab="chat" role="tabpanel">
+                    <div class="messages-box">
+                      <div class="messages-list" id="messagesList"></div>
+                    </div>
+                    <div class="chat-input-area">
+                      <input
+                        type="text"
+                        id="messageInput"
+                        class="message-input"
+                        placeholder="Schreibe eine Nachricht…"
+                        autocomplete="off"
+                      />
+                      <button class="btn btn-sm" id="btnSendMessage" type="button" aria-label="Senden">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="chat-tab-content" data-tab="voice" role="tabpanel">
+                    <div class="voice-section">
+                      <div class="voice-status" id="voiceStatus">Nicht im Call</div>
+                      <div class="voice-buttons">
+                        <button class="btn btn-secondary" id="btnStartVoice" type="button">🎤 Voice beitreten</button>
+                        <button class="btn" id="btnStartCall" type="button">📞 Anruf starten</button>
+                        <button class="btn btn-danger" id="btnEndVoice" type="button" hidden>☎️ Beenden</button>
+                        <button class="btn btn-secondary" id="btnToggleMic" type="button" hidden>🔇 Stummschalten</button>
+                      </div>
+                      <div class="voice-participants" id="voiceParticipants"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="empty-chat-state" id="emptyChatState">
+                  <div class="empty-chat-inner">
+                    <p class="empty-chat-icon">💬</p>
+                    <h3>Keine Gruppe ausgewählt</h3>
+                    <p>Wähle eine Gruppe aus der linken Spalte, um zu chatten.</p>
+                  </div>
+                </div>
+              </section>
+
+              <!-- RIGHT: Members -->
+              <aside class="connect-column connect-column--right" aria-label="Mitglieder">
+                <div class="members-header">
+                  <h3 class="members-title">Mitglieder</h3>
+                  <div class="members-count" id="membersCount">0</div>
+                </div>
+
+                <div class="members-add-section" id="membersAddSection" hidden>
                   <input
                     type="text"
-                    id="messageInput"
-                    class="message-input"
-                    placeholder="Schreibe eine Nachricht…"
+                    id="addMemberInput"
+                    class="add-member-input"
+                    placeholder="Benutzer hinzufügen…"
                     autocomplete="off"
                   />
-                  <button class="btn btn-sm" id="btnSendMessage" type="button" aria-label="Senden">
-                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                  </button>
+                  <div class="members-search-results" id="addMemberResults"></div>
                 </div>
-              </div>
 
-              <div class="chat-tab-content" data-tab="voice" role="tabpanel">
-                <div class="voice-section">
-                  <div class="voice-status" id="voiceStatus">Nicht im Call</div>
-                  <div class="voice-buttons">
-                    <button class="btn btn-secondary" id="btnStartVoice" type="button">🎤 Voice beitreten</button>
-                    <button class="btn" id="btnStartCall" type="button">📞 Anruf starten</button>
-                    <button class="btn btn-danger" id="btnEndVoice" type="button" style="display: none">☎️ Beenden</button>
-                    <button class="btn btn-secondary" id="btnToggleMic" type="button" style="display: none">🔇 Stummschalten</button>
+                <div class="members-list" id="membersList">
+                  <div class="empty-state">
+                    <p>Keine Mitglieder</p>
                   </div>
-                  <div class="voice-participants" id="voiceParticipants"></div>
                 </div>
-              </div>
-            </div>
-
-            <div class="empty-chat-state" id="emptyChatState">
-              <div class="empty-chat-inner">
-                <p class="empty-chat-icon">💬</p>
-                <h3>Keine Gruppe ausgewählt</h3>
-                <p>Wähle eine Gruppe aus der linken Spalte, um zu chatten.</p>
-              </div>
+              </aside>
             </div>
           </section>
-
-          <!-- RIGHT: Members -->
-          <aside class="connect-column connect-column--right" aria-label="Mitglieder">
-            <div class="members-header">
-              <h3 class="members-title">Mitglieder</h3>
-              <div class="members-count" id="membersCount">0</div>
-            </div>
-
-            <div class="members-add-section" id="membersAddSection" style="display: none">
-              <input
-                type="text"
-                id="addMemberInput"
-                class="add-member-input"
-                placeholder="Benutzer hinzufügen…"
-                autocomplete="off"
-              />
-              <div class="members-search-results" id="addMemberResults"></div>
-            </div>
-
-            <div class="members-list" id="membersList">
-              <div class="empty-state">
-                <p>Keine Mitglieder</p>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </section>
-    </main>
+        </main>
+      </div>
+    </div>
 
     <!-- SETTINGS MODAL -->
     <div class="group-settings-modal" id="groupSettingsModal" aria-hidden="true">
@@ -205,7 +231,7 @@
     </div>
 
     <!-- INCOMING CALL MODAL & RINGTONE AUDIO -->
-    <div id="incomingCallModal" class="modal-overlay" style="display: none">
+    <div id="incomingCallModal" class="modal-overlay" hidden>
       <div class="modal-dialog incoming-call-dialog">
         <div class="modal-header">
           <h3 class="modal-title" id="incomingCallTitle">Eingehender Anruf</h3>
@@ -227,7 +253,7 @@
         </div>
       </div>
     </div>
-    <audio id="callRingtone" preload="auto" loop style="display: none"></audio>
+    <audio id="callRingtone" preload="auto" loop hidden></audio>
 
     <!-- Footer via fetch -->
     <div id="footer-placeholder"></div>

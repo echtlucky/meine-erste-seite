@@ -4,6 +4,11 @@
 (function () {
   "use strict";
 
+  const DEBUG = false;
+  const log = (...args) => {
+    if (DEBUG) console.log(...args);
+  };
+
   if (window.__ECHTLUCKY_CONNECT_MINIMAL_LOADED__) {
     console.warn("connect-minimal.js already loaded – skipping");
     return;
@@ -20,7 +25,7 @@
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        console.log("✅ connect-minimal.js: Firebase ready");
+        log("✅ connect-minimal.js: Firebase ready");
         resolve();
         return;
       }
@@ -29,7 +34,7 @@
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        console.log("✅ connect-minimal.js: Firebase ready via event");
+        log("✅ connect-minimal.js: Firebase ready via event");
         resolve();
       };
 
@@ -242,9 +247,6 @@
     selectedGroupId = groupId;
     selectedGroupData = groupData || null;
     
-    // Store globally for voice-chat.js
-    window.__ECHTLUCKY_SELECTED_GROUP__ = groupId;
-
     // Update active state in list
     document.querySelectorAll(".group-item").forEach((item) => {
       item.classList.remove("is-active");
@@ -254,8 +256,8 @@
     // Show chat container
     const chatContainer = document.getElementById("chatContainer");
     const emptyChatState = document.getElementById("emptyChatState");
-    if (chatContainer) chatContainer.style.display = "flex";
-    if (emptyChatState) emptyChatState.style.display = "none";
+    if (chatContainer) chatContainer.hidden = false;
+    if (emptyChatState) emptyChatState.hidden = true;
 
     // Update chat header
     const chatGroupTitle = document.getElementById("chatGroupTitle");
@@ -417,7 +419,7 @@
 
     const membersAddSection = document.getElementById("membersAddSection");
     const allowAdd = canManageGroupMembers(groupDoc);
-    if (membersAddSection) membersAddSection.style.display = allowAdd ? "block" : "none";
+    if (membersAddSection) membersAddSection.hidden = !allowAdd;
 
     renderMembers(groupDoc);
     updateChatControls();
@@ -742,14 +744,13 @@
 
       selectedGroupId = null;
       selectedGroupData = null;
-      window.__ECHTLUCKY_SELECTED_GROUP__ = null;
       detachSelectedGroupListener();
       detachMessagesListener();
 
       const chatContainer = document.getElementById("chatContainer");
       const emptyChatState = document.getElementById("emptyChatState");
-      if (chatContainer) chatContainer.style.display = "none";
-      if (emptyChatState) emptyChatState.style.display = "block";
+      if (chatContainer) chatContainer.hidden = true;
+      if (emptyChatState) emptyChatState.hidden = false;
     } catch (err) {
       console.error("leaveSelectedGroup error:", err);
       window.notify?.show({
@@ -786,14 +787,13 @@
 
       selectedGroupId = null;
       selectedGroupData = null;
-      window.__ECHTLUCKY_SELECTED_GROUP__ = null;
       detachSelectedGroupListener();
       detachMessagesListener();
 
       const chatContainer = document.getElementById("chatContainer");
       const emptyChatState = document.getElementById("emptyChatState");
-      if (chatContainer) chatContainer.style.display = "none";
-      if (emptyChatState) emptyChatState.style.display = "block";
+      if (chatContainer) chatContainer.hidden = true;
+      if (emptyChatState) emptyChatState.hidden = false;
     } catch (err) {
       console.error("deleteSelectedGroup error:", err);
       window.notify?.show({
@@ -1002,25 +1002,22 @@
   // Update auth status
   function updateAuthStatus() {
     currentUser = auth.currentUser;
-    console.log(
-      "🔵 updateAuthStatus: currentUser =",
-      currentUser ? currentUser.email : null
-    );
+    log("🔵 updateAuthStatus: currentUser =", currentUser ? currentUser.email : null);
 
     if (!currentUser) {
-      console.log("⚠️ No user logged in");
-      statusLabel.textContent = "Nicht eingeloggt";
-      btnLogin.style.display = "inline-flex";
-      authStatusCard.style.display = "block";
-      connectLayout.style.display = "none";
+      log("⚠️ No user logged in");
+      if (statusLabel) statusLabel.textContent = "Nicht eingeloggt";
+      if (btnLogin) btnLogin.hidden = false;
+      if (authStatusCard) authStatusCard.hidden = false;
+      if (connectLayout) connectLayout.hidden = true;
       return;
     }
 
-    console.log("… User logged in:", currentUser.email);
-    statusLabel.textContent = `Hallo, ${currentUser.displayName || currentUser.email?.split("@")[0] || "User"}!`;
-    btnLogin.style.display = "none";
-    authStatusCard.style.display = "none";
-    connectLayout.style.display = "grid";
+    log("… User logged in:", currentUser.email);
+    if (statusLabel) statusLabel.textContent = `Hallo, ${currentUser.displayName || currentUser.email?.split("@")[0] || "User"}!`;
+    if (btnLogin) btnLogin.hidden = true;
+    if (authStatusCard) authStatusCard.hidden = true;
+    if (connectLayout) connectLayout.hidden = false;
 
     loadCurrentUserFriends();
     loadGroups();
@@ -1038,7 +1035,7 @@
         window.location.href = "login.html";
       });
     }
-    console.log("🟢 connect-minimal.js: init() called");
+    log("🟢 connect-minimal.js: init() called");
 
     const btnLeaveGroupModal = document.getElementById("btnLeaveGroupModal");
     if (btnLeaveGroupModal) {
@@ -1082,7 +1079,7 @@
 
     // Auth changes
     auth.onAuthStateChanged((user) => {
-      console.log("🔵 connect-minimal.js: Auth state changed. User:", user ? user.email : "null");
+      log("🔵 connect-minimal.js: Auth state changed. User:", user ? user.email : "null");
       updateAuthStatus();
       updateChatControls();
 
@@ -1123,7 +1120,7 @@
     if (initialized) return;
     initialized = true;
 
-    console.log("🔵 connect-minimal.js initializing");
+    log("🔵 connect-minimal.js initializing");
     await waitForFirebase();
 
     if (!auth || !db) {
@@ -1141,7 +1138,7 @@
     initModule();
   }
 
-  console.log("✅ connect-minimal.js initialized");
+  log("✅ connect-minimal.js initialized");
 })();
 
 
