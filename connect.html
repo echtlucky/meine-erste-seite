@@ -10,31 +10,29 @@
 </head>
 <body class="page-transition connect-page">
   <div id="header-placeholder"></div>
-  <main class="connect-discord-shell">
-    <aside class="connect-sidebar" id="connectSidebar">
-      <div class="sidebar-logo"> <i class="fa-brands fa-discord"></i> </div>
-      <nav class="sidebar-nav">
-        <button class="sidebar-nav-btn is-active" data-section="friends"><i class="fa fa-user-friends"></i><span>Freunde</span></button>
-        <button class="sidebar-nav-btn" data-section="groups"><i class="fa fa-users"></i><span>Gruppen</span></button>
-        <button class="sidebar-nav-btn" data-section="requests"><i class="fa fa-user-plus"></i><span>Anfragen</span></button>
-        <button class="sidebar-nav-btn" data-section="settings"><i class="fa fa-cog"></i><span>Einstellungen</span></button>
-      </nav>
-      <div class="sidebar-user" id="sidebarUser">
-        <div class="sidebar-user-avatar"><i class="fa fa-user"></i></div>
-        <div class="sidebar-user-info">
-          <span id="sidebarUserName">Gast</span>
-          <span id="sidebarUserStatus" class="user-status offline">Offline</span>
+  <main class="connect-single-card-shell">
+    <section class="discord-card connect-main-card" id="connectMainCard">
+      <div class="connect-header-row">
+        <div class="connect-user-info">
+          <div class="avatar"><i class="fa fa-user"></i></div>
+          <div>
+            <span id="sidebarUserName">Gast</span>
+            <span id="sidebarUserStatus" class="user-status offline">Offline</span>
+          </div>
+        </div>
+        <div class="connect-actions">
+          <button class="btn btn-primary" id="addFriendBtn" title="Freund hinzufügen"><i class="fa fa-user-plus"></i></button>
+          <button class="btn btn-secondary" id="settingsBtn" title="Einstellungen"><i class="fa fa-cog"></i></button>
         </div>
       </div>
-    </aside>
-    <section class="connect-main-panel" id="connectMainPanel">
-      <!-- Dynamic content: friends, groups, requests, chat, etc. -->
+      <div class="connect-tabs-row">
+        <button class="connect-tab is-active" data-tab="friends"><i class="fa fa-user-friends"></i> Freunde</button>
+        <button class="connect-tab" data-tab="groups"><i class="fa fa-users"></i> Gruppen</button>
+        <button class="connect-tab" data-tab="requests"><i class="fa fa-user-plus"></i> Anfragen</button>
+        <button class="connect-tab" data-tab="settings"><i class="fa fa-cog"></i> Einstellungen</button>
+      </div>
       <div id="connectContent"></div>
     </section>
-    <aside class="connect-right-panel" id="connectRightPanel">
-      <!-- Details/settings for selected friend/group/call -->
-      <div id="connectDetails"></div>
-    </aside>
   </main>
   <div id="footer-placeholder"></div>
   <script src="firebase.js"></script>
