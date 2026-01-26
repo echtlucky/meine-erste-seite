@@ -813,6 +813,8 @@
     if (!modal || !btnOpen || !btnClose) return;
 
     const open = () => {
+      // Settings are mobile-only (button is hidden on desktop, but keep a runtime guard).
+      if (window.matchMedia && window.matchMedia("(min-width: 901px)").matches) return;
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
     };
@@ -1048,6 +1050,24 @@
     if (btnDeleteGroupModal) {
       btnDeleteGroupModal.addEventListener("click", () => {
         deleteSelectedGroup().catch((e) => console.error(e));
+      });
+    }
+
+    // Start call from chat header (phone icon)
+    const btnStartCall = document.getElementById("btnStartCall");
+    if (btnStartCall) {
+      btnStartCall.addEventListener("click", () => {
+        if (!selectedGroupId) {
+          window.notify?.show({
+            type: "error",
+            title: "Keine Gruppe ausgewählt",
+            message: "Bitte wähle eine Gruppe aus",
+            duration: 4500
+          });
+          return;
+        }
+
+        window.echtlucky?.voiceChat?.startRingingCall?.(selectedGroupId);
       });
     }
 

@@ -293,7 +293,7 @@ groups/{groupId}/voice-calls/{callId} {
   const voiceStatus = document.getElementById("voiceStatus");
   const voiceParticipants = document.getElementById("voiceParticipants");
   const btnStartVoiceCall = document.getElementById("btnStartVoice");
-  const btnStartRingingCall = document.getElementById("btnStartCall");
+  const btnStartRingingCall = null;
   const btnEndVoiceCall = document.getElementById("btnEndVoice");
   const btnToggleMic = document.getElementById("btnToggleMic");
 
@@ -985,7 +985,7 @@ groups/{groupId}/voice-calls/{callId} {
       uiCallState = state || uiCallState || "active";
       if (voiceStatus) voiceStatus.setAttribute("data-state", uiCallState);
       if (btnStartVoiceCall) btnStartVoiceCall.hidden = true;
-      if (btnStartRingingCall) btnStartRingingCall.hidden = true;
+      // Start-call button is handled in the chat header (connect-minimal), not here.
       if (btnEndVoiceCall) btnEndVoiceCall.hidden = false;
       if (btnToggleMic) btnToggleMic.hidden = false;
       if (btnToggleMic) btnToggleMic.disabled = false;
@@ -998,7 +998,7 @@ groups/{groupId}/voice-calls/{callId} {
       uiCallState = state || "idle";
       if (voiceStatus) voiceStatus.removeAttribute("data-state");
       if (btnStartVoiceCall) btnStartVoiceCall.hidden = false;
-      if (btnStartRingingCall) btnStartRingingCall.hidden = false;
+      // Start-call button is handled in the chat header (connect-minimal), not here.
       if (btnEndVoiceCall) btnEndVoiceCall.hidden = true;
       if (btnToggleMic) btnToggleMic.hidden = true;
       if (btnToggleMic) btnToggleMic.disabled = true;
@@ -1139,21 +1139,7 @@ groups/{groupId}/voice-calls/{callId} {
       btnEndVoiceCall.addEventListener("click", endVoiceCall);
     }
 
-    if (btnStartRingingCall) {
-      btnStartRingingCall.addEventListener("click", () => {
-        const groupId = getSelectedGroupId();
-        if (!groupId) {
-          window.notify?.show({
-            type: "error",
-            title: "Keine Gruppe ausgewählt",
-            message: "Bitte wähle eine Gruppe aus",
-            duration: 4500
-          });
-          return;
-        }
-        startRingingGroupCall(groupId);
-      });
-    }
+    // Start-call is triggered via chat header button (#btnStartCall) and handled in connect-minimal.
 
     if (btnToggleMic) {
       btnToggleMic.addEventListener("click", toggleMic);
@@ -1187,6 +1173,7 @@ groups/{groupId}/voice-calls/{callId} {
 
   appNS.voiceChat = {
     startCall: startVoiceCall,
+    startRingingCall: startRingingGroupCall,
     joinCall: joinVoiceCall,
     endCall: endVoiceCall,
     isInCall: () => !!currentVoiceCall,
