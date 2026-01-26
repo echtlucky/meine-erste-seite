@@ -128,8 +128,7 @@ service cloud.firestore {
       allow read: if request.auth != null;
       
       // Only admin can write posts
-      allow create, update, delete: if isAdmin() && 
-                                        request.resource.data.author == request.auth.email;
+      allow create, update, delete: if isAdmin();
     }
 
     // ==========================================
