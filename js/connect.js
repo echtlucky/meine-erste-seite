@@ -1,15 +1,15 @@
-// js/connect.js — echtlucky Connect Page Controller
-// Manages chat, groups, voice calls, and real-time presence
+// js/connect.js — Chat und Voice Extensions für Connect Page
+// Ergänzt connect-minimal.js mit Chat-, Nachrichten- und Voice-Funktionalität
 // Guard: prevent double-load
 
 (function () {
   "use strict";
 
-  if (window.__ECHTLUCKY_CONNECT_LOADED__) {
+  if (window.__ECHTLUCKY_CONNECT_EXT_LOADED__) {
     console.warn("connect.js already loaded – skipping");
     return;
   }
-  window.__ECHTLUCKY_CONNECT_LOADED__ = true;
+  window.__ECHTLUCKY_CONNECT_EXT_LOADED__ = true;
 
   const auth = window.auth || window.echtlucky?.auth;
   const db = window.db || window.echtlucky?.db;
@@ -19,67 +19,42 @@
     return;
   }
 
-  // ============================================
-  // STATE
-  // ============================================
-
   let selectedGroupId = null;
-  let currentUserGroups = [];
-  let onlineUsers = new Map();
-  let messageUnsubscribe = null;
-  let groupsUnsubscribe = null;
-  let presenceUnsubscribe = null;
+  let messagesUnsubscribe = null;
 
-  // ============================================
-  // DOM ELEMENTS (new home-style layout)
-  // ============================================
-
-  const groupsContainer = document.getElementById("groupsContainer");
+  // DOM Elements
   const messagesList = document.getElementById("messagesList");
   const messageInput = document.getElementById("messageInput");
   const btnSendMessage = document.getElementById("btnSendMessage");
-  const btnCreateGroup = document.getElementById("btnCreateGroup");
   const membersList = document.getElementById("membersList");
-  const voiceParticipants = document.getElementById("voiceParticipants");
-  const voiceStatus = document.getElementById("voiceStatus");
   const btnStartVoice = document.getElementById("btnStartVoice");
   const btnEndVoice = document.getElementById("btnEndVoice");
-  const selectedGroupSection = document.getElementById("selectedGroupSection");
-  const groupTitle = document.getElementById("groupTitle");
-  const groupDesc = document.getElementById("groupDesc");
-  const groupLevel = document.getElementById("groupLevel");
-  const btnLeaveGroup = document.getElementById("btnLeaveGroup");
-  const authStatusCard = document.getElementById("authStatusCard");
-  const statusLabel = document.getElementById("statusLabel");
-  const btnLogin = document.getElementById("btnLogin");
-
-  // Guard: skip if old layout still in use
-  if (!groupsContainer || !messagesList) {
-    console.warn("connect.js: New layout elements not found – skipping initialization");
-    return;
-  }
+  const groupTabs = document.querySelectorAll(".tab-btn");
+  const tabContents = document.querySelectorAll(".tab-content");
 
   // ============================================
-  // INITIALIZE
+  // SETUP EVENT LISTENERS
   // ============================================
 
   function init() {
-    if (!messageInput || !btnSendMessage) return;
-
-    // Setup message send
-    messageInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-
-    btnSendMessage.addEventListener("click", sendMessage);
-
-    // Create group button
-    if (btnCreateGroup) {
-      btnCreateGroup.addEventListener("click", createGroupPrompt);
+    // Message send
+    if (messageInput && btnSendMessage) {
+      messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      btnSendMessage.addEventListener("click", sendMessage);
     }
+
+    // Tab switching
+    groupTabs.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const tabName = e.target.dataset.tab;
+        switchTab(tabName);
+      });
+    });
 
     // Voice buttons
     if (btnStartVoice) {
@@ -89,161 +64,16 @@
       btnEndVoice.addEventListener("click", endVoiceCall);
     }
 
-    // Leave group
-    if (btnLeaveGroup) {
-      btnLeaveGroup.addEventListener("click", leaveGroup);
-    }
-        const key = e.target.id;
-        localStorage.setItem(key, e.target.checked);
-      });
+    // Listen to group selection changes (from connect-minimal.js)
+    window.addEventListener("echtlucky:group-selected", (e) => {
+      selectedGroupId = e.detail?.groupId;
+      if (selectedGroupId) {
+        loadGroupMessages();
+        loadGroupMembers();
+      }
     });
 
-    // User menu
-    btnUserMenu.addEventListener("click", showUserMenu);
-
-    // Listen to auth state
-    auth.onAuthStateChanged(handleAuthStateChange);
-  }
-
-  // ============================================
-  // AUTH STATE
-  // ============================================
-
-  function handleAuthStateChange(user) {
-    if (user) {
-      window.__ECHTLUCKY_CURRENT_USER__ = {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName || "Anonymous"
-      };
-
-      // Update UI
-      userInfo.textContent = user.displayName || user.email;
-
-      // Load groups
-      loadUserGroups();
-
-      // Setup presence
-      setupPresence(user.uid);
-    } else {
-      // Not logged in
-      userInfo.innerHTML = '<span class="user-status">Not logged in</span>';
-      messageInput.disabled = true;
-      btnSendMessage.disabled = true;
-      
-      // Clear listeners
-      if (messageUnsubscribe) messageUnsubscribe();
-      if (groupsUnsubscribe) groupsUnsubscribe();
-      if (presenceUnsubscribe) presenceUnsubscribe();
-    }
-  }
-
-  // ============================================
-  // PRESENCE (Online Status)
-  // ============================================
-
-  function setupPresence(uid) {
-    const presenceRef = db.collection("presence").doc(uid);
-    const userRef = db.collection("users").doc(uid);
-
-    // Set presence as online
-    presenceRef.set({
-      uid,
-      lastSeen: new Date(),
-      status: "online"
-    });
-
-    // Listen to all presence docs
-    presenceUnsubscribe = db.collection("presence").onSnapshot((snap) => {
-      onlineUsers.clear();
-      snap.forEach((doc) => {
-        const data = doc.data();
-        if (data.status === "online") {
-          onlineUsers.set(doc.id, data);
-        }
-      });
-      updateOnlineUsersList();
-    });
-
-    // Set offline on page unload
-    window.addEventListener("beforeunload", () => {
-      presenceRef.set({ status: "offline", lastSeen: new Date() });
-    });
-  }
-
-  // ============================================
-  // LOAD & DISPLAY GROUPS
-  // ============================================
-
-  function loadUserGroups() {
-    const uid = auth.currentUser.uid;
-
-    groupsUnsubscribe = db
-      .collection("groups")
-      .where("members", "array-contains", uid)
-      .onSnapshot((snap) => {
-        currentUserGroups = [];
-        snap.forEach((doc) => {
-          currentUserGroups.push({ id: doc.id, ...doc.data() });
-        });
-        displayGroupsList();
-      });
-  }
-
-  function displayGroupsList() {
-    groupsList.innerHTML = "";
-
-    if (currentUserGroups.length === 0) {
-      groupsList.innerHTML =
-        '<p style="padding: 12px; color: var(--c-text-secondary); text-align: center;">Keine Groups. Erstelle eine neue!</p>';
-      return;
-    }
-
-    currentUserGroups.forEach((group) => {
-      const div = document.createElement("div");
-      div.className = "group-item";
-      if (group.id === selectedGroupId) div.classList.add("is-active");
-
-      const memberCount = group.members?.length || 0;
-
-      div.innerHTML = `
-        <div class="group-name">${group.name}</div>
-        <div class="group-users">${memberCount} member${memberCount !== 1 ? "s" : ""}</div>
-      `;
-
-      div.addEventListener("click", () => selectGroup(group.id, group));
-      groupsList.appendChild(div);
-    });
-  }
-
-  // ============================================
-  // SELECT GROUP
-  // ============================================
-
-  function selectGroup(groupId, groupData) {
-    selectedGroupId = groupId;
-    window.__ECHTLUCKY_SELECTED_GROUP__ = groupId;
-
-    // Update UI
-    displayGroupsList();
-    updateHeaderInfo(groupData);
-    loadGroupMessages();
-    loadGroupMembers();
-    loadGroupStats();
-
-    // Switch to chat view
-    switchView("chat");
-
-    // Enable input
-    messageInput.disabled = false;
-    btnSendMessage.disabled = false;
-  }
-
-  function updateHeaderInfo(groupData) {
-    headerInfo.innerHTML = `
-      <h2 class="header-title"># ${groupData.name}</h2>
-      <p class="header-subtitle">${groupData.description || "No description"}</p>
-    `;
+    console.log("✅ connect.js chat extensions loaded");
   }
 
   // ============================================
@@ -253,75 +83,90 @@
   function loadGroupMessages() {
     if (!selectedGroupId) return;
 
-    // Unsubscribe from previous group
-    if (messageUnsubscribe) messageUnsubscribe();
+    // Unsubscribe from previous listener
+    if (messagesUnsubscribe) messagesUnsubscribe();
 
-    // Listen to messages from this group
-    messageUnsubscribe = db
-      .collection("groups")
-      .doc(selectedGroupId)
-      .collection("messages")
-      .orderBy("createdAt", "asc")
-      .limitToLast(50)
-      .onSnapshot((snap) => {
-        messagesArea.innerHTML = "";
+    if (!messagesList) return;
 
-        snap.forEach((doc) => {
-          const msg = doc.data();
-          displayMessage(msg);
+    try {
+      messagesUnsubscribe = db
+        .collection("groups")
+        .doc(selectedGroupId)
+        .collection("messages")
+        .orderBy("createdAt", "asc")
+        .limitToLast(50)
+        .onSnapshot((snap) => {
+          messagesList.innerHTML = "";
+
+          snap.forEach((doc) => {
+            const msg = doc.data();
+            displayMessage(msg);
+          });
+
+          // Scroll to bottom
+          setTimeout(() => {
+            messagesList.scrollTop = messagesList.scrollHeight;
+          }, 50);
         });
-
-        // Scroll to bottom
-        messagesArea.scrollTop = messagesArea.scrollHeight;
-      });
+    } catch (err) {
+      console.error("Error loading messages:", err);
+    }
   }
 
   function displayMessage(msg) {
-    const div = document.createElement("div");
-    div.className = "message";
+    if (!messagesList) return;
 
-    const initials = (msg.authorName || "?").substring(0, 1).toUpperCase();
-    const time = new Date(msg.createdAt.toDate()).toLocaleTimeString("de-DE", {
+    const div = document.createElement("div");
+    div.className = "message-item";
+
+    const authorName = msg.authorName || "Anonymous";
+    const text = msg.text || "";
+    const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString("de-DE", {
       hour: "2-digit",
       minute: "2-digit"
-    });
+    }) : "";
+
+    const initials = authorName.split(" ")[0][0].toUpperCase();
 
     div.innerHTML = `
-      <div class="message-avatar">${initials}</div>
+      <div class="message-avatar" style="background: linear-gradient(135deg, var(--accent), #0088ff);">
+        ${initials}
+      </div>
       <div class="message-content">
         <div class="message-header">
-          <span class="message-author">${msg.authorName || "Anonymous"}</span>
+          <strong class="message-author">${escapeHtml(authorName)}</strong>
           <span class="message-time">${time}</span>
         </div>
-        <div class="message-text">${escapeHtml(msg.text)}</div>
+        <div class="message-text">${escapeHtml(text)}</div>
       </div>
     `;
 
-    messagesArea.appendChild(div);
+    messagesList.appendChild(div);
   }
 
   function sendMessage() {
     const text = messageInput.value.trim();
     if (!text || !selectedGroupId || !auth.currentUser) {
-      window.notify?.show({
-        type: "warn",
-        title: "Warnung",
-        message: "Select a group first"
-      });
       return;
     }
 
     const groupRef = db.collection("groups").doc(selectedGroupId);
 
-    groupRef.collection("messages").add({
-      authorUid: auth.currentUser.uid,
-      authorName: auth.currentUser.displayName || auth.currentUser.email,
-      text: text,
-      createdAt: new Date()
-    });
-
-    messageInput.value = "";
-    messageInput.focus();
+    groupRef
+      .collection("messages")
+      .add({
+        authorUid: auth.currentUser.uid,
+        authorName: auth.currentUser.displayName || auth.currentUser.email?.split("@")[0] || "User",
+        text: text,
+        createdAt: new Date()
+      })
+      .then(() => {
+        messageInput.value = "";
+        messageInput.focus();
+      })
+      .catch((err) => {
+        console.error("Error sending message:", err);
+      });
   }
 
   // ============================================
@@ -329,186 +174,103 @@
   // ============================================
 
   function loadGroupMembers() {
-    if (!selectedGroupId) return;
+    if (!selectedGroupId || !membersList) return;
 
-    const group = currentUserGroups.find((g) => g.id === selectedGroupId);
-    if (!group || !group.members) return;
-
-    membersList.innerHTML = "";
-
-    group.members.forEach((uid) => {
-      db.collection("users")
-        .doc(uid)
+    try {
+      db.collection("groups")
+        .doc(selectedGroupId)
         .get()
         .then((doc) => {
-          if (doc.exists) {
-            const user = doc.data();
-            const div = document.createElement("div");
-            div.className = "member-card";
+          if (!doc.exists) return;
 
-            const initials = (user.displayName || "?").substring(0, 1).toUpperCase();
-            const isOnline = onlineUsers.has(uid);
+          const group = doc.data();
+          const members = group.members || [];
 
-            div.innerHTML = `
-              <div class="member-avatar">${initials}</div>
-              <div class="member-name">${user.displayName || "Unknown"}</div>
-              <div class="member-status">${isOnline ? "🟢 Online" : "⚫ Offline"}</div>
-            `;
+          membersList.innerHTML = "";
 
-            membersList.appendChild(div);
-          }
+          members.forEach((uid) => {
+            db.collection("users")
+              .doc(uid)
+              .get()
+              .then((userDoc) => {
+                if (!userDoc.exists) return;
+
+                const user = userDoc.data();
+                const displayName = user.displayName || user.email?.split("@")[0] || "User";
+                const isOnline = user.isOnline || false;
+                const avatar = user.photoURL;
+
+                const memberDiv = document.createElement("div");
+                memberDiv.className = "member-item";
+                memberDiv.innerHTML = `
+                  <img
+                    src="${avatar || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%2300ff88%22 width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E'}"
+                    alt="${displayName}"
+                    class="member-avatar"
+                  />
+                  <div class="member-info">
+                    <div class="member-name">${escapeHtml(displayName)}</div>
+                    <div class="member-status" style="color: ${isOnline ? '#00ff88' : '#888'};">
+                      ${isOnline ? "🟢 Online" : "⚫ Offline"}
+                    </div>
+                  </div>
+                `;
+                membersList.appendChild(memberDiv);
+              });
+          });
         });
+    } catch (err) {
+      console.error("Error loading members:", err);
+    }
+  }
+
+  // ============================================
+  // TABS
+  // ============================================
+
+  function switchTab(tabName) {
+    // Update button styles
+    groupTabs.forEach((btn) => {
+      btn.classList.remove("is-active");
+      if (btn.dataset.tab === tabName) {
+        btn.classList.add("is-active");
+      }
+    });
+
+    // Update content visibility
+    tabContents.forEach((content) => {
+      content.style.display = "none";
+      if (content.id === `${tabName}-content`) {
+        content.style.display = "block";
+      }
     });
   }
 
   // ============================================
-  // STATS
+  // VOICE CALLS (Placeholder)
   // ============================================
 
-  function loadGroupStats() {
+  function startVoiceCall() {
     if (!selectedGroupId) return;
 
-    const group = currentUserGroups.find((g) => g.id === selectedGroupId);
-    if (!group) return;
-
-    statsGrid.innerHTML = "";
-
-    const stats = [
-      { icon: "👥", label: "Members", value: group.members?.length || 0 },
-      { icon: "💬", label: "Messages", value: "Loading..." },
-      { icon: "📅", label: "Created", value: new Date(group.createdAt.toDate()).toLocaleDateString("de-DE") },
-      { icon: "⭐", label: "Activity", value: "High" }
-    ];
-
-    stats.forEach((stat) => {
-      const div = document.createElement("div");
-      div.className = "stat-card";
-      div.innerHTML = `
-        <div class="stat-icon">${stat.icon}</div>
-        <div class="stat-label">${stat.label}</div>
-        <div class="stat-value">${stat.value}</div>
-      `;
-      statsGrid.appendChild(div);
+    window.notify?.show({
+      type: "info",
+      title: "Voice Call",
+      message: "Starting voice call in " + selectedGroupId + "..."
     });
 
-    // Load actual message count
-    db.collection("groups")
-      .doc(selectedGroupId)
-      .collection("messages")
-      .get()
-      .then((snap) => {
-        const cards = statsGrid.querySelectorAll(".stat-card");
-        if (cards[1]) {
-          cards[1].querySelector(".stat-value").textContent = snap.size;
-        }
-      });
+    // Voice call logic handled by voice-chat.js
+    window.dispatchEvent(new CustomEvent("echtlucky:voice-start", { detail: { groupId: selectedGroupId } }));
   }
 
-  // ============================================
-  // ONLINE USERS PANEL
-  // ============================================
-
-  function updateOnlineUsersList() {
-    onlineUsersContainer.innerHTML = "";
-
-    if (onlineUsers.size === 0) {
-      onlineUsersContainer.innerHTML =
-        '<p style="padding: 12px; text-align: center; color: var(--c-text-secondary); font-size: 0.85rem;">No one online</p>';
-      return;
-    }
-
-    onlineUsers.forEach((user) => {
-      const div = document.createElement("div");
-      div.className = "online-user";
-      div.innerHTML = `
-        <div class="user-dot"></div>
-        <div class="online-user-name">${user.displayName || user.email || "User"}</div>
-      `;
-      onlineUsersContainer.appendChild(div);
-    });
-  }
-
-  // ============================================
-  // CREATE GROUP
-  // ============================================
-
-  function createGroupPrompt() {
-    const name = prompt("Group name:");
-    if (!name) return;
-
-    const description = prompt("Description (optional):");
-
-    const uid = auth.currentUser.uid;
-
-    db.collection("groups")
-      .add({
-        name: name,
-        description: description || "",
-        members: [uid],
-        createdAt: new Date(),
-        createdBy: uid
-      })
-      .then((docRef) => {
-        window.notify?.show({
-          type: "success",
-          title: "Success",
-          message: `Group "${name}" created!`,
-          duration: 4500
-        });
-        selectGroup(docRef.id, { id: docRef.id, name, description });
-      })
-      .catch((error) => {
-        window.notify?.show({
-          type: "error",
-          title: "Error",
-          message: "Could not create group: " + error.message,
-          duration: 5000
-        });
-      });
-  }
-
-  // ============================================
-  // VIEW NAVIGATION
-  // ============================================
-
-  function switchView(viewName) {
-    // Update nav items
-    document.querySelectorAll(".nav-item").forEach((item) => {
-      item.classList.remove("is-active");
-      if (item.dataset.view === viewName) {
-        item.classList.add("is-active");
-      }
+  function endVoiceCall() {
+    window.notify?.show({
+      type: "info",
+      title: "Voice Call",
+      message: "Ending voice call..."
     });
 
-    // Update views
-    document.querySelectorAll(".connect-view").forEach((view) => {
-      view.classList.remove("is-active");
-      if (view.dataset.view === viewName) {
-        view.classList.add("is-active");
-      }
-    });
-  }
-
-  // ============================================
-  // USER MENU
-  // ============================================
-
-  function showUserMenu() {
-    if (!auth.currentUser) {
-      window.location.href = "login.html";
-      return;
-    }
-
-    const choice = confirm(`Hi ${auth.currentUser.displayName || "User"}!\n\nLogout?`);
-    if (choice) {
-      auth.signOut();
-      window.notify?.show({
-        type: "success",
-        title: "Logged Out",
-        message: "See you later!",
-        duration: 3500
-      });
-    }
+    window.dispatchEvent(new CustomEvent("echtlucky:voice-end"));
   }
 
   // ============================================
@@ -525,7 +287,11 @@
   // STARTUP
   // ============================================
 
-  document.addEventListener("DOMContentLoaded", init);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 
-  console.log("✅ connect.js initialized");
+  console.log("✅ connect.js extensions initialized");
 })();

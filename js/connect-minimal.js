@@ -239,6 +239,11 @@
     groupTitle.textContent = groupData.name || "Gruppe";
     groupDesc.textContent = `${groupData.members?.length || 0} Members`;
     selectedGroupSection.style.display = "block";
+    
+    // Dispatch event for connect.js to load messages/members
+    window.dispatchEvent(new CustomEvent("echtlucky:group-selected", { 
+      detail: { groupId, groupData } 
+    }));
   }
 
   // Create new group
