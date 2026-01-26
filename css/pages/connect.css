@@ -53,6 +53,7 @@
   width: 40px;
   height: 22px;
   -webkit-appearance: none;
+  appearance: none;
   background: #40444b;
   outline: none;
   border-radius: 22px;
@@ -203,7 +204,19 @@
   .connect-tabs-row {
     gap: 0.3rem;
   }
+  .sidebar {
+    background: var(--bg-sidebar);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+    box-shadow: var(--shadow);
+    z-index: 10;
+  }
 }
+
+
+.sidebar {
   background: var(--bg-sidebar);
   display: flex;
   flex-direction: column;
@@ -428,16 +441,19 @@ input:focus, select:focus, textarea:focus {
   #connectContent {
     padding: 0.5rem 0.2rem;
   }
-}
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--accent);
-}
+
 
 /* ==========================================
    3-COLUMN LAYOUT
    ========================================== */
 
+
+
+.sidebar-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
 .connect-layout {
   display: grid;
   grid-template-columns: 280px 1fr 320px;

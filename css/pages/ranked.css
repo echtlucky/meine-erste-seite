@@ -100,6 +100,14 @@
     min-width: 90px;
   }
 }
+
+/* Stats */
+.ranked-stats{
+  display: grid;
+  grid-auto-flow: column;
+}
+
+.ranked-description {
   color: rgba(255,255,255,0.78);
   line-height: 1.6;
 }
