@@ -613,7 +613,16 @@
     btnDownloadCloud?.addEventListener("click", async () => {
       const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
       if (!user) return toast("warn", "Bitte einloggen.");
-      if (!confirm("Account  Local überschreibt deine lokalen Werte. Fortfahren?")) return;
+      
+      const confirmed = await echtluckyModal.confirm({
+        title: "Cloud zu Lokal übernehmen",
+        message: "Dies überschreibt deine lokalen Werte mit den Cloud-Daten. Fortfahren?",
+        confirmText: "Ja, übernehmen",
+        cancelText: "Abbrechen",
+        type: "warning"
+      });
+      
+      if (!confirmed) return;
 
       try {
         await downloadCloudToLocal(user);
@@ -625,8 +634,16 @@
       }
     });
 
-    btnClearLocal?.addEventListener("click", () => {
-      if (!confirm("Local Stats wirklich löschen?")) return;
+    btnClearLocal?.addEventListener("click", async () => {
+      const confirmed = await echtluckyModal.confirm({
+        title: "Lokale Stats löschen",
+        message: "Möchtest du alle lokalen Statistiken wirklich löschen?",
+        confirmText: "Ja, löschen",
+        cancelText: "Abbrechen",
+        type: "danger"
+      });
+      
+      if (!confirmed) return;
       clearLocal();
       renderLocalOnly();
     });
@@ -634,7 +651,16 @@
     btnWipeCloud?.addEventListener("click", async () => {
       const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
       if (!user) return toast("warn", "Bitte einloggen.");
-      if (!confirm("Cloud Stats wirklich zurücksetzen? (nicht rückgängig)")) return;
+      
+      const confirmed = await echtluckyModal.confirm({
+        title: "Cloud Stats zurücksetzen",
+        message: "Dies löscht alle Cloud-Statistiken permanently! Dies kann nicht rückgängig gemacht werden.",
+        confirmText: "Ja, löschen",
+        cancelText: "Abbrechen",
+        type: "danger"
+      });
+      
+      if (!confirmed) return;
 
       try {
         await wipeCloud(user);

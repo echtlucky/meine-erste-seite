@@ -317,7 +317,15 @@
 
   // ==================== Delete Post ====================
   async function deletePost(postId) {
-    if (!confirm("Diesen Post wirklich löschen?")) return;
+    const confirmed = await echtluckyModal.confirm({
+      title: "Post löschen",
+      message: "Möchtest du diesen Post wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
+      confirmText: "Ja, löschen",
+      cancelText: "Abbrechen",
+      type: "danger"
+    });
+
+    if (!confirmed) return;
 
     try {
       // Versuche aus 'posts' Collection
@@ -326,7 +334,11 @@
       loadPosts();
     } catch (error) {
       console.error("❌ Fehler beim Löschen:", error);
-      alert("Fehler beim Löschen: " + error.message);
+      await echtluckyModal.alert({
+        title: "Fehler",
+        message: "Fehler beim Löschen: " + error.message,
+        type: "error"
+      });
     }
   }
 
@@ -334,7 +346,14 @@
   function sharePost(postId) {
     const url = `${window.location.origin}${window.location.pathname}#post-${postId}`;
     navigator.clipboard.writeText(url).then(() => {
-      alert("Link kopiert! 📋");
+      if (window.notify) {
+        window.notify.show({
+          type: "success",
+          title: "Erfolgreich",
+          message: "Link kopiert! 📋",
+          duration: 3000
+        });
+      }
     });
   }
 

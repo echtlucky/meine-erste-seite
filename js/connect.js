@@ -307,54 +307,76 @@
   function leaveGroup() {
     if (!selectedGroupId || !currentUser) return;
 
-    if (
-      !confirm(
-        "Möchtest du die Gruppe wirklich verlassen?"
-      )
-    )
-      return;
+    echtluckyModal.confirm({
+      title: "Gruppe verlassen",
+      message: "Möchtest du diese Gruppe wirklich verlassen? Du kannst ihr später wieder beitreten.",
+      confirmText: "Ja, verlassen",
+      cancelText: "Abbrechen",
+      type: "warning"
+    }).then(confirmed => {
+      if (!confirmed) return;
 
-    try {
-      db.collection("groups")
-        .doc(selectedGroupId)
-        .update({
-          members: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+      try {
+        db.collection("groups")
+          .doc(selectedGroupId)
+          .update({
+            members: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+          });
+
+        window.notify?.show({
+          type: "success",
+          title: "Erfolgreich",
+          message: "Gruppe verlassen",
+          duration: 3500
         });
 
-      window.notify?.show({
-        type: "success",
-        title: "Erfolgreich",
-        message: "Gruppe verlassen",
-        duration: 3500
-      });
-
-      window.dispatchEvent(new CustomEvent("echtlucky:reload-groups"));
-    } catch (err) {
-      console.error("Error leaving group:", err);
-    }
+        window.dispatchEvent(new CustomEvent("echtlucky:reload-groups"));
+      } catch (err) {
+        console.error("Error leaving group:", err);
+        window.notify?.show({
+          type: "error",
+          title: "Fehler",
+          message: "Konnte Gruppe nicht verlassen",
+          duration: 4500
+        });
+      }
+    });
   }
 
   // Delete group
   function deleteGroup() {
     if (!selectedGroupId || !currentUser) return;
 
-    if (!confirm("Möchtest du die Gruppe wirklich löschen? Dies ist nicht rückgängig zu machen!"))
-      return;
+    echtluckyModal.confirm({
+      title: "Gruppe löschen",
+      message: "Möchtest du diese Gruppe wirklich löschen? Dies ist nicht rückgängig zu machen! Alle Nachrichten und Daten gehen verloren.",
+      confirmText: "Ja, löschen",
+      cancelText: "Abbrechen",
+      type: "danger"
+    }).then(confirmed => {
+      if (!confirmed) return;
 
-    try {
-      db.collection("groups").doc(selectedGroupId).delete();
+      try {
+        db.collection("groups").doc(selectedGroupId).delete();
 
-      window.notify?.show({
-        type: "success",
-        title: "Erfolgreich",
-        message: "Gruppe gelöscht",
-        duration: 3500
-      });
+        window.notify?.show({
+          type: "success",
+          title: "Erfolgreich",
+          message: "Gruppe gelöscht",
+          duration: 3500
+        });
 
-      window.dispatchEvent(new CustomEvent("echtlucky:reload-groups"));
-    } catch (err) {
-      console.error("Error deleting group:", err);
-    }
+        window.dispatchEvent(new CustomEvent("echtlucky:reload-groups"));
+      } catch (err) {
+        console.error("Error deleting group:", err);
+        window.notify?.show({
+          type: "error",
+          title: "Fehler",
+          message: "Konnte Gruppe nicht löschen",
+          duration: 4500
+        });
+      }
+    });
   }
 
   // Search members for modal

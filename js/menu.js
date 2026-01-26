@@ -270,8 +270,12 @@ window.renderAuthUI = function renderAuthUI(user) {
       .catch((err) => {
         if (window.notify?.error) {
           window.notify.error("Ausloggen fehlgeschlagen: " + (err?.message || "Unbekannt"), "Fehler", 4500);
-        } else {
-          alert("Ausloggen fehlgeschlagen: " + (err?.message || "Unbekannt"));
+        } else if (window.echtluckyModal?.alert) {
+          window.echtluckyModal.alert({
+            title: "Fehler",
+            message: "Ausloggen fehlgeschlagen: " + (err?.message || "Unbekannt"),
+            type: "error"
+          });
         }
       });
   };

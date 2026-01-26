@@ -331,7 +331,15 @@
   }
 
   async function removeBan(banId) {
-    if (!confirm("Ban wirklich aufheben?")) return;
+    const confirmed = await echtluckyModal.confirm({
+      title: "Ban aufheben",
+      message: "Möchtest du diesen Ban wirklich aufheben?",
+      confirmText: "Ja, aufheben",
+      cancelText: "Abbrechen",
+      type: "warning"
+    });
+    
+    if (!confirmed) return;
 
     try {
       await db.collection("bans").doc(banId).delete();
@@ -489,8 +497,16 @@
       saveSettingsBtn.addEventListener("click", saveSettings);
     }
     if (resetSettingsBtn) {
-      resetSettingsBtn.addEventListener("click", () => {
-        if (confirm("Einstellungen zurücksetzen?")) {
+      resetSettingsBtn.addEventListener("click", async () => {
+        const confirmed = await echtluckyModal.confirm({
+          title: "Einstellungen zurücksetzen",
+          message: "Möchtest du die Einstellungen wirklich auf Standard zurücksetzen?",
+          confirmText: "Ja, zurücksetzen",
+          cancelText: "Abbrechen",
+          type: "warning"
+        });
+        
+        if (confirmed) {
           loadSettings();
         }
       });

@@ -444,17 +444,32 @@
       });
       return;
     }
-    alert("Reaction: Delay • Flick: instant • Precision: kleiner • ESC/Exit beendet");
+    
+    if (window.notify) {
+      window.notify.show({
+        type: "info",
+        title: "How it works",
+        message: "Reaction: Delay • Flick: instant • Precision: kleiner • ESC/Exit beendet",
+        duration: 6000
+      });
+    }
   }
 
   function resetStats(){
-    const ok = confirm("Reflex Stats wirklich resetten?");
-    if (!ok) return;
+    echtluckyModal.confirm({
+      title: "Reflex Stats zurücksetzen",
+      message: "Möchtest du alle deine Reflex-Statistiken wirklich zurücksetzen?",
+      confirmText: "Ja, zurücksetzen",
+      cancelText: "Abbrechen",
+      type: "warning"
+    }).then(ok => {
+      if (!ok) return;
 
-    localStorage.removeItem(LS_KEY);
-    renderTopStats();
-    if (resultCard) resultCard.style.display = "none";
-    if (window.notify) notify.success("Stats wurden resettet ✅", "Reflex Lab");
+      localStorage.removeItem(LS_KEY);
+      renderTopStats();
+      if (resultCard) resultCard.style.display = "none";
+      if (window.notify) window.notify.show({ type: "success", title: "Reflex Lab", message: "Stats wurden resettet ✅", duration: 4500 });
+    });
   }
 
   // ===== WIRING

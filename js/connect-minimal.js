@@ -273,35 +273,41 @@
   function createGroup() {
     if (!currentUser) return;
 
-    const groupName = prompt("Gruppennamen eingeben:");
-    if (!groupName) return;
+    echtluckyModal.input({
+      title: "Neue Gruppe erstellen",
+      placeholder: "Gruppennamen eingeben...",
+      confirmText: "Erstellen",
+      cancelText: "Abbrechen"
+    }).then(groupName => {
+      if (!groupName) return;
 
-    try {
-      db.collection("groups").add({
-        name: groupName,
-        creator: currentUser.uid,
-        members: [currentUser.uid],
-        roles: {
-          [currentUser.uid]: "admin"
-        },
-        createdAt: new Date(),
-        messages: []
-      });
+      try {
+        db.collection("groups").add({
+          name: groupName,
+          creator: currentUser.uid,
+          members: [currentUser.uid],
+          roles: {
+            [currentUser.uid]: "admin"
+          },
+          createdAt: new Date(),
+          messages: []
+        });
 
-      window.notify?.show({
-        type: "success",
-        title: "Erfolgreich",
-        message: `Gruppe "${groupName}" erstellt!`,
-        duration: 4500
-      });
-    } catch (err) {
-      window.notify?.show({
-        type: "error",
-        title: "Fehler",
-        message: "Konnte Gruppe nicht erstellen",
-        duration: 4000
-      });
-    }
+        window.notify?.show({
+          type: "success",
+          title: "Erfolgreich",
+          message: `Gruppe "${groupName}" erstellt!`,
+          duration: 4500
+        });
+      } catch (err) {
+        window.notify?.show({
+          type: "error",
+          title: "Fehler",
+          message: "Konnte Gruppe nicht erstellen",
+          duration: 4000
+        });
+      }
+    });
   }
 
   // Update auth status

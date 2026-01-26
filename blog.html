@@ -64,6 +64,7 @@
   <script src="js/legal-modal.js"></script>
   <script src="js/login.js"></script>
   <script src="js/notify.js"></script>
+  <script src="js/modal-dialog.js"></script>
 
   <script>
     document.body.classList.add('loaded');
@@ -177,17 +178,36 @@
       deletePostBtn.style.display = (canDelete && currentPostId) ? 'inline-block' : 'none';
     }
 
-    deletePostBtn.addEventListener('click', () => {
+    deletePostBtn.addEventListener('click', async () => {
       if (!canDelete || !currentPostId) return;
-      if (!confirm('Post wirklich löschen?')) return;
+      
+      const confirmed = await echtluckyModal.confirm({
+        title: "Post löschen",
+        message: "Möchtest du diesen Post wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
+        confirmText: "Ja, löschen",
+        cancelText: "Abbrechen",
+        type: "danger"
+      });
+
+      if (!confirmed) return;
 
       db.collection('posts').doc(currentPostId).delete()
         .then(() => {
-          alert('Post gelöscht');
+          echtluckyModal.alert({
+            title: "Erfolg",
+            message: "Post gelöscht!",
+            type: "success"
+          });
           closePostModal();
           resetAndReload();
         })
-        .catch((err) => alert('Fehler: ' + err.message));
+        .catch((err) => {
+          echtluckyModal.alert({
+            title: "Fehler",
+            message: "Fehler: " + err.message,
+            type: "error"
+          });
+        });
     });
 
     // ===== Cards
@@ -278,7 +298,11 @@
               escapeHtml(err.message) +
               '</p>';
           } else {
-            alert('Fehler beim Nachladen: ' + err.message);
+            echtluckyModal.alert({
+              title: "Fehler",
+              message: "Fehler beim Nachladen: " + err.message,
+              type: "error"
+            });
           }
         })
         .finally(() => {

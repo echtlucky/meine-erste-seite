@@ -278,7 +278,14 @@
           duration: 4500
         });
       } else {
-        alert(res.msg);
+        if (window.notify) {
+          window.notify.show({
+            type: "info",
+            title: "Ranked",
+            message: res.msg,
+            duration: 4000
+          });
+        }
       }
     }
   }
@@ -303,7 +310,16 @@
   }
 
   async function hardReset() {
-    if (!confirm("Wirklich alles resetten? (Streak/XP/Daily)")) return;
+    const confirmed = await echtluckyModal.confirm({
+      title: "Ranked Stats zurücksetzen",
+      message: "Möchtest du wirklich alles zurücksetzen? (Streak, XP, Daily Quests)",
+      confirmText: "Ja, alles zurücksetzen",
+      cancelText: "Abbrechen",
+      type: "danger"
+    });
+
+    if (!confirmed) return;
+
     localStorage.removeItem(LS_KEY);
 
     const s = normalizeState({});
