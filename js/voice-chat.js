@@ -304,6 +304,7 @@ groups/{groupId}/voice-calls/{callId} {
   const chatCallBar = document.getElementById("chatCallBar");
   const screenShareArea = document.getElementById("screenShareArea");
   const screenShareGrid = document.getElementById("screenShareGrid");
+  const btnCloseScreenShare = document.getElementById("btnCloseScreenShare");
   const btnStartVoiceCall = document.getElementById("btnStartVoice");
   const btnStartRingingCall = null;
   const btnEndVoiceCall = document.getElementById("btnEndVoice");
@@ -430,6 +431,15 @@ groups/{groupId}/voice-calls/{callId} {
   function showScreenShareArea(show) {
     if (!screenShareArea) return;
     screenShareArea.hidden = !show;
+
+    // Mobile: treat as a sheet/modal to prevent background scrolling.
+    if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
+      document.body.classList.toggle("modal-open", !!show);
+      if (show) {
+        // ensure it stays visible on mobile (users otherwise miss it)
+        try { btnCloseScreenShare?.focus?.(); } catch {}
+      }
+    }
   }
 
   function upsertVideoEl(id, stream, isLocal) {
@@ -535,6 +545,7 @@ groups/{groupId}/voice-calls/{callId} {
       }
 
       showScreenShareArea(true);
+      screenShareDismissed = false;
       upsertVideoEl("local-screen-preview", new MediaStream([screenTrack]), true);
 
       peerConnections.forEach((pc, remoteUid) => {
@@ -626,7 +637,7 @@ groups/{groupId}/voice-calls/{callId} {
       remoteStreams.set(remoteUid, remoteStream);
 
       if (event.track.kind === "video") {
-        showScreenShareArea(true);
+        if (!screenShareDismissed) showScreenShareArea(true);
         upsertVideoEl(`remote-screen-${remoteUid}`, new MediaStream([event.track]), false);
         event.track.onended = () => {
           removeVideoEl(`remote-screen-${remoteUid}`);
@@ -1478,6 +1489,13 @@ groups/{groupId}/voice-calls/{callId} {
       });
     }
 
+    if (btnCloseScreenShare) {
+      btnCloseScreenShare.addEventListener("click", () => {
+        screenShareDismissed = true;
+        showScreenShareArea(false);
+      });
+    }
+
     if (shareQualitySelect) {
       shareQualitySelect.addEventListener("change", async () => {
         if (!screenTrack) return;
@@ -1537,3 +1555,4 @@ groups/{groupId}/voice-calls/{callId} {
 })();
 
 
+  let screenShareDismissed = false;

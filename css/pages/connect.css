@@ -461,6 +461,49 @@
   background: rgba(0, 0, 0, 0.28);
 }
 
+.screen-share-sheet__header{
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 6px 12px 6px;
+}
+
+.screen-share-sheet__handle{
+  width: 54px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  margin: 0 auto;
+}
+
+.screen-share-sheet__title{
+  font-weight: 900;
+  letter-spacing: -0.2px;
+  color: rgba(224,255,224,0.92);
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+.screen-share-sheet__close{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,136,0.14);
+  background: rgba(0,0,0,0.35);
+  color: rgba(224,255,224,0.88);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.screen-share-sheet__close:hover{
+  background: rgba(0,255,136,0.10);
+  border-color: rgba(0,255,136,0.28);
+  color: rgba(224,255,224,0.95);
+}
+
 .screen-share-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -474,6 +517,56 @@
   background: rgba(0, 0, 0, 0.55);
   aspect-ratio: 16 / 9;
   object-fit: contain;
+}
+
+/* Mobile: show screen share as a full-screen sheet (Discord-like) */
+@media (max-width: 900px) {
+  .chat-call-bar__actions{
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+
+  .chat-call-bar__actions::-webkit-scrollbar{ height: 6px; }
+  .chat-call-bar__actions::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.12); border-radius: 999px; }
+
+  .screen-share-area{
+    position: fixed;
+    inset: 0;
+    z-index: 100003;
+    margin: 0;
+    border-radius: 0;
+    padding: 10px 12px calc(12px + env(safe-area-inset-bottom)) 12px;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(14px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .screen-share-sheet__header{
+    display: flex;
+  }
+
+  .screen-share-grid{
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+
+  /* Focus on the remote screen; hide local preview on mobile */
+  #local-screen-preview{
+    display: none;
+  }
+
+  .screen-share-video{
+    aspect-ratio: auto;
+    height: min(62dvh, 560px);
+    background: rgba(0, 0, 0, 0.55);
+  }
 }
 
 @media (min-width: 901px) {
