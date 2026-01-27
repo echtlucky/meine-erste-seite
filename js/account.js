@@ -33,6 +33,10 @@
   const pillUpdated = el("pillUpdated");
 
   const avatarInitial = el("avatarInitial");
+  const avatarImg = el("avatarImg");
+  const avatarFile = el("avatarFile");
+  const btnChangeAvatar = el("btnChangeAvatar");
+  const btnRemoveAvatar = el("btnRemoveAvatar");
   const profileName = el("profileName");
   const profileEmail= el("profileEmail");
 
@@ -70,6 +74,9 @@
   const btnSaveSettings = el("btnSaveSettings");
   const btnCancelSettings = el("btnCancelSettings");
   const settingsFormMsg = el("settingsFormMsg");
+  const prefFocusDefault = el("prefFocusDefault");
+  const prefDifficultyDefault = el("prefDifficultyDefault");
+  const prefSounds = el("prefSounds");
 
   // Chart
   let rankChart = null;
@@ -377,6 +384,11 @@
         if (inputUsername) inputUsername.value = data.username || data.displayName || "";
         if (inputEmail) inputEmail.value = user.email || "";
 
+        const prefs = data.preferences || {};
+        if (prefFocusDefault) prefFocusDefault.value = prefs.focusDefault === "on" ? "on" : "off";
+        if (prefDifficultyDefault) prefDifficultyDefault.value = String(prefs.difficultyDefault || "normal");
+        if (prefSounds) prefSounds.value = prefs.sounds === "off" ? "off" : "on";
+
         // Check if Google auth
         const isGoogleAuth = user.providerData?.some(p => p.providerId === "google.com");
         if (isGoogleAuth && inputEmail) {
@@ -396,11 +408,114 @@
     }
   }
 
+  function setAvatarUi(url, displayName) {
+    if (avatarImg) {
+      if (url) {
+        avatarImg.src = url;
+        avatarImg.hidden = false;
+        avatarImg.alt = `${displayName || "Profil"} – Profilbild`;
+      } else {
+        avatarImg.hidden = true;
+        avatarImg.removeAttribute("src");
+      }
+    }
+
+    if (avatarInitial) {
+      avatarInitial.style.display = url ? "none" : "grid";
+    }
+  }
+
+  async function fileToSquareJpegBlob(file, size = 512, quality = 0.86) {
+    const img = document.createElement("img");
+    const url = URL.createObjectURL(file);
+
+    await new Promise((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("Bild konnte nicht geladen werden"));
+      img.src = url;
+    });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    const scale = Math.max(size / w, size / h);
+    const sw = Math.round(size / scale);
+    const sh = Math.round(size / scale);
+    const sx = Math.max(0, Math.floor((w - sw) / 2));
+    const sy = Math.max(0, Math.floor((h - sh) / 2));
+
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, size, size);
+
+    URL.revokeObjectURL(url);
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+    if (!blob) throw new Error("Bild konnte nicht verarbeitet werden");
+    return blob;
+  }
+
+  async function uploadAvatar(user, file) {
+    if (!user?.uid) throw new Error("Nicht eingeloggt");
+
+    const fb = window.firebase;
+    if (!fb?.storage) throw new Error("Firebase Storage nicht verfügbar");
+
+    const storage = fb.storage();
+    const ref = storage.ref(`avatars/${user.uid}.jpg`);
+    const blob = await fileToSquareJpegBlob(file, 512, 0.86);
+
+    await ref.put(blob, {
+      contentType: "image/jpeg",
+      cacheControl: "public,max-age=31536000"
+    });
+
+    const url = await ref.getDownloadURL();
+
+    await db.collection(USER_COLLECTION).doc(user.uid).set(
+      {
+        avatarUrl: url,
+        avatarUpdatedAt: fb.firestore?.FieldValue?.serverTimestamp?.() || new Date()
+      },
+      { merge: true }
+    );
+
+    if (typeof user.updateProfile === "function") {
+      try {
+        await user.updateProfile({ photoURL: url });
+      } catch (_) {}
+    }
+
+    return url;
+  }
+
+  async function removeAvatar(user) {
+    if (!user?.uid) throw new Error("Nicht eingeloggt");
+    const fb = window.firebase;
+
+    await db.collection(USER_COLLECTION).doc(user.uid).set(
+      { avatarUrl: null, avatarUpdatedAt: fb?.firestore?.FieldValue?.serverTimestamp?.() || new Date() },
+      { merge: true }
+    );
+
+    try {
+      const storage = fb?.storage?.();
+      await storage?.ref(`avatars/${user.uid}.jpg`)?.delete?.();
+    } catch (_) {}
+  }
+
   async function saveSettings(user) {
     if (!db) return showFormMsg("Firestore nicht bereit.", "error");
 
     const username = inputUsername?.value?.trim() || "";
     const email = inputEmail?.value?.trim() || "";
+    const nextPrefs = {
+      focusDefault: prefFocusDefault?.value === "on" ? "on" : "off",
+      difficultyDefault: String(prefDifficultyDefault?.value || "normal"),
+      sounds: prefSounds?.value === "off" ? "off" : "on"
+    };
 
     if (!username) {
       return showFormMsg("Benutzername ist erforderlich.", "error");
@@ -426,6 +541,7 @@
       await db.collection(USER_COLLECTION).doc(user.uid).set({
         username: username,
         displayName: username,
+        preferences: nextPrefs,
         settingsUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
 
@@ -573,6 +689,15 @@
       // Load settings
       await loadSettingsData(user);
 
+      // Profile avatar (Firestore)
+      try {
+        const snap = await db.collection(USER_COLLECTION).doc(user.uid).get();
+        const data = snap.exists ? snap.data() : null;
+        setAvatarUi(data?.avatarUrl || user.photoURL || "", user.displayName || "");
+      } catch (_) {
+        setAvatarUi(user.photoURL || "", user.displayName || "");
+      }
+
       try {
         const localRanked = readLocalRanked();
         const localReflex = readLocalReflex();
@@ -594,6 +719,51 @@
         window.location.href = "index.html";
       } catch (e) {
         toast("error", "Ausloggen fehlgeschlagen: " + (e?.message || "Unbekannt"));
+      }
+    });
+
+    // Avatar upload/remove
+    btnChangeAvatar?.addEventListener("click", () => avatarFile?.click?.());
+    avatarInitial?.addEventListener("click", () => avatarFile?.click?.());
+    avatarImg?.addEventListener("click", () => avatarFile?.click?.());
+
+    avatarFile?.addEventListener("change", async () => {
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      const file = avatarFile.files?.[0];
+      if (!user || !file) return;
+
+      if (!/^image\//.test(file.type || "")) {
+        toast("warn", "Bitte eine Bilddatei wählen.");
+        avatarFile.value = "";
+        return;
+      }
+
+      if (file.size > 4 * 1024 * 1024) {
+        toast("warn", "Bild ist zu groß (max. 4MB).");
+        avatarFile.value = "";
+        return;
+      }
+
+      try {
+        const url = await uploadAvatar(user, file);
+        setAvatarUi(url, user.displayName || "");
+        toast("success", "Profilbild aktualisiert.");
+      } catch (e) {
+        toast("error", "Upload fehlgeschlagen: " + (e?.message || "Unbekannt"));
+      } finally {
+        avatarFile.value = "";
+      }
+    });
+
+    btnRemoveAvatar?.addEventListener("click", async () => {
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (!user) return toast("warn", "Bitte einloggen.");
+      try {
+        await removeAvatar(user);
+        setAvatarUi("", user.displayName || "");
+        toast("success", "Profilbild entfernt.");
+      } catch (e) {
+        toast("error", "Konnte nicht entfernen: " + (e?.message || "Unbekannt"));
       }
     });
 

@@ -99,14 +99,33 @@
   const groupsListPanel = document.getElementById("groupsListPanel");
   const groupContextMenu = document.getElementById("groupContextMenu");
   const userContextMenu = document.getElementById("userContextMenu");
+  const dmListPanel = document.getElementById("dmListPanel");
+  const dmSearchInput = document.getElementById("dmSearchInput");
+  const btnOpenAddFriend = document.getElementById("btnOpenAddFriend");
+  const addFriendModal = document.getElementById("addFriendModal");
+  const btnCloseAddFriendModal = document.getElementById("btnCloseAddFriendModal");
+  const connectSettingsModal = document.getElementById("connectSettingsModal");
+  const btnCloseConnectSettings = document.getElementById("btnCloseConnectSettings");
   const btnCreateGroup = document.getElementById("btnCreateGroup");
   const friendSearchInput = document.getElementById("friendSearchInput");
   const friendsSearchResults = document.getElementById("friendsSearchResults");
   const incomingCallModal = document.getElementById("incomingCallModal");
   const btnAcceptCall = document.getElementById("btnAcceptCall");
   const btnRejectCall = document.getElementById("btnRejectCall");
+  const replyPreview = document.getElementById("replyPreview");
+  const replyPreviewText = document.getElementById("replyPreviewText");
+  const btnCancelReply = document.getElementById("btnCancelReply");
+  const btnUserBarAccount = document.getElementById("btnUserBarAccount");
+  const userBarAvatar = document.getElementById("userBarAvatar");
+  const userBarName = document.getElementById("userBarName");
+  const btnUserBarMute = document.getElementById("btnUserBarMute");
+  const btnUserBarDeafen = document.getElementById("btnUserBarDeafen");
+  const btnUserBarSettings = document.getElementById("btnUserBarSettings");
 
   let currentUser = null;
+  let activeChatMode = "dm"; // "dm" | "group"
+  let selectedDmUid = null;
+  let selectedDmName = "";
   let selectedGroupId = null;
   let selectedGroupData = null;
   let selectedGroupUnsubscribe = null;
@@ -117,6 +136,7 @@
   const groupsCache = new Map(); // groupId -> groupData (from snapshot)
   let groupContextState = null; // { groupId, groupData }
   let userContextState = null; // { uid, name }
+  let replyState = null; // { messageId, authorName, excerpt }
   const connectMainCard = document.querySelector(".connect-main-card");
   const mobileSwitcher = document.querySelector(".connect-mobile-switcher");
 
@@ -245,6 +265,14 @@
     return String(str || "").replace(/[&<>"']/g, (m) => map[m]);
   }
 
+  function safeJsonParse(raw) {
+    try {
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
   function splitUserTag(displayName) {
     const s = String(displayName || "").trim();
     const m = s.match(/^(.*?)[#](\d{3,6})$/);
@@ -263,6 +291,153 @@
     return `${escapeHtml(parts.name)} <span class="user-tag"><i class="fa-solid fa-star" aria-hidden="true"></i>${escapeHtml(parts.tag)}</span>`;
   }
 
+  function getDmKey(myUid, otherUid) {
+    const a = String(myUid || "").trim();
+    const b = String(otherUid || "").trim();
+    const pair = [a, b].sort().join("_");
+    return `echtlucky:dm:${pair}`;
+  }
+
+  function loadDmMessages(myUid, otherUid) {
+    const key = getDmKey(myUid, otherUid);
+    const data = safeJsonParse(localStorage.getItem(key) || "[]");
+    return Array.isArray(data) ? data : [];
+  }
+
+  function saveDmMessages(myUid, otherUid, messages) {
+    const key = getDmKey(myUid, otherUid);
+    localStorage.setItem(key, JSON.stringify(messages || []));
+  }
+
+  function renderDmList() {
+    if (!dmListPanel) return;
+    const myUid = auth?.currentUser?.uid || currentUser?.uid;
+    if (!myUid) {
+      dmListPanel.innerHTML = '<div class="empty-state"><p>Bitte einloggen</p></div>';
+      return;
+    }
+
+    const q = String(dmSearchInput?.value || "").trim().toLowerCase();
+    const ids = Array.isArray(currentUserFriends) ? currentUserFriends.filter(Boolean) : [];
+
+    if (!ids.length) {
+      dmListPanel.innerHTML = '<div class="empty-state"><p>Keine Direktnachrichten</p></div>';
+      return;
+    }
+
+    // Warm cache
+    fetchUserProfiles(ids).catch(() => {});
+    refreshPresence(ids).catch(() => {});
+
+    const items = ids
+      .map((uid) => {
+        const { label, initials } = getCachedUserLabel(uid);
+        const state = getPresenceState(uid);
+        const stateLabel = state === "online" ? "Online" : state === "away" ? "Abwesend" : "Offline";
+        return { uid, label, initials, state, stateLabel };
+      })
+      .filter((it) => !q || String(it.label).toLowerCase().includes(q))
+      .slice(0, 60);
+
+    dmListPanel.innerHTML = items
+      .map((it) => {
+        const active = selectedDmUid === it.uid && activeChatMode === "dm";
+        return `
+          <button class="dm-item${active ? " is-active" : ""}" type="button" data-dm-uid="${escapeHtml(it.uid)}" data-dm-name="${escapeHtml(it.label)}">
+            <span class="dm-item__left">
+              <span class="dm-item__avatar">${escapeHtml(it.initials)}</span>
+              <span style="min-width:0;">
+                <span class="dm-item__name">${renderUserDisplayName(it.label)}</span>
+                <span class="dm-item__status">• ${escapeHtml(it.stateLabel)}</span>
+              </span>
+            </span>
+          </button>
+        `;
+      })
+      .join("");
+  }
+
+  function selectDm(uid, name) {
+    activeChatMode = "dm";
+    selectedDmUid = uid;
+    selectedDmName = name || "";
+    selectedGroupId = null;
+    selectedGroupData = null;
+    detachSelectedGroupListener();
+    detachMessagesListener();
+
+    const chatContainer = document.getElementById("chatContainer");
+    const emptyChatState = document.getElementById("emptyChatState");
+    if (chatContainer) chatContainer.hidden = false;
+    if (emptyChatState) emptyChatState.hidden = true;
+
+    const chatGroupTitle = document.getElementById("chatGroupTitle");
+    if (chatGroupTitle) chatGroupTitle.textContent = name || "Direktnachricht";
+
+    clearReplyState();
+
+    const myUid = auth?.currentUser?.uid;
+    const messages = myUid && uid ? loadDmMessages(myUid, uid) : [];
+    renderMessages(messages);
+    updateChatControls();
+    renderDmList();
+  }
+
+  async function sendMessageToSelectedDm() {
+    const myUid = auth?.currentUser?.uid;
+    if (!myUid || !selectedDmUid) return;
+
+    const input = document.getElementById("messageInput");
+    const text = (input?.value || "").trim();
+    if (!text) return;
+
+    const authorName = auth.currentUser.displayName || (auth.currentUser.email ? auth.currentUser.email.split("@")[0] : "Du");
+
+    const messages = loadDmMessages(myUid, selectedDmUid);
+    const message = {
+      id: `dm_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      authorUid: myUid,
+      authorName,
+      text,
+      createdAt: new Date().toISOString()
+    };
+
+    if (replyState?.excerpt) {
+      message.replyTo = {
+        messageId: replyState.messageId || null,
+        authorName: replyState.authorName || "",
+        excerpt: String(replyState.excerpt || "").slice(0, 180)
+      };
+    }
+
+    messages.push(message);
+    saveDmMessages(myUid, selectedDmUid, messages.slice(-200));
+    if (input) input.value = "";
+    clearReplyState();
+    renderMessages(messages);
+  }
+
+  function clearReplyState() {
+    replyState = null;
+    if (replyPreview) replyPreview.hidden = true;
+    if (replyPreviewText) replyPreviewText.textContent = "";
+  }
+
+  function setReplyState(message) {
+    if (!message) return;
+
+    replyState = {
+      messageId: message.id || null,
+      authorName: message.authorName || "User",
+      excerpt: String(message.text || "").trim().slice(0, 140)
+    };
+
+    if (replyPreviewText) {
+      replyPreviewText.textContent = `${replyState.authorName}: ${replyState.excerpt}`;
+    }
+    if (replyPreview) replyPreview.hidden = false;
+  }
+
   // Load current user's friends list
   function loadCurrentUserFriends() {
     if (!currentUser) return;
@@ -272,6 +447,7 @@
         .doc(currentUser.uid)
         .onSnapshot((doc) => {
           currentUserFriends = doc.data()?.friends || [];
+          renderDmList();
         });
     } catch (err) {
       console.error("Error loading friends:", err);
@@ -287,53 +463,71 @@
         .where("members", "array-contains", currentUser.uid)
         .onSnapshot((snapshot) => {
           groupsCache.clear();
-          groupsListPanel.innerHTML = "";
           const stripData = [];
 
-          if (snapshot.empty) {
-            groupsListPanel.innerHTML =
-              '<div class="empty-state"><p>📭 Keine Gruppen</p></div>';
-            return;
+          // DM "home" entry at the top of the strip
+          stripData.push({ id: "__dm__", name: "DM", unread: 0, color: "#00ff88", type: "dm" });
+
+          if (!snapshot.empty) {
+            // Legacy list (kept hidden in HTML, but still populated for quick context operations if needed)
+            if (groupsListPanel) groupsListPanel.innerHTML = "";
+
+            snapshot.forEach((doc) => {
+              const group = doc.data();
+              groupsCache.set(doc.id, group);
+
+              if (groupsListPanel) {
+                const div = document.createElement("div");
+                div.className = "group-item";
+                div.dataset.groupId = doc.id;
+                if (selectedGroupId === doc.id) div.classList.add("is-active");
+
+                div.innerHTML = `
+                  <div class="group-item-name">${escapeHtml(group.name || "Gruppe")}</div>
+                  <div class="group-item-meta">${group.members?.length || 0} Mitglieder</div>
+                `;
+
+                div.addEventListener("click", () => selectGroup(doc.id, group, div));
+                div.addEventListener("contextmenu", (e) => {
+                  e.preventDefault();
+                  selectGroup(doc.id, group, div);
+                  openGroupContextMenu(e.clientX, e.clientY, doc.id, group);
+                });
+                groupsListPanel.appendChild(div);
+              }
+
+              stripData.push({
+                id: doc.id,
+                name: group.name || "Gruppe",
+                unread: group.unreadCount || group.unread || 0,
+                color: group.meta?.color || "#00ff88",
+                type: "group"
+              });
+            });
+          } else {
+            if (groupsListPanel) {
+              groupsListPanel.innerHTML = '<div class="empty-state"><p>📭 Keine Gruppen</p></div>';
+            }
           }
 
-          snapshot.forEach((doc) => {
-            const group = doc.data();
-            groupsCache.set(doc.id, group);
-            const div = document.createElement("div");
-            div.className = "group-item";
-            div.dataset.groupId = doc.id;
-            if (selectedGroupId === doc.id) div.classList.add("is-active");
+          // Create button at the bottom of the strip
+          stripData.push({ id: "__create__", name: "+", unread: 0, color: "#00ff88", type: "create" });
 
-            div.innerHTML = `
-              <div class="group-item-name">${escapeHtml(group.name || "Gruppe")}</div>
-              <div class="group-item-meta">${group.members?.length || 0} Mitglieder</div>
-            `;
-
-            div.addEventListener("click", () => selectGroup(doc.id, group, div));
-            div.addEventListener("contextmenu", (e) => {
-              e.preventDefault();
-              selectGroup(doc.id, group, div);
-              openGroupContextMenu(e.clientX, e.clientY, doc.id, group);
-            });
-            groupsListPanel.appendChild(div);
-            stripData.push({
-              id: doc.id,
-              name: group.name || "Gruppe",
-              unread: group.unreadCount || group.unread || 0,
-              color: group.meta?.color || "#00ff88"
-            });
-          });
           window.updateGroupStrip?.(stripData);
         });
     } catch (err) {
       console.error("Error loading groups:", err);
-      groupsListPanel.innerHTML =
-        '<div class="empty-state"><p>⚠️ Fehler</p></div>';
+      if (groupsListPanel) {
+        groupsListPanel.innerHTML = '<div class="empty-state"><p>⚠️ Fehler</p></div>';
+      }
     }
   }
 
   // Select a group
   function selectGroup(groupId, groupData, clickedEl) {
+    activeChatMode = "group";
+    selectedDmUid = null;
+    selectedDmName = "";
     selectedGroupId = groupId;
     selectedGroupData = groupData || null;
     
@@ -363,6 +557,8 @@
     const chatGroupTitle = document.getElementById("chatGroupTitle");
     if (chatGroupTitle) chatGroupTitle.textContent = groupData.name || "Gruppe";
 
+    clearReplyState();
+
     // Update member settings
     const groupNameInput = document.getElementById("groupNameInput");
     if (groupNameInput) groupNameInput.value = groupData.name || "Gruppe";
@@ -372,6 +568,7 @@
 
     attachSelectedGroupListener(groupId);
     attachMessagesListener(groupId);
+    updateChatControls();
 
     // Dispatch event for other listeners (e.g. voice-chat)
     window.dispatchEvent(
@@ -490,23 +687,61 @@
       .join("");
   }
 
-  function openUserContextMenu(x, y, targetUid, targetName) {
+  function getMutedFriendsKey() {
+    const myUid = auth?.currentUser?.uid || currentUser?.uid || "";
+    return `echtlucky:friends-muted:${myUid}`;
+  }
+
+  function readMutedFriendsSet() {
+    const arr = safeJsonParse(localStorage.getItem(getMutedFriendsKey()) || "[]");
+    return new Set(Array.isArray(arr) ? arr : []);
+  }
+
+  function writeMutedFriendsSet(set) {
+    localStorage.setItem(getMutedFriendsKey(), JSON.stringify(Array.from(set || [])));
+  }
+
+  async function showUserProfile(uid, fallbackName) {
+    const { label, initials } = getCachedUserLabel(uid);
+    const name = fallbackName || label || `User ${String(uid || "").slice(0, 6)}`;
+    const state = getPresenceState(uid);
+    const stateLabel = state === "online" ? "Online" : state === "away" ? "Abwesend" : "Offline";
+
+    await window.echtluckyModal?.alert?.({
+      title: "Profil",
+      message: `${name}\n\nStatus: ${stateLabel}\nTag: ${initials}`,
+      confirmText: "OK"
+    });
+  }
+
+  function openUserContextMenu(x, y, targetUid, targetName, source = "member") {
     if (!userContextMenu) return;
     if (!targetUid) return;
     if (targetUid === auth?.currentUser?.uid) return;
 
     const isFriend = Array.isArray(currentUserFriends) && currentUserFriends.includes(targetUid);
+    const muted = readMutedFriendsSet().has(targetUid);
 
     const items = [];
-    if (isFriend) {
-      items.push({ action: "remove-friend", label: "Aus Freundesliste entfernen" });
-    } else {
-      items.push({ action: "add-friend", label: "Freund hinzufügen" });
-    }
-    items.push({ type: "sep" });
-    items.push({ action: "copy-name", label: "Benutzername kopieren", hint: "⧉" });
 
-    userContextState = { uid: targetUid, name: targetName || "" };
+    if (source === "friend") {
+      items.push({ action: "view-profile", label: "Profil ansehen" });
+      items.push({ action: "toggle-mute", label: muted ? "Stummschaltung aufheben" : "Stummschalten" });
+      items.push({ type: "sep" });
+      items.push({ action: "remove-friend", label: "Aus Freundesliste entfernen", variant: "danger" });
+      items.push({ type: "sep" });
+      items.push({ action: "copy-name", label: "Benutzername kopieren", hint: "⧉" });
+    } else {
+      if (isFriend) {
+        items.push({ action: "remove-friend", label: "Aus Freundesliste entfernen", variant: "danger" });
+      } else {
+        items.push({ action: "add-friend", label: "Freund hinzufügen" });
+      }
+      items.push({ type: "sep" });
+      items.push({ action: "copy-name", label: "Benutzername kopieren", hint: "⧉" });
+    }
+
+    userContextState = { uid: targetUid, name: targetName || "", source };
     renderUserContextMenuItems(items);
     userContextMenu.hidden = false;
     positionUserContextMenu(x, y);
@@ -809,13 +1044,17 @@
       try {
         const d =
           createdAt?.toDate?.() ||
-          (createdAt instanceof Date ? createdAt : null);
+          (createdAt instanceof Date ? createdAt : null) ||
+          (typeof createdAt === "string" ? new Date(createdAt) : null);
         if (!d) return "";
         return d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
       } catch (_) {
         return "";
       }
     };
+
+    const reactionKey = activeChatMode === "group" && selectedGroupId && myUid ? `echtlucky:reacted:${selectedGroupId}:${myUid}` : null;
+    const reactedIds = reactionKey ? new Set(safeJsonParse(localStorage.getItem(reactionKey) || "[]") || []) : new Set();
 
     list.innerHTML = messages
       .map((m) => {
@@ -824,9 +1063,22 @@
         const text = m.text || "";
         const isMine = m.authorUid === myUid;
         const time = formatTime(m.createdAt);
+        const idAttr = m.id ? ` data-message-id="${escapeHtml(m.id)}"` : "";
+        const hasReply = !!m.replyTo?.excerpt;
+        const hasReaction = !!(m.id && reactedIds.has(m.id)) || !!m.reactionsCount;
+
+        const quote = hasReply
+          ? `<div class="message-quote"><strong>${escapeHtml(m.replyTo.authorName || "User")}:</strong> ${escapeHtml(m.replyTo.excerpt || "")}</div>`
+          : "";
+
         return `
-          <div class="message${isMine ? " is-mine" : ""}">
+          <div class="message${isMine ? " is-mine" : ""}${hasReply ? " has-reply" : ""}${hasReaction ? " has-reaction" : ""}"${idAttr}>
+            <div class="message-actions">
+              <button class="message-action" type="button" data-action="reply" aria-label="Antworten">↩</button>
+              <button class="message-action" type="button" data-action="react" aria-label="Reaktion">❤</button>
+            </div>
             <div class="message-author">${renderUserDisplayName(author)}</div>
+            ${quote}
             <div class="message-text">${escapeHtml(text)}</div>
             ${time ? `<div class="message-time">${escapeHtml(time)}</div>` : ""}
           </div>
@@ -849,7 +1101,7 @@
       .limit(200)
       .onSnapshot((snap) => {
         const messages = [];
-        snap.forEach((doc) => messages.push(doc.data()));
+        snap.forEach((doc) => messages.push({ id: doc.id, ...(doc.data() || {}) }));
         renderMessages(messages);
         updateChatControls();
       });
@@ -878,15 +1130,26 @@
       const authorName =
         user.displayName || (user.email ? user.email.split("@")[0] : "User");
 
-      await db.collection("groups").doc(selectedGroupId).collection("messages").add({
+      const payload = {
         authorUid: user.uid,
         authorName,
         text,
         createdAt: new Date(),
         createdAtServer: firebase?.firestore?.FieldValue?.serverTimestamp?.()
-      });
+      };
+
+      if (replyState?.excerpt) {
+        payload.replyTo = {
+          messageId: replyState.messageId || null,
+          authorName: replyState.authorName || "",
+          excerpt: String(replyState.excerpt || "").slice(0, 180)
+        };
+      }
+
+      await db.collection("groups").doc(selectedGroupId).collection("messages").add(payload);
 
       if (input) input.value = "";
+      clearReplyState();
     } catch (err) {
       console.error("sendMessageToSelectedGroup error:", err);
       window.notify?.show({
@@ -903,11 +1166,16 @@
     const btn = document.getElementById("btnSendMessage");
 
     const hasAuth = !!auth?.currentUser?.uid;
-    const hasGroup = !!selectedGroupId;
-    const members = Array.isArray(selectedGroupData?.members) ? selectedGroupData.members : [];
-    const isMember = hasAuth ? members.includes(auth.currentUser.uid) : false;
 
-    const enabled = hasAuth && hasGroup && isMember;
+    let enabled = false;
+    if (activeChatMode === "group") {
+      const hasGroup = !!selectedGroupId;
+      const members = Array.isArray(selectedGroupData?.members) ? selectedGroupData.members : [];
+      const isMember = hasAuth ? members.includes(auth.currentUser.uid) : false;
+      enabled = hasAuth && hasGroup && isMember;
+    } else {
+      enabled = hasAuth && !!selectedDmUid;
+    }
 
     if (input) input.disabled = !enabled;
     if (btn) btn.disabled = !enabled;
@@ -1354,14 +1622,21 @@
       if (btnLogin) btnLogin.hidden = false;
       if (authStatusCard) authStatusCard.hidden = false;
       if (connectLayout) connectLayout.hidden = true;
+      if (userBarName) userBarName.textContent = "Guest";
+      if (userBarAvatar) userBarAvatar.textContent = "G";
+      if (dmListPanel) dmListPanel.innerHTML = '<div class="empty-state"><p>Bitte einloggen</p></div>';
       return;
     }
 
     log("… User logged in:", currentUser.email);
-    if (statusLabel) statusLabel.textContent = `Hallo, ${currentUser.displayName || currentUser.email?.split("@")[0] || "User"}!`;
+    const display = currentUser.displayName || currentUser.email?.split("@")[0] || "User";
+    if (statusLabel) statusLabel.textContent = `Hallo, ${display}!`;
     if (btnLogin) btnLogin.hidden = true;
     if (authStatusCard) authStatusCard.hidden = true;
     if (connectLayout) connectLayout.hidden = false;
+
+    if (userBarName) userBarName.textContent = display;
+    if (userBarAvatar) userBarAvatar.textContent = String(display || "U")[0].toUpperCase();
 
     loadCurrentUserFriends();
     loadGroups();
@@ -1677,17 +1952,9 @@
       window.addEventListener("scroll", closeGroupContextMenu, true);
     }
 
-    // Users: right-click context menu (members list)
-    const membersList = document.getElementById("membersList");
-    if (membersList && userContextMenu) {
-      membersList.addEventListener("contextmenu", (e) => {
-        const item = e.target?.closest?.(".member-item[data-user-uid]");
-        if (!item) return;
-        e.preventDefault();
-        const targetUid = item.getAttribute("data-user-uid") || "";
-        const targetName = item.getAttribute("data-user-name") || "";
-        openUserContextMenu(e.clientX, e.clientY, targetUid, targetName);
-      });
+    // Users context menu (members + friends)
+    if (userContextMenu && !userContextMenu.__wired) {
+      userContextMenu.__wired = true;
 
       userContextMenu.addEventListener("click", async (e) => {
         const btn = e.target?.closest?.(".context-menu__item");
@@ -1706,6 +1973,38 @@
 
         if (action === "remove-friend") {
           await removeFriend(state.uid, state.name || "User");
+          if (selectedDmUid === state.uid) {
+            selectedDmUid = null;
+            selectedDmName = "";
+            clearReplyState();
+            updateChatControls();
+            const chatContainer = document.getElementById("chatContainer");
+            const emptyChatState = document.getElementById("emptyChatState");
+            if (chatContainer) chatContainer.hidden = true;
+            if (emptyChatState) emptyChatState.hidden = false;
+          }
+          renderDmList();
+          return;
+        }
+
+        if (action === "toggle-mute") {
+          const set = readMutedFriendsSet();
+          const nextMuted = !set.has(state.uid);
+          if (nextMuted) set.add(state.uid);
+          else set.delete(state.uid);
+          writeMutedFriendsSet(set);
+          renderDmList();
+          window.notify?.show({
+            type: "success",
+            title: "Aktualisiert",
+            message: nextMuted ? "User stummgeschaltet." : "Stummschaltung aufgehoben.",
+            duration: 2500
+          });
+          return;
+        }
+
+        if (action === "view-profile") {
+          await showUserProfile(state.uid, state.name || "");
           return;
         }
 
@@ -1720,14 +2019,11 @@
               message: "Benutzername kopiert.",
               duration: 2000
             });
-          } catch (_) {
-            // Clipboard may be blocked; ignore silently.
-          }
+          } catch (_) {}
           return;
         }
       });
 
-      // Close on outside click / escape / scroll / resize
       document.addEventListener("pointerdown", (e) => {
         if (userContextMenu.hidden) return;
         if (e.target === userContextMenu || e.target?.closest?.("#userContextMenu")) return;
@@ -1742,6 +2038,37 @@
       window.addEventListener("scroll", closeUserContextMenu, true);
     }
 
+    const membersList = document.getElementById("membersList");
+    if (membersList) {
+      membersList.addEventListener("contextmenu", (e) => {
+        const item = e.target?.closest?.(".member-item[data-user-uid]");
+        if (!item) return;
+        e.preventDefault();
+        openUserContextMenu(
+          e.clientX,
+          e.clientY,
+          item.getAttribute("data-user-uid") || "",
+          item.getAttribute("data-user-name") || "",
+          "member"
+        );
+      });
+    }
+
+    if (dmListPanel) {
+      dmListPanel.addEventListener("contextmenu", (e) => {
+        const item = e.target?.closest?.(".dm-item[data-dm-uid]");
+        if (!item) return;
+        e.preventDefault();
+        openUserContextMenu(
+          e.clientX,
+          e.clientY,
+          item.getAttribute("data-dm-uid") || "",
+          item.getAttribute("data-dm-name") || "",
+          "friend"
+        );
+      });
+    }
+
     initGroupSettingsModal();
     wireAddMemberSearchUI();
 
@@ -1749,6 +2076,153 @@
     if (btnCreateGroup) {
       btnCreateGroup.addEventListener("click", createGroup);
     }
+
+    // DM list: search + select
+    if (dmSearchInput) {
+      dmSearchInput.addEventListener("input", () => {
+        renderDmList();
+      });
+    }
+
+    if (dmListPanel && !dmListPanel.__wired) {
+      dmListPanel.__wired = true;
+      dmListPanel.addEventListener("click", (e) => {
+        const btn = e.target?.closest?.(".dm-item[data-dm-uid]");
+        if (!btn) return;
+        const uid = btn.getAttribute("data-dm-uid") || "";
+        const name = btn.getAttribute("data-dm-name") || "";
+        if (!uid) return;
+        selectDm(uid, name);
+      });
+    }
+
+    // Add friend modal
+    const openAddFriend = () => {
+      if (!addFriendModal) return;
+      addFriendModal.hidden = false;
+      addFriendModal.setAttribute("aria-hidden", "false");
+      setTimeout(() => addFriendModal.classList.add("show"), 10);
+      friendSearchInput?.focus?.();
+    };
+
+    const closeAddFriend = () => {
+      if (!addFriendModal) return;
+      addFriendModal.classList.remove("show");
+      addFriendModal.setAttribute("aria-hidden", "true");
+      setTimeout(() => (addFriendModal.hidden = true), 200);
+    };
+
+    btnOpenAddFriend?.addEventListener("click", openAddFriend);
+    btnCloseAddFriendModal?.addEventListener("click", closeAddFriend);
+    addFriendModal?.addEventListener("click", (e) => {
+      if (e.target === addFriendModal) closeAddFriend();
+    });
+
+    // Settings popup (user bar gear)
+    const openConnectSettings = () => {
+      if (!connectSettingsModal) return;
+      connectSettingsModal.hidden = false;
+      connectSettingsModal.setAttribute("aria-hidden", "false");
+      setTimeout(() => connectSettingsModal.classList.add("show"), 10);
+
+      // Populate device selectors (settings popup has its own selects)
+      const audioIn = document.getElementById("audioInputSelectSettings");
+      const audioOut = document.getElementById("audioOutputSelectSettings");
+      const AUDIO_INPUT_KEY = "echtlucky:audioInputDeviceId";
+      const AUDIO_OUTPUT_KEY = "echtlucky:audioOutputDeviceId";
+
+      const fill = (select, list, stored, placeholder) => {
+        if (!select) return;
+        select.innerHTML = "";
+        const opt0 = document.createElement("option");
+        opt0.value = "";
+        opt0.textContent = placeholder || "Automatisch";
+        select.appendChild(opt0);
+
+        list.forEach((d) => {
+          const opt = document.createElement("option");
+          opt.value = d.deviceId;
+          opt.textContent = d.label || `${d.kind}`;
+          select.appendChild(opt);
+        });
+
+        if (stored) select.value = stored;
+      };
+
+      const refresh = async () => {
+        if (!navigator.mediaDevices?.enumerateDevices) return;
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const inputs = devices.filter((d) => d.kind === "audioinput");
+        const outputs = devices.filter((d) => d.kind === "audiooutput");
+        fill(audioIn, inputs, localStorage.getItem(AUDIO_INPUT_KEY), "Automatisch");
+        fill(audioOut, outputs, localStorage.getItem(AUDIO_OUTPUT_KEY), "Automatisch");
+      };
+
+      refresh().catch(() => {});
+
+      if (audioIn && !audioIn.__wired) {
+        audioIn.__wired = true;
+        audioIn.addEventListener("change", () => {
+          localStorage.setItem(AUDIO_INPUT_KEY, audioIn.value || "");
+        });
+      }
+
+      if (audioOut && !audioOut.__wired) {
+        audioOut.__wired = true;
+        audioOut.addEventListener("change", () => {
+          localStorage.setItem(AUDIO_OUTPUT_KEY, audioOut.value || "");
+        });
+      }
+    };
+
+    const closeConnectSettings = () => {
+      if (!connectSettingsModal) return;
+      connectSettingsModal.classList.remove("show");
+      connectSettingsModal.setAttribute("aria-hidden", "true");
+      setTimeout(() => (connectSettingsModal.hidden = true), 200);
+    };
+
+    btnUserBarSettings?.addEventListener("click", openConnectSettings);
+    btnCloseConnectSettings?.addEventListener("click", closeConnectSettings);
+    connectSettingsModal?.addEventListener("click", (e) => {
+      if (e.target === connectSettingsModal) closeConnectSettings();
+    });
+
+    // Settings tabs
+    if (connectSettingsModal && !connectSettingsModal.__wired) {
+      connectSettingsModal.__wired = true;
+      connectSettingsModal.addEventListener("click", (e) => {
+        const tabBtn = e.target?.closest?.(".settings-tab[data-tab]");
+        if (!tabBtn) return;
+        const tab = tabBtn.dataset.tab;
+        connectSettingsModal.querySelectorAll(".settings-tab").forEach((b) => b.classList.toggle("is-active", b === tabBtn));
+        connectSettingsModal.querySelectorAll(".settings-pane").forEach((p) => p.classList.toggle("is-active", p.dataset.tab === tab));
+      });
+    }
+
+    // User bar controls
+    btnUserBarAccount?.addEventListener("click", () => {
+      // Reuse quick account modal (rail) so there is a single source of truth for device selectors.
+      document.getElementById("btnQuickAccount")?.click?.();
+    });
+
+    btnUserBarMute?.addEventListener("click", () => {
+      document.getElementById("btnToggleMic")?.click?.();
+    });
+
+    let isDeafened = false;
+    btnUserBarDeafen?.addEventListener("click", () => {
+      isDeafened = !isDeafened;
+      document.querySelectorAll("audio").forEach((a) => {
+        try {
+          a.muted = isDeafened;
+        } catch (_) {}
+      });
+      btnUserBarDeafen.classList.toggle("is-active", isDeafened);
+    });
+
+    // Reply preview
+    btnCancelReply?.addEventListener("click", clearReplyState);
 
     // Friend search
     if (friendSearchInput) {
@@ -1797,8 +2271,28 @@
     window.addEventListener("echtlucky:group-strip-select", (event) => {
       const groupId = event?.detail?.groupId;
       if (!groupId) return;
+
+      if (groupId === "__dm__") {
+        activeChatMode = "dm";
+        selectedDmUid = null;
+        selectedDmName = "";
+        selectedGroupId = null;
+        selectedGroupData = null;
+        detachSelectedGroupListener();
+        detachMessagesListener();
+        clearReplyState();
+        renderDmList();
+        updateChatControls();
+        return;
+      }
+
+      if (groupId === "__create__") {
+        createGroup();
+        return;
+      }
+
       const cached = groupsCache.get(groupId);
-      const item = groupsListPanel?.querySelector(`[data-group-id="${groupId}"]`);
+      const item = groupsListPanel?.querySelector?.(`[data-group-id="${groupId}"]`) || null;
       if (cached) selectGroup(groupId, cached, item);
     });
 
@@ -1808,7 +2302,8 @@
     const btnSendMessage = document.getElementById("btnSendMessage");
     if (btnSendMessage) {
       btnSendMessage.addEventListener("click", () => {
-        sendMessageToSelectedGroup().catch((e) => console.error(e));
+        if (activeChatMode === "group") sendMessageToSelectedGroup().catch((e) => console.error(e));
+        else sendMessageToSelectedDm().catch((e) => console.error(e));
       });
     }
 
@@ -1817,7 +2312,41 @@
       messageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
-          sendMessageToSelectedGroup().catch((er) => console.error(er));
+          if (activeChatMode === "group") sendMessageToSelectedGroup().catch((er) => console.error(er));
+          else sendMessageToSelectedDm().catch((er) => console.error(er));
+        }
+      });
+    }
+
+    // Message actions (reply/react)
+    const messagesList = document.getElementById("messagesList");
+    if (messagesList && !messagesList.__wired) {
+      messagesList.__wired = true;
+      messagesList.addEventListener("click", (e) => {
+        const btn = e.target?.closest?.(".message-action[data-action]");
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        const messageEl = btn.closest(".message[data-message-id]");
+        const msgId = messageEl?.getAttribute?.("data-message-id") || "";
+        if (!msgId) return;
+
+        // Reconstruct minimal data from DOM for reply preview (group messages have full data in snapshot, dm is local)
+        if (action === "reply") {
+          const author = messageEl.querySelector(".message-author")?.textContent?.trim() || "User";
+          const text = messageEl.querySelector(".message-text")?.textContent?.trim() || "";
+          setReplyState({ id: msgId, authorName: author, text });
+        }
+
+        if (action === "react") {
+          const myUid = auth?.currentUser?.uid;
+          if (!myUid || !selectedGroupId || activeChatMode !== "group") return;
+          const key = `echtlucky:reacted:${selectedGroupId}:${myUid}`;
+          const set = new Set(safeJsonParse(localStorage.getItem(key) || "[]") || []);
+          if (set.has(msgId)) set.delete(msgId);
+          else set.add(msgId);
+          localStorage.setItem(key, JSON.stringify(Array.from(set)));
+          messageEl.classList.toggle("has-reaction", set.has(msgId));
         }
       });
     }

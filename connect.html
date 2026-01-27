@@ -62,24 +62,36 @@
                   <div class="connect-left-header">
                     <div class="connect-left-search">
                       <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                      <input type="search" placeholder="Finde oder starte ein Gespräch" aria-label="Gruppen suchen" />
+                      <input id="dmSearchInput" type="search" placeholder="Finde oder starte ein Gespräch" aria-label="Direktnachrichten suchen" />
                     </div>
-                    <button class="btn btn-sm" id="btnCreateGroup" type="button" title="Neue Gruppe">+</button>
+                    <button class="btn btn-sm" id="btnOpenAddFriend" type="button" title="Freund hinzufügen" aria-label="Freund hinzufügen">
+                      <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                    </button>
                   </div>
 
-                  <div class="connect-groups-list" id="groupsListPanel"></div>
+                  <div class="connect-nav-block" aria-label="Direktnachrichten">
+                    <div class="connect-nav-block__title">Direktnachrichten</div>
+                    <div class="dm-list" id="dmListPanel"></div>
+                  </div>
 
-                  <div class="friends-section">
-                    <div class="friends-title"><span>Freunde hinzufügen</span></div>
-                    <input
-                      type="text"
-                      id="friendSearchInput"
-                      class="friend-search-input"
-                      placeholder="Benutzer suchen…"
-                      autocomplete="off"
-                    />
-                    <div class="friends-search-results" id="friendsSearchResults">
-                      <div class="empty-state"><p>🔍 Suche…</p></div>
+                  <!-- Legacy groups list (selection is driven by the left strip like Discord servers) -->
+                  <div id="groupsListPanel" hidden></div>
+
+                  <div class="connect-userbar" id="connectUserBar" aria-label="User Controls">
+                    <button class="connect-userbar__identity" id="btnUserBarAccount" type="button" aria-label="Account">
+                      <span class="connect-userbar__avatar" id="userBarAvatar">U</span>
+                      <span class="connect-userbar__name" id="userBarName">User</span>
+                    </button>
+                    <div class="connect-userbar__actions">
+                      <button class="connect-userbar__btn" id="btnUserBarMute" type="button" aria-label="Mute">
+                        <i class="fa-solid fa-microphone-slash" aria-hidden="true"></i>
+                      </button>
+                      <button class="connect-userbar__btn" id="btnUserBarDeafen" type="button" aria-label="Full Mute">
+                        <i class="fa-solid fa-volume-xmark" aria-hidden="true"></i>
+                      </button>
+                      <button class="connect-userbar__btn" id="btnUserBarSettings" type="button" aria-label="Settings">
+                        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+                      </button>
                     </div>
                   </div>
                 </aside>
@@ -138,16 +150,25 @@
                         <div class="messages-list" id="messagesList"></div>
                       </div>
                       <div class="chat-input-area">
-                        <input
-                          type="text"
-                          id="messageInput"
-                          class="message-input"
-                          placeholder="Schreibe eine Nachricht…"
-                          autocomplete="off"
-                        />
-                        <button class="btn btn-sm" id="btnSendMessage" type="button" aria-label="Senden">
-                          <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                        </button>
+                        <div class="reply-preview" id="replyPreview" hidden>
+                          <div class="reply-preview__content">
+                            <div class="reply-preview__label">Antwort an</div>
+                            <div class="reply-preview__text" id="replyPreviewText"></div>
+                          </div>
+                          <button class="reply-preview__close" id="btnCancelReply" type="button" aria-label="Antwort entfernen">×</button>
+                        </div>
+                        <div class="chat-input-row">
+                          <input
+                            type="text"
+                            id="messageInput"
+                            class="message-input"
+                            placeholder="Schreibe eine Nachricht…"
+                            autocomplete="off"
+                          />
+                          <button class="btn btn-sm" id="btnSendMessage" type="button" aria-label="Senden">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -164,8 +185,8 @@
                   <div class="empty-chat-state" id="emptyChatState">
                     <div class="empty-chat-inner">
                       <p class="empty-chat-icon">💬</p>
-                      <h3>Keine Gruppe ausgewählt</h3>
-                      <p>Wähle eine Gruppe aus der linken Spalte, um zu chatten.</p>
+                      <h3>Keine Direktnachricht ausgewählt</h3>
+                      <p>Wähle links eine Direktnachricht (oder starte eine neue), um zu chatten.</p>
                     </div>
                   </div>
                 </section>
@@ -250,6 +271,69 @@
     <div class="context-menu" id="groupContextMenu" hidden role="menu" aria-label="GruppenmenÃ¼"></div>
     <!-- USER CONTEXT MENU (Desktop right-click) -->
     <div class="context-menu" id="userContextMenu" hidden role="menu" aria-label="BenutzermenÃ¼"></div>
+
+    <!-- ADD FRIEND MODAL -->
+    <div id="addFriendModal" class="modal-overlay" hidden aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title">Freund hinzufügen</h3>
+        </div>
+        <div class="modal-body">
+          <input
+            type="text"
+            id="friendSearchInput"
+            class="friend-search-input"
+            placeholder="Benutzer suchen…"
+            autocomplete="off"
+          />
+          <div class="friends-search-results" id="friendsSearchResults">
+            <div class="empty-state"><p>🔍 Suche…</p></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn" id="btnCloseAddFriendModal" type="button">Schließen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONNECT SETTINGS POPUP -->
+    <div id="connectSettingsModal" class="modal-overlay" hidden aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title">Settings</h3>
+        </div>
+        <div class="modal-body">
+          <div class="settings-tabs">
+            <button class="settings-tab is-active" type="button" data-tab="audio">Audio</button>
+            <button class="settings-tab" type="button" data-tab="ui">UI</button>
+            <button class="settings-tab" type="button" data-tab="account">Account</button>
+          </div>
+
+          <div class="settings-pane is-active" data-tab="audio">
+            <div class="account-quick-devices" aria-label="Audio Einstellungen">
+              <label class="account-quick-devices__label" for="audioInputSelectSettings">🎙️ Mikrofon</label>
+              <select id="audioInputSelectSettings" class="account-quick-devices__select"></select>
+
+              <label class="account-quick-devices__label" for="audioOutputSelectSettings">🔊 Ausgabe</label>
+              <select id="audioOutputSelectSettings" class="account-quick-devices__select"></select>
+              <p class="account-quick-devices__hint">Geräteauswahl wirkt ab dem nächsten Call (Browser-Funktion).</p>
+            </div>
+          </div>
+
+          <div class="settings-pane" data-tab="ui">
+            <p style="opacity:.85; margin:0;">UI Preferences werden in Kürze erweitert.</p>
+          </div>
+
+          <div class="settings-pane" data-tab="account">
+            <p style="opacity:.85; margin:0 0 12px;">Account &amp; Profil verwalten:</p>
+            <a class="btn btn-primary" href="account.html">Konto verwalten öffnen</a>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn" id="btnCloseConnectSettings" type="button">Schließen</button>
+        </div>
+      </div>
+    </div>
 
     <!-- QUICK ACCOUNT (Rail) -->
     <div id="accountQuickModal" class="modal-overlay" hidden aria-hidden="true">

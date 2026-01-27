@@ -5,11 +5,13 @@
   window.__ECHTLUCKY_GROUP_STRIP__ = true;
 
   const defaultGroups = [
-    { id: "group-1", name: "Connect Hub", unread: 4, color: "#00ff88" },
-    { id: "group-2", name: "Ballistic", unread: 2, color: "#ff3366" },
-    { id: "group-3", name: "Reflex Lab", unread: 0, color: "#5865f2" },
-    { id: "group-4", name: "Community", unread: 0, color: "#00a8ff" },
-    { id: "group-5", name: "Updates", unread: 3, color: "#ff9a00" }
+    { id: "__dm__", name: "DM", unread: 0, color: "#00ff88", type: "dm" },
+    { id: "group-1", name: "Connect Hub", unread: 4, color: "#00ff88", type: "group" },
+    { id: "group-2", name: "Ballistic", unread: 2, color: "#ff3366", type: "group" },
+    { id: "group-3", name: "Reflex Lab", unread: 0, color: "#5865f2", type: "group" },
+    { id: "group-4", name: "Community", unread: 0, color: "#00a8ff", type: "group" },
+    { id: "group-5", name: "Updates", unread: 3, color: "#ff9a00", type: "group" },
+    { id: "__create__", name: "+", unread: 0, color: "#00ff88", type: "create" }
   ];
 
   const contextMenu = document.getElementById("groupStripContextMenu");
@@ -31,8 +33,11 @@
     wrapper.dataset.groupName = group.name;
     wrapper.style.setProperty("--group-color", group.color || "rgba(0,255,136,0.65)");
 
+    const iconContent =
+      group.type === "dm" ? "💬" : group.type === "create" ? "+" : getShortLabel(group.name);
+
     wrapper.innerHTML = `
-      <span class="group-strip__icon">${getShortLabel(group.name)}</span>
+      <span class="group-strip__icon">${iconContent}</span>
       ${group.unread ? `<span class="group-strip__badge">${group.unread}</span>` : ""}
     `;
 
@@ -41,6 +46,7 @@
     });
 
     wrapper.addEventListener("contextmenu", (event) => {
+      if (group.type && group.type !== "group") return;
       event.preventDefault();
       contextTarget = group;
       openContextMenu(event.clientX, event.clientY);
@@ -58,7 +64,7 @@
     if (!slots.length) return;
     slots.forEach((slot) => {
       slot.innerHTML = "";
-      currentGroups.slice(0, 8).forEach((group) => {
+      currentGroups.slice(0, 10).forEach((group) => {
         slot.appendChild(buildIcon(group));
       });
     });
@@ -139,11 +145,12 @@
 
   window.updateGroupStrip = function (groups) {
     if (Array.isArray(groups) && groups.length) {
-      currentGroups = groups.slice(0, 8).map((g) => ({
+      currentGroups = groups.slice(0, 10).map((g) => ({
         id: g.id,
         name: g.name,
         unread: g.unread || 0,
-        color: g.color || "rgba(0,255,136,0.65)"
+        color: g.color || "rgba(0,255,136,0.65)",
+        type: g.type || "group"
       }));
     } else {
       currentGroups = defaultGroups.slice();

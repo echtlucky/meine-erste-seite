@@ -16,7 +16,11 @@
         <header class="account-hero">
           <div class="profile-card">
             <div class="profile-top">
-              <div class="avatar" id="avatarInitial">U</div>
+              <div class="avatar avatar--editable" aria-label="Profilbild">
+                <img id="avatarImg" class="avatar-img" alt="Profilbild" hidden />
+                <div class="avatar-fallback" id="avatarInitial" aria-hidden="true">U</div>
+                <input id="avatarFile" class="avatar-file" type="file" accept="image/*" hidden />
+              </div>
               <div>
                 <div class="profile-name" id="profileName">User</div>
                 <div class="profile-email" id="profileEmail">—</div>
@@ -24,6 +28,8 @@
             </div>
 
             <div class="profile-actions">
+              <button class="btn btn-secondary" id="btnChangeAvatar" type="button">Profilbild ändern</button>
+              <button class="btn btn-ghost" id="btnRemoveAvatar" type="button">Entfernen</button>
               <button class="btn btn-danger" id="btnSignOut" type="button">Ausloggen</button>
             </div>
           </div>
@@ -114,8 +120,8 @@
           <div class="account-card">
             <div class="card-head">
               <div>
-                <h2 class="card-title">Account Einstellungen</h2>
-                <p class="card-hint">Ändere deine Accountdaten</p>
+                <h2 class="card-title">Profil &amp; Account</h2>
+                <p class="card-hint">Username, Email &amp; Preferences</p>
               </div>
             </div>
 
@@ -136,6 +142,36 @@
                   <span class="form-status" id="emailStatus"></span>
                 </div>
                 <span class="form-hint" id="emailHint">Du kannst deine Email ändern</span>
+              </div>
+
+              <div class="divider-line" aria-hidden="true"></div>
+
+              <div class="form-group">
+                <label for="prefFocusDefault">Focus Mode Default</label>
+                <select id="prefFocusDefault">
+                  <option value="off">Aus</option>
+                  <option value="on">An</option>
+                </select>
+                <span class="form-hint">Gilt für Focus/Ranked UI (UI-only).</span>
+              </div>
+
+              <div class="form-group">
+                <label for="prefDifficultyDefault">Difficulty Default</label>
+                <select id="prefDifficultyDefault">
+                  <option value="normal">Normal</option>
+                  <option value="easy">Easy</option>
+                  <option value="hard">Hard</option>
+                </select>
+                <span class="form-hint">Skaliert XP/Progress (UI-only).</span>
+              </div>
+
+              <div class="form-group">
+                <label for="prefSounds">Sounds</label>
+                <select id="prefSounds">
+                  <option value="on">An</option>
+                  <option value="off">Aus</option>
+                </select>
+                <span class="form-hint">Benachrichtigungen/Call-Sounds (UI-only).</span>
               </div>
 
               <div class="form-actions">
@@ -215,6 +251,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <script src="firebase.js"></script>
@@ -242,4 +279,3 @@
     </script>
   </body>
 </html>
-

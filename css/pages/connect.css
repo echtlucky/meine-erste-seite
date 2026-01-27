@@ -795,6 +795,14 @@
 .chat-input-area {
   display: flex;
   gap: 0.8rem;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.chat-input-row{
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
 }
 
 .message-input {
@@ -1694,3 +1702,267 @@
   color: var(--text-muted);
   font-size: 0.92rem;
 }
+
+/* ============================================
+   Discord-like Structure Additions (Connect)
+   ============================================ */
+
+.connect-page .connect-nav-block__title{
+  font-weight: 820;
+  color: rgba(224,255,224,0.86);
+  font-size: 0.95rem;
+  letter-spacing: -0.2px;
+  margin: 0.2rem 0 0.4rem;
+}
+
+.connect-page .dm-list{
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.connect-page .dm-item{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,136,0.12);
+  background: rgba(0,0,0,0.28);
+  color: rgba(224,255,224,0.92);
+  cursor: pointer;
+  text-align: left;
+}
+
+.connect-page .dm-item:hover{
+  background: rgba(0,255,136,0.08);
+  border-color: rgba(0,255,136,0.22);
+}
+
+.connect-page .dm-item.is-active{
+  background: rgba(0,255,136,0.12);
+  border-color: rgba(0,255,136,0.34);
+}
+
+.connect-page .dm-item__left{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.connect-page .dm-item__avatar{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(0,255,136,0.18);
+  color: rgba(224,255,224,0.9);
+  font-weight: 850;
+  flex: 0 0 auto;
+}
+
+.connect-page .dm-item__name{
+  font-weight: 820;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.connect-page .dm-item__status{
+  color: rgba(224,255,224,0.66);
+  font-size: 0.86rem;
+}
+
+.connect-page .connect-userbar{
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.connect-page .connect-userbar__identity{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(224,255,224,0.92);
+  padding: 6px 8px;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.connect-page .connect-userbar__identity:hover{
+  background: rgba(0,255,136,0.08);
+  border-color: rgba(0,255,136,0.18);
+}
+
+.connect-page .connect-userbar__avatar{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(0,255,136,0.18);
+  color: rgba(224,255,224,0.9);
+  font-weight: 900;
+}
+
+.connect-page .connect-userbar__name{
+  font-weight: 860;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.connect-page .connect-userbar__actions{
+  display: flex;
+  gap: 8px;
+}
+
+.connect-page .connect-userbar__btn{
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,136,0.12);
+  background: rgba(0,0,0,0.30);
+  color: rgba(224,255,224,0.92);
+  cursor: pointer;
+}
+
+.connect-page .connect-userbar__btn:hover{
+  background: rgba(0,255,136,0.10);
+  border-color: rgba(0,255,136,0.28);
+}
+
+.connect-page .reply-preview{
+  width: 100%;
+  border: 1px solid rgba(0,255,136,0.16);
+  background: rgba(0,0,0,0.35);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.connect-page .reply-preview__label{
+  font-weight: 860;
+  color: rgba(224,255,224,0.86);
+  font-size: 0.86rem;
+}
+
+.connect-page .reply-preview__text{
+  color: rgba(224,255,224,0.76);
+  font-size: 0.92rem;
+  max-width: 52ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.connect-page .reply-preview__close{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.25);
+  color: rgba(224,255,224,0.86);
+  cursor: pointer;
+}
+
+.connect-page .reply-preview__close:hover{
+  background: rgba(255,51,102,0.12);
+  border-color: rgba(255,51,102,0.18);
+}
+
+.connect-page .message{
+  position: relative;
+}
+
+.connect-page .message.has-reaction,
+.connect-page .message.has-reply{
+  border-color: rgba(0,255,136,0.24);
+  box-shadow: 0 10px 32px rgba(0,255,136,0.08);
+}
+
+.connect-page .message-quote{
+  margin: 8px 0 10px;
+  padding: 8px 10px;
+  border-left: 3px solid rgba(0,255,136,0.45);
+  background: rgba(0,0,0,0.22);
+  border-radius: 10px;
+  color: rgba(224,255,224,0.78);
+  font-size: 0.92rem;
+}
+
+.connect-page .message-actions{
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.connect-page .message:hover .message-actions{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.connect-page .message-action{
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,136,0.14);
+  background: rgba(0,0,0,0.35);
+  color: rgba(224,255,224,0.9);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.connect-page .message-action:hover{
+  background: rgba(0,255,136,0.10);
+  border-color: rgba(0,255,136,0.26);
+}
+
+.connect-page .settings-tabs{
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.connect-page .settings-tab{
+  border: 1px solid rgba(0,255,136,0.14);
+  background: rgba(0,0,0,0.25);
+  color: rgba(224,255,224,0.86);
+  border-radius: 14px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 820;
+}
+
+.connect-page .settings-tab.is-active{
+  background: rgba(0,255,136,0.14);
+  border-color: rgba(0,255,136,0.32);
+  color: rgba(224,255,224,0.95);
+}
+
+.connect-page .settings-pane{ display:none; }
+.connect-page .settings-pane.is-active{ display:block; }
