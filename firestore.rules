@@ -121,13 +121,13 @@ service cloud.firestore {
         ]);
 
       match /offers/{offerId} {
-        allow read, write: if isDirectCallMember();
+        allow read, write: if isDirectCallMemberById();
       }
       match /answers/{answerId} {
-        allow read, write: if isDirectCallMember();
+        allow read, write: if isDirectCallMemberById();
       }
       match /ice-candidates/{candidateId} {
-        allow read, write: if isDirectCallMember();
+        allow read, write: if isDirectCallMemberById();
       }
 
       function isDirectCallMember() {
@@ -137,6 +137,11 @@ service cloud.firestore {
             request.auth.uid == resource.data.to ||
             (request.auth.uid in resource.data.participants)
           );
+      }
+
+      function isDirectCallMemberById() {
+        return request.auth != null &&
+          (request.auth.uid in get(/databases/$(database)/documents/direct-calls/$(callId)).data.participants);
       }
     }
 
@@ -168,7 +173,7 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt','status','lastMessagePreview']) &&
         request.resource.data.status in ['open','closed','waiting_staff','waiting_user'];
 
-      allow update, delete: if isStaff() &&
+      allow update: if isStaff() &&
         request.resource.data.keys().hasOnly([
           'createdBy','createdByName','createdByEmail',
           'createdAt','updatedAt',
@@ -177,7 +182,35 @@ service cloud.firestore {
           'assignedTo','assignedToName','claimedAt',
           'lastMessagePreview','attachmentMeta','tags','mergedInto'
         ]) &&
-        request.resource.data.createdBy == resource.data.createdBy;
+        request.resource.data.createdBy == resource.data.createdBy &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.category in ['bug','account','payments','feedback','other'] &&
+        request.resource.data.priority in ['low','normal','high','urgent'] &&
+        request.resource.data.status in ['open','closed','waiting_staff','waiting_user'] &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() >= 5 &&
+        request.resource.data.title.size() <= 80 &&
+        (
+          !('assignedTo' in request.resource.data) ||
+          request.resource.data.assignedTo == null ||
+          request.resource.data.assignedTo is string
+        ) &&
+        (
+          !('assignedToName' in request.resource.data) ||
+          request.resource.data.assignedToName == null ||
+          request.resource.data.assignedToName is string
+        ) &&
+        (
+          !('tags' in request.resource.data) ||
+          (request.resource.data.tags is list && request.resource.data.tags.size() <= 12)
+        ) &&
+        (
+          !('mergedInto' in request.resource.data) ||
+          request.resource.data.mergedInto == null ||
+          request.resource.data.mergedInto is string
+        );
+
+      allow delete: if isAdmin();
 
       match /messages/{messageId} {
         allow read: if canReadTicketById(ticketId);
@@ -271,7 +304,7 @@ service cloud.firestore {
     match /admin-logs/{logId} {
       allow read: if isAdmin();
 
-      allow create: if isAdmin() || request.auth == null;
+      allow create: if isAdmin();
     }
 
     match /chat-logs/{logId} {
