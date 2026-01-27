@@ -10,6 +10,7 @@ body.admin-page{
 /* New full-width shell (sidebar + content) */
 .admin-main{
   width: 100%;
+  margin-top: clamp(1rem, 1.5vw, 1.8rem);
 }
 
 .admin-shell{
@@ -19,14 +20,20 @@ body.admin-page{
   grid-template-columns: 360px 1fr;
   gap: 1.2rem;
   align-items: start;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
 .admin-sidebar{
   position: sticky;
   top: calc(var(--header-h) + 12px);
-  height: calc(100dvh - var(--header-h) - 24px);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  max-height: calc(100vh - var(--header-h) - 50px);
+  overflow: hidden;
+}
+
+.admin-sidebar-card{
+  max-height: calc(100vh - var(--header-h) - 92px);
+  overflow-y: auto;
 }
 
 .admin-sidebar-card{
@@ -57,6 +64,33 @@ body.admin-page{
   display: flex;
   flex-direction: column;
   gap: .65rem;
+  max-height: calc(100vh - var(--header-h) - 180px);
+  overflow-y: auto;
+  padding-right: .4rem;
+}
+
+.admin-sidebar-card::-webkit-scrollbar,
+.admin-logs-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-sidebar-card::-webkit-scrollbar-track,
+.admin-logs-list::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.01);
+}
+
+.admin-sidebar-card::-webkit-scrollbar-thumb,
+.admin-logs-list::-webkit-scrollbar-thumb {
+  background: rgba(0,255,136,0.4);
+  border-radius: 999px;
+  border: 2px solid rgba(0,0,0,0.2);
+}
+
+.admin-sidebar-card,
+.admin-logs-list,
+.admin-activity {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,255,136,0.4) rgba(0,0,0,0.2);
 }
 
 .admin-log-item{
@@ -1130,3 +1164,4 @@ body.admin-page{
     justify-content: flex-start;
   }
 }
+
