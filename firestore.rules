@@ -133,8 +133,8 @@ service cloud.firestore {
     // BLOG COLLECTION
     // ==========================================
     match /blog/{documentId} {
-      // Everyone (authenticated) can read blog posts
-      allow read: if request.auth != null;
+      // Public read (blog should be usable without login)
+      allow read: if true;
       
       // Only creator or admin can write blog posts
       allow create: if request.auth != null && 
@@ -142,17 +142,49 @@ service cloud.firestore {
       
       allow update, delete: if request.auth != null && 
                               (request.auth.uid == resource.data.authorUid || isAdmin());
+
+      // Comments subcollection (public read, auth write)
+      match /comments/{commentId} {
+        allow read: if true;
+
+        allow create: if request.auth != null &&
+          request.resource.data.authorUid == request.auth.uid &&
+          request.resource.data.keys().hasOnly(['authorUid','authorName','text','createdAt','updatedAt']);
+
+        allow update, delete: if request.auth != null &&
+          (
+            isAdmin() ||
+            (resource.data.authorUid == request.auth.uid &&
+             request.resource.data.keys().hasOnly(resource.data.keys()))
+          );
+      }
     }
 
     // ==========================================
     // POSTS COLLECTION (Admin Blog)
     // ==========================================
     match /posts/{documentId} {
-      // Everyone (authenticated) can read posts
-      allow read: if request.auth != null;
+      // Public read (admin blog is still publicly readable)
+      allow read: if true;
       
       // Only admin can write posts
       allow create, update, delete: if isAdmin();
+
+      // Comments subcollection (public read, auth write)
+      match /comments/{commentId} {
+        allow read: if true;
+
+        allow create: if request.auth != null &&
+          request.resource.data.authorUid == request.auth.uid &&
+          request.resource.data.keys().hasOnly(['authorUid','authorName','text','createdAt','updatedAt']);
+
+        allow update, delete: if request.auth != null &&
+          (
+            isAdmin() ||
+            (resource.data.authorUid == request.auth.uid &&
+             request.resource.data.keys().hasOnly(resource.data.keys()))
+          );
+      }
     }
 
     // ==========================================

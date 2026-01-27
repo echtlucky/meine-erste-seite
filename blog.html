@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
@@ -34,7 +34,7 @@
         <div class="pill" id="postCountPill"><i class="fa-solid fa-pen-nib" aria-hidden="true"></i> 0 Posts</div>
         <div class="hint">
           <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
-          Tipp: Klick auf „Lesen“, um den Beitrag im Pop-Up zu öffnen.
+          Tipp: Klick auf „Lesen“, um den Beitrag im Pop-up zu öffnen.
         </div>
       </section>
 
@@ -54,12 +54,45 @@
     </main>
 
     <div id="postModal" class="modal" aria-hidden="true">
-      <div class="modal-content">
-        <span class="modal-close" id="modalCloseBtn" role="button" aria-label="Schließen">×</span>
-        <h2 id="post-title"></h2>
-        <p class="meta" id="post-meta"></p>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-label="Blog Post">
+        <button class="modal-close" id="modalCloseBtn" type="button" aria-label="Schließen">×</button>
+
+        <div class="post-modal-head">
+          <div>
+            <h2 id="post-title"></h2>
+            <p class="meta" id="post-meta"></p>
+          </div>
+          <div class="post-modal-actions">
+            <button class="btn btn-sm btn-secondary" id="edit-post-btn" type="button" hidden>Bearbeiten</button>
+            <button class="btn btn-sm btn-danger" id="delete-post-btn" type="button" hidden>Post löschen</button>
+          </div>
+        </div>
+
         <div class="post-content" id="post-content"></div>
-        <button class="delete-btn" id="delete-post-btn" type="button">Post löschen</button>
+
+        <section class="post-comments" aria-label="Kommentare">
+          <div class="post-comments__head">
+            <h3>Kommentare</h3>
+            <div class="post-comments__meta" id="commentsMeta">—</div>
+          </div>
+
+          <div class="comments-list" id="commentsList">
+            <div class="comments-empty">Noch keine Kommentare.</div>
+          </div>
+
+          <form class="comment-form" id="commentForm">
+            <textarea
+              id="commentText"
+              rows="3"
+              placeholder="Kommentieren… (Links werden automatisch erkannt)"
+              maxlength="600"
+            ></textarea>
+            <div class="comment-form__actions">
+              <a class="btn btn-secondary btn-sm" id="commentLoginBtn" href="login.html" hidden>Anmelden</a>
+              <button class="btn btn-sm" id="commentSubmitBtn" type="submit">Senden</button>
+            </div>
+          </form>
+        </section>
       </div>
     </div>
 
@@ -81,17 +114,23 @@
       document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.add("loaded");
 
-        fetch("header.html").then(r => r.text()).then(html => {
-          document.getElementById("header-placeholder").innerHTML = html;
-          if (typeof initHeaderScripts === "function") initHeaderScripts();
-          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-        }).catch(() => {});
+        fetch("header.html?v=" + Date.now())
+          .then((r) => r.text())
+          .then((html) => {
+            document.getElementById("header-placeholder").innerHTML = html;
+            if (typeof initHeaderScripts === "function") initHeaderScripts();
+            if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+            window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
+          })
+          .catch(() => {});
 
-        fetch("footer.html").then(r => r.text()).then(html => {
-          document.getElementById("footer-placeholder").innerHTML = html;
-        }).catch(() => {});
+        fetch("footer.html?v=" + Date.now())
+          .then((r) => r.text())
+          .then((html) => {
+            document.getElementById("footer-placeholder").innerHTML = html;
+          })
+          .catch(() => {});
       });
     </script>
   </body>
 </html>
-
