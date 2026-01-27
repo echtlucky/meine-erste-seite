@@ -327,6 +327,24 @@ groups/{groupId}/voice-calls/{callId} {
 
   const AUDIO_INPUT_KEY = "echtlucky:audioInputDeviceId";
   const AUDIO_OUTPUT_KEY = "echtlucky:audioOutputDeviceId";
+  const MIC_GAIN_KEY = "echtlucky:micGain";
+
+  function clampNumber(value, min, max) {
+    const v = Number(value);
+    if (!Number.isFinite(v)) return min;
+    return Math.min(max, Math.max(min, v));
+  }
+
+  function getStoredNumber(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw == null || raw === "") return fallback;
+      const v = Number.parseFloat(raw);
+      return Number.isFinite(v) ? v : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
 
   function getStoredDeviceId(key) {
     try {
@@ -395,7 +413,9 @@ groups/{groupId}/voice-calls/{callId} {
       micCompressorNode.attack.value = 0.003;
       micCompressorNode.release.value = 0.25;
 
-      micGainNode.gain.value = isMobileUi() ? 1.15 : 1.6;
+      const defaultGain = isMobileUi() ? 1.15 : 1.6;
+      const preferredGain = clampNumber(getStoredNumber(MIC_GAIN_KEY, defaultGain), 0.8, 2.2);
+      micGainNode.gain.value = preferredGain;
 
       const dest = audioContext.createMediaStreamDestination();
       micSourceNode.connect(micCompressorNode);
@@ -411,6 +431,25 @@ groups/{groupId}/voice-calls/{callId} {
   function getOutgoingStream() {
     ensureAudioProcessing();
     return processedStream || localStream;
+  }
+
+  function getMicGain() {
+    const defaultGain = isMobileUi() ? 1.15 : 1.6;
+    return clampNumber(micGainNode?.gain?.value ?? getStoredNumber(MIC_GAIN_KEY, defaultGain), 0.8, 2.2);
+  }
+
+  function setMicGain(value) {
+    const next = clampNumber(value, 0.8, 2.2);
+    try {
+      localStorage.setItem(MIC_GAIN_KEY, String(next));
+    } catch (_) {}
+
+    try {
+      ensureAudioProcessing();
+      if (micGainNode) micGainNode.gain.value = next;
+    } catch (_) {}
+
+    return next;
   }
 
   function getSharePreset() {
@@ -1431,16 +1470,40 @@ groups/{groupId}/voice-calls/{callId} {
   // ============================================
 
   function toggleMic() {
-    if (!localStream) return;
+    if (!localStream) return isMicMuted;
 
-    const audioTracks = localStream.getAudioTracks();
-    audioTracks.forEach(track => {
-      track.enabled = !track.enabled;
-    });
+    const nextMuted = !isMicMuted;
+    const nextEnabled = !nextMuted;
 
-    isMicMuted = !isMicMuted;
+    const outgoing = getOutgoingStream();
+
+    try {
+      localStream.getAudioTracks().forEach((track) => {
+        track.enabled = nextEnabled;
+      });
+    } catch (_) {}
+
+    // When audio processing is enabled, the sent track lives on `processedStream`.
+    // Toggling only `localStream` does not reliably mute the outgoing audio.
+    if (outgoing && outgoing !== localStream) {
+      try {
+        outgoing.getAudioTracks().forEach((track) => {
+          track.enabled = nextEnabled;
+        });
+      } catch (_) {}
+    }
+
+    isMicMuted = nextMuted;
     btnToggleMic.classList.toggle("is-muted", isMicMuted);
     btnToggleMic.textContent = isMicMuted ? "🔊 Entstummen" : "🔇 Stummschalten";
+    return isMicMuted;
+  }
+
+  function setMicMuted(muted) {
+    const wantMuted = !!muted;
+    if (wantMuted === isMicMuted) return isMicMuted;
+    // Re-use toggle logic to keep streams + UI in sync.
+    return toggleMic();
   }
 
   // ============================================
@@ -1601,8 +1664,16 @@ groups/{groupId}/voice-calls/{callId} {
     endCall: endVoiceCall,
     isInCall: () => !!currentVoiceCall,
     toggleMic: toggleMic,
+    setMicMuted: setMicMuted,
+    getMicMuted: () => isMicMuted,
+    setMicGain: setMicGain,
+    getMicGain: getMicGain,
     getPeerCount: () => peerConnections.size
   };
+
+  try {
+    window.dispatchEvent(new CustomEvent("echtlucky:voice-chat-ready"));
+  } catch (_) {}
 
   log("✅ voice-chat.js initialized with full WebRTC support");
 })();

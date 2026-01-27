@@ -1611,8 +1611,42 @@
     });
   }
 
+  async function loadCurrentUserProfile(uid) {
+    if (!uid) return null;
+    try {
+      const snap = await db.collection("users").doc(uid).get();
+      return snap.exists ? snap.data() : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function renderUserBarIdentity(displayName, avatarUrl) {
+    if (userBarName) userBarName.textContent = displayName || "User";
+
+    if (!userBarAvatar) return;
+
+    const url = String(avatarUrl || "").trim();
+    if (url) {
+      userBarAvatar.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      userBarAvatar.appendChild(img);
+      userBarAvatar.setAttribute("aria-label", "Profilbild");
+      return;
+    }
+
+    userBarAvatar.innerHTML = "";
+    const initial = String(displayName || "U")[0]?.toUpperCase?.() || "U";
+    userBarAvatar.textContent = initial;
+    userBarAvatar.removeAttribute("aria-label");
+  }
+
   // Update auth status
-  function updateAuthStatus() {
+  async function updateAuthStatus() {
     currentUser = auth.currentUser;
     log("🔵 updateAuthStatus: currentUser =", currentUser ? currentUser.email : null);
 
@@ -1622,21 +1656,27 @@
       if (btnLogin) btnLogin.hidden = false;
       if (authStatusCard) authStatusCard.hidden = false;
       if (connectLayout) connectLayout.hidden = true;
-      if (userBarName) userBarName.textContent = "Guest";
-      if (userBarAvatar) userBarAvatar.textContent = "G";
+      renderUserBarIdentity("Guest", "");
       if (dmListPanel) dmListPanel.innerHTML = '<div class="empty-state"><p>Bitte einloggen</p></div>';
       return;
     }
 
     log("… User logged in:", currentUser.email);
-    const display = currentUser.displayName || currentUser.email?.split("@")[0] || "User";
+    const profile = await loadCurrentUserProfile(currentUser.uid);
+    const display =
+      profile?.username ||
+      profile?.displayName ||
+      currentUser.displayName ||
+      currentUser.email?.split("@")[0] ||
+      "User";
+
+    const avatarUrl = profile?.avatarUrl || currentUser.photoURL || "";
     if (statusLabel) statusLabel.textContent = `Hallo, ${display}!`;
     if (btnLogin) btnLogin.hidden = true;
     if (authStatusCard) authStatusCard.hidden = true;
     if (connectLayout) connectLayout.hidden = false;
 
-    if (userBarName) userBarName.textContent = display;
-    if (userBarAvatar) userBarAvatar.textContent = String(display || "U")[0].toUpperCase();
+    renderUserBarIdentity(display, avatarUrl);
 
     loadCurrentUserFriends();
     loadGroups();
@@ -2119,11 +2159,57 @@
     });
 
     // Settings popup (user bar gear)
+    const CONNECT_PREFS_KEY = "echtlucky:connect:prefs:v1";
+    const loadPrefs = () => {
+      const defaults = {
+        callSounds: true,
+        messageSounds: true,
+        compactUi: false,
+        reducedMotion: false,
+        remoteVolume: 1
+      };
+      try {
+        const raw = localStorage.getItem(CONNECT_PREFS_KEY);
+        if (!raw) return defaults;
+        const parsed = JSON.parse(raw);
+        return { ...defaults, ...(parsed || {}) };
+      } catch (_) {
+        return defaults;
+      }
+    };
+
+    const savePrefs = (next) => {
+      try {
+        localStorage.setItem(CONNECT_PREFS_KEY, JSON.stringify(next || {}));
+      } catch (_) {}
+    };
+
+    const applyRemoteVolume = (value) => {
+      const v = Math.max(0, Math.min(1, Number(value) || 0));
+      document.querySelectorAll("audio, video").forEach((el) => {
+        try {
+          el.volume = v;
+        } catch (_) {}
+      });
+    };
+
+    const applyUiPrefs = (prefs) => {
+      document.documentElement.classList.toggle("connect-compact", !!prefs.compactUi);
+      document.documentElement.classList.toggle("reduced-motion", !!prefs.reducedMotion);
+      applyRemoteVolume(prefs.remoteVolume);
+    };
+
+    // Apply persisted preferences once on load (no UI interaction needed).
+    applyUiPrefs(loadPrefs());
+
     const openConnectSettings = () => {
       if (!connectSettingsModal) return;
       connectSettingsModal.hidden = false;
       connectSettingsModal.setAttribute("aria-hidden", "false");
       setTimeout(() => connectSettingsModal.classList.add("show"), 10);
+
+      const prefs = loadPrefs();
+      applyUiPrefs(prefs);
 
       // Populate device selectors (settings popup has its own selects)
       const audioIn = document.getElementById("audioInputSelectSettings");
@@ -2173,6 +2259,90 @@
           localStorage.setItem(AUDIO_OUTPUT_KEY, audioOut.value || "");
         });
       }
+
+      // Preferences (UI/Audio)
+      const prefCallSounds = document.getElementById("prefCallSounds");
+      const prefMessageSounds = document.getElementById("prefMessageSounds");
+      const prefCompactUi = document.getElementById("prefCompactUi");
+      const prefReducedMotion = document.getElementById("prefReducedMotion");
+      const prefRemoteVolume = document.getElementById("prefRemoteVolume");
+      const prefRemoteVolumeValue = document.getElementById("prefRemoteVolumeValue");
+      const prefMicGain = document.getElementById("prefMicGain");
+      const prefMicGainValue = document.getElementById("prefMicGainValue");
+
+      const syncUi = (p) => {
+        if (prefCallSounds) prefCallSounds.checked = !!p.callSounds;
+        if (prefMessageSounds) prefMessageSounds.checked = !!p.messageSounds;
+        if (prefCompactUi) prefCompactUi.checked = !!p.compactUi;
+        if (prefReducedMotion) prefReducedMotion.checked = !!p.reducedMotion;
+
+        if (prefRemoteVolume) {
+          const pct = Math.round((Number(p.remoteVolume) || 1) * 100);
+          prefRemoteVolume.value = String(Math.max(0, Math.min(100, pct)));
+          if (prefRemoteVolumeValue) prefRemoteVolumeValue.textContent = `${prefRemoteVolume.value}%`;
+        }
+
+        if (prefMicGain) {
+          const api = window.echtlucky?.voiceChat;
+          const gain = typeof api?.getMicGain === "function" ? api.getMicGain() : 1.6;
+          const pct = Math.round((Number(gain) || 1.6) * 100);
+          prefMicGain.value = String(Math.max(80, Math.min(220, pct)));
+          if (prefMicGainValue) prefMicGainValue.textContent = `${(Number(prefMicGain.value) / 100).toFixed(2)}x`;
+        }
+      };
+
+      const write = (mutator) => {
+        const p = loadPrefs();
+        const next = { ...p, ...(mutator ? mutator(p) : {}) };
+        savePrefs(next);
+        applyUiPrefs(next);
+        syncUi(next);
+      };
+
+      syncUi(prefs);
+
+      if (prefCallSounds && !prefCallSounds.__wired) {
+        prefCallSounds.__wired = true;
+        prefCallSounds.addEventListener("change", () => write(() => ({ callSounds: prefCallSounds.checked })));
+      }
+
+      if (prefMessageSounds && !prefMessageSounds.__wired) {
+        prefMessageSounds.__wired = true;
+        prefMessageSounds.addEventListener("change", () => write(() => ({ messageSounds: prefMessageSounds.checked })));
+      }
+
+      if (prefCompactUi && !prefCompactUi.__wired) {
+        prefCompactUi.__wired = true;
+        prefCompactUi.addEventListener("change", () => write(() => ({ compactUi: prefCompactUi.checked })));
+      }
+
+      if (prefReducedMotion && !prefReducedMotion.__wired) {
+        prefReducedMotion.__wired = true;
+        prefReducedMotion.addEventListener("change", () => write(() => ({ reducedMotion: prefReducedMotion.checked })));
+      }
+
+      if (prefRemoteVolume && !prefRemoteVolume.__wired) {
+        prefRemoteVolume.__wired = true;
+        prefRemoteVolume.addEventListener("input", () => {
+          const v = Math.max(0, Math.min(100, Number(prefRemoteVolume.value) || 100));
+          if (prefRemoteVolumeValue) prefRemoteVolumeValue.textContent = `${v}%`;
+          write(() => ({ remoteVolume: v / 100 }));
+        });
+      }
+
+      if (prefMicGain && !prefMicGain.__wired) {
+        prefMicGain.__wired = true;
+        prefMicGain.addEventListener("input", () => {
+          const pct = Math.max(80, Math.min(220, Number(prefMicGain.value) || 160));
+          const gain = pct / 100;
+          if (prefMicGainValue) prefMicGainValue.textContent = `${gain.toFixed(2)}x`;
+          const api = window.echtlucky?.voiceChat;
+          if (typeof api?.setMicGain === "function") api.setMicGain(gain);
+          else {
+            try { localStorage.setItem("echtlucky:micGain", String(gain)); } catch (_) {}
+          }
+        });
+      }
     };
 
     const closeConnectSettings = () => {
@@ -2206,19 +2376,41 @@
       document.getElementById("btnQuickAccount")?.click?.();
     });
 
+    const syncUserBarMicState = () => {
+      const api = window.echtlucky?.voiceChat;
+      const muted = typeof api?.getMicMuted === "function" ? api.getMicMuted() : false;
+      btnUserBarMute?.classList?.toggle?.("is-active", !!muted);
+    };
+
+    window.addEventListener("echtlucky:voice-chat-ready", () => {
+      syncUserBarMicState();
+    });
+
     btnUserBarMute?.addEventListener("click", () => {
-      document.getElementById("btnToggleMic")?.click?.();
+      const api = window.echtlucky?.voiceChat;
+      if (typeof api?.toggleMic === "function") {
+        const muted = api.toggleMic();
+        btnUserBarMute.classList.toggle("is-active", !!muted);
+      } else {
+        document.getElementById("btnToggleMic")?.click?.();
+        setTimeout(syncUserBarMicState, 0);
+      }
     });
 
     let isDeafened = false;
     btnUserBarDeafen?.addEventListener("click", () => {
       isDeafened = !isDeafened;
-      document.querySelectorAll("audio").forEach((a) => {
+      document.querySelectorAll("audio, video").forEach((a) => {
         try {
           a.muted = isDeafened;
         } catch (_) {}
       });
       btnUserBarDeafen.classList.toggle("is-active", isDeafened);
+    });
+
+    // Keep userbar state in sync when voice UI toggles are used elsewhere.
+    document.getElementById("btnToggleMic")?.addEventListener?.("click", () => {
+      setTimeout(syncUserBarMicState, 0);
     });
 
     // Reply preview
@@ -2256,7 +2448,7 @@
     // Auth changes
     auth.onAuthStateChanged((user) => {
       log("🔵 connect-minimal.js: Auth state changed. User:", user ? user.email : "null");
-      updateAuthStatus();
+      updateAuthStatus().catch(() => {});
       updateChatControls();
 
       if (user) startPresenceHeartbeat();
@@ -2297,7 +2489,7 @@
     });
 
     // Initial auth check
-    updateAuthStatus();
+    updateAuthStatus().catch(() => {});
 
     const btnSendMessage = document.getElementById("btnSendMessage");
     if (btnSendMessage) {

@@ -317,10 +317,57 @@
               <select id="audioOutputSelectSettings" class="account-quick-devices__select"></select>
               <p class="account-quick-devices__hint">Geräteauswahl wirkt ab dem nächsten Call (Browser-Funktion).</p>
             </div>
+
+            <div class="settings-section" style="margin-top: 14px;">
+              <div class="settings-row">
+                <label class="settings-toggle">
+                  <input id="prefCallSounds" type="checkbox" />
+                  <span>Call-Sounds (Ringing / Join / Leave)</span>
+                </label>
+              </div>
+
+              <div class="settings-row">
+                <label class="settings-range__label" for="prefRemoteVolume">🔊 Remote-Lautstärke</label>
+                <div class="settings-range__control">
+                  <input id="prefRemoteVolume" type="range" min="0" max="100" step="1" />
+                  <span id="prefRemoteVolumeValue" class="settings-range__value">100%</span>
+                </div>
+              </div>
+
+              <div class="settings-row">
+                <label class="settings-range__label" for="prefMicGain">🎙️ Mic-Boost</label>
+                <div class="settings-range__control">
+                  <input id="prefMicGain" type="range" min="80" max="220" step="1" />
+                  <span id="prefMicGainValue" class="settings-range__value">1.60x</span>
+                </div>
+                <p class="account-quick-devices__hint" style="margin-top: 8px;">
+                  Hilft bei leisen Desktop-Mikros. Wirkt live im Call.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div class="settings-pane" data-tab="ui">
-            <p style="opacity:.85; margin:0;">UI Preferences werden in Kürze erweitert.</p>
+            <div class="settings-section">
+              <div class="settings-row">
+                <label class="settings-toggle">
+                  <input id="prefMessageSounds" type="checkbox" />
+                  <span>Message-Sounds (UI)</span>
+                </label>
+              </div>
+              <div class="settings-row">
+                <label class="settings-toggle">
+                  <input id="prefCompactUi" type="checkbox" />
+                  <span>Kompakte UI (mehr Platz)</span>
+                </label>
+              </div>
+              <div class="settings-row">
+                <label class="settings-toggle">
+                  <input id="prefReducedMotion" type="checkbox" />
+                  <span>Reduced Motion (weniger Animationen)</span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <div class="settings-pane" data-tab="account">
