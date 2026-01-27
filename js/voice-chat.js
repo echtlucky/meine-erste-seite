@@ -517,6 +517,19 @@ groups/{groupId}/voice-calls/{callId} {
     
     const peerConnection = new RTCPeerConnection(peerConfig);
 
+    // Always include a video m-line so screen sharing can start/stop without renegotiation.
+    // We keep a sender reference per peer and swap the track via replaceTrack().
+    try {
+      const videoTransceiver = peerConnection.addTransceiver("video", { direction: "sendrecv" });
+      if (videoTransceiver?.sender) {
+        videoSenders.set(remoteUid, videoTransceiver.sender);
+        setVideoSenderBitrate(videoTransceiver.sender);
+        if (screenTrack) {
+          videoTransceiver.sender.replaceTrack(screenTrack).catch(() => {});
+        }
+      }
+    } catch {}
+
     // Add local audio tracks (optionally processed)
     const outgoing = getOutgoingStream();
     if (outgoing) {
@@ -531,6 +544,18 @@ groups/{groupId}/voice-calls/{callId} {
       log("Remote track received from", remoteUid, event.track.kind);
       const remoteStream = event.streams[0];
       remoteStreams.set(remoteUid, remoteStream);
+
+      if (event.track.kind === "video") {
+        showScreenShareArea(true);
+        upsertVideoEl(`remote-screen-${remoteUid}`, new MediaStream([event.track]), false);
+        event.track.onended = () => {
+          removeVideoEl(`remote-screen-${remoteUid}`);
+          if (screenShareGrid && screenShareGrid.querySelectorAll("video").length === 0) {
+            showScreenShareArea(false);
+          }
+        };
+        return;
+      }
       
       // Create or update audio element for remote user
       let audioElement = document.getElementById(`remote-audio-${remoteUid}`);
@@ -605,6 +630,12 @@ groups/{groupId}/voice-calls/{callId} {
       audioElement.remove();
     }
 
+    removeVideoEl(`remote-screen-${uid}`);
+    videoSenders.delete(uid);
+    if (screenShareGrid && screenShareGrid.querySelectorAll("video").length === 0) {
+      showScreenShareArea(false);
+    }
+
     remoteStreams.delete(uid);
   }
 
@@ -623,7 +654,7 @@ groups/{groupId}/voice-calls/{callId} {
       
       const offer = await peerConnection.createOffer({
         offerToReceiveAudio: true,
-        offerToReceiveVideo: false
+        offerToReceiveVideo: true
       });
 
       await peerConnection.setLocalDescription(offer);
@@ -1089,6 +1120,8 @@ groups/{groupId}/voice-calls/{callId} {
 
   async function endVoiceCall() {
     try {
+      stopScreenShare();
+
       // Stop all audio tracks
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
@@ -1357,6 +1390,26 @@ groups/{groupId}/voice-calls/{callId} {
 
     if (btnToggleMic) {
       btnToggleMic.addEventListener("click", toggleMic);
+    }
+
+    if (btnShareScreen) {
+      btnShareScreen.addEventListener("click", async () => {
+        if (!currentVoiceCall || uiCallState !== "active") {
+          window.notify?.show({
+            type: "warn",
+            title: "Bildschirm teilen",
+            message: "Starte zuerst einen Call.",
+            duration: 3500
+          });
+          return;
+        }
+
+        if (screenTrack) {
+          stopScreenShare();
+        } else {
+          await startScreenShare();
+        }
+      });
     }
 
     // Incoming calls + labels: event-driven (no polling)
