@@ -322,31 +322,4 @@ window.renderAuthUI = function renderAuthUI(user) {
     updateAccountCTAs(window.__ECHTLUCKY_CURRENT_USER__);
   });
 
-  /* =========================
-     Background Atmosphere
-  ========================= */
-  function injectAtmosphere() {
-    if (document.body.dataset.atmosphereRendered) return;
-    document.body.dataset.atmosphereRendered = "1";
-
-    const createSparkle = () => {
-      const el = document.createElement("span");
-      el.className = "sparkle";
-      el.style.left = `${Math.random() * 100}%`;
-      el.style.top = `${Math.random() * 100}%`;
-      el.style.animationDelay = `${Math.random() * 4}s`;
-      document.body.appendChild(el);
-    };
-
-    for (let i = 0; i < 3; i += 1) {
-      createSparkle();
-    }
-
-    const lightning = document.createElement("div");
-    lightning.className = "lightning";
-    document.body.appendChild(lightning);
-  }
-
-  injectAtmosphere();
-
 })();

@@ -10,7 +10,7 @@
 
 body.home-page{
   position: relative;
-  --home-gap: clamp(1.6rem, 3.8vw, 3.2rem);
+  --home-gap: clamp(2.4rem, 5vw, 4rem);
 }
 
 /* Soft fade overlay (only Home) */
@@ -115,6 +115,65 @@ body.home-page::after{
   flex-direction: column;
   align-items: center;
   gap: 1.1rem;
+}
+
+.home-connect{
+  border-radius: 30px;
+  border: 1px solid rgba(0,255,136,0.18);
+  background: rgba(0,0,0,0.58);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 26px 90px rgba(0,0,0,0.58);
+  position: relative;
+  overflow: hidden;
+  padding: clamp(2rem, 3.8vw, 3.4rem);
+  text-align: center;
+}
+
+.home-connect::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(0,255,136,0.12), transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(88,101,242,0.09), transparent 60%);
+  opacity: 0.65;
+}
+
+.home-connect__inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap: 1.4rem;
+}
+
+.home-connect__left{
+  max-width: 660px;
+}
+
+.home-connect__left h2{
+  margin-bottom: 0.35rem;
+}
+
+.home-connect__left p{
+  margin: 0 auto 1rem;
+  color: rgba(224,255,224,0.9);
+}
+
+.home-connect__cta{
+  display:flex;
+  justify-content:center;
+  gap: 1rem;
+  flex-wrap:wrap;
+}
+
+.home-connect__right{
+  width: 100%;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap: 1rem;
 }
 
 .home-badge{
