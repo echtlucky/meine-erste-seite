@@ -26,6 +26,21 @@
   gap: 1.5rem;
 }
 
+/* Desktop: make space for left rail + group strip (fixed) */
+@media (min-width: 901px) {
+  .connect-page .app-shell__main {
+    padding-left: 86px;
+    padding-right: 12px;
+  }
+
+  .connect-page .group-strip--connect {
+    /* Align with main card instead of overlapping the Connect title */
+    top: calc(var(--header-h) + 104px);
+    left: calc(72px + 18px);
+    width: 70px;
+  }
+}
+
 .connect-main-card {
   position: relative;
   background: rgba(0, 0, 0, 0.52);

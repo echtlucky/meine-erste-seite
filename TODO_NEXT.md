@@ -15,6 +15,11 @@
 - [ ] Touch-Ziele/Spacing optimieren (Tabs, Buttons, Lists).
 - [ ] Screen-Share Viewer auf Mobile: stabil, immer auffindbar, Reopen-Flow über Call-Bar.
 
+## P1 — Connect Desktop Layout (Linksleisten)
+- [x] Doppelte Mitglieder-Spalte in `connect.html` entfernt (IDs/Panel-Duplikate).
+- [~] Gruppen-Leiste (Group Strip) auf Card-Höhe ausrichten + mehr Abstand zur Main-Card (CSS).
+- [~] Rechtsklick-Menü für Mitglieder (add/remove friend, copy name) in `connect-minimal.js`.
+
 ## P1 — Account Seite (Style wie Startseite)
 - [x] `account.html` auf modernes Tiles-Layout umgestellt.
 - [x] Fullwidth + Footer/Scroll-Bugs entfernt (keine doppelten Placeholder mehr).

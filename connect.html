@@ -196,34 +196,6 @@
               </div>
             </div>
           </section>
-
-                <!-- RIGHT: Members -->
-                <aside class="connect-panel connect-panel--right" aria-label="Mitglieder">
-                  <div class="members-header">
-                    <h3 class="members-title">Mitglieder</h3>
-                    <div class="members-count" id="membersCount">0</div>
-                  </div>
-
-                  <div class="members-add-section" id="membersAddSection" hidden>
-                    <input
-                      type="text"
-                      id="addMemberInput"
-                      class="add-member-input"
-                      placeholder="Benutzer hinzufÃ¼genâ€¦"
-                      autocomplete="off"
-                    />
-                    <div class="members-search-results" id="addMemberResults"></div>
-                  </div>
-
-                  <div class="members-list" id="membersList">
-                    <div class="empty-state">
-                      <p>Keine Mitglieder</p>
-                    </div>
-                  </div>
-                </aside>
-              </div>
-            </div>
-          </section>
         </main>
 
         <!-- Footer via fetch (kept inside app shell so it remains visible) -->
@@ -276,6 +248,8 @@
 
     <!-- GROUP CONTEXT MENU (Desktop right-click) -->
     <div class="context-menu" id="groupContextMenu" hidden role="menu" aria-label="GruppenmenÃ¼"></div>
+    <!-- USER CONTEXT MENU (Desktop right-click) -->
+    <div class="context-menu" id="userContextMenu" hidden role="menu" aria-label="BenutzermenÃ¼"></div>
 
     <!-- QUICK ACCOUNT (Rail) -->
     <div id="accountQuickModal" class="modal-overlay" hidden aria-hidden="true">

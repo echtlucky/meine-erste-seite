@@ -98,6 +98,7 @@
   const connectLayout = document.getElementById("connectLayout");
   const groupsListPanel = document.getElementById("groupsListPanel");
   const groupContextMenu = document.getElementById("groupContextMenu");
+  const userContextMenu = document.getElementById("userContextMenu");
   const btnCreateGroup = document.getElementById("btnCreateGroup");
   const friendSearchInput = document.getElementById("friendSearchInput");
   const friendsSearchResults = document.getElementById("friendsSearchResults");
@@ -115,6 +116,7 @@
   const userCache = new Map(); // uid -> { displayName, email }
   const groupsCache = new Map(); // groupId -> groupData (from snapshot)
   let groupContextState = null; // { groupId, groupData }
+  let userContextState = null; // { uid, name }
   const connectMainCard = document.querySelector(".connect-main-card");
   const mobileSwitcher = document.querySelector(".connect-mobile-switcher");
 
@@ -410,6 +412,15 @@
     groupContextState = null;
   }
 
+  function closeUserContextMenu() {
+    if (!userContextMenu) return;
+    userContextMenu.hidden = true;
+    userContextMenu.style.left = "";
+    userContextMenu.style.top = "";
+    userContextMenu.innerHTML = "";
+    userContextState = null;
+  }
+
   function positionContextMenu(x, y) {
     if (!groupContextMenu) return;
 
@@ -432,6 +443,27 @@
     groupContextMenu.style.top = `${top}px`;
   }
 
+  function positionUserContextMenu(x, y) {
+    if (!userContextMenu) return;
+
+    const margin = 10;
+    const vw = window.innerWidth || 0;
+    const vh = window.innerHeight || 0;
+
+    userContextMenu.style.left = `${Math.max(margin, Math.min(x, vw - margin))}px`;
+    userContextMenu.style.top = `${Math.max(margin, Math.min(y, vh - margin))}px`;
+
+    const rect = userContextMenu.getBoundingClientRect();
+    let left = rect.left;
+    let top = rect.top;
+
+    if (rect.right > vw - margin) left = Math.max(margin, vw - margin - rect.width);
+    if (rect.bottom > vh - margin) top = Math.max(margin, vh - margin - rect.height);
+
+    userContextMenu.style.left = `${left}px`;
+    userContextMenu.style.top = `${top}px`;
+  }
+
   function renderContextMenuItems(items) {
     if (!groupContextMenu) return;
 
@@ -443,6 +475,68 @@
         return `<button class="context-menu__item" type="button" data-action="${escapeHtml(it.action)}"${variantAttr} role="menuitem">${escapeHtml(it.label)}${hint}</button>`;
       })
       .join("");
+  }
+
+  function renderUserContextMenuItems(items) {
+    if (!userContextMenu) return;
+
+    userContextMenu.innerHTML = items
+      .map((it) => {
+        if (it.type === "sep") return '<div class="context-menu__sep" role="separator"></div>';
+        const variantAttr = it.variant ? ` data-variant="${escapeHtml(it.variant)}"` : "";
+        const hint = it.hint ? `<span class="context-menu__hint">${escapeHtml(it.hint)}</span>` : "";
+        return `<button class="context-menu__item" type="button" data-action="${escapeHtml(it.action)}"${variantAttr} role="menuitem">${escapeHtml(it.label)}${hint}</button>`;
+      })
+      .join("");
+  }
+
+  function openUserContextMenu(x, y, targetUid, targetName) {
+    if (!userContextMenu) return;
+    if (!targetUid) return;
+    if (targetUid === auth?.currentUser?.uid) return;
+
+    const isFriend = Array.isArray(currentUserFriends) && currentUserFriends.includes(targetUid);
+
+    const items = [];
+    if (isFriend) {
+      items.push({ action: "remove-friend", label: "Aus Freundesliste entfernen" });
+    } else {
+      items.push({ action: "add-friend", label: "Freund hinzufügen" });
+    }
+    items.push({ type: "sep" });
+    items.push({ action: "copy-name", label: "Benutzername kopieren", hint: "⧉" });
+
+    userContextState = { uid: targetUid, name: targetName || "" };
+    renderUserContextMenuItems(items);
+    userContextMenu.hidden = false;
+    positionUserContextMenu(x, y);
+
+    userContextMenu.querySelector(".context-menu__item")?.focus?.();
+  }
+
+  async function removeFriend(friendUid, friendName) {
+    if (!currentUser || !db || !friendUid || !firebase) return;
+
+    try {
+      await db.collection("users").doc(currentUser.uid).update({
+        friends: firebase.firestore.FieldValue.arrayRemove(friendUid)
+      });
+
+      window.notify?.show({
+        type: "success",
+        title: "Entfernt",
+        message: `${friendName || "User"} wurde entfernt.`,
+        duration: 3500
+      });
+    } catch (err) {
+      console.error("removeFriend error:", err);
+      window.notify?.show({
+        type: "error",
+        title: "Fehler",
+        message: "Konnte Freund nicht entfernen",
+        duration: 4000
+      });
+    }
   }
 
   async function renameGroup(groupId, groupDoc) {
@@ -630,8 +724,10 @@
         const initials = memberUid === uid ? "DU" : cachedInitials;
         const presenceState = memberUid === uid ? (document.hidden ? "away" : "online") : getPresenceState(memberUid);
         const presenceText = presenceState === "online" ? "Online" : presenceState === "away" ? "Abwesend" : "Offline";
+        const dataUid = escapeHtml(memberUid);
+        const dataName = escapeHtml(label);
         return `
-          <div class="member-item">
+          <div class="member-item" data-user-uid="${dataUid}" data-user-name="${dataName}">
             <div class="member-info">
               <div class="member-avatar">${escapeHtml(initials)}</div>
               <div class="member-details">
@@ -1579,6 +1675,71 @@
 
       window.addEventListener("resize", closeGroupContextMenu);
       window.addEventListener("scroll", closeGroupContextMenu, true);
+    }
+
+    // Users: right-click context menu (members list)
+    const membersList = document.getElementById("membersList");
+    if (membersList && userContextMenu) {
+      membersList.addEventListener("contextmenu", (e) => {
+        const item = e.target?.closest?.(".member-item[data-user-uid]");
+        if (!item) return;
+        e.preventDefault();
+        const targetUid = item.getAttribute("data-user-uid") || "";
+        const targetName = item.getAttribute("data-user-name") || "";
+        openUserContextMenu(e.clientX, e.clientY, targetUid, targetName);
+      });
+
+      userContextMenu.addEventListener("click", async (e) => {
+        const btn = e.target?.closest?.(".context-menu__item");
+        if (!btn) return;
+
+        const action = btn.getAttribute("data-action") || "";
+        const state = userContextState;
+        closeUserContextMenu();
+
+        if (!state?.uid) return;
+
+        if (action === "add-friend") {
+          window.echtluckyAddFriend?.(state.uid, state.name || "User");
+          return;
+        }
+
+        if (action === "remove-friend") {
+          await removeFriend(state.uid, state.name || "User");
+          return;
+        }
+
+        if (action === "copy-name") {
+          const text = String(state.name || "").trim();
+          if (!text) return;
+          try {
+            await navigator.clipboard.writeText(text);
+            window.notify?.show({
+              type: "success",
+              title: "Kopiert",
+              message: "Benutzername kopiert.",
+              duration: 2000
+            });
+          } catch (_) {
+            // Clipboard may be blocked; ignore silently.
+          }
+          return;
+        }
+      });
+
+      // Close on outside click / escape / scroll / resize
+      document.addEventListener("pointerdown", (e) => {
+        if (userContextMenu.hidden) return;
+        if (e.target === userContextMenu || e.target?.closest?.("#userContextMenu")) return;
+        closeUserContextMenu();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeUserContextMenu();
+      });
+
+      window.addEventListener("resize", closeUserContextMenu);
+      window.addEventListener("scroll", closeUserContextMenu, true);
     }
 
     initGroupSettingsModal();
