@@ -237,6 +237,7 @@
         .onSnapshot((snapshot) => {
           groupsCache.clear();
           groupsListPanel.innerHTML = "";
+          const stripData = [];
 
           if (snapshot.empty) {
             groupsListPanel.innerHTML =
@@ -249,6 +250,7 @@
             groupsCache.set(doc.id, group);
             const div = document.createElement("div");
             div.className = "group-item";
+            div.dataset.groupId = doc.id;
             if (selectedGroupId === doc.id) div.classList.add("is-active");
 
             div.innerHTML = `
@@ -263,7 +265,14 @@
               openGroupContextMenu(e.clientX, e.clientY, doc.id, group);
             });
             groupsListPanel.appendChild(div);
+            stripData.push({
+              id: doc.id,
+              name: group.name || "Gruppe",
+              unread: group.unreadCount || group.unread || 0,
+              color: group.meta?.color || "#00ff88"
+            });
           });
+          window.updateGroupStrip?.(stripData);
         });
     } catch (err) {
       console.error("Error loading groups:", err);
@@ -1533,6 +1542,14 @@
     // Reload groups event
     window.addEventListener("echtlucky:reload-groups", () => {
       loadGroups();
+    });
+
+    window.addEventListener("echtlucky:group-strip-select", (event) => {
+      const groupId = event?.detail?.groupId;
+      if (!groupId) return;
+      const cached = groupsCache.get(groupId);
+      const item = groupsListPanel?.querySelector(`[data-group-id="${groupId}"]`);
+      if (cached) selectGroup(groupId, cached, item);
     });
 
     // Initial auth check
