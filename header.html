@@ -1,23 +1,24 @@
 <header class="site-header" role="banner">
   <!-- Left -->
   <div class="header-left">
+    <div class="header-groups">
+      <button
+        id="groupsToggle"
+        class="nav-icon-btn"
+        type="button"
+        aria-label="Gruppen"
+        aria-haspopup="menu"
+        aria-expanded="false"
+      >
+        <span class="nav-icon" aria-hidden="true">&#128101;</span>
+      </button>
+      <div id="groupsMenu" class="dropdown-menu groups-menu" role="menu" aria-label="Gruppen"></div>
+    </div>
+
     <a href="index.html" class="logo" aria-label="echtlucky Home">
       echtlucky
       <span class="logo-glow" aria-hidden="true"></span>
     </a>
-
-    <div class="header-groups">
-      <button
-        id="groupsToggle"
-        class="nav-auth nav-auth--ghost"
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded="false"
-      >
-        Gruppen <span class="chev" aria-hidden="true">▾</span>
-      </button>
-      <div id="groupsMenu" class="dropdown-menu groups-menu" role="menu" aria-label="Gruppen"></div>
-    </div>
   </div>
 
   <!-- Center / Nav -->

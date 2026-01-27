@@ -209,6 +209,45 @@ window.renderAuthUI = function renderAuthUI(user) {
     el.classList.remove("show");
   }
 
+  function wireHoverDelay(toggle, menu) {
+    if (!toggle || !menu) return;
+
+    let closeTimer = null;
+
+    function open() {
+      if (closeTimer) window.clearTimeout(closeTimer);
+      closeTimer = null;
+      menu.classList.add("show");
+      toggle.setAttribute("aria-expanded", "true");
+    }
+
+    function scheduleClose() {
+      if (closeTimer) window.clearTimeout(closeTimer);
+      closeTimer = window.setTimeout(() => {
+        menu.classList.remove("show");
+        toggle.setAttribute("aria-expanded", "false");
+      }, 1000);
+    }
+
+    // Desktop hover intent (keeps menu open ~1s after leaving)
+    toggle.addEventListener("mouseenter", () => {
+      if (window.innerWidth <= 992) return;
+      open();
+    });
+    toggle.addEventListener("mouseleave", () => {
+      if (window.innerWidth <= 992) return;
+      scheduleClose();
+    });
+    menu.addEventListener("mouseenter", () => {
+      if (window.innerWidth <= 992) return;
+      open();
+    });
+    menu.addEventListener("mouseleave", () => {
+      if (window.innerWidth <= 992) return;
+      scheduleClose();
+    });
+  }
+
   function wireHubDropdown() {
     const toggle = qs("hubToggle");
     const menu = qs("hubMenu");
@@ -230,6 +269,8 @@ window.renderAuthUI = function renderAuthUI(user) {
         toggle.setAttribute("aria-expanded", "false");
       }
     });
+
+    wireHoverDelay(toggle, menu);
   }
 
   function wireGroupsDropdown() {
@@ -253,6 +294,8 @@ window.renderAuthUI = function renderAuthUI(user) {
         toggle.setAttribute("aria-expanded", "false");
       }
     });
+
+    wireHoverDelay(toggle, menu);
   }
 
   function ensureGroupStripLoaded() {

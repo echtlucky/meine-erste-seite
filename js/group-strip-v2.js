@@ -26,15 +26,8 @@
   }
 
   function ensureDockSlot() {
-    const existing = document.querySelector("[data-group-strip='dock']");
-    if (existing) return existing;
-
-    const dock = document.createElement("div");
-    dock.className = "group-strip group-strip--dock";
-    dock.setAttribute("data-group-strip", "dock");
-    dock.setAttribute("aria-label", "Gruppen-Leiste");
-    document.body.appendChild(dock);
-    return dock;
+    // Dock removed: do not create a bottom bar.
+    return null;
   }
 
   function ensureContextMenu() {
@@ -113,6 +106,7 @@
 
   function renderDock() {
     const dock = ensureDockSlot();
+    if (!dock) return;
     dock.innerHTML = "";
     currentGroups.slice(0, 10).forEach((g) => dock.appendChild(buildDockIcon(g)));
   }
@@ -216,7 +210,6 @@
   }
 
   function renderAll() {
-    renderDock();
     renderGroupsDropdown();
   }
 
@@ -246,4 +239,3 @@
     init();
   }
 })();
-

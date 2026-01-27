@@ -57,7 +57,6 @@ body{
   display:flex;
   flex-direction:column;
   padding-top: var(--header-h); /* fixed header space */
-  padding-bottom: calc(86px + env(safe-area-inset-bottom)); /* group dock space */
   overflow-x:hidden;
   letter-spacing:-0.15px;
   font-weight: 460;
@@ -152,34 +151,8 @@ main{ flex:1; }
   transform: translate3d(0,-110%,0);
 }
 
-.group-strip{
-  position: fixed;
-  left: 50%;
-  bottom: 12px;
-  transform: translateX(-50%);
-  width: min(860px, calc(100% - 24px));
-  height: 74px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.65rem;
-  padding: 0.6rem 0.75rem;
-  background: rgba(0,0,0,0.55);
-  border-radius: 999px;
-  border: 1px solid rgba(0,255,136,0.14);
-  z-index: 100010;
-  box-shadow: 0 18px 55px rgba(0,0,0,0.72);
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.group-strip::-webkit-scrollbar{
-  width: 0;
-  height: 0;
-}
+/* Group dock removed (groups live in header dropdown) */
+.group-strip{ display:none !important; }
 
 .group-strip__item{
   position: relative;
@@ -262,12 +235,7 @@ main{ flex:1; }
 }
 
 @media (max-width: 900px){
-  .group-strip{
-    width: calc(100% - 16px);
-    bottom: 8px;
-    height: 70px;
-    padding: 0.55rem 0.65rem;
-  }
+  .group-strip{ display:none !important; }
 }
 
 /* Header dropdown buttons (Hub / Groups) */
@@ -307,8 +275,30 @@ main{ flex:1; }
   align-items: center;
 }
 
-.nav-auth.nav-auth--ghost{
-  background: rgba(0,0,0,0.22);
+.nav-icon-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,255,136,0.14);
+  background: rgba(0,0,0,0.30);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background .18s ease, transform .14s ease, border-color .18s ease;
+}
+
+.nav-icon-btn:hover{
+  background: rgba(0,255,136,0.10);
+  border-color: rgba(0,255,136,0.26);
+  transform: translateY(-1px);
+}
+
+.nav-icon{
+  display:inline-flex;
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 .dropdown-menu.hub-menu,
@@ -520,15 +510,6 @@ main{ flex:1; }
 }
 
 .dropdown-menu.show{ display:block; }
-
-@media (min-width: 993px){
-  .nav-dropdown:hover .dropdown-menu{
-    display:block;
-  }
-  .header-groups:hover .dropdown-menu{
-    display:block;
-  }
-}
 
 /* Click / keyboard accessibility without JS (works with focus on the toggle button) */
 .nav-dropdown:focus-within .dropdown-menu{
