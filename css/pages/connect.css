@@ -408,6 +408,56 @@ input:focus, select:focus, textarea:focus {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.chat-call-bar__quality {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.chat-call-bar__quality-select {
+  width: auto;
+  margin: 0;
+  padding: 0.45rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 136, 0.16);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+}
+
+.screen-share-area {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 255, 136, 0.12);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.screen-share-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.screen-share-video {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 255, 136, 0.14);
+  background: rgba(0, 0, 0, 0.55);
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
+
+@media (min-width: 901px) {
+  .screen-share-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* voiceStatus state colors, now used inside call bar */

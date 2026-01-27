@@ -130,10 +130,22 @@
                       <div class="chat-call-bar" id="chatCallBar" hidden>
                         <div class="chat-call-bar__status" id="voiceStatus">Nicht im Call</div>
                         <div class="chat-call-bar__actions">
+                          <label class="chat-call-bar__quality" for="shareQuality">
+                            Qualität
+                            <select id="shareQuality" class="chat-call-bar__quality-select">
+                              <option value="720">720p</option>
+                              <option value="1080" selected>1080p</option>
+                              <option value="1440">1440p</option>
+                            </select>
+                          </label>
+                          <button class="btn btn-secondary" id="btnShareScreen" type="button">🖥️ Teilen</button>
                           <button class="btn btn-secondary" id="btnToggleMic" type="button" hidden>🔇 Stummschalten</button>
                           <button class="btn btn-danger" id="btnEndVoice" type="button" hidden>☎️ Beenden</button>
                         </div>
                       </div>
+                    </div>
+                    <div class="screen-share-area" id="screenShareArea" hidden aria-label="Bildschirmübertragung">
+                      <div class="screen-share-grid" id="screenShareGrid"></div>
                     </div>
 
                     <div class="chat-tabs" role="tablist" aria-label="Chat/Voice Tabs">

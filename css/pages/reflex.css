@@ -24,70 +24,62 @@
 /* Cursor normal on page */
 .reflex-page, .reflex-page *{ cursor: auto; }
 
-/* Discord-Style Layout */
+/* Layout aligned with Home look */
 .reflex-discord-shell {
-  max-width: 900px;
-  margin: 2.5rem auto 2rem auto;
-  padding: 0 1.5rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(1.2rem, 2.6vw, 2.2rem);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.6rem;
 }
-.discord-card {
-  background: #23272a;
-  border-radius: 1.2rem;
-  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
-  padding: 1.5rem 1.5rem 1.2rem 1.5rem;
-  margin-bottom: 0;
-  color: #fff;
+
+.reflex-discord-shell .discord-card {
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(0,255,136,0.16);
+  background: linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,0,0,0.62));
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
+  padding: clamp(1.2rem, 2.2vw, 1.8rem);
+  color: var(--text);
 }
+
 .reflex-hero-card {
-  background: linear-gradient(90deg, #43e97b 0%, #23272a 100%);
-  color: #23272a;
-  box-shadow: 0 2px 16px 0 rgba(67,233,123,0.12);
-  padding: 2rem 2rem 1.5rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
+  background: linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,0,0,0.62));
 }
-.admin-stat {
-  background: #18191c;
-  border-radius: 0.8rem;
-  padding: 1.1rem 1.5rem;
+
+.reflex-discord-shell .admin-stat {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(0,255,136,0.14);
+  border-radius: 18px;
+  padding: 1.0rem 1.15rem;
   min-width: 120px;
   text-align: center;
-  color: #fff;
-  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.08);
+  color: var(--text);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
 }
-.admin-stat__label {
-  font-size: 0.98rem;
-  color: #b9bbbe;
+
+.reflex-discord-shell .admin-stat__label {
+  font-size: 0.95rem;
+  color: var(--text-muted);
 }
-.admin-stat__value {
+
+.reflex-discord-shell .admin-stat__value {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 900;
   margin-top: 0.3rem;
   display: block;
+  color: var(--accent);
 }
+
 .reflex-main-card {
   margin-top: 0;
 }
 
-/* HERO */
-/* ...restliche Komponenten und Controls bleiben bestehen... */
 @media (max-width: 700px) {
   .reflex-discord-shell {
-    padding: 0 0.3rem;
-  }
-  .reflex-hero-card {
-    padding: 1.2rem 0.7rem 1rem 0.7rem;
-  }
-  .discord-card {
-    padding: 1rem 0.7rem 0.7rem 0.7rem;
-  }
-  .admin-stat {
-    padding: 0.7rem 0.7rem;
-    min-width: 90px;
+    padding: 1.2rem 0.75rem;
+    gap: 1.1rem;
   }
 }
 .miniStat__label{ font-size: .85rem; opacity: .8; margin-bottom: .25rem; }

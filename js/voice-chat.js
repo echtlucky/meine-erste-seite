@@ -272,6 +272,14 @@ groups/{groupId}/voice-calls/{callId} {
 
   let currentVoiceCall = null; // { groupId, callId, isInitiator }
   let localStream = null;
+  let processedStream = null;
+  let audioContext = null;
+  let micSourceNode = null;
+  let micGainNode = null;
+  let micCompressorNode = null;
+  let screenStream = null;
+  let screenTrack = null;
+  const videoSenders = new Map(); // remoteUid -> RTCRtpSender
   let isMicMuted = false;
   let uiCallState = "idle"; // idle | ringing | active | ended
   let callUnsubscribe = null;
@@ -293,16 +301,211 @@ groups/{groupId}/voice-calls/{callId} {
   const voiceStatus = document.getElementById("voiceStatus");
   const voiceParticipants = document.getElementById("voiceParticipants");
   const chatCallBar = document.getElementById("chatCallBar");
+  const screenShareArea = document.getElementById("screenShareArea");
+  const screenShareGrid = document.getElementById("screenShareGrid");
   const btnStartVoiceCall = document.getElementById("btnStartVoice");
   const btnStartRingingCall = null;
   const btnEndVoiceCall = document.getElementById("btnEndVoice");
   const btnToggleMic = document.getElementById("btnToggleMic");
+  const btnShareScreen = document.getElementById("btnShareScreen");
+  const shareQualitySelect = document.getElementById("shareQuality");
 
   // Check if required elements exist
   const hasRequiredElements = btnStartVoiceCall && btnEndVoiceCall;
   
   if (!hasRequiredElements) {
     console.warn("voice-chat.js: Required DOM elements missing");
+  }
+
+  function isMobileUi() {
+    return window.matchMedia ? window.matchMedia("(max-width: 900px)").matches : false;
+  }
+
+  function cleanupAudioProcessing() {
+    try { micSourceNode?.disconnect(); } catch {}
+    try { micCompressorNode?.disconnect(); } catch {}
+    try { micGainNode?.disconnect(); } catch {}
+    try { audioContext?.close?.(); } catch {}
+
+    micSourceNode = null;
+    micCompressorNode = null;
+    micGainNode = null;
+    audioContext = null;
+    processedStream = null;
+  }
+
+  function ensureAudioProcessing() {
+    if (!localStream) return;
+    if (processedStream) return;
+
+    // Desktop speech can sound very quiet on some setups (notably BT “hands-free”).
+    // A light compressor + small gain improves intelligibility while avoiding clipping.
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      audioContext = new AudioCtx();
+      micSourceNode = audioContext.createMediaStreamSource(localStream);
+      micCompressorNode = audioContext.createDynamicsCompressor();
+      micGainNode = audioContext.createGain();
+
+      micCompressorNode.threshold.value = -24;
+      micCompressorNode.knee.value = 24;
+      micCompressorNode.ratio.value = 8;
+      micCompressorNode.attack.value = 0.003;
+      micCompressorNode.release.value = 0.25;
+
+      micGainNode.gain.value = isMobileUi() ? 1.15 : 1.6;
+
+      const dest = audioContext.createMediaStreamDestination();
+      micSourceNode.connect(micCompressorNode);
+      micCompressorNode.connect(micGainNode);
+      micGainNode.connect(dest);
+
+      processedStream = dest.stream;
+    } catch (_) {
+      cleanupAudioProcessing();
+    }
+  }
+
+  function getOutgoingStream() {
+    ensureAudioProcessing();
+    return processedStream || localStream;
+  }
+
+  function getSharePreset() {
+    const v = String(shareQualitySelect?.value || "1080");
+    const h = Number.parseInt(v, 10);
+    if (h === 720) return { width: 1280, height: 720, maxBitrate: 2_500_000 };
+    if (h === 1440) return { width: 2560, height: 1440, maxBitrate: 6_000_000 };
+    return { width: 1920, height: 1080, maxBitrate: 4_000_000 };
+  }
+
+  function setVideoSenderBitrate(sender) {
+    try {
+      const params = sender.getParameters();
+      params.encodings = params.encodings || [{}];
+      params.encodings[0].maxBitrate = getSharePreset().maxBitrate;
+      sender.setParameters(params).catch(() => {});
+    } catch {}
+  }
+
+  function showScreenShareArea(show) {
+    if (!screenShareArea) return;
+    screenShareArea.hidden = !show;
+  }
+
+  function upsertVideoEl(id, stream, isLocal) {
+    if (!screenShareGrid) return;
+
+    let el = document.getElementById(id);
+    if (!el) {
+      el = document.createElement("video");
+      el.id = id;
+      el.className = "screen-share-video";
+      el.autoplay = true;
+      el.playsInline = true;
+      el.muted = !!isLocal;
+      el.controls = false;
+      screenShareGrid.appendChild(el);
+    }
+
+    if (el.srcObject !== stream) el.srcObject = stream;
+    el.play().catch(() => {});
+  }
+
+  function removeVideoEl(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    try { el.srcObject = null; } catch {}
+    el.remove();
+  }
+
+  async function startScreenShare() {
+    if (!currentVoiceCall) return;
+
+    try {
+      if (!navigator.mediaDevices?.getDisplayMedia) {
+        window.notify?.show({
+          type: "error",
+          title: "Bildschirm teilen",
+          message: "Dein Browser unterstützt keine Bildschirmübertragung.",
+          duration: 4500
+        });
+        return;
+      }
+
+      const preset = getSharePreset();
+      screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          frameRate: 30,
+          width: { ideal: preset.width },
+          height: { ideal: preset.height }
+        },
+        audio: false
+      });
+
+      screenTrack = screenStream.getVideoTracks()[0] || null;
+      if (!screenTrack) return;
+
+      try {
+        await screenTrack.applyConstraints({
+          width: preset.width,
+          height: preset.height,
+          frameRate: 30
+        });
+      } catch {}
+
+      showScreenShareArea(true);
+      upsertVideoEl("local-screen-preview", new MediaStream([screenTrack]), true);
+
+      peerConnections.forEach((pc, remoteUid) => {
+        const sender = videoSenders.get(remoteUid);
+        if (sender) {
+          sender.replaceTrack(screenTrack).catch(() => {});
+          setVideoSenderBitrate(sender);
+        }
+      });
+
+      if (btnShareScreen) btnShareScreen.textContent = "🛑 Stop";
+
+      screenTrack.onended = () => {
+        stopScreenShare();
+      };
+
+      window.notify?.show({
+        type: "success",
+        title: "Bildschirm teilen",
+        message: "Übertragung gestartet.",
+        duration: 2500
+      });
+    } catch (_) {
+      window.notify?.show({
+        type: "error",
+        title: "Bildschirm teilen",
+        message: "Konnte nicht starten (Berechtigung abgelehnt?).",
+        duration: 4500
+      });
+    }
+  }
+
+  function stopScreenShare() {
+    try { screenTrack?.stop?.(); } catch {}
+    screenTrack = null;
+    screenStream = null;
+
+    peerConnections.forEach((pc, remoteUid) => {
+      const sender = videoSenders.get(remoteUid);
+      if (sender) sender.replaceTrack(null).catch(() => {});
+    });
+
+    removeVideoEl("local-screen-preview");
+
+    if (screenShareGrid && screenShareGrid.querySelectorAll("video").length === 0) {
+      showScreenShareArea(false);
+    }
+
+    if (btnShareScreen) btnShareScreen.textContent = "🖥️ Teilen";
   }
 
   // ============================================
@@ -314,10 +517,11 @@ groups/{groupId}/voice-calls/{callId} {
     
     const peerConnection = new RTCPeerConnection(peerConfig);
 
-    // Add local audio tracks
-    if (localStream) {
-      localStream.getAudioTracks().forEach(track => {
-        peerConnection.addTrack(track, localStream);
+    // Add local audio tracks (optionally processed)
+    const outgoing = getOutgoingStream();
+    if (outgoing) {
+      outgoing.getAudioTracks().forEach(track => {
+        peerConnection.addTrack(track, outgoing);
         log(`Added local audio track to peer ${remoteUid}`);
       });
     }
@@ -638,6 +842,8 @@ groups/{groupId}/voice-calls/{callId} {
         },
         video: false
       });
+      cleanupAudioProcessing();
+      ensureAudioProcessing();
 
       const callId = `call_${Date.now()}_${auth.currentUser.uid}`;
       const user = auth.currentUser;
@@ -721,6 +927,8 @@ groups/{groupId}/voice-calls/{callId} {
         },
         video: false
       });
+      cleanupAudioProcessing();
+      ensureAudioProcessing();
 
       const callId = `call_${Date.now()}_${auth.currentUser.uid}`;
       const user = auth.currentUser;
@@ -809,6 +1017,8 @@ groups/{groupId}/voice-calls/{callId} {
         },
         video: false
       });
+      cleanupAudioProcessing();
+      ensureAudioProcessing();
 
       currentVoiceCall = {
         groupId,
@@ -884,6 +1094,7 @@ groups/{groupId}/voice-calls/{callId} {
         localStream.getTracks().forEach(track => track.stop());
         localStream = null;
       }
+      cleanupAudioProcessing();
 
       // Close all peer connections
       peerConnections.forEach((pc) => {
