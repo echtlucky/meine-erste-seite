@@ -80,7 +80,7 @@
 .ranked-header-progress .ranked-progress__bar {
   height: 6px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%);
+  background: rgba(0,255,136,0.75);
   width: 72%;
   transition: width 0.4s ease;
 }
@@ -173,7 +173,7 @@
 
 .btn-primary {
   border-color: transparent;
-  background: linear-gradient(135deg, #00ff88, #00cc66);
+  background: rgba(0,255,136,0.86);
   color: #01140c;
   font-weight: 700;
 }
@@ -290,7 +290,7 @@
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%);
+  background: rgba(0,255,136,0.75);
 }
 
 .streak-timeline {
@@ -340,7 +340,7 @@
 .ranked-progress.rank-progress--compact .ranked-progress__bar {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%);
+  background: rgba(0,255,136,0.75);
   width: 60%;
 }
 
@@ -416,7 +416,7 @@
 .monthly-progress__fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%);
+  background: rgba(0,255,136,0.75);
 }
 
 .daily-difficulty {
@@ -438,7 +438,7 @@
 }
 
 .difficulty-buttons .btn.active {
-  background: linear-gradient(90deg, #00ff88, #00cc66);
+  background: rgba(0,255,136,0.75);
   color: #01140c;
   border-color: transparent;
 }
@@ -597,7 +597,7 @@
   bottom: clamp(1rem, 2vw, 1.8rem);
   border-radius: 999px;
   border: none;
-  background: linear-gradient(135deg, #00ff88, #00cc66);
+  background: rgba(0,255,136,0.86);
   color: #01140c;
   padding: 0.9rem 1.5rem;
   font-size: 0.95rem;

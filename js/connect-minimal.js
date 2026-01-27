@@ -144,6 +144,9 @@
   const userContextMenu = document.getElementById("userContextMenu");
   const dmListPanel = document.getElementById("dmListPanel");
   const dmSearchInput = document.getElementById("dmSearchInput");
+  const connectDesktopNav = document.getElementById("connectDesktopNav");
+  const connectDmBlock = document.getElementById("connectDmBlock");
+  const connectGroupsBlock = document.getElementById("connectGroupsBlock");
   const btnOpenAddFriend = document.getElementById("btnOpenAddFriend");
   const addFriendModal = document.getElementById("addFriendModal");
   const btnCloseAddFriendModal = document.getElementById("btnCloseAddFriendModal");
@@ -427,7 +430,19 @@
     if (emptyChatState) emptyChatState.hidden = true;
 
     const chatGroupTitle = document.getElementById("chatGroupTitle");
-    if (chatGroupTitle) chatGroupTitle.textContent = name || "Direktnachricht";
+    if (chatGroupTitle) chatGroupTitle.textContent = `Direktnachricht: ${name || "User"}`;
+
+    const btnGroupSettings = document.getElementById("btnGroupSettings");
+    if (btnGroupSettings) btnGroupSettings.hidden = true;
+
+    const rightPanel = document.querySelector(".connect-right-panel");
+    if (rightPanel) rightPanel.hidden = true;
+    const membersAddSection = document.getElementById("membersAddSection");
+    if (membersAddSection) membersAddSection.hidden = true;
+    const membersList = document.getElementById("membersList");
+    const membersCount = document.getElementById("membersCount");
+    if (membersCount) membersCount.textContent = "0";
+    if (membersList) membersList.innerHTML = '<div class="empty-state"><p>Direktnachricht</p></div>';
 
     clearReplyState();
 
@@ -611,7 +626,13 @@
 
     // Update chat header
     const chatGroupTitle = document.getElementById("chatGroupTitle");
-    if (chatGroupTitle) chatGroupTitle.textContent = groupData.name || "Gruppe";
+    if (chatGroupTitle) chatGroupTitle.textContent = `Gruppe: ${groupData.name || "Gruppe"}`;
+
+    const btnGroupSettings = document.getElementById("btnGroupSettings");
+    if (btnGroupSettings) btnGroupSettings.hidden = false;
+
+    const rightPanel = document.querySelector(".connect-right-panel");
+    if (rightPanel) rightPanel.hidden = false;
 
     clearReplyState();
 
@@ -1063,7 +1084,7 @@
     if (groupMemberCount) groupMemberCount.value = Array.isArray(groupDoc.members) ? groupDoc.members.length : 0;
 
     const chatGroupTitle = document.getElementById("chatGroupTitle");
-    if (chatGroupTitle) chatGroupTitle.textContent = groupDoc.name || "Gruppe";
+    if (chatGroupTitle) chatGroupTitle.textContent = `Gruppe: ${groupDoc.name || "Gruppe"}`;
 
     const membersAddSection = document.getElementById("membersAddSection");
     const allowAdd = canManageGroupMembers(groupDoc);
@@ -1582,7 +1603,7 @@
 
               return `
                 <div class="friend-search-item">
-                  <div class="friend-search-item-avatar" style="background: linear-gradient(135deg, #00ff88, #0088ff);">
+                  <div class="friend-search-item-avatar" style="background: rgba(0,255,136,0.75); color: #041a10;">
                     ${initials}
                   </div>
                   <div class="friend-search-item-name">${renderUserDisplayName(user.displayName)}</div>
@@ -1963,19 +1984,37 @@
     const btnStartCall = document.getElementById("btnStartCall");
     if (btnStartCall) {
       btnStartCall.addEventListener("click", () => {
+        const api = window.echtlucky?.voiceChat;
+
+        if (activeChatMode === "dm") {
+          if (!selectedDmUid) {
+            window.notify?.show({
+              type: "error",
+              title: "Keine Direktnachricht ausgewählt",
+              message: "Bitte wähle links eine Direktnachricht aus.",
+              duration: 4200
+            });
+            return;
+          }
+          if (readBlockedFriendsSet().has(selectedDmUid)) return;
+
+          startRingLoop();
+          api?.startDirectCall?.(selectedDmUid, selectedDmName || "");
+          return;
+        }
+
         if (!selectedGroupId) {
           window.notify?.show({
             type: "error",
             title: "Keine Gruppe ausgewählt",
-            message: "Bitte wähle eine Gruppe aus",
-            duration: 4500
+            message: "Bitte wähle eine Gruppe aus.",
+            duration: 4200
           });
           return;
         }
 
         startRingLoop();
-
-        window.echtlucky?.voiceChat?.startRingingCall?.(selectedGroupId);
+        api?.startRingingCall?.(selectedGroupId);
       });
     }
 
@@ -2235,10 +2274,48 @@
     initGroupSettingsModal();
     wireAddMemberSearchUI();
 
-    // Create group button
-    if (btnCreateGroup) {
-      btnCreateGroup.addEventListener("click", createGroup);
+    // Desktop Connect Navigation (DMs / Groups / Create Group)
+    const setConnectNavView = (view) => {
+      const next = view === "groups" ? "groups" : "dm";
+      if (connectDmBlock) connectDmBlock.hidden = next !== "dm";
+      if (connectGroupsBlock) connectGroupsBlock.hidden = next !== "groups";
+
+      if (connectDesktopNav) {
+        connectDesktopNav.querySelectorAll(".connect-desktop-tab[data-view]").forEach((btn) => {
+          const isActive = btn.getAttribute("data-view") === next;
+          btn.classList.toggle("is-active", isActive);
+          btn.setAttribute("aria-selected", String(isActive));
+        });
+      }
+
+      // Keep the start view DM-first (requested).
+      try {
+        sessionStorage.setItem("echtlucky:connect:view", next);
+      } catch (_) {}
+    };
+
+    if (connectDesktopNav && !connectDesktopNav.__wired) {
+      connectDesktopNav.__wired = true;
+      connectDesktopNav.addEventListener("click", (e) => {
+        const btn = e.target?.closest?.(".connect-desktop-tab[data-view]");
+        if (!btn) return;
+        const view = btn.getAttribute("data-view") || "dm";
+
+        if (view === "create") {
+          createGroup();
+          setConnectNavView("groups");
+          return;
+        }
+
+        setConnectNavView(view);
+      });
     }
+
+    // Legacy fallback (if present in older markup)
+    if (btnCreateGroup) btnCreateGroup.addEventListener("click", createGroup);
+
+    // Always DM-first on load
+    setConnectNavView("dm");
 
     // DM list: search + select
     if (dmSearchInput) {
@@ -2499,42 +2576,101 @@
       document.getElementById("btnQuickAccount")?.click?.();
     });
 
-    const syncUserBarMicState = () => {
+    let isFullMute = false;
+    let micMutedBeforeFullMute = false;
+
+    const getMicMuted = () => {
       const api = window.echtlucky?.voiceChat;
-      const muted = typeof api?.getMicMuted === "function" ? api.getMicMuted() : false;
-      btnUserBarMute?.classList?.toggle?.("is-active", !!muted);
+      return typeof api?.getMicMuted === "function" ? !!api.getMicMuted() : false;
+    };
+
+    const setMicMuted = (next) => {
+      const api = window.echtlucky?.voiceChat;
+      if (typeof api?.setMicMuted === "function") {
+        api.setMicMuted(!!next);
+        return;
+      }
+      if (typeof api?.toggleMic === "function") {
+        const cur = getMicMuted();
+        if (!!next !== cur) api.toggleMic();
+        return;
+      }
+      document.getElementById("btnToggleMic")?.click?.();
+    };
+
+    const applyOutputMute = (muted) => {
+      document.querySelectorAll("audio, video").forEach((a) => {
+        try {
+          a.muted = !!muted;
+        } catch (_) {}
+      });
+    };
+
+    const applyMuteUi = () => {
+      const micMuted = getMicMuted();
+      const showMute = micMuted || isFullMute;
+      btnUserBarMute?.classList?.toggle?.("is-muted", showMute);
+      btnUserBarDeafen?.classList?.toggle?.("is-muted", isFullMute);
+      if (btnUserBarMute) btnUserBarMute.disabled = isFullMute;
+      const toggleMicBtn = document.getElementById("btnToggleMic");
+      if (toggleMicBtn) toggleMicBtn.disabled = isFullMute;
+    };
+
+    const enforceFullMute = () => {
+      if (!isFullMute) return;
+      setMicMuted(true);
+      applyOutputMute(true);
+      applyMuteUi();
     };
 
     window.addEventListener("echtlucky:voice-chat-ready", () => {
-      syncUserBarMicState();
+      applyMuteUi();
+      enforceFullMute();
     });
 
     btnUserBarMute?.addEventListener("click", () => {
+      if (isFullMute) return;
       const api = window.echtlucky?.voiceChat;
       if (typeof api?.toggleMic === "function") {
-        const muted = api.toggleMic();
-        btnUserBarMute.classList.toggle("is-active", !!muted);
-      } else {
-        document.getElementById("btnToggleMic")?.click?.();
-        setTimeout(syncUserBarMicState, 0);
+        api.toggleMic();
+        applyMuteUi();
+        return;
       }
+      document.getElementById("btnToggleMic")?.click?.();
+      setTimeout(applyMuteUi, 0);
     });
 
-    let isDeafened = false;
     btnUserBarDeafen?.addEventListener("click", () => {
-      isDeafened = !isDeafened;
-      document.querySelectorAll("audio, video").forEach((a) => {
-        try {
-          a.muted = isDeafened;
-        } catch (_) {}
-      });
-      btnUserBarDeafen.classList.toggle("is-active", isDeafened);
+      const next = !isFullMute;
+      if (next) micMutedBeforeFullMute = getMicMuted();
+      isFullMute = next;
+
+      if (isFullMute) {
+        setMicMuted(true);
+        applyOutputMute(true);
+      } else {
+        applyOutputMute(false);
+        setMicMuted(micMutedBeforeFullMute);
+      }
+
+      applyMuteUi();
     });
 
     // Keep userbar state in sync when voice UI toggles are used elsewhere.
     document.getElementById("btnToggleMic")?.addEventListener?.("click", () => {
-      setTimeout(syncUserBarMicState, 0);
+      setTimeout(() => {
+        enforceFullMute();
+        applyMuteUi();
+      }, 0);
     });
+
+    // If call-state changes while Full Mute is on, re-assert mic/output mute.
+    const voiceStatusEl = document.getElementById("voiceStatus");
+    if (voiceStatusEl && !voiceStatusEl.__fullMuteObs) {
+      voiceStatusEl.__fullMuteObs = true;
+      const obs = new MutationObserver(() => enforceFullMute());
+      obs.observe(voiceStatusEl, { attributes: true, attributeFilter: ["data-state"] });
+    }
 
     // Reply preview
     btnCancelReply?.addEventListener("click", clearReplyState);

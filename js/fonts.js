@@ -305,7 +305,7 @@
       tile.className = "font-tile" + (favs.has(s.id) ? " is-fav" : "");
       tile.dataset.styleId = s.id;
 
-      const output = s.apply(rawText || "echtlucky");
+      const output = s.apply(rawText || "echtlcky");
 
       tile.innerHTML = `
         <div class="font-tile__top">
@@ -335,7 +335,7 @@
     const rawText = normalizeInput(ui.text?.value || "");
     const s = styles.find((x) => x.id === styleId);
     if (!s) return;
-    const output = s.apply(rawText || "echtlucky");
+    const output = s.apply(rawText || "echtlcky");
     const ok = await copyToClipboard(output);
     if (ok) announce(`${s.name} kopiert.`);
   }
@@ -402,4 +402,3 @@
   bind();
   render();
 })();
-

@@ -3,10 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Connect | echtlucky</title>
+    <title>Connect | echtlcky</title>
 
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/fonts.css" />
     <link rel="stylesheet" href="css/app-shell.css" />
     <link rel="stylesheet" href="css/pages/connect.css" />
     <link
@@ -16,32 +17,17 @@
   </head>
 
   <body class="page-transition connect-page">
-    <div class="app-shell">
+    <div class="app-shell app-shell--no-rail">
       <header class="app-topbar">
         <div id="header-placeholder"></div>
       </header>
 
-      <nav class="app-rail" aria-label="Navigation">
-        <a class="app-rail__link" href="index.html" title="Home" aria-label="Home">
-          <i class="fa-solid fa-house" aria-hidden="true"></i>
-        </a>
-        <a class="app-rail__link is-active" href="connect.html" title="Connect" aria-label="Connect">
-          <i class="fa-solid fa-comments" aria-hidden="true"></i>
-        </a>
-        <a class="app-rail__link" href="blog.html" title="Blog" aria-label="Blog">
-          <i class="fa-solid fa-blog" aria-hidden="true"></i>
-        </a>
-        <a class="app-rail__link" href="ranked.html" title="Ranked" aria-label="Ranked">
-          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-        </a>
-        <div class="app-rail__spacer"></div>
-        <button class="app-rail__link" id="btnQuickAccount" type="button" title="Account" aria-label="Account">
-          <i class="fa-solid fa-user" aria-hidden="true"></i>
-        </button>
-      </nav>
-
       <div class="app-shell__main">
-        <main class="connect-main">          <section class="connect-single-card-shell">
+        <main class="connect-main">
+          <!-- Legacy hook: keep for device selector modal logic (no longer visible as sidebar button). -->
+          <button id="btnQuickAccount" type="button" hidden></button>
+
+          <section class="connect-single-card-shell">
             <div class="connect-hero">
               <div class="connect-hero__inner">
                 <h1 class="connect-title">Connect</h1>
@@ -68,18 +54,19 @@
                     </button>
                   </div>
 
-                  <div class="connect-nav-block" aria-label="Direktnachrichten">
+                  <div class="connect-desktop-nav" id="connectDesktopNav" role="tablist" aria-label="Connect Navigation">
+                    <button class="connect-desktop-tab is-active" type="button" data-view="dm" role="tab" aria-selected="true">Direktnachrichten</button>
+                    <button class="connect-desktop-tab" type="button" data-view="groups" role="tab" aria-selected="false">Gruppen</button>
+                    <button class="connect-desktop-tab connect-desktop-tab--cta" type="button" data-view="create" role="tab" aria-selected="false">Gruppen erstellen</button>
+                  </div>
+
+                  <div class="connect-nav-block" id="connectDmBlock" aria-label="Direktnachrichten">
                     <div class="connect-nav-block__title">Direktnachrichten</div>
                     <div class="dm-list" id="dmListPanel"></div>
                   </div>
 
-                  <div class="connect-nav-block" aria-label="Gruppen">
-                    <div class="connect-nav-block__titleRow">
-                      <div class="connect-nav-block__title">Gruppen</div>
-                      <button class="btn btn-sm" id="btnCreateGroup" type="button" title="Gruppe erstellen" aria-label="Gruppe erstellen">
-                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                      </button>
-                    </div>
+                  <div class="connect-nav-block" id="connectGroupsBlock" aria-label="Gruppen" hidden>
+                    <div class="connect-nav-block__title">Gruppen</div>
                     <div id="groupsListPanel" class="connect-groups-list" aria-label="Gruppenliste"></div>
                   </div>
 
@@ -470,6 +457,9 @@
     <script src="js/legal-modal.js"></script>
     <script src="js/notify.js"></script>
     <script src="js/modal-dialog.js"></script>
+    <script src="js/overlays.js"></script>
+    <script src="js/fonts.js"></script>
+    <script src="js/tickets.js"></script>
     <script src="js/connect-minimal.js"></script>
     <script src="js/voice-chat.js"></script>
 

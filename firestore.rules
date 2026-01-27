@@ -130,6 +130,146 @@ service cloud.firestore {
     }
 
     // ==========================================
+    // DIRECT CALLS (1:1 Voice)
+    // ==========================================
+    match /direct-calls/{callId} {
+      allow read: if isDirectCallMember();
+
+      allow create: if request.auth != null &&
+        request.resource.data.keys().hasOnly([
+          'initiator','initiatorName','to','toName',
+          'participants','status','type','rejectedBy',
+          'createdAt','acceptedAt','endedAt'
+        ]) &&
+        request.resource.data.type == 'direct' &&
+        request.resource.data.initiator == request.auth.uid &&
+        request.resource.data.to is string &&
+        request.resource.data.status in ['ringing','active','in_call','ended'] &&
+        request.resource.data.participants is list &&
+        request.auth.uid in request.resource.data.participants;
+
+      allow update, delete: if isDirectCallMember() &&
+        request.resource.data.keys().hasOnly([
+          'initiator','initiatorName','to','toName',
+          'participants','status','type','rejectedBy',
+          'createdAt','acceptedAt','endedAt'
+        ]) &&
+        request.resource.data.initiator == resource.data.initiator &&
+        request.resource.data.to == resource.data.to &&
+        request.resource.data.type == 'direct' &&
+        request.resource.data.status in ['ringing','active','in_call','ended'] &&
+        // Only allow a small set of mutable fields to change.
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'participants','status','rejectedBy','acceptedAt','endedAt'
+        ]);
+
+      match /offers/{offerId} {
+        allow read, write: if isDirectCallMember();
+      }
+      match /answers/{answerId} {
+        allow read, write: if isDirectCallMember();
+      }
+      match /ice-candidates/{candidateId} {
+        allow read, write: if isDirectCallMember();
+      }
+
+      function isDirectCallMember() {
+        return request.auth != null &&
+          (
+            request.auth.uid == resource.data.initiator ||
+            request.auth.uid == resource.data.to ||
+            (request.auth.uid in resource.data.participants)
+          );
+      }
+    }
+
+    // ==========================================
+    // SUPPORT / TICKETS
+    // ==========================================
+    match /tickets/{ticketId} {
+      allow read: if canReadTicket();
+
+      allow create: if request.auth != null &&
+        request.resource.data.keys().hasOnly([
+          'createdBy','createdByName','createdByEmail',
+          'createdAt','updatedAt',
+          'status','category','priority','title',
+          'contextPage','contextTitle','contextUrl',
+          'assignedTo','assignedToName','claimedAt',
+          'lastMessagePreview','attachmentMeta','tags','mergedInto'
+        ]) &&
+        request.resource.data.createdBy == request.auth.uid &&
+        request.resource.data.status == 'open' &&
+        request.resource.data.category in ['bug','account','payments','feedback','other'] &&
+        request.resource.data.priority in ['low','normal','high','urgent'] &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() >= 5 &&
+        request.resource.data.title.size() <= 80 &&
+        request.resource.data.assignedTo == null;
+
+      // Users: may close own tickets + update preview timestamps via message sends.
+      allow update: if request.auth != null &&
+        isTicketOwner() &&
+        request.resource.data.keys().hasOnly(resource.data.keys()) &&
+        request.resource.data.createdBy == resource.data.createdBy &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt','status','lastMessagePreview']) &&
+        request.resource.data.status in ['open','closed','waiting_staff','waiting_user'];
+
+      // Staff: can claim, respond, change status/priority/tags, merge.
+      allow update, delete: if isStaff() &&
+        request.resource.data.keys().hasOnly([
+          'createdBy','createdByName','createdByEmail',
+          'createdAt','updatedAt',
+          'status','category','priority','title',
+          'contextPage','contextTitle','contextUrl',
+          'assignedTo','assignedToName','claimedAt',
+          'lastMessagePreview','attachmentMeta','tags','mergedInto'
+        ]) &&
+        request.resource.data.createdBy == resource.data.createdBy;
+
+      match /messages/{messageId} {
+        allow read: if canReadTicketById(ticketId);
+
+        allow create: if request.auth != null &&
+          canReadTicketById(ticketId) &&
+          request.resource.data.keys().hasOnly(['authorUid','authorName','authorRole','text','createdAt','attachments']) &&
+          request.resource.data.authorUid == request.auth.uid &&
+          request.resource.data.text is string &&
+          request.resource.data.text.size() >= 1 &&
+          request.resource.data.text.size() <= 1200 &&
+          (
+            // Ticket owner writes as user
+            (isTicketOwnerById(ticketId) && request.resource.data.authorRole == 'user') ||
+            // Staff writes as staff role
+            (isStaff() && request.resource.data.authorRole in ['admin','support','moderator'])
+          );
+
+        allow update, delete: if isStaff();
+      }
+
+      // Internal notes are staff-only and must never be readable by users.
+      match /internal/{noteId} {
+        allow read: if isStaff();
+        allow create: if isStaff() && request.auth != null &&
+          request.resource.data.keys().hasOnly(['authorUid','authorName','authorRole','text','createdAt']) &&
+          request.resource.data.authorUid == request.auth.uid &&
+          request.resource.data.text is string &&
+          request.resource.data.text.size() >= 1 &&
+          request.resource.data.text.size() <= 2000;
+        allow update, delete: if isStaff();
+      }
+
+      function canReadTicket() {
+        return request.auth != null &&
+          (isStaff() || resource.data.createdBy == request.auth.uid);
+      }
+
+      function isTicketOwner() {
+        return request.auth != null && resource.data.createdBy == request.auth.uid;
+      }
+    }
+
+    // ==========================================
     // BLOG COLLECTION
     // ==========================================
     match /blog/{documentId} {
@@ -233,6 +373,28 @@ service cloud.firestore {
       return request.auth != null && 
              (request.auth.email == 'lucassteckel04@gmail.com' ||
               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    function isStaff() {
+      return request.auth != null &&
+        (
+          isAdmin() ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'support' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'moderator'
+        );
+    }
+
+    function canReadTicketById(ticketId) {
+      return request.auth != null &&
+        (
+          isStaff() ||
+          get(/databases/$(database)/documents/tickets/$(ticketId)).data.createdBy == request.auth.uid
+        );
+    }
+
+    function isTicketOwnerById(ticketId) {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/tickets/$(ticketId)).data.createdBy == request.auth.uid;
     }
   }
 }

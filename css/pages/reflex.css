@@ -52,9 +52,7 @@
   position:absolute;
   inset:-1px;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 16% 22%, rgba(0,255,136,0.12), transparent 62%),
-    radial-gradient(circle at 86% 76%, rgba(88,101,242,0.08), transparent 64%);
+  background: rgba(0,255,136,0.04);
   opacity: .85;
 }
 .reflex-discord-shell .discord-card > *{ position:relative; z-index:1; }
@@ -120,9 +118,7 @@
   position:absolute;
   inset:-1px;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 18% 25%, rgba(0,255,136,.12), transparent 58%),
-    radial-gradient(circle at 84% 78%, rgba(88,101,242,.08), transparent 62%);
+  background: rgba(0,255,136,.04);
   opacity:.85;
 }
 .reflex-card > *{ position:relative; z-index:1; }
@@ -238,12 +234,7 @@
   outline:none;
   cursor:pointer;
   border: 1px solid rgba(0,255,136,.12);
-  background:
-    linear-gradient(90deg,
-      rgba(0,255,136,.90) 0%,
-      rgba(0,255,136,.90) var(--fill, 50%),
-      rgba(255,255,255,.07) var(--fill, 50%),
-      rgba(255,255,255,.07) 100%);
+  background: rgba(0,0,0,.45);
 }
 
 .range-mini::-webkit-slider-thumb{
@@ -252,7 +243,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.85), rgba(0,255,136,.95));
+  background: rgba(0,255,136,.90);
   border: 1px solid rgba(0,255,136,.25);
   box-shadow: 0 10px 30px rgba(0,0,0,.55);
 }
@@ -260,7 +251,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.85), rgba(0,255,136,.95));
+  background: rgba(0,255,136,.90);
   border: 1px solid rgba(0,255,136,.25);
   box-shadow: 0 10px 30px rgba(0,0,0,.55);
 }
@@ -390,10 +381,7 @@
   inset: 0;
   z-index: 9999;
   display:none;
-  background:
-    radial-gradient(circle at 30% 18%, rgba(0,255,136,0.14), transparent 58%),
-    radial-gradient(circle at 78% 72%, rgba(88,101,242,0.12), transparent 60%),
-    rgba(0,0,0,0.88);
+  background: rgba(0,0,0,0.90);
   backdrop-filter: blur(10px);
 }
 .reflex-game.show{ display:block; }
@@ -472,8 +460,7 @@
   transform: translate3d(-50%,-50%,0);
   border-radius: 50%;
   border: 2px solid rgba(0,255,136,.45);
-  background:
-    radial-gradient(circle at 35% 35%, rgba(255,255,255,.18), rgba(0,0,0,.25) 38%, rgba(0,255,136,.10) 72%, rgba(0,0,0,.10));
+  background: rgba(0,0,0,.40);
   box-shadow:
     0 22px 70px rgba(0,0,0,.65),
     0 0 0 10px rgba(0,255,136,.06);

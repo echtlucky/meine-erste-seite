@@ -10,6 +10,15 @@
   padding: clamp(2.4rem, 4.2vw, 3.8rem) clamp(1.2rem, 3vw, 2.6rem) clamp(3rem, 5vw, 4rem);
 }
 
+.fonts-shell--overlay{
+  padding: 0;
+  gap: 1.25rem;
+}
+
+.fonts-shell--overlay > section{
+  width: 100%;
+}
+
 .fonts-shell > section{
   width: min(1400px, calc(100% - clamp(2.4rem, 4vw, 3rem)));
   margin: 0 auto;
@@ -201,11 +210,11 @@
 }
 
 .font-tile.is-fav{
-  border-color: rgba(88,101,242,0.38);
+  border-color: rgba(0,255,136,0.42);
 }
 
 .font-tile.is-fav .font-tile__name{
-  color: rgba(88,101,242,0.95);
+  color: rgba(0,255,136,0.95);
 }
 
 @media (max-width: 720px){
@@ -222,4 +231,3 @@
     width: 100%;
   }
 }
-

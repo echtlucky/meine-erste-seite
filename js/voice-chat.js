@@ -32,10 +32,10 @@
   async function sendCallPush(toUid, title, body, data) {
     // Hier müsste ein Cloud Function/Backend-Service das FCM-Token holen und Push senden
     // (Demo: Log-Ausgabe)
-    log("[Push] Sende Call-Push an", toUid, title, body, data);
+    console.log("[Push] Sende Call-Push an", toUid, title, body, data);
   }
 // js/voice-chat.js — echtlucky Voice Integration
-// WebRTC + Firebase Signaling für Gruppen-Calls (Direct Calls sind in diesem Projekt derzeit deaktiviert)
+// WebRTC + Firebase Signaling für Gruppen-Calls + Direktanrufe (1:1)
 
 /*
 ==============================
@@ -148,34 +148,59 @@ groups/{groupId}/voice-calls/{callId} {
     if (!activeCallRequest) return;
     const { type, groupId, callId } = activeCallRequest;
 
-    if (type !== "group" || !groupId || !callId) return;
-
     hideIncomingCallModal();
 
     try {
-      await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).update({
-        status: "active",
-        participants: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
-      });
+      if (!auth?.currentUser?.uid) return;
+      if (!callId) return;
+
+      if (type === "group") {
+        if (!groupId) return;
+        await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).update({
+          status: "active",
+          participants: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+        });
+        window.echtlucky?.voiceChat?.joinCall?.(groupId, callId);
+        return;
+      }
+
+      if (type === "direct") {
+        await db.collection("direct-calls").doc(callId).set({
+          status: "active",
+          participants: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid),
+          acceptedAt: new Date()
+        }, { merge: true });
+        window.echtlucky?.voiceChat?.joinDirectCall?.(callId);
+        return;
+      }
     } catch (e) {
       console.warn("Teilnehmer konnte nicht hinzugefügt werden", e);
     }
-
-    window.echtlucky?.voiceChat?.joinCall?.(groupId, callId);
   };
   if (btnRejectCall) btnRejectCall.onclick = async () => {
     if (!activeCallRequest) return;
     const { type, groupId, callId } = activeCallRequest;
 
-    if (type !== "group" || !groupId || !callId) {
-      hideIncomingCallModal();
-      return;
-    }
-
     try {
-      await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).update({
-        rejectedBy: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
-      });
+      if (!auth?.currentUser?.uid) return;
+      if (!callId) return;
+
+      if (type === "group") {
+        if (!groupId) return;
+        await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).update({
+          rejectedBy: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+        });
+        return;
+      }
+
+      if (type === "direct") {
+        await db.collection("direct-calls").doc(callId).set({
+          status: "ended",
+          endedAt: new Date(),
+          rejectedBy: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+        }, { merge: true });
+        return;
+      }
     } catch (e) {
       console.warn("Reject konnte nicht gespeichert werden", e);
     } finally {
@@ -187,7 +212,15 @@ groups/{groupId}/voice-calls/{callId} {
   // Firestore Rules in this project only allow group-member reads/writes in /groups/...,
   // so users/{uid}/callRequests and the top-level /calls collection are intentionally not used here.
   let incomingGroupUnsubscribe = null;
+  let incomingDirectUnsubscribe = null;
   let watchedGroupId = null;
+
+  function detachIncomingDirectListener() {
+    if (incomingDirectUnsubscribe) {
+      incomingDirectUnsubscribe();
+      incomingDirectUnsubscribe = null;
+    }
+  }
 
   function attachIncomingGroupListener(groupId) {
     if (incomingGroupUnsubscribe) {
@@ -196,6 +229,7 @@ groups/{groupId}/voice-calls/{callId} {
     }
 
     if (!groupId) return;
+    if (!auth?.currentUser?.uid) return;
 
     const callsRef = db.collection("groups").doc(groupId).collection("voice-calls");
 
@@ -246,7 +280,48 @@ groups/{groupId}/voice-calls/{callId} {
       });
   }
 
+  function attachIncomingDirectListener() {
+    detachIncomingDirectListener();
+    if (!db || !auth?.currentUser?.uid) return;
+
+    const myUid = auth.currentUser.uid;
+    incomingDirectUnsubscribe = db
+      .collection("direct-calls")
+      .where("status", "==", "ringing")
+      .where("to", "==", myUid)
+      .limit(1)
+      .onSnapshot((snap) => {
+        if (snap.empty) {
+          if (activeCallRequest?.type === "direct") hideIncomingCallModal();
+          return;
+        }
+
+        const doc = snap.docs[0];
+        const data = doc.data() || {};
+
+        if (!auth?.currentUser?.uid) return;
+        if (data.initiator === myUid) return;
+        if (Array.isArray(data.rejectedBy) && data.rejectedBy.includes(myUid)) return;
+        if (Array.isArray(data.participants) && data.participants.includes(myUid)) return;
+
+        activeCallRequest = { type: "direct", callId: doc.id };
+        showIncomingCallModal({
+          fromName: data.initiatorName || "Unbekannt",
+          groupName: "",
+          type: "direct"
+        });
+      });
+  }
+
   function handleSelectedGroupChange(groupId) {
+    if (!auth?.currentUser?.uid) {
+      if (incomingGroupUnsubscribe) {
+        incomingGroupUnsubscribe();
+        incomingGroupUnsubscribe = null;
+      }
+      watchedGroupId = null;
+      return;
+    }
     const nextGroupId = groupId || null;
     if (nextGroupId === watchedGroupId) return;
     watchedGroupId = nextGroupId;
@@ -270,7 +345,10 @@ groups/{groupId}/voice-calls/{callId} {
   // STATE
   // ============================================
 
-  let currentVoiceCall = null; // { groupId, callId, isInitiator }
+  const CALL_KIND_GROUP = "group";
+  const CALL_KIND_DIRECT = "direct";
+
+  let currentVoiceCall = null; // { kind: "group"|"direct", groupId?, callId, peerUid?, isInitiator }
   let localStream = null;
   let processedStream = null;
   let audioContext = null;
@@ -284,7 +362,7 @@ groups/{groupId}/voice-calls/{callId} {
   let btnOpenScreenShare = null;
   const videoSenders = new Map(); // remoteUid -> RTCRtpSender
   let isMicMuted = false;
-  let uiCallState = "idle"; // idle | ringing | active | ended
+  let uiCallState = "idle"; // idle | ringing | in_call | ended
   let callUnsubscribe = null;
   let peerConnections = new Map(); // uid -> RTCPeerConnection
   let remoteStreams = new Map(); // uid -> MediaStream
@@ -328,6 +406,32 @@ groups/{groupId}/voice-calls/{callId} {
   const AUDIO_INPUT_KEY = "echtlucky:audioInputDeviceId";
   const AUDIO_OUTPUT_KEY = "echtlucky:audioOutputDeviceId";
   const MIC_GAIN_KEY = "echtlucky:micGain";
+
+  function getGroupCallRef(groupId, callId) {
+    return db.collection("groups").doc(groupId).collection("voice-calls").doc(callId);
+  }
+
+  function getDirectCallRef(callId) {
+    return db.collection("direct-calls").doc(callId);
+  }
+
+  function getCallRefFromActiveCall() {
+    if (!currentVoiceCall) return null;
+    if (currentVoiceCall.kind === CALL_KIND_DIRECT) return getDirectCallRef(currentVoiceCall.callId);
+    if (!currentVoiceCall.groupId) return null;
+    return getGroupCallRef(currentVoiceCall.groupId, currentVoiceCall.callId);
+  }
+
+  function uiStateFromStatus(status) {
+    if (status === "ringing") return "ringing";
+    if (status === "active") return "in_call";
+    if (status === "ended") return "ended";
+    return "idle";
+  }
+
+  function callLabel(kind) {
+    return kind === CALL_KIND_DIRECT ? "Direktanruf" : "Gruppenanruf";
+  }
 
   function clampNumber(value, min, max) {
     const v = Number(value);
@@ -817,13 +921,14 @@ groups/{groupId}/voice-calls/{callId} {
   // SIGNALING: Create & Send Offer
   // ============================================
 
-  async function createAndSendOffer(groupId, callId, remoteUid) {
+  async function createAndSendOffer(callRef, remoteUid) {
     try {
       if (peerConnections.has(remoteUid)) {
         log(`Offer already sent to ${remoteUid}`);
         return;
       }
 
+      if (!callRef) return;
       const peerConnection = createPeerConnection(remoteUid);
       
       const offer = await peerConnection.createOffer({
@@ -835,9 +940,6 @@ groups/{groupId}/voice-calls/{callId} {
       log(`Offer created for ${remoteUid}`);
 
       // Store offer in Firestore
-      const groupRef = db.collection("groups").doc(groupId);
-      const callRef = groupRef.collection("voice-calls").doc(callId);
-      
       await callRef.collection("offers").doc(remoteUid).set({
         from: auth.currentUser.uid,
         to: remoteUid,
@@ -856,10 +958,8 @@ groups/{groupId}/voice-calls/{callId} {
   // SIGNALING: Listen & Create Answer
   // ============================================
 
-  function listenForOffers(groupId, callId) {
-    const groupRef = db.collection("groups").doc(groupId);
-    const callRef = groupRef.collection("voice-calls").doc(callId);
-    
+  function listenForOffers(callRef) {
+    if (!callRef) return () => {};
     const unsubscribe = callRef.collection("offers").where("to", "==", auth.currentUser.uid).onSnapshot(async (snapshot) => {
       for (const doc of snapshot.docs) {
         const { from, sdp } = doc.data();
@@ -902,10 +1002,8 @@ groups/{groupId}/voice-calls/{callId} {
   // SIGNALING: Listen for Answers
   // ============================================
 
-  function listenForAnswers(groupId, callId) {
-    const groupRef = db.collection("groups").doc(groupId);
-    const callRef = groupRef.collection("voice-calls").doc(callId);
-    
+  function listenForAnswers(callRef) {
+    if (!callRef) return () => {};
     const unsubscribe = callRef.collection("answers").where("to", "==", auth.currentUser.uid).onSnapshot(async (snapshot) => {
       for (const doc of snapshot.docs) {
         const { from, sdp } = doc.data();
@@ -933,10 +1031,8 @@ groups/{groupId}/voice-calls/{callId} {
   // ICE CANDIDATES: Listen & Add
   // ============================================
 
-  function listenForIceCandidates(groupId, callId) {
-    const groupRef = db.collection("groups").doc(groupId);
-    const callRef = groupRef.collection("voice-calls").doc(callId);
-    
+  function listenForIceCandidates(callRef) {
+    if (!callRef) return () => {};
     const unsubscribe = callRef.collection("ice-candidates").where("to", "==", auth.currentUser.uid).onSnapshot((snapshot) => {
       snapshot.forEach((doc) => {
         const { from, candidate, sdpMLineIndex, sdpMid } = doc.data();
@@ -960,21 +1056,22 @@ groups/{groupId}/voice-calls/{callId} {
   }
 
   // ============================================
-  // Listen for Users Joining Call (Initiator)
+  // Subscribe to Call Doc (status + participants)
   // ============================================
 
-  function listenForJoiningUsers(groupId, callId) {
-    const groupRef = db.collection("groups").doc(groupId);
-    const callRef = groupRef.collection("voice-calls").doc(callId);
-    
+  function subscribeToCallDoc(callRef, kind) {
+    if (!callRef) return () => {};
     const unsubscribe = callRef.onSnapshot((snap) => {
       if (!snap.exists) {
-        log("Call document deleted");
+        endVoiceCall().catch(() => {});
         return;
       }
 
-      const data = snap.data();
-      if (data?.status === "ended") {
+      const data = snap.data() || {};
+      const status = String(data.status || "");
+      const participants = Array.isArray(data.participants) ? data.participants : [];
+
+      if (status === "ended") {
         window.notify?.show({
           type: "info",
           title: "Anruf",
@@ -984,17 +1081,17 @@ groups/{groupId}/voice-calls/{callId} {
         endVoiceCall().catch(() => {});
         return;
       }
-      if (data?.participants) {
-        const newParticipants = data.participants.filter(p => p !== auth.currentUser.uid);
-        
-        // Create offers for new participants
-        newParticipants.forEach(participantUid => {
-          if (!peerConnections.has(participantUid)) {
-            createAndSendOffer(groupId, callId, participantUid);
-          }
-        });
 
-        updateParticipantsList(data.participants);
+      updateParticipantsList(participants);
+
+      const label = callLabel(kind);
+      const uiState = uiStateFromStatus(status);
+      if (uiState === "ringing") {
+        updateVoiceUI(true, `${label}: klingelt…`, "ringing");
+      } else if (uiState === "in_call") {
+        updateVoiceUI(true, `${label}: ${participants.length} Teilnehmer`, "in_call");
+      } else {
+        updateVoiceUI(true, `${label}`, "in_call");
       }
     });
 
@@ -1021,9 +1118,9 @@ groups/{groupId}/voice-calls/{callId} {
       if (!groupId) {
         window.notify?.show({
           type: "error",
-          title: "Nicht unterstützt",
-          message: "Direktanrufe sind aktuell nicht aktiviert. Bitte starte/joine einen Gruppenanruf.",
-          duration: 5000
+          title: "Keine Gruppe ausgewählt",
+          message: "Bitte wähle eine Gruppe aus.",
+          duration: 4500
         });
         return;
       }
@@ -1049,12 +1146,14 @@ groups/{groupId}/voice-calls/{callId} {
       const user = auth.currentUser;
 
       currentVoiceCall = {
+        kind: CALL_KIND_GROUP,
         groupId,
         callId,
         isInitiator: true
       };
 
-      await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).set({
+      const callRef = getGroupCallRef(groupId, callId);
+      await callRef.set({
         initiator: user.uid,
         initiatorName: user.displayName || "User",
         createdAt: new Date(),
@@ -1064,12 +1163,12 @@ groups/{groupId}/voice-calls/{callId} {
         rejectedBy: []
       });
 
-      listenForJoiningUsers(groupId, callId);
-      listenForOffers(groupId, callId);
-      listenForAnswers(groupId, callId);
-      listenForIceCandidates(groupId, callId);
+      callUnsubscribe = subscribeToCallDoc(callRef, CALL_KIND_GROUP);
+      listenForOffers(callRef);
+      listenForAnswers(callRef);
+      listenForIceCandidates(callRef);
 
-      updateVoiceUI(true, "Ruft an… (klingelt)", "ringing");
+      updateVoiceUI(true, "Gruppenanruf: klingelt…", "ringing");
 
       window.notify?.show({
         type: "info",
@@ -1129,13 +1228,15 @@ groups/{groupId}/voice-calls/{callId} {
       const user = auth.currentUser;
 
       currentVoiceCall = {
+        kind: CALL_KIND_GROUP,
         groupId,
         callId,
         isInitiator: true
       };
 
       // Create call document in Firestore
-      await db.collection("groups").doc(groupId).collection("voice-calls").doc(callId).set({
+      const callRef = getGroupCallRef(groupId, callId);
+      await callRef.set({
         initiator: user.uid,
         initiatorName: user.displayName || "User",
         createdAt: new Date(),
@@ -1144,13 +1245,13 @@ groups/{groupId}/voice-calls/{callId} {
       });
 
       // Setup listeners
-      listenForJoiningUsers(groupId, callId);
-      listenForOffers(groupId, callId);
-      listenForAnswers(groupId, callId);
-      listenForIceCandidates(groupId, callId);
+      callUnsubscribe = subscribeToCallDoc(callRef, CALL_KIND_GROUP);
+      listenForOffers(callRef);
+      listenForAnswers(callRef);
+      listenForIceCandidates(callRef);
 
       // Show voice panel
-      updateVoiceUI(true, "Sprachchat aktiv - wartend auf Teilnehmer", "active");
+      updateVoiceUI(true, "Gruppenanruf: aktiv", "in_call");
 
       window.notify?.show({
         type: "success",
@@ -1211,12 +1312,14 @@ groups/{groupId}/voice-calls/{callId} {
       ensureAudioProcessing();
 
       currentVoiceCall = {
+        kind: CALL_KIND_GROUP,
         groupId,
         callId,
-        isInitiator: false
+        isInitiator: false,
+        peerUid: null
       };
 
-      const callRef = db.collection("groups").doc(groupId).collection("voice-calls").doc(callId);
+      const callRef = getGroupCallRef(groupId, callId);
 
       // Add self to participants
       await callRef.update({
@@ -1229,27 +1332,18 @@ groups/{groupId}/voice-calls/{callId} {
       // Create offers for each existing participant (they will answer)
       for (const participantUid of existingParticipants) {
         if (participantUid !== auth.currentUser.uid) {
-          await createAndSendOffer(groupId, callId, participantUid);
+          currentVoiceCall.peerUid = participantUid;
+          await createAndSendOffer(callRef, participantUid);
         }
       }
 
       // Setup listeners
-      listenForOffers(groupId, callId);
-      listenForAnswers(groupId, callId);
-      listenForIceCandidates(groupId, callId);
+      listenForOffers(callRef);
+      listenForAnswers(callRef);
+      listenForIceCandidates(callRef);
+      callUnsubscribe = subscribeToCallDoc(callRef, CALL_KIND_GROUP);
 
-      // Subscribe to participants list (nur für Gruppen sinnvoll)
-      if (groupId) {
-        callUnsubscribe = callRef.onSnapshot((snap) => {
-          const data = snap.data();
-          if (data?.participants) {
-            updateParticipantsList(data.participants);
-            updateVoiceUI(true, `${data.participants.length} Teilnehmer`, "active");
-          }
-        });
-      }
-
-      updateVoiceUI(true, "Sprachchat - Verbindung wird hergestellt", "active");
+      updateVoiceUI(true, "Gruppenanruf: Verbindung wird hergestellt", "in_call");
 
       window.notify?.show({
         type: "success",
@@ -1264,6 +1358,169 @@ groups/{groupId}/voice-calls/{callId} {
         ? "Mikrofonzugriff verweigert"
         : "Fehler beim Beitreten zum Sprachchat";
       
+      window.notify?.show({
+        type: "error",
+        title: "Voice Chat Fehler",
+        message: errorMsg,
+        duration: 5000
+      });
+    }
+  }
+
+  // ============================================
+  // DIRECT CALLS (1:1)
+  // ============================================
+
+  async function startRingingDirectCall(targetUid, targetName) {
+    try {
+      if (!auth.currentUser) {
+        window.notify?.show({
+          type: "error",
+          title: "Authentifizierung erforderlich",
+          message: "Du musst eingeloggt sein",
+          duration: 4500
+        });
+        return;
+      }
+
+      const toUid = String(targetUid || "").trim();
+      if (!toUid) return;
+
+      if (currentVoiceCall) {
+        window.notify?.show({
+          type: "warn",
+          title: "Voice Chat",
+          message: "Beende erst den aktuellen Anruf",
+          duration: 3500
+        });
+        return;
+      }
+
+      localStream = await navigator.mediaDevices.getUserMedia({
+        audio: buildAudioConstraints(),
+        video: false
+      });
+      cleanupAudioProcessing();
+      ensureAudioProcessing();
+
+      const callId = `direct_${Date.now()}_${auth.currentUser.uid}`;
+      const user = auth.currentUser;
+
+      currentVoiceCall = {
+        kind: CALL_KIND_DIRECT,
+        groupId: null,
+        callId,
+        peerUid: toUid,
+        isInitiator: true
+      };
+
+      const callRef = getDirectCallRef(callId);
+      await callRef.set({
+        initiator: user.uid,
+        initiatorName: user.displayName || (user.email ? user.email.split("@")[0] : "User"),
+        to: toUid,
+        toName: String(targetName || "").trim(),
+        createdAt: new Date(),
+        participants: [user.uid],
+        status: "ringing",
+        type: "direct",
+        rejectedBy: []
+      });
+
+      callUnsubscribe = subscribeToCallDoc(callRef, CALL_KIND_DIRECT);
+      listenForOffers(callRef);
+      listenForAnswers(callRef);
+      listenForIceCandidates(callRef);
+
+      updateVoiceUI(true, "Direktanruf: klingelt…", "ringing");
+    } catch (err) {
+      console.error("startRingingDirectCall error:", err);
+      const errorMsg =
+        err.name === "NotAllowedError"
+          ? "Mikrofonzugriff verweigert. Bitte erlaube Audiovorbereitung!"
+          : err.name === "NotFoundError"
+            ? "Kein Mikrofon gefunden. Bitte überprüfe dein Gerät!"
+            : "Fehler beim Starten des Direktanrufs";
+
+      window.notify?.show({
+        type: "error",
+        title: "Anruf Fehler",
+        message: errorMsg,
+        duration: 5000
+      });
+    }
+  }
+
+  async function joinDirectCall(callId) {
+    try {
+      if (!auth.currentUser) {
+        window.notify?.show({
+          type: "error",
+          title: "Authentifizierung erforderlich",
+          message: "Du musst eingeloggt sein",
+          duration: 4500
+        });
+        return;
+      }
+
+      if (currentVoiceCall) {
+        window.notify?.show({
+          type: "warn",
+          title: "Voice Chat",
+          message: "Beende erst den aktuellen Anruf",
+          duration: 3500
+        });
+        return;
+      }
+
+      const id = String(callId || "").trim();
+      if (!id) return;
+
+      localStream = await navigator.mediaDevices.getUserMedia({
+        audio: buildAudioConstraints(),
+        video: false
+      });
+      cleanupAudioProcessing();
+      ensureAudioProcessing();
+
+      currentVoiceCall = {
+        kind: CALL_KIND_DIRECT,
+        groupId: null,
+        callId: id,
+        peerUid: null,
+        isInitiator: false
+      };
+
+      const callRef = getDirectCallRef(id);
+
+      // Add self to participants
+      await callRef.set({
+        participants: window.firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+      }, { merge: true });
+
+      const callDoc = await callRef.get();
+      const existingParticipants = callDoc.data()?.participants || [];
+
+      // Create offers for each existing participant (they will answer)
+      for (const participantUid of existingParticipants) {
+        if (participantUid !== auth.currentUser.uid) {
+          currentVoiceCall.peerUid = participantUid;
+          await createAndSendOffer(callRef, participantUid);
+        }
+      }
+
+      listenForOffers(callRef);
+      listenForAnswers(callRef);
+      listenForIceCandidates(callRef);
+      callUnsubscribe = subscribeToCallDoc(callRef, CALL_KIND_DIRECT);
+
+      updateVoiceUI(true, "Direktanruf: Verbindung wird hergestellt", "in_call");
+    } catch (err) {
+      console.error("joinDirectCall error:", err);
+      const errorMsg = err.name === "NotAllowedError"
+        ? "Mikrofonzugriff verweigert"
+        : "Fehler beim Beitreten zum Direktanruf";
+
       window.notify?.show({
         type: "error",
         title: "Voice Chat Fehler",
@@ -1315,24 +1572,29 @@ groups/{groupId}/voice-calls/{callId} {
 
       // Update Firestore: mark ended (initiator) and remove self from call
       if (currentVoiceCall) {
-        const groupRef = db.collection("groups").doc(currentVoiceCall.groupId);
-        const callRef = groupRef.collection("voice-calls").doc(currentVoiceCall.callId);
+        const callRef = getCallRefFromActiveCall();
 
         try {
           if (currentVoiceCall.isInitiator) {
-            await callRef.update({
-              status: "ended",
-              endedAt: new Date()
-            });
+            if (callRef) {
+              await callRef.set({
+                status: "ended",
+                endedAt: new Date()
+              }, { merge: true });
+            }
           }
 
           // Remove participant
-          await callRef.update({
-            participants: window.firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid)
-          });
+          if (callRef && auth?.currentUser?.uid) {
+            await callRef.set({
+              participants: window.firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid)
+            }, { merge: true });
+          }
 
           // If initiator, delete entire call and all subcollections
           if (currentVoiceCall.isInitiator) {
+            if (!callRef) return;
+
             // Clean up offers
             const offerSnap = await callRef.collection("offers").get();
             for (const doc of offerSnap.docs) {
@@ -1363,7 +1625,7 @@ groups/{groupId}/voice-calls/{callId} {
       isMicMuted = false;
 
       // Update UI
-      updateVoiceUI(false, undefined, "idle");
+      updateVoiceUI(false, "Anruf beendet", "ended");
       btnToggleMic.classList.remove("is-muted");
       btnToggleMic.textContent = "🔇 Stummschalten";
 
@@ -1386,7 +1648,7 @@ groups/{groupId}/voice-calls/{callId} {
   function updateVoiceUI(isActive, statusText, state) {
     if (isActive) {
       if (voiceStatus) voiceStatus.textContent = statusText;
-      uiCallState = state || uiCallState || "active";
+      uiCallState = state || uiCallState || "in_call";
       if (voiceStatus) voiceStatus.setAttribute("data-state", uiCallState);
       if (chatCallBar) chatCallBar.hidden = false;
       if (btnStartVoiceCall) btnStartVoiceCall.hidden = true;
@@ -1399,9 +1661,13 @@ groups/{groupId}/voice-calls/{callId} {
         btnEndVoiceCall.textContent = uiCallState === "ringing" ? "Abbrechen" : "Beenden";
       }
     } else {
-      if (voiceStatus) voiceStatus.textContent = "Nicht im Call";
-      uiCallState = state || "idle";
-      if (voiceStatus) voiceStatus.removeAttribute("data-state");
+      const nextState = state || "idle";
+      uiCallState = nextState;
+      if (voiceStatus) {
+        voiceStatus.textContent = statusText || (nextState === "ended" ? "Anruf beendet" : "Nicht im Call");
+        if (nextState === "ended") voiceStatus.setAttribute("data-state", "ended");
+        else voiceStatus.removeAttribute("data-state");
+      }
       if (chatCallBar) chatCallBar.hidden = true;
       if (btnStartVoiceCall) btnStartVoiceCall.hidden = false;
       // Start-call button is handled in the chat header (connect-minimal), not here.
@@ -1577,7 +1843,7 @@ groups/{groupId}/voice-calls/{callId} {
 
     if (btnShareScreen) {
       btnShareScreen.addEventListener("click", async () => {
-        if (!currentVoiceCall || uiCallState !== "active") {
+        if (!currentVoiceCall || uiCallState !== "in_call") {
           window.notify?.show({
             type: "warn",
             title: "Bildschirm teilen",
@@ -1634,6 +1900,22 @@ groups/{groupId}/voice-calls/{callId} {
     // Incoming calls + labels: event-driven (no polling)
     bindSelectedGroupEvents();
     handleSelectedGroupChange(getSelectedGroupId());
+
+    const syncAuthDependentListeners = () => {
+      if (auth?.currentUser?.uid) {
+        attachIncomingDirectListener();
+        handleSelectedGroupChange(getSelectedGroupId());
+      } else {
+        detachIncomingDirectListener();
+        handleSelectedGroupChange(null);
+      }
+    };
+
+    window.addEventListener("echtlucky:auth-change", () => {
+      syncAuthDependentListeners();
+    });
+    syncAuthDependentListeners();
+
     // Push-Benachrichtigungen initialisieren
     initPushNotifications();
 
@@ -1660,7 +1942,9 @@ groups/{groupId}/voice-calls/{callId} {
   appNS.voiceChat = {
     startCall: startVoiceCall,
     startRingingCall: startRingingGroupCall,
+    startDirectCall: startRingingDirectCall,
     joinCall: joinVoiceCall,
+    joinDirectCall: joinDirectCall,
     endCall: endVoiceCall,
     isInCall: () => !!currentVoiceCall,
     toggleMic: toggleMic,

@@ -31,7 +31,7 @@
   transition: background 0.2s, color 0.2s;
   margin-bottom: 0.2rem;
 }
-.account-page .btn-primary { background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%); color: #041a10; }
+.account-page .btn-primary { background: rgba(0,255,136,0.86); color: #041a10; border: 1px solid rgba(0,255,136,0.25); }
 .account-page .btn-primary:hover { filter: brightness(1.03); }
 .account-page .btn-danger { background: #ed4245; color: #fff; }
 .account-page .btn-success { background: #43b581; color: #fff; }
@@ -108,7 +108,7 @@
 .account-hero{
   border-radius: var(--acc-radius-xl);
   border: 1px solid var(--acc-border2);
-  background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(0,0,0,.74));
+  background: rgba(0,0,0,.70);
   box-shadow: var(--acc-shadow);
   backdrop-filter: blur(18px);
   padding: 1.25rem;
@@ -124,9 +124,7 @@
   position:absolute;
   inset:-1px;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 18% 18%, rgba(0,255,136,.14), transparent 55%),
-    radial-gradient(circle at 82% 70%, rgba(88,101,242,.10), transparent 60%);
+  background: rgba(0,255,136,.05);
   opacity:.95;
 }
 .account-hero > *{ position: relative; z-index: 1; }
@@ -263,7 +261,7 @@
 .account-card{
   border-radius: var(--acc-radius-xl);
   border: 1px solid var(--acc-border2);
-  background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(0,0,0,.74));
+  background: rgba(0,0,0,.70);
   box-shadow: var(--acc-shadow);
   backdrop-filter: blur(18px);
   padding: 1.15rem;
@@ -276,9 +274,7 @@
   position:absolute;
   inset:-1px;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 18% 25%, rgba(0,255,136,.12), transparent 58%),
-    radial-gradient(circle at 84% 78%, rgba(88,101,242,.08), transparent 62%);
+  background: rgba(0,255,136,.04);
   opacity:.85;
 }
 .account-card > *{ position: relative; z-index: 1; }
@@ -604,7 +600,7 @@
 /* DANGER CARD SPECIAL STYLE */
 .danger-card{
   border-color: rgba(255,51,102,.20) !important;
-  background: linear-gradient(135deg, rgba(255,51,102,.08), rgba(0,0,0,.70)) !important;
+  background: rgba(255,51,102,.08) !important;
 }
 
 .danger-card .card-head{

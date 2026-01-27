@@ -7,10 +7,10 @@
   const defaultGroups = [
     { id: "__dm__", name: "DM", unread: 0, color: "#00ff88", type: "dm" },
     { id: "group-1", name: "Connect Hub", unread: 4, color: "#00ff88", type: "group" },
-    { id: "group-2", name: "Ballistic", unread: 2, color: "#ff3366", type: "group" },
-    { id: "group-3", name: "Reflex Lab", unread: 0, color: "#5865f2", type: "group" },
-    { id: "group-4", name: "Community", unread: 0, color: "#00a8ff", type: "group" },
-    { id: "group-5", name: "Updates", unread: 3, color: "#ff9a00", type: "group" },
+    { id: "group-2", name: "Ballistic", unread: 2, color: "#00cc66", type: "group" },
+    { id: "group-3", name: "Reflex Lab", unread: 0, color: "#00cc66", type: "group" },
+    { id: "group-4", name: "Community", unread: 0, color: "#00cc66", type: "group" },
+    { id: "group-5", name: "Updates", unread: 3, color: "#00cc66", type: "group" },
     { id: "__create__", name: "+", unread: 0, color: "#00ff88", type: "create" }
   ];
 

@@ -73,10 +73,7 @@ body.home-page{
   position:absolute;
   inset:-1px;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 18% 22%, rgba(0,255,136,0.14), transparent 58%),
-    radial-gradient(circle at 84% 72%, rgba(88,101,242,0.12), transparent 60%),
-    linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0.74));
+  background: rgba(0,255,136,0.05);
   opacity:.95;
 }
 .home-hero > *,
@@ -119,9 +116,7 @@ body.home-page{
   position:absolute;
   inset:-1px;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 15% 20%, rgba(0,255,136,0.12), transparent 60%),
-    radial-gradient(circle at 80% 80%, rgba(88,101,242,0.09), transparent 60%);
+  background: rgba(0,255,136,0.04);
   opacity: 0.65;
 }
 
@@ -180,10 +175,8 @@ body.home-page{
   font-size: clamp(3.0rem, 5.2vw, 4.4rem);
   line-height: 1.03;
   letter-spacing: -1.15px;
-  background: linear-gradient(90deg, #00ff88, #00cc66);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--accent);
+  text-shadow: 0 0 18px rgba(0,255,136,0.18);
 }
 
 .home-sub{

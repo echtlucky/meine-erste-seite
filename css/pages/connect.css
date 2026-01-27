@@ -49,9 +49,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(900px 520px at 10% 0%, rgba(0, 255, 136, 0.14), transparent 60%),
-    radial-gradient(900px 520px at 90% 0%, rgba(88, 101, 242, 0.10), transparent 55%);
+  background: rgba(0, 255, 136, 0.05);
   pointer-events: none;
 }
 
@@ -216,6 +214,50 @@ html.connect-compact .connect-chat-area {
   gap: 0.75rem;
 }
 
+.connect-desktop-nav{
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.1fr;
+  gap: 8px;
+}
+
+.connect-desktop-tab{
+  height: 40px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,136,0.14);
+  background: rgba(0,0,0,0.30);
+  color: rgba(224,255,224,0.85);
+  font-weight: 780;
+  cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
+}
+
+.connect-desktop-tab:hover,
+.connect-desktop-tab:focus-visible{
+  transform: translateY(-1px);
+  background: rgba(0,255,136,0.10);
+  border-color: rgba(0,255,136,0.30);
+  color: rgba(224,255,224,0.95);
+}
+
+.connect-desktop-tab.is-active{
+  background: rgba(0,255,136,0.14);
+  border-color: rgba(0,255,136,0.38);
+  color: #00ff88;
+}
+
+.connect-desktop-tab.connect-desktop-tab--cta{
+  background: rgba(0,255,136,0.18);
+  border-color: rgba(0,255,136,0.42);
+  color: #00ff88;
+}
+
+.connect-desktop-tab.connect-desktop-tab--cta:hover,
+.connect-desktop-tab.connect-desktop-tab--cta:focus-visible{
+  background: rgba(0,255,136,0.22);
+  border-color: rgba(0,255,136,0.55);
+}
+
 .connect-left-search {
   flex: 1;
   display: flex;
@@ -279,6 +321,12 @@ html.connect-compact .connect-chat-area {
   gap: 0.8rem;
 }
 
+@media (max-width: 900px) {
+  .connect-desktop-nav{
+    display: none;
+  }
+}
+
 @media (max-width: 1100px) {
   .connect-workspace {
     grid-template-columns: 1fr;
@@ -325,7 +373,7 @@ html.connect-compact .connect-chat-area {
 
 .group-item {
   padding: 1rem;
-  background: linear-gradient(180deg, rgba(0, 255, 136, 0.06), rgba(255, 255, 255, 0.02));
+  background: rgba(0, 0, 0, 0.26);
   border: 1px solid rgba(0, 255, 136, 0.15);
   border-radius: 10px;
   cursor: pointer;
@@ -333,13 +381,13 @@ html.connect-compact .connect-chat-area {
 }
 
 .group-item:hover {
-  background: linear-gradient(180deg, rgba(0, 255, 136, 0.12), rgba(255, 255, 255, 0.03));
+  background: rgba(0, 255, 136, 0.08);
   border-color: rgba(0, 255, 136, 0.30);
   transform: translateX(4px);
 }
 
 .group-item.is-active {
-  background: linear-gradient(180deg, rgba(0, 255, 136, 0.16), rgba(0, 0, 0, 0.32));
+  background: rgba(0, 255, 136, 0.12);
   border-color: rgba(0, 255, 136, 0.40);
 }
 
@@ -906,7 +954,7 @@ html.connect-compact .connect-chat-area {
 }
 
 .modal-btn--reject {
-  background: linear-gradient(135deg, #ff3366, #ff1a4d);
+  background: rgba(255,51,102,0.18);
   color: #fff;
 }
 
@@ -1061,11 +1109,11 @@ html.connect-compact .connect-chat-area {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #0088ff);
+  background: rgba(0,255,136,0.75);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000;
+  color: #041a10;
   font-weight: 700;
   font-size: 0.8rem;
 }
@@ -1287,7 +1335,7 @@ html.connect-compact .connect-chat-area {
   overflow-y: auto;
   border-radius: 16px;
   border: 1px solid rgba(0, 255, 136, 0.25);
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 20, 10, 0.8) 100%);
+  background: rgba(0, 0, 0, 0.86);
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   padding: 2rem;
   position: relative;
@@ -1671,7 +1719,7 @@ html.connect-compact .connect-chat-area {
   padding: 8px;
   border-radius: 16px;
   border: 1px solid var(--border-soft);
-  background: linear-gradient(180deg, rgba(0,0,0,0.78), rgba(0,0,0,0.62));
+  background: rgba(0,0,0,0.78);
   box-shadow: 0 22px 70px rgba(0,0,0,0.62);
   backdrop-filter: blur(14px);
 }
@@ -1915,10 +1963,20 @@ html.connect-compact .connect-chat-area {
   border-color: rgba(0,255,136,0.28);
 }
 
-.connect-page .connect-userbar__btn.is-active{
-  background: rgba(0,255,136,0.18);
-  border-color: rgba(0,255,136,0.42);
-  color: #00ff88;
+.connect-page .connect-userbar__btn.is-muted{
+  background: rgba(255, 51, 102, 0.14);
+  border-color: rgba(255, 51, 102, 0.40);
+  color: #ff3366;
+}
+
+.connect-page .connect-userbar__btn.is-muted:hover{
+  background: rgba(255, 51, 102, 0.18);
+  border-color: rgba(255, 51, 102, 0.52);
+}
+
+.connect-page .connect-userbar__btn:disabled{
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .connect-page .settings-row{

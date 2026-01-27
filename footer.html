@@ -1,11 +1,29 @@
-﻿<footer>
+<footer>
   <div class="footer-content">
-    <p>© 2026 echtlucky • Competitives Fortnite Journey</p>
-    <div class="footer-links">
-      <a href="fonts.html">Schriftgenerator</a>
+    <p>© 2026 echtlcky • Competitive Fortnite Journey</p>
+
+    <div class="footer-links" aria-label="Footer Links">
+      <a href="#" data-overlay="fonts">Schriftgenerator</a>
       <a href="impressum.html" data-modal="impressum.html">Impressum</a>
       <a href="datenschutz.html" data-modal="datenschutz.html">Datenschutz</a>
       <a href="kontakt.html" data-modal="kontakt.html">Kontakt</a>
+    </div>
+
+    <div class="footer-actions" aria-label="Footer Aktionen">
+      <button
+        class="footer-icon-btn"
+        type="button"
+        data-overlay="support"
+        aria-label="Support & Tickets öffnen"
+        title="Support & Tickets"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M6 7h12a2 2 0 0 1 2 2v3h-2V9H6v10h6v2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm12 6h2a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-6l-2 2v-2h-2a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h8Zm0 2h-8v3h3v1.2L14.2 18H20v-3Z"
+          />
+        </svg>
+      </button>
     </div>
   </div>
 </footer>
@@ -22,64 +40,3 @@
   </div>
 </div>
 
-<script>
-(function () {
-  const modal = document.getElementById('legalModal');
-  const contentEl = document.getElementById('legalModalContent');
-  const titleEl = document.getElementById('legalModalTitle');
-  const closeBtn = document.getElementById('legalModalClose');
-
-  function openModal(title) {
-    titleEl.textContent = title || 'Info';
-    modal.classList.add('show');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('modal-open');
-  }
-
-  function closeModal() {
-    modal.classList.remove('show');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('modal-open');
-    contentEl.innerHTML = '';
-  }
-
-  async function loadIntoModal(url, title) {
-    contentEl.innerHTML = "<p style='opacity:.8'>Lade Inhalt...</p>";
-    openModal(title);
-
-    try {
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-
-      const html = await res.text();
-      const temp = document.createElement('div');
-      temp.innerHTML = html;
-
-      const main = temp.querySelector('main');
-      contentEl.innerHTML = main ? main.innerHTML : temp.innerHTML;
-    } catch (err) {
-      contentEl.innerHTML = "<p style='color:#ff3366'>Fehler beim Laden: " + err.message + '</p>';
-    }
-  }
-
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[data-modal]');
-    if (!a) return;
-
-    e.preventDefault();
-    loadIntoModal(a.dataset.modal, a.textContent.trim());
-  });
-
-  closeBtn.addEventListener('click', closeModal);
-
-  modal.addEventListener('click', (e) => {
-    if (e.target.dataset.close) closeModal();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('show')) {
-      closeModal();
-    }
-  });
-})();
-</script>

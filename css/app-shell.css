@@ -12,6 +12,17 @@
     "rail main";
 }
 
+.app-shell.app-shell--no-rail{
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "topbar"
+    "main";
+}
+
+.app-shell.app-shell--no-rail .app-rail{
+  display: none;
+}
+
 .app-topbar {
   grid-area: topbar;
   position: sticky;

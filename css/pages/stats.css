@@ -105,7 +105,7 @@
 
 .stats-graph {
   height: 120px;
-  background: radial-gradient(circle at 20% 20%, rgba(0, 255, 136, 0.1), transparent 50%);
+  background: rgba(0, 255, 136, 0.05);
   border-radius: 16px;
   position: relative;
   overflow: hidden;
@@ -151,7 +151,7 @@
 .progress-fill {
   height: 100%;
   border-radius: 99px;
-  background: linear-gradient(90deg, #00ff88, #00cc66);
+  background: rgba(0,255,136,0.75);
   width: 0;
   transition: width 0.6s ease;
 }
@@ -172,7 +172,7 @@
 .skill-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #00ff88, #5865f2);
+  background: rgba(0,255,136,0.75);
   width: 0;
   transition: width 0.6s ease;
 }
