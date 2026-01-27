@@ -541,6 +541,30 @@ main{ flex:1; }
   }
 }
 
+@media (max-width: 768px) {
+  body {
+    padding-top: calc(var(--header-h) + 10px);
+    padding-bottom: calc(var(--pad-xl) + env(safe-area-inset-bottom));
+  }
+
+  .app-shell__main,
+  main,
+  .container {
+    padding-bottom: calc(var(--pad-xl) + 2rem);
+  }
+
+  footer,
+  #footer-placeholder > footer {
+    position: relative;
+    margin-top: auto;
+    z-index: 1;
+  }
+
+  .group-strip {
+    display: none;
+  }
+}
+
 /* ======================================
    GENERIC HERO (fallback)
 ====================================== */

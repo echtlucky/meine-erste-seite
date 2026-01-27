@@ -18,6 +18,8 @@
   let auth = null;
   let db = null;
   let firebase = null;
+  const audioCtx =
+    typeof window.AudioContext !== "undefined" ? new window.AudioContext() : null;
 
   async function waitForFirebase() {
     return new Promise((resolve) => {
@@ -43,6 +45,50 @@
     });
   }
 
+  function playToneSequence(sequence) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    sequence.forEach(({ freq = 440, duration = 0.18, start = 0, type = "sine" }) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now + start);
+      gain.gain.setValueAtTime(0, now + start);
+      gain.gain.linearRampToValueAtTime(0.35, now + start + 0.01);
+      gain.gain.setValueAtTime(0.35, now + start + duration - 0.02);
+      gain.gain.linearRampToValueAtTime(0, now + start + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + start);
+      osc.stop(now + start + duration);
+    });
+  }
+
+  function playIncomingTone() {
+    playToneSequence([
+      { freq: 520, duration: 0.12, start: 0 },
+      { freq: 640, duration: 0.12, start: 0.16 },
+      { freq: 760, duration: 0.14, start: 0.32 }
+    ]);
+  }
+
+  function playCallTone() {
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    playToneSequence([
+      { freq: 280, duration: 0.2, start: 0, type: "triangle" },
+      { freq: 360, duration: 0.2, start: 0.18, type: "triangle" },
+      { freq: 440, duration: 0.2, start: 0.36, type: "triangle" }
+    ]);
+  }
+
+  function playHangupTone() {
+    playToneSequence([
+      { freq: 420, duration: 0.2, start: 0, type: "square" },
+      { freq: 320, duration: 0.2, start: 0.18, type: "square" },
+      { freq: 240, duration: 0.24, start: 0.36, type: "square" }
+    ]);
+  }
+
   let initialized = false;
 
   // DOM Elements
@@ -55,6 +101,9 @@
   const btnCreateGroup = document.getElementById("btnCreateGroup");
   const friendSearchInput = document.getElementById("friendSearchInput");
   const friendsSearchResults = document.getElementById("friendsSearchResults");
+  const incomingCallModal = document.getElementById("incomingCallModal");
+  const btnAcceptCall = document.getElementById("btnAcceptCall");
+  const btnRejectCall = document.getElementById("btnRejectCall");
 
   let currentUser = null;
   let selectedGroupId = null;
@@ -1439,8 +1488,37 @@
           return;
         }
 
+        playCallTone();
+
         window.echtlucky?.voiceChat?.startRingingCall?.(selectedGroupId);
       });
+    }
+
+    btnEndVoice?.addEventListener("click", () => {
+      playHangupTone();
+    });
+
+    btnAcceptCall?.addEventListener("click", () => {
+      playCallTone();
+    });
+
+    btnRejectCall?.addEventListener("click", () => {
+      playHangupTone();
+    });
+
+    if (incomingCallModal) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === "hidden") {
+            if (!incomingCallModal.hidden) {
+              playIncomingTone();
+            } else {
+              playHangupTone();
+            }
+          }
+        });
+      });
+      observer.observe(incomingCallModal, { attributes: true });
     }
 
     // Groups: right-click context menu (desktop)
