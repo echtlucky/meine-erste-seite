@@ -52,143 +52,119 @@ body.admin-page{
 }
 
 .admin-subtitle{
-  /* Discord-Style Admin Panel */
-  .admin-discord-shell {
-    max-width: 900px;
-    margin: 2.5rem auto 2rem auto;
-    padding: 0 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  .discord-card {
-    background: #23272a;
-    border-radius: 1.2rem;
-    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
-    padding: 1.5rem 1.5rem 1.2rem 1.5rem;
-    margin-bottom: 0;
-    color: #fff;
-  }
-  .admin-hero-card {
-    background: linear-gradient(90deg, #5865f2 0%, #23272a 100%);
-    color: #fff;
-    box-shadow: 0 2px 16px 0 rgba(88,101,242,0.12);
-    padding: 2rem 2rem 1.5rem 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
-  }
-  .pill {
-    background: #23272a;
-    color: #fff;
-    font-size: 0.98rem;
-    padding: 0.3rem 1.1rem;
-    border-radius: 1.2rem;
-    display: inline-block;
-  }
-  .admin-discord-nav {
-    display: flex;
-    gap: 0.7rem;
-    margin-bottom: 0.5rem;
-    flex-wrap: wrap;
-  }
-  .admin-discord-nav .btn {
-    background: #23272a;
-    color: #fff;
-    border: none;
-    padding: 0.7rem 1.3rem;
-    border-radius: 0.8rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .admin-discord-nav .btn.is-active,
-  .admin-discord-nav .btn:hover {
-    background: #5865f2;
-    color: #fff;
-  }
-  .admin-discord-content {
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  .admin-tab {
-    display: none;
-  }
-  .admin-tab.is-active {
-    display: block;
-  }
-  .admin-list {
-    margin-top: 0.7rem;
-  }
-  .admin-ban-form {
-    display: flex;
-    gap: 0.7rem;
-    margin-bottom: 1.2rem;
-  }
-  .admin-input {
-    background: #18191c;
-    color: #fff;
-    border: 1px solid #23272a;
-    border-radius: 0.7rem;
-    padding: 0.7rem 1rem;
-    font-size: 1rem;
-    outline: none;
-    transition: border 0.15s;
-  }
-  .admin-input:focus {
-    border: 1px solid #5865f2;
-  }
-  .admin-stats {
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-  }
-  .admin-stat {
-    background: #18191c;
-    border-radius: 0.8rem;
-    padding: 1.1rem 1.5rem;
-    min-width: 120px;
-    text-align: center;
-    color: #fff;
-    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.08);
-  }
-  .admin-stat__label {
-    font-size: 0.98rem;
-    color: #b9bbbe;
-  }
-  .admin-stat__value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-top: 0.3rem;
-    display: block;
-  }
-  @media (max-width: 700px) {
-    .admin-discord-shell {
-      padding: 0 0.3rem;
-    }
-    .admin-hero-card {
-      padding: 1.2rem 0.7rem 1rem 0.7rem;
-    }
-    .discord-card {
-      padding: 1rem 0.7rem 0.7rem 0.7rem;
-    }
-    .admin-discord-nav {
-      gap: 0.3rem;
-    }
-    .admin-ban-form {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .admin-stats {
-      gap: 0.7rem;
-    }
-  }
   margin: .35rem 0 0 0;
   color: var(--text-muted);
   font-size: .95rem;
+}
+
+/* Discord-style admin panel layout (top-level rules; CSS nesting is not supported in plain CSS) */
+.admin-discord-shell {
+  max-width: 900px;
+  margin: 2.5rem auto 2rem auto;
+  padding: 0 1.5rem 2.5rem 1.5rem; /* bottom space so last cards aren't cut off */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.discord-card {
+  background: #23272a;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
+  padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+  margin-bottom: 0;
+  color: #fff;
+}
+
+.admin-hero-card {
+  background: linear-gradient(90deg, #5865f2 0%, #23272a 100%);
+  color: #fff;
+  box-shadow: 0 2px 16px 0 rgba(88,101,242,0.12);
+  padding: 2rem 2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.pill {
+  background: #23272a;
+  color: #fff;
+  font-size: 0.98rem;
+  padding: 0.3rem 1.1rem;
+  border-radius: 1.2rem;
+  display: inline-block;
+}
+
+.admin-discord-nav {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-discord-nav .btn {
+  background: #23272a;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.3rem;
+  border-radius: 0.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-discord-nav .btn.is-active,
+.admin-discord-nav .btn:hover {
+  background: #5865f2;
+  color: #fff;
+}
+
+.admin-discord-content {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin-tab {
+  display: none;
+}
+
+.admin-tab.is-active {
+  display: block;
+}
+
+.admin-list {
+  margin-top: 0.7rem;
+}
+
+.admin-ban-form {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 1.2rem;
+}
+
+@media (max-width: 700px) {
+  .admin-discord-shell {
+    padding: 0 0.75rem 2.5rem 0.75rem;
+  }
+  .admin-hero-card {
+    padding: 1.2rem 0.7rem 1rem 0.7rem;
+  }
+  .discord-card {
+    padding: 1rem 0.7rem 0.7rem 0.7rem;
+  }
+  .admin-discord-nav {
+    gap: 0.3rem;
+  }
+  .admin-ban-form {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .admin-stats {
+    gap: 0.7rem;
+  }
 }
 
 /* List Items (Posts + Users) */
