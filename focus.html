@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Focus | echtlucky</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/focus.css" />
+  </head>
+
+  <body class="page-transition focus-page">
+    <div class="group-strip group-strip--home" data-group-strip="home" aria-label="Gruppen-Leiste"></div>
+
+    <div class="app-shell">
+      <header class="app-topbar">
+        <div id="header-placeholder"></div>
+      </header>
+
+      <main class="focus-shell">
+        <section class="focus-hero">
+          <div class="focus-hero__text">
+            <p class="focus-tag">Focus Sessions</p>
+            <h1>Stay locked in, stay fresh.</h1>
+            <p>Start/Stop Trainingsläufe, track Pomodoro-Runden und dokumentiere Ablenkungen.</p>
+          </div>
+          <div class="focus-hero__meta">
+            <div>
+              <p class="hero-label">Live Session</p>
+              <p class="hero-value" id="focusStatus">Idle</p>
+            </div>
+            <div>
+              <p class="hero-label">Accumulated Focus</p>
+              <p class="hero-value" id="focusTime">00:00</p>
+            </div>
+            <button class="btn btn-secondary" id="btnToggleFocusMode" type="button">
+              Ablenkungsfrei: Aus
+            </button>
+          </div>
+        </section>
+
+        <section class="focus-grid">
+          <article class="focus-card card-sessions">
+            <header>
+              <div>
+                <p class="card-label">Pomodoro</p>
+                <h3 id="currentLabel">Session bereit</h3>
+              </div>
+              <span class="status-pill">Session</span>
+            </header>
+            <div class="session-display" id="sessionClock">00:00</div>
+            <div class="focus-controls">
+              <button class="btn btn-sm" id="btnStartFocus" type="button">Start</button>
+              <button class="btn btn-sm" id="btnPauseFocus" type="button" disabled>Pause</button>
+              <button class="btn btn-sm btn-secondary" id="btnEndFocus" type="button" disabled>Beenden</button>
+            </div>
+            <p class="focus-hint">Standard-Sitzung: 25 Minuten. Nach 4 Sessions eine längere Pause.</p>
+          </article>
+
+          <article class="focus-card card-history">
+            <header>
+              <p class="card-label">Focus History</p>
+              <button class="btn btn-sm" id="btnClearHistory" type="button">Alles löschen</button>
+            </header>
+            <div class="history-list" id="focusHistory">
+              <div class="history-empty">Noch keine Sessions.</div>
+            </div>
+          </article>
+
+          <article class="focus-card card-output">
+            <header>
+              <p class="card-label">Session Overview</p>
+            </header>
+            <div class="overview-stats">
+              <div>
+                <p class="stat-label">Today</p>
+                <p class="stat-value" id="todayCount">0 Sessions</p>
+              </div>
+              <div>
+                <p class="stat-label">Average</p>
+                <p class="stat-value" id="avgDuration">00:00</p>
+              </div>
+            </div>
+            <div class="focus-logs" id="focusLogs">
+              <div class="log-item">Letzte Ablenkung: keine</div>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+    <script src="firebase.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/legal-modal.js"></script>
+    <script src="js/notify.js"></script>
+    <script src="js/modal-dialog.js"></script>
+    <script src="js/group-strip.js"></script>
+    <script src="js/focus.js"></script>
+
+    <script>
+      document.body.classList.add("loaded");
+
+      fetch("header.html?v=" + Date.now())
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("header-placeholder").innerHTML = html;
+          if (typeof initHeaderScripts === "function") initHeaderScripts();
+          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+          window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
+        });
+
+      fetch("footer.html?v=" + Date.now())
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("footer-placeholder").innerHTML = html;
+        });
+    </script>
+  </body>
+</html>

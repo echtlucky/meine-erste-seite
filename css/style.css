@@ -171,6 +171,10 @@ main{ flex:1; }
   left: 74px;
 }
 
+.connect-page .app-shell {
+  margin-left: 80px;
+}
+
 .group-strip__item{
   position: relative;
   width: 46px;

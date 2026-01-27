@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stats | echtlucky</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/stats.css" />
+  </head>
+
+  <body class="page-transition stats-page">
+    <div class="group-strip group-strip--home" data-group-strip="home" aria-label="Gruppen-Leiste"></div>
+
+    <div class="app-shell">
+      <header class="app-topbar">
+        <div id="header-placeholder"></div>
+      </header>
+
+      <main class="stats-shell">
+        <section class="stats-hero">
+          <div class="stats-hero__intro">
+            <span class="stats-tag">Performance Overview</span>
+            <h1>Deine Competitive Stats</h1>
+            <p>Alle wichtigen Metrics zu XP, Ranked, Focus, und Skill in einem Blick.</p>
+          </div>
+          <div class="stats-hero__meta">
+            <div>
+              <p class="hero-label">Current Rank</p>
+              <p class="hero-value">Unreal 2475 XP</p>
+            </div>
+            <div>
+              <p class="hero-label">Streak</p>
+              <p class="hero-value">12 Tage</p>
+            </div>
+            <div>
+              <p class="hero-label">Focus Mode</p>
+              <p class="hero-value">Aktiv</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats-grid">
+          <article class="stats-card stats-progress" id="xpProgressCard">
+            <header>
+              <div>
+                <p class="card-label">XP Verlauf</p>
+                <h3>+1.280 XP diese Woche</h3>
+              </div>
+              <span class="status-pill">Weekly</span>
+            </header>
+            <div class="stats-graph" id="xpSpark"></div>
+            <div class="progress-row">
+              <div class="progress-label">
+                <span>Heute</span>
+                <span>+320 XP</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" data-value="0.64"></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="stats-card stats-grid-card">
+            <h3>Skill Breakdown</h3>
+            <div class="skill-row">
+              <p>Aim</p>
+              <div class="skill-track">
+                <div class="skill-fill" data-value="0.78"></div>
+              </div>
+              <span>78%</span>
+            </div>
+            <div class="skill-row">
+              <p>Gamesense</p>
+              <div class="skill-track">
+                <div class="skill-fill" data-value="0.63"></div>
+              </div>
+              <span>63%</span>
+            </div>
+            <div class="skill-row">
+              <p>Consistency</p>
+              <div class="skill-track">
+                <div class="skill-fill" data-value="0.71"></div>
+              </div>
+              <span>71%</span>
+            </div>
+          </article>
+
+          <article class="stats-card stats-streak">
+            <header>
+              <p class="card-label">Streak</p>
+              <span class="status-pill status-pill--accent">+12 Tage</span>
+            </header>
+            <div class="streak-rows" id="streakRows"></div>
+            <p class="card-foot">Keep the grind steady. Blick auf morgen: XP +210</p>
+          </article>
+        </section>
+
+        <section class="stats-grid stats-supplement">
+          <article class="stats-card stats-chart">
+            <header>
+              <p class="card-label">Heatmap</p>
+              <h3>Beste Spielzeiten</h3>
+            </header>
+            <div class="heatmap-grid" id="heatmap"></div>
+          </article>
+
+          <article class="stats-card stats-compare">
+            <header>
+              <p class="card-label">Today vs Yesterday</p>
+              <h3>Leistung im Vergleich</h3>
+            </header>
+            <div class="compare-row">
+              <span>Today</span>
+              <strong>+1.2 Win Rate</strong>
+            </div>
+            <div class="compare-row">
+              <span>Yesterday</span>
+              <strong>+0.6 Win Rate</strong>
+            </div>
+            <p class="card-foot">Schreibe Notizen zu Matches, um die Trends zu verfolgen.</p>
+          </article>
+
+          <article class="stats-card stats-notes">
+            <header>
+              <p class="card-label">Daily Notes</p>
+              <button class="btn btn-sm">+ Neue Notiz</button>
+            </header>
+            <div class="notes-list" id="noteList">
+              <div class="note">Taktische Anpassung: Focus auf Anchor-Positionen.</div>
+              <div class="note">Energie bewahren und 1v1s früh meiden.</div>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+    <script src="firebase.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/legal-modal.js"></script>
+    <script src="js/notify.js"></script>
+    <script src="js/modal-dialog.js"></script>
+    <script src="js/group-strip.js"></script>
+    <script src="js/stats.js"></script>
+
+    <script>
+      document.body.classList.add("loaded");
+
+      fetch("header.html?v=" + Date.now())
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("header-placeholder").innerHTML = html;
+          if (typeof initHeaderScripts === "function") initHeaderScripts();
+          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+          window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
+        });
+
+      fetch("footer.html?v=" + Date.now())
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("footer-placeholder").innerHTML = html;
+        });
+    </script>
+  </body>
+</html>

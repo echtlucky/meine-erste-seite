@@ -1162,9 +1162,9 @@
           friendsSearchResults
             .querySelectorAll("button[data-friend-uid]")
             .forEach((btn) => {
-              btn.addEventListener("click", (e) => {
-                const friendUid = e.currentTarget.dataset.friendUid;
-                const friendName = e.currentTarget.dataset.friendName;
+              btn.addEventListener("click", () => {
+                const friendUid = btn.dataset.friendUid;
+                const friendName = btn.dataset.friendName;
                 window.echtluckyAddFriend(friendUid, friendName);
               });
             });
@@ -1604,6 +1604,17 @@
         friendSearchTimeout = setTimeout(() => {
           searchFriends(query);
         }, 300);
+      });
+    }
+
+    if (friendsSearchResults && !friendsSearchResults.__friendDelegate) {
+      friendsSearchResults.__friendDelegate = true;
+      friendsSearchResults.addEventListener("click", (event) => {
+        const btn = event.target.closest("button[data-friend-uid]");
+        if (!btn) return;
+        const friendUid = btn.dataset.friendUid;
+        const friendName = btn.dataset.friendName;
+        window.echtluckyAddFriend(friendUid, friendName);
       });
     }
 

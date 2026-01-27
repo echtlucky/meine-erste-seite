@@ -159,9 +159,9 @@
    ========================================== */
 .connect-workspace {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 280px;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
+  grid-template-columns: 260px minmax(0, 1fr) 310px;
+  gap: 1.6rem;
+  margin-top: 1.75rem;
 }
 
 .connect-left-panel,
@@ -169,7 +169,7 @@
   background: rgba(0, 0, 0, 0.35);
   border-radius: 18px;
   border: 1px solid rgba(0, 255, 136, 0.15);
-  padding: 1.25rem;
+  padding: 1.6rem;
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
@@ -218,10 +218,10 @@
 .connect-groups-list {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  max-height: 420px;
+  gap: 0.65rem;
+  max-height: 460px;
   overflow-y: auto;
-  padding-right: 0.25rem;
+  padding-right: 0.4rem;
 }
 
 .friends-section {
