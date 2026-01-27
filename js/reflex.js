@@ -1,28 +1,17 @@
-/* =========================
-   Reflex Lab — echtlucky (v3 CLEAN)
-   FIX:
-   - No duplicate UI logic
-   - Overlay stable + fullscreen best effort
-   - Cursor visible in UI, hidden only in overlay (is-playing)
-   - Crosshair STIFF (instant)
-   - Cleaner start/exit lifecycle
-========================= */
+﻿
 
 (() => {
   "use strict";
 
   const LS_KEY = "echtlucky_reflex_v3";
 
-  // Firebase optional
   const authRef = window.echtlucky?.auth || window.auth || null;
   const dbRef   = window.echtlucky?.db   || window.db   || null;
 
-  // ===== DOM (top stats)
   const bestValue   = document.getElementById("bestValue");
   const avgValue    = document.getElementById("avgValue");
   const ratingValue = document.getElementById("ratingValue");
 
-  // Controls
   const btnStart = document.getElementById("btnStart");
   const btnReset = document.getElementById("btnReset");
   const btnHow   = document.getElementById("btnHow");
@@ -35,21 +24,18 @@
   const sizeSegs  = Array.from(document.querySelectorAll(".seg[data-size]"));
   const spawnSegs = Array.from(document.querySelectorAll(".seg[data-spawn]"));
 
-  // Overlay
   const overlay   = document.getElementById("gameOverlay");
   const stage     = document.getElementById("stage");
   const crosshair = document.getElementById("crosshair");
   const centerMsg = document.getElementById("centerMsg");
   const btnExit   = document.getElementById("btnExit");
 
-  // HUD
   const hudMode     = document.getElementById("hudMode");
   const hudProgress = document.getElementById("hudProgress");
   const hudLast     = document.getElementById("hudLast");
   const hudBest     = document.getElementById("hudBest");
   const hudAvg      = document.getElementById("hudAvg");
 
-  // Results
   const resultCard   = document.getElementById("resultCard");
   const resultRating = document.getElementById("resultRating");
   const resAvg       = document.getElementById("resAvg");
@@ -58,13 +44,10 @@
   const resScore     = document.getElementById("resScore");
   const hitChips     = document.getElementById("hitChips");
 
-  // Guard
   if (!btnStart || !overlay || !stage) {
-    console.error("Reflex Lab: required DOM missing.");
     return;
   }
 
-  // ===== State
   let mode = "reaction";     // reaction | flick | precision
   let sizeMode = "mixed";    // mixed | large | medium | small
   let spawnMode = "safe";    // safe | full
@@ -77,10 +60,8 @@
 
   let lastPos = { x: 0.5, y: 0.5 };
 
-  // pointer (used for crosshair position)
   const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
-  // ===== Helpers
   function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
   function nowMs(){ return performance.now(); }
 
@@ -153,12 +134,9 @@
         reflexStats: payload,
         reflexUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
-    } catch (e) {
-      console.warn("Reflex save failed:", e?.message || e);
-    }
+    } catch {}
   }
 
-  // ===== UI: Slider fill
   function paintTargetsRange(){
     if (!cfgTargets) return;
     const min = Number(cfgTargets.min || 0);
@@ -169,7 +147,6 @@
     if (cfgTargetsVal) cfgTargetsVal.textContent = String(val);
   }
 
-  // ===== Game mechanics
   function clearStage(){
     stage.querySelectorAll(".target").forEach(el => el.remove());
   }
@@ -179,7 +156,6 @@
     if (sizeMode === "medium") return 54;
     if (sizeMode === "small") return 34;
 
-    // mixed: depends on mode
     const pool =
       mode === "precision" ? [26,28,30,32,34] :
       mode === "flick"     ? [34,40,46,52] :
@@ -231,7 +207,6 @@
     t.style.left = p.x + "px";
     t.style.top = p.y + "px";
 
-    // small pop-in
     t.animate(
       [{ transform: "translate3d(-50%,-50%,0) scale(0.92)", opacity: 0.0 },
        { transform: "translate3d(-50%,-50%,0) scale(1)", opacity: 1.0 }],
@@ -272,7 +247,6 @@
       return;
     }
 
-    // flick / precision: immediate chain
     createTarget();
   }
 
@@ -289,25 +263,21 @@
     if (centerMsg) centerMsg.style.display = "none";
   }
 
-  // ===== Overlay lifecycle
   async function openOverlay(){
     overlay.classList.add("show");
     overlay.classList.add("is-playing");
     overlay.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
 
-    // fullscreen best effort
     try {
       if (!document.fullscreenElement && overlay.requestFullscreen) {
         await overlay.requestFullscreen();
       }
     } catch (_) {}
 
-    // ensure layout settled before spawn
     await new Promise((r) => requestAnimationFrame(() => r()));
     stage.focus({ preventScroll: true });
 
-    // snap crosshair to center immediately
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
     pointer.x = cx; pointer.y = cy;
@@ -356,7 +326,6 @@
     if (hudBest) hudBest.textContent = "Best: " + msToLabel(stats.best);
     if (hudAvg)  hudAvg.textContent  = "Avg: "  + msToLabel(stats.avg);
 
-    // save local bests
     const ls = loadLS();
     const improvedBest = !isFinite(ls.bestMs) || stats.best < ls.bestMs;
     const improvedAvg  = !isFinite(ls.bestAvgMs) || stats.avg < ls.bestAvgMs;
@@ -378,7 +347,6 @@
     };
     saveLS(newLS);
 
-    // results UI
     const r = ratingFromAvg(stats.avg);
     if (resultCard) resultCard.style.display = "grid";
     if (resultRating) resultRating.textContent = `${r.grade} • ${r.label}`;
@@ -397,7 +365,6 @@
       });
     }
 
-    // account save
     saveToAccountIfLoggedIn({
       bestMs: newLS.bestMs,
       bestAvgMs: newLS.bestAvgMs,
@@ -406,12 +373,10 @@
 
     renderTopStats();
 
-    // notify
     if (window.notify) notify.success(`Run complete • Avg ${msToLabel(stats.avg)}`, "Reflex Lab");
     setCenter("Run complete ✅", "Du kannst erneut starten oder Exit drücken.");
   }
 
-  // ===== Crosshair (STIFF / instant)
   function setCrosshair(x, y){
     if (!crosshair) return;
     crosshair.style.transform =
@@ -422,13 +387,11 @@
     pointer.x = e.clientX;
     pointer.y = e.clientY;
 
-    // update only when overlay visible
     if (overlay.classList.contains("show")) {
       setCrosshair(pointer.x, pointer.y);
     }
   }
 
-  // ===== UI actions
   function setActive(list, btn){
     list.forEach(x => x.classList.remove("is-active"));
     btn.classList.add("is-active");
@@ -472,7 +435,6 @@
     });
   }
 
-  // ===== WIRING
   paintTargetsRange();
   cfgTargets.addEventListener("input", paintTargetsRange, { passive: true });
 
@@ -510,25 +472,20 @@
   btnReset.addEventListener("click", resetStats);
   btnHow.addEventListener("click", showHow);
 
-  // pointer tracking (stage + window)
   stage.addEventListener("pointermove", onPointerMove, { passive: true });
   window.addEventListener("pointermove", onPointerMove, { passive: true });
   stage.addEventListener("contextmenu", (e) => e.preventDefault());
 
-  // ESC handling
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && overlay.classList.contains("show")) {
-      // allow browser fullscreen exit first
       setTimeout(closeOverlay, 0);
     }
   });
 
-  // Auth save indicator
   if (authRef && typeof authRef.onAuthStateChanged === "function") {
     authRef.onAuthStateChanged(() => updateSaveStatus());
   }
 
-  // Init
   renderTopStats();
   updateSaveStatus();
   setCenter("Ready?", "Targets erscheinen gleich. Klick so schnell wie möglich.");

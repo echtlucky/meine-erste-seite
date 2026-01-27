@@ -1,4 +1,4 @@
-/* Accessibility: Fokus-Outline für alle interaktiven Elemente */
+﻿
 a, button, input, select, textarea, .btn, .btn-primary, .btn-lg, .btn-xs, .chat-tab-btn, .chat-settings-btn {
   outline: none;
 }
@@ -8,7 +8,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   outline-offset: 2px;
   box-shadow: 0 0 0 3px #00ff8833;
 }
-/* Lade-Spinner Utility */
+
 .spinner {
   display: inline-block;
   width: 32px;
@@ -24,7 +24,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   100% { transform: rotate(360deg); }
 }
 
-/* Sanfte Fade-Transitions für Gruppenwechsel, Call-Start, Modal-Öffnung */
+
 .fade-in {
   animation: fadeIn 0.32s cubic-bezier(.4,1.6,.6,1) both;
 }
@@ -39,7 +39,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   from { opacity: 1; }
   to   { opacity: 0; }
 }
-/* Direktanruf-Button (1:1 Call) */
+
 .btn-xs.btn-direct-call {
   padding: 0.28rem 0.85rem;
   font-size: 1.05em;
@@ -63,7 +63,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   transform: scale(0.97);
 }
 
-/* Call-to-Action Buttons */
+
 .btn-primary, .btn-lg, .btn {
   box-shadow: 0 2px 16px rgba(0,255,136,0.10);
   transition: box-shadow .18s, background .18s, transform .13s;
@@ -81,7 +81,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   outline-offset: 2px;
 }
 
-/* Card Hover/Focus */
+
 .card, .group-item, .member-item, .auth-status-card {
   transition: box-shadow .18s, border-color .18s, background .18s, transform .13s;
 }
@@ -92,7 +92,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   transform: translateY(-2px);
 }
 
-/* Input Fokus-States */
+
 input, select, textarea, .message-input, .add-member-input, .friend-search-input, .setting-input {
   transition: border-color .18s, box-shadow .18s;
 }
@@ -103,7 +103,7 @@ input:focus, select:focus, textarea:focus,
   outline: none;
 }
 
-/* Animierte Avatare */
+
 .member-avatar, .friend-search-item-avatar {
   transition: box-shadow .18s, transform .13s;
 }
@@ -112,7 +112,7 @@ input:focus, select:focus, textarea:focus,
   transform: translateY(-1px) scale(1.04);
 }
 
-/* Notification Stack Animation */
+
 .notify-stack .notify {
   animation: notifyFadeIn 0.32s cubic-bezier(.4,1.6,.6,1) both;
 }
@@ -121,7 +121,7 @@ input:focus, select:focus, textarea:focus,
   to   { opacity: 1; transform: none; }
 }
 
-/* Modal Animation */
+
 .modal-overlay, .modal-dialog {
   transition: opacity .22s, transform .22s;
 }
@@ -143,9 +143,7 @@ input:focus, select:focus, textarea:focus,
   from { opacity: 0; transform: translateY(32px) scale(0.98); }
   to   { opacity: 1; transform: none; }
 }
-/* ======================================
-   INCOMING CALL MODAL (echtlucky)
-====================================== */
+
 .modal-overlay#incomingCallModal {
   z-index: 100000;
   background: rgba(0,0,0,0.82);
@@ -177,13 +175,10 @@ input:focus, select:focus, textarea:focus,
   background: rgba(255,51,102,0.24);
   box-shadow: 0 8px 24px rgba(255,51,102,0.18);
 }
-/* =========================
-   COMPONENTS • echtlucky UI
-   airy spacing + crisp contrast
-========================= */
+
 
 :root{
-  /* Map component tokens to the global design system (css/style.css) */
+  
   --ui-radius-lg: var(--radius-xl);
   --ui-radius-md: var(--radius-lg);
 
@@ -200,12 +195,12 @@ input:focus, select:focus, textarea:focus,
   --ui-shadow-hover: 0 32px 110px rgba(0,0,0,0.62);
 }
 
-/* --- Utilities --- */
+
 .fw-820{ font-weight: 820; }
 .hidden{ display:none !important; }
 .google-g{ font-weight: 900; }
 
-/* --- Card --- */
+
 .card{
   border-radius: var(--ui-radius-lg);
   border: 1px solid var(--ui-border);
@@ -224,7 +219,7 @@ input:focus, select:focus, textarea:focus,
   border: 1px solid rgba(0,255,136,0.14);
 }
 
-/* --- Badge --- */
+
 .badge{
   display: inline-flex;
   align-items: center;
@@ -238,7 +233,7 @@ input:focus, select:focus, textarea:focus,
   width: fit-content;
 }
 
-/* --- Tabs --- */
+
 .tabs{
   display:flex;
   gap:.7rem;
@@ -270,7 +265,7 @@ input:focus, select:focus, textarea:focus,
   opacity: 1;
 }
 
-/* --- Forms --- */
+
 .field{ display:grid; gap:.85rem; }
 
 .field label{
@@ -299,7 +294,7 @@ input:focus, select:focus, textarea:focus,
   background: rgba(0,0,0,0.62);
 }
 
-/* --- Rows / Links --- */
+
 .row{
   display:flex;
   gap: 1.2rem;
@@ -317,7 +312,7 @@ input:focus, select:focus, textarea:focus,
 }
 .small-link:hover{ text-decoration: underline; }
 
-/* --- Divider --- */
+
 .divider{
   display:flex;
   align-items:center;
@@ -334,7 +329,7 @@ input:focus, select:focus, textarea:focus,
   background: rgba(0,255,136,0.12);
 }
 
-/* --- Buttons --- */
+
 .btn-full{
   width: 100%;
   text-align: center;
@@ -375,7 +370,7 @@ input:focus, select:focus, textarea:focus,
   transform: translateY(-2px);
 }
 
-/* --- Messages --- */
+
 .msg{
   padding: 1.1rem 1.15rem;
   border-radius: var(--ui-radius-md);
@@ -397,7 +392,7 @@ input:focus, select:focus, textarea:focus,
   color: #e0ffe0;
 }
 
-/* --- Hints --- */
+
 .hint{
   color: rgba(224,255,224,0.74);
   font-size: .98rem;
@@ -407,10 +402,7 @@ input:focus, select:focus, textarea:focus,
 .hint--strong{ opacity: .92; }
 .hint--compact{ margin-top: .2rem; }
 
-/* ======================================
-   NOTIFY SYSTEM — echtlucky (global)
-   Types: info | success | warn | error
-====================================== */
+
 
 :root{
   --notify-bg: rgba(0,0,0,0.76);
@@ -426,10 +418,10 @@ input:focus, select:focus, textarea:focus,
   --notify-muted: rgba(224,255,224,0.72);
 }
 
-/* Container */
+
 .notify-stack{
   position: fixed;
-  top: 20px; /* Better positioning for modern layouts */
+  top: 20px; 
   right: 20px;
   z-index: 999999;
   display: grid;
@@ -438,7 +430,7 @@ input:focus, select:focus, textarea:focus,
   pointer-events: none;
 }
 
-/* Card */
+
 .notify{
   pointer-events: auto;
   position: relative;
@@ -470,7 +462,7 @@ input:focus, select:focus, textarea:focus,
   opacity: 0;
 }
 
-/* Left color bar */
+
 .notify__bar{
   width: 12px;
   height: 100%;
@@ -479,7 +471,7 @@ input:focus, select:focus, textarea:focus,
   box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset;
 }
 
-/* Content */
+
 .notify__title{
   margin: 0 0 2px;
   font-weight: 820;
@@ -494,7 +486,7 @@ input:focus, select:focus, textarea:focus,
   font-size: 0.95rem;
 }
 
-/* Close */
+
 .notify__close{
   border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.04);
@@ -513,7 +505,7 @@ input:focus, select:focus, textarea:focus,
   border-color: rgba(0,255,136,0.16);
 }
 
-/* Progress bar (auto dismiss) */
+
 .notify__progress{
   position: absolute;
   left: 0;
@@ -531,7 +523,7 @@ input:focus, select:focus, textarea:focus,
   background: var(--notify-info);
 }
 
-/* Types */
+
 .notify[data-type="info"] .notify__bar,
 .notify[data-type="info"] .notify__progress > span{ background: var(--notify-info); }
 
@@ -553,10 +545,7 @@ input:focus, select:focus, textarea:focus,
   }
 }
 
-/* ======================================
-   MODAL DIALOG SYSTEM — echtlucky
-   Global input, confirm, alert modals
-====================================== */
+
 
 .modal-overlay {
   position: fixed;
@@ -706,7 +695,7 @@ input:focus, select:focus, textarea:focus,
   width: 100%;
 }
 
-/* Dialog type variations */
+
 .confirm-danger .modal-header,
 .alert-error .modal-header {
   border-bottom-color: rgba(255, 51, 102, 0.2);
@@ -780,9 +769,7 @@ input:focus, select:focus, textarea:focus,
   }
 }
 
-/* ======================================
-   OVERLAYS (Fonts / Support)
-====================================== */
+
 body.overlay-open{ overflow: hidden; }
 
 .overlay{
@@ -927,7 +914,7 @@ body.overlay-open{ overflow: hidden; }
   color: rgba(224,255,224,0.96);
 }
 
-/* Support UI */
+
 .support-banner{
   margin-bottom: 1rem;
   padding: 0.9rem 1rem;

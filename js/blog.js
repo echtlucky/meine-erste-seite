@@ -1,6 +1,4 @@
-﻿// js/blog.js - echtlucky
-// Public blog feed (no-login read) + comments + safe rendering.
-
+﻿
 (() => {
   "use strict";
 
@@ -311,7 +309,6 @@
         btn.style.display = hasMore ? "inline-flex" : "none";
       }
     } catch (err) {
-      console.error("blog loadMore error:", err);
       if (list && renderedIds.size === 0) {
         list.innerHTML = `
           <div class="error-state">
@@ -418,7 +415,6 @@
         window.location.hash = `post=${currentPost.collection}:${currentPost.id}`;
       } catch (_) {}
     } catch (err) {
-      console.error("openPostModal error:", err);
       if (elements.postContent) {
         elements.postContent.innerHTML = `<p style="color:#ff6699;">Fehler: ${escapeHtml(err?.message || String(err))}</p>`;
       }
@@ -491,7 +487,6 @@
         elements.commentsList.innerHTML = comments.map(renderCommentItem).join("");
       },
       (err) => {
-        console.error("comments listener error:", err);
         if (elements.commentsList) {
           elements.commentsList.innerHTML = `<div class="comments-empty" style="color:#ff6699;">Kommentare konnten nicht geladen werden.</div>`;
         }
@@ -538,7 +533,6 @@
 
       elements.commentText.value = "";
     } catch (err) {
-      console.error("submitComment error:", err);
       window.notify?.show?.({
         type: "error",
         title: "Kommentar",
@@ -582,7 +576,6 @@
         { merge: true }
       );
     } catch (err) {
-      console.error("editComment error:", err);
     }
   }
 
@@ -605,7 +598,6 @@
     try {
       await db.collection(currentPost.collection).doc(currentPost.id).collection("comments").doc(commentId).delete();
     } catch (err) {
-      console.error("deleteComment error:", err);
     }
   }
 
@@ -627,7 +619,6 @@
       closeModal();
       await loadInitial();
     } catch (err) {
-      console.error("deletePost error:", err);
       window.notify?.show?.({
         type: "error",
         title: "Post",
@@ -705,7 +696,6 @@
 
         window.notify?.show?.({ type: "success", title: "Post", message: "Gespeichert.", duration: 2500 });
       } catch (err) {
-        console.error("editPost save error:", err);
         window.notify?.show?.({ type: "error", title: "Post", message: err?.message || "Fehler beim Speichern.", duration: 4500 });
       }
     });

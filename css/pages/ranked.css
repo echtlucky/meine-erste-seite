@@ -1,4 +1,4 @@
-/* Ranked: fullwidth dark theme */
+﻿
 .ranked-page {
   background: transparent;
   min-height: 100vh;
@@ -582,13 +582,6 @@
 .badge--locked {
   border-color: rgba(255, 255, 255, 0.08);
   opacity: 0.6;
-}
-
-.future-grid {
-  display: grid;
-  gap: 0.35rem;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
 }
 
 .floating-add-session {

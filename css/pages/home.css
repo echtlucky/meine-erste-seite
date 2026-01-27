@@ -1,22 +1,14 @@
-/* =========================
-   HOME • echtlucky (vNext)
-   - Hero: Badge + huge title + subline
-   - 2nd card: 3 paths w/ arrow-to-button
-   - Community: 6 feature cards
-   - Remove "Über mich" (moved to own page)
-   - Stats + Discord spacing improved
-   - Adds “More” section (roadmap)
-========================= */
+﻿
 
 body.home-page{
   position: relative;
   --home-gap: clamp(2.4rem, 5vw, 4rem);
 }
 
-/* Soft fade overlay (only Home) */
-/* Home uses the global background (css/style.css). */
 
-/* Layout rhythm */
+
+
+
 .home-shell{
   padding-top: clamp(1.4rem, 3vw, 2.6rem);
   padding-bottom: clamp(3.2rem, 5vw, 5rem);
@@ -29,7 +21,7 @@ body.home-page{
   margin: 0 auto;
 }
 
-/* Shared section head */
+
 .home-sectionhead{
   text-align: center;
   margin-bottom: 1.2rem;
@@ -45,7 +37,7 @@ body.home-page{
   opacity: .92;
 }
 
-/* ============ Card base (Home only) ============ */
+
 .home-hero,
 .home-navcard,
 .home-community,
@@ -86,7 +78,7 @@ body.home-page{
   z-index: 1;
 }
 
-/* ============ 1) HERO ============ */
+
 .home-hero{
   padding: clamp(2.2rem, 4.6vw, 3.6rem) clamp(1.8rem, 4.2vw, 3.2rem);
   text-align: center;
@@ -217,7 +209,7 @@ body.home-page{
   font-size: .95rem;
 }
 
-/* ============ 2) NAV CARD (3 paths) ============ */
+
 .home-navgrid{
   margin-top: 1.2rem;
   display:grid;
@@ -278,7 +270,7 @@ body.home-page{
   border-bottom: 2px solid rgba(0,255,136,0.55);
 }
 
-/* ============ 3) COMMUNITY (6 features) ============ */
+
 .home-features{
   margin-top: 1.2rem;
   display:grid;
@@ -318,7 +310,7 @@ body.home-page{
   margin-top: 1.55rem;
 }
 
-/* ============ 4) STATS ============ */
+
 .stats-grid{
   margin-top: 1.2rem;
   display:grid;
@@ -372,7 +364,7 @@ body.home-page{
   color: rgba(224,255,224,0.92);
 }
 
-/* ============ 5) DISCORD bigger + spacing ============ */
+
 .discord-split{
   margin-top: 1.2rem;
   display:grid;
@@ -420,7 +412,7 @@ body.home-page{
   max-width: 38ch;
 }
 
-/* ============ 6) MORE / ROADMAP ============ */
+
 .more-grid{
   margin-top: 1.2rem;
   display:grid;
@@ -445,7 +437,7 @@ body.home-page{
   line-height: 1.65;
 }
 
-/* Responsive */
+
 @media (max-width: 980px){
   .home-navgrid{ grid-template-columns: 1fr; }
   .home-features{ grid-template-columns: 1fr; }

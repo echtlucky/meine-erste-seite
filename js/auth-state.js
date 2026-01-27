@@ -1,20 +1,11 @@
-﻿// js/auth-state.js
-// Single source of truth für Auth-State (1 Listener, 1 UI-Update)
-// - Works with Firebase compat auth (window.auth)
-// - Handles header injected via fetch with "echtlucky:header-ready"
-// - Updates data-account-cta automatically
-// - Admin role via users/{uid}.role (cached), fallback: ADMIN_EMAIL
-
-(function () {
+﻿(function () {
   "use strict";
 
-  // ✅ Fix: konsistenter Guard-Name
   if (window.__ECHTLUCKY_AUTH_WIRED__) return;
   window.__ECHTLUCKY_AUTH_WIRED__ = true;
 
   const appNS = (window.echtlucky = window.echtlucky || {});
 
-  // Wait for Firebase to be ready
   let auth = null;
   let db = null;
 
@@ -23,7 +14,6 @@
       if (window.auth && window.db) {
         auth = window.auth;
         db = window.db;
-        console.log("✅ auth-state.js: Firebase ready");
         resolve();
         return;
       }
@@ -31,7 +21,6 @@
       const handler = () => {
         auth = window.auth;
         db = window.db;
-        console.log("✅ auth-state.js: Firebase ready via event");
         resolve();
       };
 
@@ -41,22 +30,16 @@
         if (window.auth && window.db) {
           auth = window.auth;
           db = window.db;
-          console.log("✅ auth-state.js: Firebase ready via timeout");
           resolve();
         } else {
-          console.error("❌ auth-state.js: Firebase timeout");
           resolve();
         }
       }, 5000);
     });
   }
 
-  // globale Quelle der Wahrheit
   window.__ECHTLUCKY_CURRENT_USER__ = window.__ECHTLUCKY_CURRENT_USER__ || null;
 
-  // -----------------------------
-  // Header Targets
-  // -----------------------------
   function getHeaderEls() {
     return {
       loginLink: document.getElementById("login-link"),
@@ -72,9 +55,6 @@
     return !!(loginLink || userName || dropdown);
   }
 
-  // -----------------------------
-  // Account CTA (Home Button etc.)
-  // -----------------------------
   function applyAccountCTAs(user) {
     const nodes = document.querySelectorAll("[data-account-cta]");
     if (!nodes || !nodes.length) return;
@@ -97,9 +77,6 @@
     });
   }
 
-  // -----------------------------
-  // Admin Role Cache (minimiert Firestore Reads)
-  // -----------------------------
   const ROLE_CACHE_KEY = "echtlucky:role-cache:v1";
   const ROLE_TTL_MS = 10 * 60 * 1000; // 10 min
 
@@ -120,12 +97,10 @@
   async function resolveRole(user) {
     if (!user?.uid) return "user";
 
-    // fallback: admin email (aus firebase.js)
     if (typeof appNS.isAdminByEmail === "function" && appNS.isAdminByEmail(user)) {
       return "admin";
     }
 
-    // cached?
     const cache = loadRoleCache();
     const cached = cache[user.uid];
     const now = Date.now();
@@ -134,7 +109,6 @@
       return cached.role;
     }
 
-    // fetch role
     let role = "user";
     if (db && db.collection) {
       try {
@@ -150,13 +124,9 @@
     return role;
   }
 
-  // -----------------------------
-  // Apply Header UI
-  // -----------------------------
   async function applyHeaderState(user) {
     const { loginLink, userName, dropdown, adminPanelLink, connectNav } = getHeaderEls();
 
-    // Header noch nicht da? -> später via event
     if (!loginLink && !userName && !dropdown) return;
 
     if (!user) {
@@ -173,7 +143,6 @@
       return;
     }
 
-    // logged in
     if (loginLink) loginLink.style.display = "none";
     if (connectNav) connectNav.style.display = "inline-flex";
 
@@ -199,22 +168,17 @@
     }
   }
 
-  // Init when ready
   async function init() {
-    console.log("🔵 auth-state.js initializing");
     await waitForFirebase();
 
     if (!auth) {
-      console.error("❌ auth-state.js: auth still not ready");
       return;
     }
 
-    console.log("✅ auth-state.js setup complete");
 
     auth.onAuthStateChanged(async (user) => {
       window.__ECHTLUCKY_CURRENT_USER__ = user || null;
       
-      // Update presence
       let lastUid = localStorage.getItem("__echtlucky_lastuid") || "__init__";
       
       if (user && db && db.collection) {
@@ -241,13 +205,11 @@
 
       await applyHeaderState(user || null);
       applyAccountCTAs(user || null);
-      // Emit auth event for other listeners
       const evt = new CustomEvent('echtlucky:auth-change', { detail: { user } });
       window.dispatchEvent(evt);
       document.dispatchEvent(evt);
     });
 
-    // Header injected later (fetch)
     window.addEventListener("echtlucky:header-ready", async () => {
       const u = auth.currentUser || null;
       window.__ECHTLUCKY_CURRENT_USER__ = u;
@@ -255,7 +217,6 @@
       applyAccountCTAs(u);
     });
 
-    // fallback
     document.addEventListener("DOMContentLoaded", async () => {
       if (!headerReady()) return;
       const u = auth.currentUser || window.__ECHTLUCKY_CURRENT_USER__ || null;

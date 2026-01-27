@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   "use strict";
 
   if (window.__ECHTLUCKY_TICKETS_LOADED__) return;

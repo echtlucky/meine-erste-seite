@@ -1,21 +1,12 @@
-﻿/* =========================
-   account.js  echtlucky
-   - zeigt Local + Cloud Stats
-   - Sync Buttons (Local -> Cloud, Cloud -> Local)
-   - Username + Email Änderung
-   - Rank History Chart
-   - Requires Firebase Auth/Firestore
-========================= */
+﻿
 
 (() => {
   "use strict";
 
-  // LocalStorage Keys
   const LS_RANKED = "echtlucky_ranked_v1";
   const LS_REFLEX = "echtlucky_reflex_v2";
   const LS_USERNAME_CHANGE = "echtlucky_username_change_ts";
 
-  // Firestore path
   const USER_COLLECTION = "users";
   const COOLDOWN_DAYS = 7;
 
@@ -24,7 +15,6 @@
 
   const el = (id) => document.getElementById(id);
 
-  // UI
   const loggedOutCard = el("loggedOutCard");
   const accountGrid   = el("accountGrid");
 
@@ -63,7 +53,6 @@
   const btnClearLocal   = el("btnClearLocal");
   const btnWipeCloud    = el("btnWipeCloud");
 
-  // Account Settings Elements
   const accountSettingsForm = el("accountSettingsForm");
   const inputUsername = el("inputUsername");
   const inputEmail = el("inputEmail");
@@ -78,7 +67,6 @@
   const prefDifficultyDefault = el("prefDifficultyDefault");
   const prefSounds = el("prefSounds");
 
-  // New: Status / Security / Sessions / Export
   const accountStatusSelect = el("accountStatusSelect");
   const accountCustomStatus = el("accountCustomStatus");
   const btnSaveStatus = el("btnSaveStatus");
@@ -100,11 +88,9 @@
   const btnExportAll = el("btnExportAll");
   const btnDeleteAccount = el("btnDeleteAccount");
 
-  // Chart
   let rankChart = null;
   let cachedUserDoc = null;
 
-  // Notify wrapper
   function toast(type, msg) {
     if (window.notify?.show) {
       return window.notify.show({
@@ -114,7 +100,6 @@
         duration: 4500
       });
     }
-    console.log(`[${type.toUpperCase()}] ${msg}`);
   }
 
   function showFormMsg(text, type = "error") {
@@ -396,7 +381,6 @@
 
     chipSync.textContent = cloud ? "Sync: Account + Local" : "Sync: Local";
     
-    // Draw rank chart with some history
     const levels = [calcLevel(totalXp)];
     const labels = ["Aktuell"];
     drawRankChart(levels, labels);
@@ -457,7 +441,6 @@
     });
   }
 
-  // Username cooldown check
   function checkUsernameCooldown() {
     const lastChange = localStorage.getItem(LS_USERNAME_CHANGE);
     if (!lastChange) {
@@ -505,7 +488,6 @@
         if (prefDifficultyDefault) prefDifficultyDefault.value = String(prefs.difficultyDefault || "normal");
         if (prefSounds) prefSounds.value = prefs.sounds === "off" ? "off" : "on";
 
-        // Check if Google auth
         const isGoogleAuth = user.providerData?.some(p => p.providerId === "google.com");
         if (isGoogleAuth && inputEmail) {
           inputEmail.disabled = true;
@@ -515,17 +497,13 @@
           emailHint.textContent = "Du kannst deine Email ändern";
         }
 
-        // Check username cooldown
         const cooldown = checkUsernameCooldown();
         updateUsernameStatus(cooldown.canChange, cooldown.daysLeft);
 
-        // Status fields
         if (accountStatusSelect) accountStatusSelect.value = String(data.status || "online");
         if (accountCustomStatus) accountCustomStatus.value = String(data.customStatus || "");
       }
-    } catch (e) {
-      console.warn("Fehler beim Laden der Einstellungen:", e);
-    }
+    } catch {}
   }
 
   async function saveStatus(user) {
@@ -618,7 +596,6 @@
     if (!confirmed) return;
 
     try {
-      // Best-effort Firestore cleanup (allowed for own docs by rules)
       const snap = await db.collection(USER_COLLECTION).doc(user.uid).get();
       const data = snap.exists ? snap.data() : null;
       const username = String(data?.username || data?.displayName || "").trim();
@@ -756,7 +733,6 @@
       return showFormMsg("Email ist erforderlich.", "error");
     }
 
-    // Check username cooldown
     const cooldown = checkUsernameCooldown();
     if (!cooldown.canChange) {
       return showFormMsg(`Benutzername noch ${cooldown.daysLeft} Tag(e) gesperrt.`, "error");
@@ -768,7 +744,6 @@
         btnSaveSettings.textContent = "Speichern...";
       }
 
-      // Update username in Firestore
       await db.collection(USER_COLLECTION).doc(user.uid).set({
         username: username,
         displayName: username,
@@ -776,28 +751,23 @@
         settingsUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
 
-      // Set username change cooldown
       localStorage.setItem(LS_USERNAME_CHANGE, Date.now().toString());
 
-      // Update user profile if email changed
       if (email !== user.email) {
         try {
           await user.verifyBeforeUpdateEmail(email);
           showFormMsg("Bestätigungslink wurde an neue Email gesendet ", "success");
           toast("success", "Bestätigungslink versendet!");
         } catch (emailErr) {
-          console.warn("Email Änderung:", emailErr);
           showFormMsg("Email konnte nicht geändert werden: " + emailErr.message, "error");
         }
       } else {
         showFormMsg("Einstellungen gespeichert ", "success");
       }
 
-      // Reload settings
       await loadSettingsData(user);
       toast("success", "Einstellungen aktualisiert ");
     } catch (e) {
-      console.error("Fehler beim Speichern:", e);
       showFormMsg("Speichern fehlgeschlagen: " + (e?.message || "Unbekannt"), "error");
     } finally {
       if (btnSaveSettings) {
@@ -883,7 +853,6 @@
   }
 
   async function boot() {
-    // Wait for Firebase to be ready
     if (!auth || !db) {
       if (window.firebaseReady && window.auth && window.db) {
         auth = window.auth;
@@ -917,12 +886,10 @@
       showLoggedIn();
       setLoggedInUI(user);
 
-      // Load settings
       await loadSettingsData(user);
       renderLinkedProviders(user);
       renderSessions(user);
 
-      // Profile avatar (Firestore)
       try {
         const snap = await db.collection(USER_COLLECTION).doc(user.uid).get();
         const data = snap.exists ? snap.data() : null;
@@ -939,12 +906,10 @@
         renderCloudPreview(user, cloud);
         renderMerged(localRanked, localReflex, cloud);
       } catch (e) {
-        console.warn(e);
         toast("warn", "Konnte Cloud-Daten nicht laden.");
       }
     });
 
-    // Buttons
     btnSignOut?.addEventListener("click", async () => {
       try {
         await auth.signOut();
@@ -955,7 +920,6 @@
       }
     });
 
-    // Avatar upload/remove
     btnChangeAvatar?.addEventListener("click", () => avatarFile?.click?.());
     avatarInitial?.addEventListener("click", () => avatarFile?.click?.());
     avatarImg?.addEventListener("click", () => avatarFile?.click?.());
@@ -1075,7 +1039,6 @@
       }
     });
 
-    // Settings Form
     accountSettingsForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
@@ -1117,7 +1080,7 @@
     btnSetup2fa?.addEventListener("click", async () => {
       await window.echtluckyModal?.alert?.({
         title: "2FA",
-        message: "2FA ist vorbereitet (UI). Serverseitige Verifizierung folgt in einem späteren Step.",
+        message: "2FA ist aktuell nicht verfügbar.",
         confirmText: "OK"
       });
     });
@@ -1139,7 +1102,7 @@
     btnSignOutOtherSessions?.addEventListener("click", async () => {
       await window.echtluckyModal?.alert?.({
         title: "Sessions",
-        message: "Firebase Web kann andere Sessions nicht zuverlässig serverseitig beenden. UI ist vorbereitet.",
+        message: "Andere Sessions ausloggen ist in der Web-Version nicht verfügbar.",
         confirmText: "OK"
       });
     });
@@ -1176,7 +1139,6 @@
     });
   }
 
-  // Initialize on DOM load
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => boot());
   } else {

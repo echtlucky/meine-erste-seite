@@ -1,8 +1,7 @@
-/* App Shell (Desktop-first) — used to give pages a Discord/WhatsApp-desktop structure.
-   Scope carefully: keep selectors prefixed with .app-shell / .connect-page to avoid side effects. */
+﻿
 
 .app-shell {
-  /* body already has padding-top: var(--header-h) for the fixed header */
+  
   min-height: calc(100dvh - var(--header-h));
   display: grid;
   grid-template-columns: 72px 1fr;
@@ -27,7 +26,7 @@
   grid-area: topbar;
   position: sticky;
   top: 0;
-  /* Must stay above app panels (header contains fixed .site-header). */
+  
   z-index: 100001;
 }
 
@@ -83,7 +82,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  /* Keep footer at the bottom even when the page content is short. */
+  
   min-height: calc(100dvh - var(--header-h));
 }
 
@@ -96,9 +95,9 @@
   margin-top: auto;
 }
 
-/* Footer stays visible (user-requested). */
 
-/* Mobile: collapse the rail into a bottom bar later (next step). For now hide it. */
+
+
 @media (max-width: 900px) {
   .app-shell {
     grid-template-columns: 1fr;

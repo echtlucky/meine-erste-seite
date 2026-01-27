@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -12,12 +12,11 @@
 </head>
 
 <body class="page-transition home-page">
-  <!-- Header via fetch -->
   <div id="header-placeholder"></div>
 
   <main class="container home-shell">
 
-    <!-- 1) HERO: Headline Card -->
+    
     <section class="home-hero">
       <div class="home-hero__inner">
         <div class="home-badge">⚡ echtlcky • Competitive</div>
@@ -50,8 +49,7 @@
           <h2>Connect Zone</h2>
           <p>
             Schnell rein ins Zentrum: Freunde, Gruppen, Call-Control – alles direkt
-            auf der Website. Später erweitern wir das Call- und Screen-Share-Erlebnis
-            hier.
+            auf der Website.
           </p>
           <div class="home-connect__cta">
             <a class="btn" href="connect.html">Connect öffnen</a>
@@ -65,7 +63,7 @@
       </div>
     </section>
 
-    <!-- 2) NAV EXPLAIN: 3 Wege + Arrow + Button -->
+    
     <section class="home-navcard">
       <header class="home-sectionhead">
         <h2>Wohin willst du?</h2>
@@ -108,7 +106,7 @@
       </div>
     </section>
 
-    <!-- 3) COMMUNITY CARD: 6 Features -->
+    
     <section class="home-community">
       <header class="home-sectionhead">
         <h2>Werde Teil der echten Grind-Community</h2>
@@ -150,7 +148,7 @@
       <div class="home-actions">
         <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">Discord Community</a>
 
-        <!-- ✅ Dieser Button switcht automatisch via auth-state.js -->
+        
         <a class="btn btn-secondary"
           data-account-cta
           data-cta-logged-out-text="Account erstellen"
@@ -163,11 +161,11 @@
       </div>
     </section>
 
-    <!-- 4) BALLISTIC STATS CARD -->
+    
     <section class="home-stats">
       <header class="home-sectionhead">
         <h2>Ballistic Stats</h2>
-        <p>Aktueller Status – hier soll später live mehr reinkommen (Rank, Peak, Season-Progress, etc.).</p>
+        <p>Aktueller Status.</p>
       </header>
 
       <div class="stats-grid">
@@ -194,7 +192,7 @@
       </div>
     </section>
 
-    <!-- 5) DISCORD CARD bigger -->
+    
     <section class="home-discord">
       <header class="home-sectionhead">
         <h2>Discord Community</h2>
@@ -221,7 +219,7 @@
       </div>
     </section>
 
-    <!-- 6) EXTRA INFO: Roadmap + FAQ -->
+    
     <section class="home-more">
       <header class="home-sectionhead">
         <h2>Was als Nächstes kommt</h2>
@@ -250,51 +248,25 @@
 
   </main>
 
-  <!-- Footer via fetch -->
+  
   <div id="footer-placeholder"></div>
 
-  <!-- Firebase CDN (Compat v10.14.1) -->
+  
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-  <!-- Scripts -->
+  
   <script src="firebase.js"></script>
   <script src="js/auth-state.js"></script>
 
   <script src="js/menu.js"></script>
   <script src="js/legal-modal.js"></script>
-  <script src="js/login.js"></script>
   <script src="js/notify.js"></script>
   <script src="js/modal-dialog.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/overlays.js"></script>
   <script src="js/fonts.js"></script>
   <script src="js/tickets.js"></script>
- 
-  <script>
-    document.body.classList.add("loaded");
-
-    // HEADER inject
-    fetch("header.html")
-      .then((r) => r.text())
-      .then((html) => {
-        document.getElementById("header-placeholder").innerHTML = html;
-
-        if (typeof initHeaderScripts === "function") initHeaderScripts();
-        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-
-        // ✅ wichtig: signalisiert auth-state.js, dass DOM targets existieren
-        window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
-      })
-      .catch((err) => console.error("Header load failed:", err));
-
-    // FOOTER inject
-    fetch("footer.html")
-      .then((r) => r.text())
-      .then((html) => {
-        document.getElementById("footer-placeholder").innerHTML = html;
-      })
-      .catch((err) => console.error("Footer load failed:", err));
-  </script>
 </body>
 </html>

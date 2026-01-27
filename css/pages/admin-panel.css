@@ -1,14 +1,11 @@
-/* ======================================
-   ADMIN PANEL — clean airy (matches HTML 1:1)
-   File: css/pages/admin-panel.css
-====================================== */
+﻿
 
 body.admin-page{
-  /* body already reserves header space via css/style.css */
+  
   padding-top: 0;
 }
 
-/* New full-width shell (sidebar + content) */
+
 .admin-main{
   width: 100%;
   margin-top: clamp(1rem, 1.5vw, 1.8rem);
@@ -195,14 +192,14 @@ body.admin-page{
   color: rgba(224,255,224,0.92);
 }
 
-/* Wrap */
+
 .admin-wrap{
   max-width: none;
   margin: 0 auto;
   padding: clamp(1.2rem, 2.6vw, 2.2rem);
 }
 
-/* Hero */
+
 .admin-hero{
   display: flex;
   align-items: flex-end;
@@ -245,11 +242,11 @@ body.admin-page{
   font-size: .95rem;
 }
 
-/* Discord-style admin panel layout (top-level rules; CSS nesting is not supported in plain CSS) */
+
 .admin-discord-shell {
   max-width: 900px;
   margin: 2.5rem auto 2rem auto;
-  padding: 0 1.5rem 2.5rem 1.5rem; /* bottom space so last cards aren't cut off */
+  padding: 0 1.5rem 2.5rem 1.5rem; 
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -358,7 +355,7 @@ body.admin-page{
   }
 }
 
-/* List Items (Posts + Users) */
+
 .admin-list{
   display: grid;
   grid-template-columns: 1fr;
@@ -403,7 +400,7 @@ body.admin-page{
   gap: .7rem;
 }
 
-/* Inputs */
+
 .admin-field{
   display: flex;
   flex-direction: column;
@@ -472,7 +469,7 @@ body.admin-page{
   flex-wrap: wrap;
 }
 
-/* Inline ban row */
+
 .admin-inline{
   display: flex;
   gap: 1rem;
@@ -480,7 +477,7 @@ body.admin-page{
   flex-wrap: wrap;
 }
 
-/* Table */
+
 .admin-tablewrap{
   margin-top: 1rem;
   overflow-x: auto;
@@ -524,7 +521,7 @@ body.admin-page{
   white-space: nowrap;
 }
 
-/* Empty */
+
 .admin-empty{
   margin: 1rem 0 0;
   padding: 1rem;
@@ -533,7 +530,7 @@ body.admin-page{
   opacity: .9;
 }
 
-/* Modal */
+
 .admin-modal{
   display: none;
   position: fixed;
@@ -641,7 +638,7 @@ body.admin-page{
   justify-content: flex-end;
 }
 
-/* Responsive */
+
 @media (max-width: 900px){
   .admin-shell{
     grid-template-columns: 1fr;
@@ -680,16 +677,14 @@ body.admin-page{
   }
 }
 
-/* ==========================================
-   ADDITIONAL STYLES (für neue HTML-Struktur)
-   ========================================== */
 
-/* Hero Content */
+
+
 .admin-hero__content {
   flex: 1;
 }
 
-/* Admin Status Pill */
+
 .admin-status-pill {
   display: inline-flex;
   align-items: center;
@@ -704,7 +699,7 @@ body.admin-page{
   margin-top: 0.6rem;
 }
 
-/* Admin Nav */
+
 .admin-nav {
   margin-top: 1.2rem;
   display: flex;
@@ -753,12 +748,12 @@ body.admin-page{
   box-shadow: 0 12px 40px rgba(0,0,0,0.35);
 }
 
-/* Admin Container */
+
 .admin-shell {
   padding-top: 0;
 }
 
-/* Card Header */
+
 .admin-card__header {
   display: flex;
   align-items: center;
@@ -773,7 +768,7 @@ body.admin-page{
   font-size: 0.9rem;
 }
 
-/* Post Items */
+
 .admin-post-item {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(0,255,136,0.14);
@@ -814,7 +809,7 @@ body.admin-page{
   gap: 0.6rem;
 }
 
-/* User Items */
+
 .admin-user-item {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(0,255,136,0.14);
@@ -859,7 +854,7 @@ body.admin-page{
   background: rgba(0,255,136,0.08);
 }
 
-/* Ban Form */
+
 .admin-ban-form {
   display: flex;
   gap: 0.8rem;
@@ -872,7 +867,7 @@ body.admin-page{
   min-width: 200px;
 }
 
-/* Ban Items */
+
 .admin-ban-item {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,51,102,0.14);
@@ -894,7 +889,7 @@ body.admin-page{
   color: #ff6699;
 }
 
-/* Comment Items */
+
 .admin-comment-item {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(0,255,136,0.14);
@@ -919,7 +914,7 @@ body.admin-page{
   margin: 0.5rem 0;
 }
 
-/* Log Items */
+
 .admin-log-item {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(0,255,136,0.14);
@@ -956,7 +951,7 @@ body.admin-page{
   font-size: 0.85rem;
 }
 
-/* Stats Grid */
+
 .admin-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -991,7 +986,7 @@ body.admin-page{
   font-weight: 900;
 }
 
-/* Activity */
+
 .admin-activity {
   display: flex;
   flex-direction: column;
@@ -1017,7 +1012,7 @@ body.admin-page{
   font-size: 0.8rem;
 }
 
-/* Health */
+
 .admin-health {
   display: flex;
   flex-direction: column;
@@ -1049,7 +1044,7 @@ body.admin-page{
   color: var(--accent);
 }
 
-/* Settings */
+
 .admin-settings-group {
   margin-bottom: 1.5rem;
 }
@@ -1091,7 +1086,7 @@ body.admin-page{
   margin-top: 1.5rem;
 }
 
-/* Chat Detail */
+
 .admin-chat-detail {
   display: flex;
   flex-direction: column;
@@ -1121,7 +1116,7 @@ body.admin-page{
   overflow-y: auto;
 }
 
-/* User Info */
+
 .admin-userinfo {
   display: flex;
   flex-direction: column;
@@ -1138,7 +1133,7 @@ body.admin-page{
   background: rgba(255,255,255,0.02);
 }
 
-/* Modal Actions */
+
 .admin-modal__actions {
   display: flex;
   gap: 0.8rem;
@@ -1146,7 +1141,7 @@ body.admin-page{
   flex-wrap: wrap;
 }
 
-/* Responsive Adjustments */
+
 @media (max-width: 700px) {
   .admin-stats-grid {
     grid-template-columns: 1fr;

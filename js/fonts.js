@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   "use strict";
 
   if (window.__ECHTLUCKY_FONTS_LOADED__) return;
@@ -172,7 +172,6 @@
   }
 
   function squared(text) {
-    // limited unicode set; fallback to fullwidth boxed style
     const map = new Map();
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach((c, i) => {
       map.set(c, String.fromCodePoint(0x1f130 + i)); // 🄰..🅉
@@ -238,7 +237,6 @@
   ];
 
   function bestStyleId() {
-    // Prefer lcky if input resembles a tag (short), else bold
     const t = String(ui.text?.value || "").trim();
     if (t.length > 0 && t.length <= 10) return "lcky";
     return "bold";
@@ -393,7 +391,6 @@
           return;
         }
 
-        // click anywhere copies
         copyStyle(styleId);
       });
     }

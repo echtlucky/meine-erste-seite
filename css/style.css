@@ -1,7 +1,4 @@
-/* ======================================
-   THEME — echtlucky (Apple clean x Riot premium) — BASE
-   File: css/style.css
-====================================== */
+﻿
 
 :root{
   --bg:#020b06;
@@ -35,12 +32,10 @@
   --content-max: 1400px;
 }
 
-/* Ensure the HTML `hidden` attribute always wins (prevents invisible overlays from blocking clicks). */
+
 [hidden] { display: none !important; }
 
-/* ======================================
-   BASE / RESET
-====================================== */
+
 *{ margin:0; padding:0; box-sizing:border-box; }
 
 html, body{
@@ -57,22 +52,20 @@ body{
   min-height: 100vh;
   display:flex;
   flex-direction:column;
-  padding-top: var(--header-h); /* fixed header space */
+  padding-top: var(--header-h); 
   overflow-x:hidden;
   letter-spacing:-0.15px;
   font-weight: 460;
   background: var(--bg);
 }
 
-/* Typography */
+
 h1{ font-weight: 860; letter-spacing: -1px; }
 h2{ font-weight: 780; letter-spacing: -0.7px; }
 h3{ font-weight: 700; letter-spacing: -0.3px; }
 p{ color: var(--text-soft); }
 
-/* ======================================
-   LAYOUT
-====================================== */
+
 main{ flex:1; }
 .container{
   max-width: var(--content-max);
@@ -83,9 +76,7 @@ main{ flex:1; }
   margin: clamp(1.6rem, 3.8vw, 3rem) 0;
 }
 
-/* ======================================
-   HEADER — vNext (cleaner, clickable, mobile solid)
-====================================== */
+
 .site-header{
   position:fixed;
   top:0; left:0;
@@ -113,7 +104,7 @@ main{ flex:1; }
   transform: translate3d(0,-110%,0);
 }
 
-/* Group dock removed (groups live in header dropdown) */
+
 .group-strip{ display:none !important; }
 
 .group-strip__item{
@@ -200,7 +191,7 @@ main{ flex:1; }
   .group-strip{ display:none !important; }
 }
 
-/* Header dropdown buttons (Hub / Groups) */
+
 .nav-link-btn{
   display:inline-flex;
   align-items:center;
@@ -284,7 +275,7 @@ main{ flex:1; }
   right: auto;
   transform: none;
 }
-/* Overlay safety */
+
 .site-header::before,
 .site-header::after,
 .site-header *::before,
@@ -292,7 +283,7 @@ main{ flex:1; }
   pointer-events:none !important;
 }
 
-/* Left */
+
 .header-left{ display:flex; align-items:center; gap: .9rem; }
 
 .logo{
@@ -305,7 +296,7 @@ main{ flex:1; }
   user-select:none;
 }
 
-/* Main Nav wrapper (important for mobile) */
+
 #mainNav.header-nav{
   display:flex;
   align-items:center;
@@ -314,7 +305,7 @@ main{ flex:1; }
   z-index: 100006;
 }
 
-/* Middle links */
+
 .nav-links{
   display:flex;
   align-items:center;
@@ -359,14 +350,14 @@ main{ flex:1; }
   box-shadow: 0 0 0 1px rgba(0,255,136,0.14) inset;
 }
 
-/* Right */
+
 .header-right{
   display:flex;
   align-items:center;
   gap: .75rem;
 }
 
-/* Auth link */
+
 .nav-auth{
   display:inline-flex;
   align-items:center;
@@ -393,7 +384,7 @@ main{ flex:1; }
   transform: translateY(-1px);
 }
 
-/* Live/Connect Button */
+
 .nav-live{
   display:inline-flex;
   align-items:center;
@@ -423,7 +414,7 @@ main{ flex:1; }
   box-shadow: 0 0 12px rgba(0,255,136,0.18);
 }
 
-/* Live Status Dot */
+
 .live-dot{
   width: 8px;
   height: 8px;
@@ -444,7 +435,7 @@ main{ flex:1; }
   }
 }
 
-/* Dropdown */
+
 .user-dropdown-wrapper{ position:relative; display:flex; align-items:center; }
 
 .user-name{
@@ -488,7 +479,7 @@ main{ flex:1; }
 
 .dropdown-menu.show{ display:block; }
 
-/* Click / keyboard accessibility without JS (works with focus on the toggle button) */
+
 .nav-dropdown:focus-within .dropdown-menu{
   display:block;
 }
@@ -519,7 +510,7 @@ main{ flex:1; }
 
 .dropdown-item.logout{ color:#ff3366; }
 
-/* Hamburger */
+
 .menu-toggle{
   display:none;
   background:none;
@@ -536,7 +527,7 @@ main{ flex:1; }
 
 .menu-toggle:hover{ background: rgba(0,255,136,0.10); transform: translateY(-1px); }
 
-/* Mobile Nav */
+
 @media (max-width: 992px){
   .site-header{ padding: 0.8rem 4%; }
 
@@ -606,9 +597,7 @@ main{ flex:1; }
   }
 }
 
-/* ======================================
-   GENERIC HERO (fallback)
-====================================== */
+
 .hero{
   width: min(980px, calc(100% - 2rem));
   margin: clamp(1.2rem, 2.8vw, 2rem) auto;
@@ -644,9 +633,7 @@ main{ flex:1; }
   gap: 0.9rem;
 }
 
-/* ======================================
-   BUTTONS
-====================================== */
+
 .btn{
   display:inline-flex;
   align-items:center;
@@ -728,9 +715,7 @@ main{ flex:1; }
   box-shadow: 0 22px 75px rgba(0,255,136,0.14), 0 14px 40px rgba(0,0,0,0.55);
 }
 
-/* ======================================
-   GENERIC SECTIONS / CARDS
-====================================== */
+
 .community-teaser,
 .bio, .stats-section, .discord-section, .twitch-section{
   width: min(980px, 100%);
@@ -798,9 +783,7 @@ main{ flex:1; }
   margin: 0.9rem auto 0;
 }
 
-/* ======================================
-   FOOTER
-====================================== */
+
 footer{
   text-align:center;
   padding: 2.8rem 1rem 2.0rem;
@@ -868,9 +851,7 @@ footer{
   border-color: rgba(0,255,136,0.30);
 }
 
-/* ======================================
-   RESPONSIVE
-====================================== */
+
 @media (max-width:768px){
   .btn{ font-size: 1.02rem; padding: 0.95rem 1.25rem; }
   .community-teaser, .bio, .stats-section, .discord-section, .twitch-section{
@@ -879,16 +860,14 @@ footer{
   .feature{ padding: 1.25rem 1.15rem; }
 }
 
-/* Keep footer readable above the mobile bottom rail (app-shell) */
+
 @media (max-width: 900px){
   #footer-placeholder > footer{
     padding-bottom: calc(2.0rem + 84px + env(safe-area-inset-bottom));
   }
 }
 
-/* ======================================
-   PAGE TRANSITION
-====================================== */
+
 .page-transition{
   opacity: 1;
   transition: opacity 0.6s ease;
@@ -896,9 +875,7 @@ footer{
 body.page-transition{ opacity: 0; }
 body.loaded{ opacity: 1; }
 
-/* ======================================
-   LEGAL MODAL (unchanged)
-====================================== */
+
 body.modal-open{ overflow:hidden; }
 
 .legal-modal{

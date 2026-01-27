@@ -24,7 +24,6 @@
 
       <div class="app-shell__main">
         <main class="connect-main">
-          <!-- Legacy hook: keep for device selector modal logic (no longer visible as sidebar button). -->
           <button id="btnQuickAccount" type="button" hidden></button>
 
           <section class="connect-single-card-shell">
@@ -212,7 +211,7 @@
                 </aside>
               </div>
 
-              <!-- Mobile panel switcher (DMs / Chat / Members) -->
+              
               <div class="connect-mobile-switcher" role="tablist" aria-label="Ansicht wechseln">
                 <button class="connect-mobile-tab" type="button" data-panel="left" role="tab" aria-selected="true">
                   <i class="fa-solid fa-comments" aria-hidden="true"></i>
@@ -231,12 +230,12 @@
           </section>
         </main>
 
-        <!-- Footer via fetch (kept inside app shell so it remains visible) -->
+        
         <div id="footer-placeholder"></div>
       </div>
     </div>
 
-    <!-- SETTINGS MODAL -->
+    
     <div class="group-settings-modal" id="groupSettingsModal" aria-hidden="true">
       <div class="settings-modal-panel" role="dialog" aria-modal="true" aria-label="Gruppeneinstellungen">
         <button class="settings-modal-close" id="closeGroupSettings" type="button" aria-label="Schließen">×</button>
@@ -279,12 +278,12 @@
       </div>
     </div>
 
-    <!-- GROUP CONTEXT MENU (Desktop right-click) -->
+    
     <div class="context-menu" id="groupContextMenu" hidden role="menu" aria-label="Gruppenmenü"></div>
-    <!-- USER CONTEXT MENU (Desktop right-click) -->
+    
     <div class="context-menu" id="userContextMenu" hidden role="menu" aria-label="Benutzermenü"></div>
 
-    <!-- ADD FRIEND MODAL -->
+    
     <div id="addFriendModal" class="modal-overlay" hidden aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-header">
@@ -308,7 +307,7 @@
       </div>
     </div>
 
-    <!-- CONNECT SETTINGS POPUP -->
+    
     <div id="connectSettingsModal" class="modal-overlay" hidden aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-header">
@@ -394,7 +393,7 @@
       </div>
     </div>
 
-    <!-- QUICK ACCOUNT (Rail) -->
+    
     <div id="accountQuickModal" class="modal-overlay" hidden aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-header">
@@ -420,7 +419,7 @@
       </div>
     </div>
 
-    <!-- INCOMING CALL MODAL & RINGTONE AUDIO -->
+    
     <div id="incomingCallModal" class="modal-overlay" hidden>
       <div class="modal-dialog incoming-call-dialog">
         <div class="modal-header">
@@ -445,54 +444,24 @@
     </div>
     <audio id="callRingtone" preload="auto" loop hidden></audio>
 
-    <!-- FIREBASE CDN (Compat v10.14.1) -->
+    
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-    <!-- SCRIPTS -->
+    
     <script src="firebase.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/auth-state.js"></script>
     <script src="js/legal-modal.js"></script>
     <script src="js/notify.js"></script>
     <script src="js/modal-dialog.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/overlays.js"></script>
     <script src="js/fonts.js"></script>
     <script src="js/tickets.js"></script>
     <script src="js/connect-minimal.js"></script>
     <script src="js/voice-chat.js"></script>
-
-    <script>
-      document.body.classList.add("loaded");
-
-      fetch("header.html?v=" + Date.now())
-        .then((r) => r.text())
-        .then((html) => {
-          document.getElementById("header-placeholder").innerHTML = html;
-          if (typeof initHeaderScripts === "function") initHeaderScripts();
-          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-          window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
-        });
-
-      fetch("footer.html?v=" + Date.now())
-        .then((r) => r.text())
-        .then((html) => {
-          document.getElementById("footer-placeholder").innerHTML = html;
-        });
-
-      document.querySelectorAll(".chat-tab-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          const tabName = e.currentTarget.dataset.tab;
-
-          document.querySelectorAll(".chat-tab-btn").forEach((b) => b.classList.remove("is-active"));
-          e.currentTarget.classList.add("is-active");
-
-          document.querySelectorAll(".chat-tab-content").forEach((c) => c.classList.remove("is-active"));
-          document.querySelector(`.chat-tab-content[data-tab="${tabName}"]`)?.classList.add("is-active");
-        });
-      });
-    </script>
   </body>
 </html>
 

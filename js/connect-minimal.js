@@ -1,16 +1,7 @@
-﻿// js/connect-minimal.js v2 — 3-Column Layout Controller
-// Manages groups list (left column), group selection, and auth state
-
-(function () {
+﻿(function () {
   "use strict";
 
-  const DEBUG = false;
-  const log = (...args) => {
-    if (DEBUG) console.log(...args);
-  };
-
   if (window.__ECHTLUCKY_CONNECT_MINIMAL_LOADED__) {
-    console.warn("connect-minimal.js already loaded – skipping");
     return;
   }
   window.__ECHTLUCKY_CONNECT_MINIMAL_LOADED__ = true;
@@ -38,7 +29,6 @@
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        log("✅ connect-minimal.js: Firebase ready");
         resolve();
         return;
       }
@@ -47,7 +37,6 @@
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        log("✅ connect-minimal.js: Firebase ready via event");
         resolve();
       };
 
@@ -78,7 +67,6 @@
   }
 
   function playRingTick() {
-    // Soft, relaxed "ring" (single tick). Looping handled elsewhere.
     playToneSequence(
       [
         { freq: 440, duration: 0.18, start: 0, type: "sine" },
@@ -93,7 +81,6 @@
   }
 
   function playCallTone() {
-    // Gentle "connected" confirmation.
     playToneSequence(
       [
         { freq: 392, duration: 0.14, start: 0, type: "triangle" },
@@ -125,7 +112,6 @@
     if (!isCallSoundsEnabled()) return;
     if (ringLoopTimer) return;
 
-    // First tick immediately, then loop until stopped.
     playRingTick();
     ringLoopTimer = window.setInterval(() => {
       playRingTick();
@@ -134,7 +120,6 @@
 
   let initialized = false;
 
-  // DOM Elements
   const authStatusCard = document.getElementById("authStatusCard");
   const statusLabel = document.getElementById("statusLabel");
   const btnLogin = document.getElementById("btnLogin");
@@ -186,7 +171,6 @@
   const connectMainCard = document.querySelector(".connect-main-card");
   const mobileSwitcher = document.querySelector(".connect-mobile-switcher");
 
-  // Presence (Firestone rules allow write only to /presence/{uid})
   let presenceHeartbeatTimer = null;
   let presenceListenersBound = false;
   const presenceCache = new Map(); // uid -> { state, lastActiveAtMs }
@@ -205,9 +189,7 @@
         },
         { merge: true }
       );
-    } catch (e) {
-      console.warn("Presence update fehlgeschlagen", e);
-    }
+    } catch {}
   }
 
   function stopPresenceHeartbeat() {
@@ -220,7 +202,6 @@
   function startPresenceHeartbeat() {
     stopPresenceHeartbeat();
 
-    // Immediate update + heartbeat (stale-data friendly; clients can treat old timestamps as offline)
     writePresence(document.hidden ? "away" : "online");
 
     presenceHeartbeatTimer = setInterval(() => {
@@ -235,7 +216,6 @@
       });
 
       window.addEventListener("beforeunload", () => {
-        // Best-effort; might not complete, but helps on normal navigations.
         writePresence("offline");
       });
     }
@@ -276,7 +256,6 @@
             changed = true;
           }
         } catch (_) {
-          // Ignore presence fetch failures; default display stays "offline".
         } finally {
           presenceCacheFetchedAt.set(uid, now);
           presenceCacheInFlight.delete(uid);
@@ -299,7 +278,6 @@
   }
   const userCacheInFlight = new Set(); // uid
 
-  // Escape HTML
   function escapeHtml(str) {
     const map = {
       "&": "&amp;",
@@ -372,7 +350,6 @@
       return;
     }
 
-    // Warm cache
     fetchUserProfiles(ids).catch(() => {});
     refreshPresence(ids).catch(() => {});
 
@@ -509,7 +486,6 @@
     if (replyPreview) replyPreview.hidden = false;
   }
 
-  // Load current user's friends list
   function loadCurrentUserFriends() {
     if (!currentUser) return;
 
@@ -521,11 +497,9 @@
           renderDmList();
         });
     } catch (err) {
-      console.error("Error loading friends:", err);
     }
   }
 
-  // Load groups for current user
   function loadGroups() {
     if (!currentUser) return;
 
@@ -536,11 +510,9 @@
           groupsCache.clear();
           const stripData = [];
 
-          // DM "home" entry at the top of the strip
           stripData.push({ id: "__dm__", name: "DM", unread: 0, color: "#00ff88", type: "dm" });
 
           if (!snapshot.empty) {
-            // Legacy list (kept hidden in HTML, but still populated for quick context operations if needed)
             if (groupsListPanel) groupsListPanel.innerHTML = "";
 
             snapshot.forEach((doc) => {
@@ -581,20 +553,17 @@
             }
           }
 
-          // Create button at the bottom of the strip
           stripData.push({ id: "__create__", name: "+", unread: 0, color: "#00ff88", type: "create" });
 
           window.updateGroupStrip?.(stripData);
         });
     } catch (err) {
-      console.error("Error loading groups:", err);
       if (groupsListPanel) {
         groupsListPanel.innerHTML = '<div class="empty-state"><p>⚠️ Fehler</p></div>';
       }
     }
   }
 
-  // Select a group
   function selectGroup(groupId, groupData, clickedEl) {
     activeChatMode = "group";
     selectedDmUid = null;
@@ -602,19 +571,16 @@
     selectedGroupId = groupId;
     selectedGroupData = groupData || null;
     
-    // Update active state in list
     document.querySelectorAll(".group-item").forEach((item) => {
       item.classList.remove("is-active");
     });
     clickedEl?.classList.add("is-active");
 
-    // Show chat container
     const chatContainer = document.getElementById("chatContainer");
     const emptyChatState = document.getElementById("emptyChatState");
     if (chatContainer) chatContainer.hidden = false;
     if (emptyChatState) emptyChatState.hidden = true;
 
-    // Mobile: jump into chat panel after selecting a group
     if (connectMainCard && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
       connectMainCard.setAttribute("data-mobile-panel", "middle");
       document.querySelectorAll(".connect-mobile-tab").forEach((b) => {
@@ -624,7 +590,6 @@
       });
     }
 
-    // Update chat header
     const chatGroupTitle = document.getElementById("chatGroupTitle");
     if (chatGroupTitle) chatGroupTitle.textContent = `Gruppe: ${groupData.name || "Gruppe"}`;
 
@@ -636,7 +601,6 @@
 
     clearReplyState();
 
-    // Update member settings
     const groupNameInput = document.getElementById("groupNameInput");
     if (groupNameInput) groupNameInput.value = groupData.name || "Gruppe";
 
@@ -647,7 +611,6 @@
     attachMessagesListener(groupId);
     updateChatControls();
 
-    // Dispatch event for other listeners (e.g. voice-chat)
     window.dispatchEvent(
       new CustomEvent("echtlucky:group-selected", {
         detail: { groupId, groupData }
@@ -673,7 +636,6 @@
   function canDeleteGroup(groupDoc) {
     const uid = auth?.currentUser?.uid;
     if (!uid || !groupDoc) return false;
-    // Destructive action: restrict to creator only.
     return groupDoc.createdBy === uid;
   }
 
@@ -702,7 +664,6 @@
     const vw = window.innerWidth || 0;
     const vh = window.innerHeight || 0;
 
-    // Place near cursor first; then clamp into viewport after measuring.
     groupContextMenu.style.left = `${Math.max(margin, Math.min(x, vw - margin))}px`;
     groupContextMenu.style.top = `${Math.max(margin, Math.min(y, vh - margin))}px`;
 
@@ -859,7 +820,6 @@
         duration: 3500
       });
     } catch (err) {
-      console.error("removeFriend error:", err);
       window.notify?.show({
         type: "error",
         title: "Fehler",
@@ -900,7 +860,6 @@
         duration: 2500
       });
     } catch (err) {
-      console.error("renameGroup error:", err);
       window.notify?.show({
         type: "error",
         title: "Fehler",
@@ -921,7 +880,6 @@
       return;
     }
 
-    // Mobile: switch to members panel
     if (connectMainCard && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
       connectMainCard.setAttribute("data-mobile-panel", "right");
       document.querySelectorAll(".connect-mobile-tab").forEach((b) => {
@@ -1031,18 +989,15 @@
 
     const uid = auth?.currentUser?.uid;
 
-    // Fetch missing profiles in background and re-render after load.
     const missing = members.filter((m) => m && !userCache.has(m) && m !== uid);
     if (missing.length) {
       fetchUserProfiles(missing).then(() => {
         if (selectedGroupId === groupDoc?.id || selectedGroupId) {
-          // Re-render to show names once cache is warm
           renderMembers(groupDoc);
         }
       });
     }
 
-    // Presence fetch in background and re-render after cache update.
     refreshPresence(members).then((changed) => {
       if (changed && selectedGroupId) renderMembers(groupDoc);
     });
@@ -1246,7 +1201,6 @@
       if (input) input.value = "";
       clearReplyState();
     } catch (err) {
-      console.error("sendMessageToSelectedGroup error:", err);
       window.notify?.show({
         type: "error",
         title: "Fehler",
@@ -1320,7 +1274,6 @@
         duration: 3000
       });
     } catch (err) {
-      console.error("addMemberToSelectedGroup error:", err);
       window.notify?.show({
         type: "error",
         title: "Fehler",
@@ -1358,7 +1311,6 @@
       try {
         users = await searchUsersForGroup(query.trim());
       } catch (e) {
-        console.error("searchUsersForGroup error:", e);
         targetEl.innerHTML = '<div class="empty-state"><p>❌ Fehler bei der Suche</p></div>';
         return;
       }
@@ -1457,7 +1409,6 @@
       if (chatContainer) chatContainer.hidden = true;
       if (emptyChatState) emptyChatState.hidden = false;
     } catch (err) {
-      console.error("leaveSelectedGroup error:", err);
       window.notify?.show({
         type: "error",
         title: "Fehler",
@@ -1500,7 +1451,6 @@
       if (chatContainer) chatContainer.hidden = true;
       if (emptyChatState) emptyChatState.hidden = false;
     } catch (err) {
-      console.error("deleteSelectedGroup error:", err);
       window.notify?.show({
         type: "error",
         title: "Fehler",
@@ -1518,7 +1468,6 @@
     if (!modal || !btnOpen || !btnClose) return;
 
     const open = () => {
-      // Settings are mobile-only (button is hidden on desktop, but keep a runtime guard).
       if (window.matchMedia && window.matchMedia("(min-width: 901px)").matches) return;
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
@@ -1553,7 +1502,6 @@
     });
   }
 
-  // Search friends
   function searchFriends(query) {
     if (!currentUser) return;
 
@@ -1617,7 +1565,6 @@
             })
             .join("");
 
-          // Add listeners
           friendsSearchResults
             .querySelectorAll("button[data-friend-uid]")
             .forEach((btn) => {
@@ -1634,7 +1581,6 @@
     }
   }
 
-  // Add friend
   window.echtluckyAddFriend = function (friendUid, friendName) {
     if (!currentUser) return;
 
@@ -1665,7 +1611,6 @@
     }
   };
 
-  // Create group
   function createGroup() {
     if (!currentUser) return;
 
@@ -1740,13 +1685,10 @@
     userBarAvatar.removeAttribute("aria-label");
   }
 
-  // Update auth status
   async function updateAuthStatus() {
     currentUser = auth.currentUser;
-    log("🔵 updateAuthStatus: currentUser =", currentUser ? currentUser.email : null);
 
     if (!currentUser) {
-      log("⚠️ No user logged in");
       if (statusLabel) statusLabel.textContent = "Nicht eingeloggt";
       if (btnLogin) btnLogin.hidden = false;
       if (authStatusCard) authStatusCard.hidden = false;
@@ -1756,7 +1698,6 @@
       return;
     }
 
-    log("… User logged in:", currentUser.email);
     const profile = await loadCurrentUserProfile(currentUser.uid);
     const display =
       profile?.username ||
@@ -1777,8 +1718,29 @@
     loadGroups();
   }
 
-  // Setup event listeners (after Firebase ready)
+  function wireChatTabs() {
+    const buttons = Array.from(document.querySelectorAll(".chat-tab-btn"));
+    if (!buttons.length) return;
+
+    buttons.forEach((btn) => {
+      if (btn.__wired) return;
+      btn.__wired = true;
+      btn.addEventListener("click", (e) => {
+        const tabName = e.currentTarget?.dataset?.tab;
+        if (!tabName) return;
+
+        document.querySelectorAll(".chat-tab-btn").forEach((b) => b.classList.remove("is-active"));
+        e.currentTarget.classList.add("is-active");
+
+        document.querySelectorAll(".chat-tab-content").forEach((c) => c.classList.remove("is-active"));
+        document.querySelector(`.chat-tab-content[data-tab="${tabName}"]`)?.classList.add("is-active");
+      });
+    });
+  }
+
   function init() {
+    wireChatTabs();
+
     if (btnLogin) {
       btnLogin.addEventListener("click", () => {
         try {
@@ -1789,23 +1751,21 @@
         window.location.href = "login.html";
       });
     }
-    log("🟢 connect-minimal.js: init() called");
 
     const btnLeaveGroupModal = document.getElementById("btnLeaveGroupModal");
     if (btnLeaveGroupModal) {
       btnLeaveGroupModal.addEventListener("click", () => {
-        leaveSelectedGroup().catch((e) => console.error(e));
+        leaveSelectedGroup().catch(() => {});
       });
     }
 
     const btnDeleteGroupModal = document.getElementById("btnDeleteGroupModal");
     if (btnDeleteGroupModal) {
       btnDeleteGroupModal.addEventListener("click", () => {
-        deleteSelectedGroup().catch((e) => console.error(e));
+        deleteSelectedGroup().catch(() => {});
       });
     }
 
-    // Mobile panel switcher
     if (mobileSwitcher && connectMainCard) {
       const setMobilePanel = (panel) => {
         const next = panel || "left";
@@ -1824,7 +1784,6 @@
         btn.addEventListener("click", () => setMobilePanel(btn.dataset.panel || "left"));
       });
 
-      // Keep state sane across resizes (e.g. rotating the phone)
       window.addEventListener("resize", () => {
         if (!window.matchMedia) return;
         const isMobile = window.matchMedia("(max-width: 900px)").matches;
@@ -1835,7 +1794,6 @@
         }
       });
 
-      // Mobile back button (chat header) -> go back to groups
       const btnMobileBack = document.getElementById("btnMobileBack");
       if (btnMobileBack && !btnMobileBack.__wired) {
         btnMobileBack.__wired = true;
@@ -1843,7 +1801,6 @@
       }
     }
 
-    // Rail quick account modal (desktop + mobile)
     const btnQuickAccount = document.getElementById("btnQuickAccount");
     const accountQuickModal = document.getElementById("accountQuickModal");
     const btnAccountQuickClose = document.getElementById("btnAccountQuickClose");
@@ -1913,9 +1870,7 @@
             audioOutputSelect.disabled = !canSetSink;
             fillSelect(audioOutputSelect, outputs, getStored(AUDIO_OUTPUT_KEY), canSetSink ? "Automatisch" : "Nicht verfügbar");
           }
-        } catch (err) {
-          console.warn("refreshDeviceSelectors error:", err);
-        }
+        } catch {}
       };
 
       if (audioInputSelect && !audioInputSelect.__wired) {
@@ -1980,7 +1935,6 @@
       });
     }
 
-    // Start call from chat header (phone icon)
     const btnStartCall = document.getElementById("btnStartCall");
     if (btnStartCall) {
       btnStartCall.addEventListener("click", () => {
@@ -2057,7 +2011,6 @@
       });
       observer.observe(incomingCallModal, { attributes: true });
 
-      // Also react to voice UI state changes (set by voice-chat.js).
       const voiceStatusEl = document.getElementById("voiceStatus");
       if (voiceStatusEl && !voiceStatusEl.__ringObs) {
         voiceStatusEl.__ringObs = true;
@@ -2066,9 +2019,7 @@
       }
     }
 
-    // Groups: right-click context menu (desktop)
     if (groupsListPanel && groupContextMenu) {
-      // Right-click on empty area -> quick create
       groupsListPanel.addEventListener("contextmenu", (e) => {
         if (e.target?.closest?.(".group-item")) return;
         e.preventDefault();
@@ -2101,17 +2052,16 @@
         }
 
         if (action === "leave") {
-          leaveSelectedGroup().catch((err) => console.error(err));
+          leaveSelectedGroup().catch(() => {});
           return;
         }
 
         if (action === "delete") {
-          deleteSelectedGroup().catch((err) => console.error(err));
+          deleteSelectedGroup().catch(() => {});
           return;
         }
       });
 
-      // Close on outside click / escape / scroll / resize
       document.addEventListener("pointerdown", (e) => {
         if (groupContextMenu.hidden) return;
         if (e.target === groupContextMenu || e.target?.closest?.("#groupContextMenu")) return;
@@ -2126,7 +2076,6 @@
       window.addEventListener("scroll", closeGroupContextMenu, true);
     }
 
-    // Users context menu (members + friends)
     if (userContextMenu && !userContextMenu.__wired) {
       userContextMenu.__wired = true;
 
@@ -2274,7 +2223,6 @@
     initGroupSettingsModal();
     wireAddMemberSearchUI();
 
-    // Desktop Connect Navigation (DMs / Groups / Create Group)
     const setConnectNavView = (view) => {
       const next = view === "groups" ? "groups" : "dm";
       if (connectDmBlock) connectDmBlock.hidden = next !== "dm";
@@ -2288,7 +2236,6 @@
         });
       }
 
-      // Keep the start view DM-first (requested).
       try {
         sessionStorage.setItem("echtlucky:connect:view", next);
       } catch (_) {}
@@ -2311,13 +2258,10 @@
       });
     }
 
-    // Legacy fallback (if present in older markup)
     if (btnCreateGroup) btnCreateGroup.addEventListener("click", createGroup);
 
-    // Always DM-first on load
     setConnectNavView("dm");
 
-    // DM list: search + select
     if (dmSearchInput) {
       dmSearchInput.addEventListener("input", () => {
         renderDmList();
@@ -2336,7 +2280,6 @@
       });
     }
 
-    // Add friend modal
     const openAddFriend = () => {
       if (!addFriendModal) return;
       addFriendModal.hidden = false;
@@ -2358,7 +2301,6 @@
       if (e.target === addFriendModal) closeAddFriend();
     });
 
-    // Settings popup (user bar gear)
     const CONNECT_PREFS_KEY = "echtlucky:connect:prefs:v1";
     const loadPrefs = () => {
       const defaults = {
@@ -2399,7 +2341,6 @@
       applyRemoteVolume(prefs.remoteVolume);
     };
 
-    // Apply persisted preferences once on load (no UI interaction needed).
     applyUiPrefs(loadPrefs());
 
     const openConnectSettings = () => {
@@ -2411,7 +2352,6 @@
       const prefs = loadPrefs();
       applyUiPrefs(prefs);
 
-      // Populate device selectors (settings popup has its own selects)
       const audioIn = document.getElementById("audioInputSelectSettings");
       const audioOut = document.getElementById("audioOutputSelectSettings");
       const AUDIO_INPUT_KEY = "echtlucky:audioInputDeviceId";
@@ -2460,7 +2400,6 @@
         });
       }
 
-      // Preferences (UI/Audio)
       const prefCallSounds = document.getElementById("prefCallSounds");
       const prefMessageSounds = document.getElementById("prefMessageSounds");
       const prefCompactUi = document.getElementById("prefCompactUi");
@@ -2558,7 +2497,6 @@
       if (e.target === connectSettingsModal) closeConnectSettings();
     });
 
-    // Settings tabs
     if (connectSettingsModal && !connectSettingsModal.__wired) {
       connectSettingsModal.__wired = true;
       connectSettingsModal.addEventListener("click", (e) => {
@@ -2570,9 +2508,7 @@
       });
     }
 
-    // User bar controls
     btnUserBarAccount?.addEventListener("click", () => {
-      // Reuse quick account modal (rail) so there is a single source of truth for device selectors.
       document.getElementById("btnQuickAccount")?.click?.();
     });
 
@@ -2656,7 +2592,6 @@
       applyMuteUi();
     });
 
-    // Keep userbar state in sync when voice UI toggles are used elsewhere.
     document.getElementById("btnToggleMic")?.addEventListener?.("click", () => {
       setTimeout(() => {
         enforceFullMute();
@@ -2664,7 +2599,6 @@
       }, 0);
     });
 
-    // If call-state changes while Full Mute is on, re-assert mic/output mute.
     const voiceStatusEl = document.getElementById("voiceStatus");
     if (voiceStatusEl && !voiceStatusEl.__fullMuteObs) {
       voiceStatusEl.__fullMuteObs = true;
@@ -2672,10 +2606,8 @@
       obs.observe(voiceStatusEl, { attributes: true, attributeFilter: ["data-state"] });
     }
 
-    // Reply preview
     btnCancelReply?.addEventListener("click", clearReplyState);
 
-    // Friend search
     if (friendSearchInput) {
       friendSearchInput.addEventListener("input", (e) => {
         clearTimeout(friendSearchTimeout);
@@ -2704,9 +2636,7 @@
       });
     }
 
-    // Auth changes
     auth.onAuthStateChanged((user) => {
-      log("🔵 connect-minimal.js: Auth state changed. User:", user ? user.email : "null");
       updateAuthStatus().catch(() => {});
       updateChatControls();
 
@@ -2714,7 +2644,6 @@
       else stopPresenceHeartbeat();
     });
 
-    // Reload groups event
     window.addEventListener("echtlucky:reload-groups", () => {
       loadGroups();
     });
@@ -2747,14 +2676,13 @@
       if (cached) selectGroup(groupId, cached, item);
     });
 
-    // Initial auth check
     updateAuthStatus().catch(() => {});
 
     const btnSendMessage = document.getElementById("btnSendMessage");
     if (btnSendMessage) {
       btnSendMessage.addEventListener("click", () => {
-        if (activeChatMode === "group") sendMessageToSelectedGroup().catch((e) => console.error(e));
-        else sendMessageToSelectedDm().catch((e) => console.error(e));
+        if (activeChatMode === "group") sendMessageToSelectedGroup().catch(() => {});
+        else sendMessageToSelectedDm().catch(() => {});
       });
     }
 
@@ -2763,13 +2691,12 @@
       messageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
-          if (activeChatMode === "group") sendMessageToSelectedGroup().catch((er) => console.error(er));
-          else sendMessageToSelectedDm().catch((er) => console.error(er));
+          if (activeChatMode === "group") sendMessageToSelectedGroup().catch(() => {});
+          else sendMessageToSelectedDm().catch(() => {});
         }
       });
     }
 
-    // Message actions (reply/react)
     const messagesList = document.getElementById("messagesList");
     if (messagesList && !messagesList.__wired) {
       messagesList.__wired = true;
@@ -2782,7 +2709,6 @@
         const msgId = messageEl?.getAttribute?.("data-message-id") || "";
         if (!msgId) return;
 
-        // Reconstruct minimal data from DOM for reply preview (group messages have full data in snapshot, dm is local)
         if (action === "reply") {
           const author = messageEl.querySelector(".message-author")?.textContent?.trim() || "User";
           const text = messageEl.querySelector(".message-text")?.textContent?.trim() || "";
@@ -2805,30 +2731,25 @@
     updateChatControls();
   }
 
-  // Initialize module
   async function initModule() {
     if (initialized) return;
     initialized = true;
 
-    log("🔵 connect-minimal.js initializing");
     await waitForFirebase();
 
     if (!auth || !db) {
-      console.error("❌ connect-minimal.js: Firebase not ready");
       return;
     }
 
     init();
   }
 
-  // Start
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initModule);
   } else {
     initModule();
   }
 
-  log("✅ connect-minimal.js initialized");
 })();
 
 

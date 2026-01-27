@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   "use strict";
 
   if (window.__ECHTLUCKY_STATS_V2_LOADED__) return;
@@ -182,7 +182,6 @@
 
   function aimPercentFromReflex(bestAvgMs) {
     if (!Number.isFinite(bestAvgMs)) return 0.55;
-    // 220ms -> 100%, 520ms -> 0%
     const pct = 1 - clamp((bestAvgMs - 220) / 300, 0, 1);
     return clamp(pct, 0.08, 1);
   }
@@ -200,7 +199,6 @@
   function setFill(elFill, pct) {
     if (!elFill) return;
     const p = clamp(Number(pct || 0), 0, 1);
-    // trigger transitions reliably
     elFill.style.width = "0%";
     requestAnimationFrame(() => {
       elFill.style.width = `${Math.round(p * 1000) / 10}%`;
@@ -250,7 +248,6 @@
   function renderHeatmap(sessions) {
     if (!ui.heatmap) return;
 
-    // 7 columns (Mon..Sun) x 4 rows (Night/Morning/Afternoon/Evening) => 28 cells
     const grid = Array.from({ length: 28 }, () => 0);
 
     sessions
@@ -319,7 +316,6 @@
     let text = "";
 
     if (window.echtluckyModal?.input) {
-      // returns { ok:boolean, value:string }
       const res = await window.echtluckyModal.input({
         title: "Neue Notiz",
         label: promptText,
@@ -329,7 +325,6 @@
       if (!res?.ok) return;
       text = String(res.value || "").trim();
     } else {
-      // eslint-disable-next-line no-alert
       text = String(window.prompt(promptText, "") || "").trim();
     }
 
@@ -359,7 +354,6 @@
       });
       ok = !!res?.ok;
     } else {
-      // eslint-disable-next-line no-alert
       ok = window.confirm("Notiz löschen?");
     }
 

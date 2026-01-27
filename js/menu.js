@@ -1,27 +1,12 @@
-// js/menu.js — FINAL v4
-// - Fetch-Header kompatibel
-// - Anti-flicker + robust gegen Timing (Firebase lädt manchmal später)
-// - SINGLE auth listener
-// - Mobile-Menü fix
-// - Dropdown fix
-// - GLOBAL Account-CTA (data-account-cta) -> "Account erstellen" vs "Account verwalten"
-
-(function () {
+﻿(function () {
   "use strict";
 
-  // Prevent double load
-  if (window.__ECHTLUCKY_MENU_JS_LOADED__) {
-    console.warn("menu.js already loaded – skipping");
-    return;
-  }
+  if (window.__ECHTLUCKY_MENU_JS_LOADED__) return;
   window.__ECHTLUCKY_MENU_JS_LOADED__ = true;
 
-  // Global user state
   window.__ECHTLUCKY_CURRENT_USER__ = window.__ECHTLUCKY_CURRENT_USER__ || null;
 
-  /* =========================
-     Helpers
-  ========================= */
+  
   const qs = (id) => document.getElementById(id);
 
   function getAuth() {
@@ -33,9 +18,7 @@
     return user.displayName || (user.email ? user.email.split("@")[0] : "User");
   }
 
-  /* =========================
-     Active Nav Link
-  ========================= */
+  
   function setActiveNavLink() {
     const currentPath = window.location.pathname.split("/").pop() || "index.html";
     const links = Array.from(document.querySelectorAll(".nav-links a, .hub-menu a"));
@@ -52,21 +35,12 @@
     if (hubToggle) hubToggle.classList.toggle("active", anyActive);
   }
 
-  /* =========================
-     Account CTA (global)
-     - any element with [data-account-cta]
-     - optional overrides via data attrs
-  ========================= */
+  
   function updateAccountCTAs(user) {
     const ctas = document.querySelectorAll("[data-account-cta]");
     if (!ctas.length) return;
 
     ctas.forEach((el) => {
-      // you can override defaults:
-      // data-cta-logged-out-text="Account erstellen"
-      // data-cta-logged-in-text="Account verwalten"
-      // data-cta-logged-out-href="login.html"
-      // data-cta-logged-in-href="account.html"
 
       const outText = el.getAttribute("data-cta-logged-out-text") || "Account erstellen";
       const inText  = el.getAttribute("data-cta-logged-in-text")  || "Account verwalten";
@@ -88,23 +62,18 @@
     });
   }
 
-/* =========================
-   Header Auth UI (UPDATED)
-========================= */
+
 window.renderAuthUI = function renderAuthUI(user) {
   const userNameDisplay = qs("user-name-display");
   const dropdownMenu = qs("dropdown-menu");
   const loginLink = qs("login-link");
   const adminPanelLink = qs("admin-panel-link");
 
-  // Header noch nicht geladen? -> raus
   if (!loginLink && !userNameDisplay && !adminPanelLink) return;
 
   if (user) {
-    // Login-Link verstecken
     if (loginLink) loginLink.style.display = "none";
 
-    // Username-Button zeigen + nur Text im Child setzen
     if (userNameDisplay) {
       const nameText = userNameDisplay.querySelector(".user-name-text");
       const label =
@@ -114,18 +83,15 @@ window.renderAuthUI = function renderAuthUI(user) {
       if (nameText) nameText.textContent = label;
       userNameDisplay.style.display = "inline-flex";
 
-      // A11y state reset (Dropdown zu beim Render)
       userNameDisplay.setAttribute("aria-expanded", "false");
     }
 
-    // Admin Link (email fallback)
     const ADMIN_EMAIL = "lucassteckel04@gmail.com";
     if (adminPanelLink) {
       adminPanelLink.style.display =
         user.email && user.email === ADMIN_EMAIL ? "block" : "none";
     }
   } else {
-    // Logout state
     if (loginLink) loginLink.style.display = "inline-flex";
 
     if (userNameDisplay) {
@@ -138,9 +104,7 @@ window.renderAuthUI = function renderAuthUI(user) {
   }
 };
 
-  /* =========================
-     Wiring: Mobile menu + Dropdown
-  ========================= */
+  
   function wireMobileMenu() {
     const menuToggle = qs("menuToggle");
     const mainNav = qs("mainNav");
@@ -157,7 +121,6 @@ window.renderAuthUI = function renderAuthUI(user) {
       menuToggle.classList.toggle("is-open", isOpen);
     });
 
-    // close on outside click
     document.addEventListener("click", (e) => {
       if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
         mainNav.classList.remove("open");
@@ -166,7 +129,6 @@ window.renderAuthUI = function renderAuthUI(user) {
       }
     });
 
-    // close after clicking a link
     mainNav.querySelectorAll("a").forEach((a) => {
       a.addEventListener("click", () => {
         mainNav.classList.remove("open");
@@ -175,7 +137,6 @@ window.renderAuthUI = function renderAuthUI(user) {
       });
     });
 
-    // resize reset
     window.addEventListener("resize", () => {
       if (window.innerWidth > 992) {
         mainNav.classList.remove("open");
@@ -229,7 +190,6 @@ window.renderAuthUI = function renderAuthUI(user) {
       }, 1000);
     }
 
-    // Desktop hover intent (keeps menu open ~1s after leaving)
     toggle.addEventListener("mouseenter", () => {
       if (window.innerWidth <= 992) return;
       open();
@@ -309,9 +269,7 @@ window.renderAuthUI = function renderAuthUI(user) {
     document.head.appendChild(s);
   }
 
-  /* =========================
-     Public init (call after fetch(header.html))
-  ========================= */
+  
   window.initHeaderScripts = function initHeaderScripts() {
     wireMobileMenu();
     wireDropdown();
@@ -320,13 +278,10 @@ window.renderAuthUI = function renderAuthUI(user) {
     setActiveNavLink();
     ensureGroupStripLoaded();
 
-    // apply current state immediately
     renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
   };
 
-  /* =========================
-     Smart Header Scroll (single init)
-  ========================= */
+  
   window.initSmartHeaderScroll = function initSmartHeaderScroll() {
     if (window.__ECHTLUCKY_SMART_HEADER__) return;
     window.__ECHTLUCKY_SMART_HEADER__ = true;
@@ -366,9 +321,7 @@ window.renderAuthUI = function renderAuthUI(user) {
     );
   };
 
-  /* =========================
-     Logout global
-  ========================= */
+  
   window.logout = function logout() {
     const auth = getAuth();
     if (!auth) return;
@@ -393,10 +346,7 @@ window.renderAuthUI = function renderAuthUI(user) {
       });
   };
 
-  /* =========================
-     SINGLE auth listener — robust timing
-     - If firebase auth isn't ready yet, we retry a few times.
-  ========================= */
+  
   function attachAuthListener() {
     if (window.__ECHTLUCKY_AUTH_LISTENER_SET__) return true;
 
@@ -413,7 +363,6 @@ window.renderAuthUI = function renderAuthUI(user) {
     return true;
   }
 
-  // Try now + retry (for slow firebase init)
   (function ensureAuthListener() {
     if (attachAuthListener()) return;
 
@@ -423,14 +372,11 @@ window.renderAuthUI = function renderAuthUI(user) {
       tries++;
       if (attachAuthListener() || tries >= maxTries) clearInterval(timer);
 
-      // Even if no auth yet: keep CTA correct based on current global user (might be null)
       renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
     }, 100);
   })();
 
-  /* =========================
-     Also update CTA on DOM ready (pages without header fetch yet)
-  ========================= */
+  
   document.addEventListener("DOMContentLoaded", () => {
     updateAccountCTAs(window.__ECHTLUCKY_CURRENT_USER__);
   });

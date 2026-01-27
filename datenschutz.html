@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -9,9 +9,9 @@
   <link rel="stylesheet" href="css/pages/fonts.css" />
 </head>
 
-<body class="page-transition loaded">
+<body class="page-transition legal-page">
 
-  <!-- HEADER -->
+  
   <div id="header-placeholder"></div>
 
   <main class="container">
@@ -20,7 +20,7 @@
 
       <div style="opacity:.92; font-size: 1.05rem;">
 
-        <!-- EINLEITUNG -->
+        
         <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(0,255,136,0.18); border-radius: 16px; padding: 1.2rem 1.4rem; margin-bottom: 1.4rem;">
           <p style="margin:0;">
             Der Schutz deiner persönlichen Daten ist mir wichtig.  
@@ -30,7 +30,7 @@
           </p>
         </div>
 
-        <!-- VERANTWORTLICHER -->
+        
         <h3 style="color: var(--accent); margin-bottom:.6rem;">Verantwortlicher</h3>
         <p style="margin-bottom:1.4rem;">
           Lucas Steckel<br />
@@ -43,7 +43,7 @@
           </a>
         </p>
 
-        <!-- ALLGEMEINE DATENERFASSUNG -->
+        
         <h3 style="color: var(--accent); margin-bottom:.6rem;">Allgemeine Hinweise zur Datenerfassung</h3>
         <p style="margin-bottom:1rem;">
           Die Nutzung dieser Website ist in der Regel ohne Angabe personenbezogener Daten möglich.
@@ -53,7 +53,7 @@
           Eine Zusammenführung dieser Daten mit anderen Datenquellen wird nicht vorgenommen.
         </p>
 
-        <!-- SERVER LOGFILES -->
+        
         <h3 style="color: var(--accent); margin-bottom:.6rem;">Server-Log-Dateien</h3>
         <p style="margin-bottom:1rem;">
           Der Hosting-Provider dieser Website erhebt und speichert automatisch Informationen in sogenannten
@@ -73,7 +73,7 @@
           Überwachung und Sicherheit des Betriebs.
         </p>
 
-        <!-- COOKIES -->
+        
         <h3 style="color: var(--accent); margin-bottom:.6rem;">Cookies</h3>
         <p style="margin-bottom:1rem;">
           Diese Website verwendet <strong>keine Cookies zu Tracking- oder Marketingzwecken</strong>.
@@ -83,7 +83,7 @@
           erfolgt dies auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO.
         </p>
 
-        <!-- FIREBASE -->
+        
         <h3 style="color: var(--accent); margin-bottom:.6rem;">Firebase / Hosting</h3>
         <p style="margin-bottom:1rem;">
           Diese Website wird über <strong>Firebase Hosting</strong> (Google Ireland Limited) bereitgestellt.
@@ -93,14 +93,14 @@
           Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).
         </p>
 
-        <!-- KEINE ANALYTICS -->
+        
         <h3 style="color: var(--accent); margin-bottom:.6rem;">Analyse-Tools</h3>
         <p style="margin-bottom:1.4rem;">
           Diese Website verwendet <strong>keine Analyse-, Tracking- oder Werbetools</strong>
           wie Google Analytics, Facebook Pixel oder vergleichbare Dienste.
         </p>
 
-        <!-- RECHTE -->
+        
         <h3 style="color: var(--accent); margin-bottom:.6rem;">Deine Rechte</h3>
         <p style="margin-bottom:.6rem;">
           Du hast jederzeit das Recht auf:
@@ -113,7 +113,7 @@
           <li>Widerspruch gegen die Verarbeitung</li>
         </ul>
 
-        <!-- ABSCHLUSS -->
+        
         <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(0,255,136,0.18); border-radius: 16px; padding: 1.2rem 1.4rem;">
           <p style="margin:0;">
             Bei Fragen zum Datenschutz kannst du dich jederzeit unter der oben angegebenen E-Mail-Adresse melden.
@@ -124,34 +124,21 @@
     </section>
   </main>
 
-  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
   <script src="firebase.js"></script>
+  <script src="js/auth-state.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/legal-modal.js"></script>
-  <script src="js/login.js"></script>
   <script src="js/notify.js"></script>
   <script src="js/modal-dialog.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/overlays.js"></script>
   <script src="js/fonts.js"></script>
   <script src="js/tickets.js"></script>
-
-  <script>
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-placeholder").innerHTML = html;
-        if (typeof initHeaderScripts === "function") initHeaderScripts();
-        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-      });
-
-    fetch("footer.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("footer-placeholder").innerHTML = html;
-      });
-  </script>
-
 </body>
 </html>

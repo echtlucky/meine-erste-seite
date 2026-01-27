@@ -1,1 +1,0 @@
-PLACEHOLDER: Bitte ersetze diese Datei durch eine echte MP3-Klingeltondatei (z.B. ringtone.mp3) für eingehende Anrufe. Die Logik und das UI erwarten die Datei unter assets/icons/ringtone.mp3.

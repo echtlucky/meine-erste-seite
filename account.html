@@ -233,7 +233,7 @@
                 <div class="sync-info-box" style="margin-bottom:0;">
                   <div id="linkedProvidersList" style="display:grid; gap:8px;"></div>
                 </div>
-                <span class="form-hint">OAuth-Verknüpfungen (Google etc.) – future-ready.</span>
+                <span class="form-hint">OAuth-Verknüpfungen (Google etc.).</span>
               </div>
 
               <div class="divider-line" aria-hidden="true"></div>
@@ -248,10 +248,10 @@
               <div class="form-group">
                 <label>2FA (Authenticator)</label>
                 <div class="sync-info-box" style="margin-bottom:0;">
-                  <p style="margin:0;">Vorbereitung (UI). TOTP/Authenticator-Flow wird später serverseitig finalisiert.</p>
+                  <p style="margin:0;">2FA ist aktuell nicht verfügbar.</p>
                 </div>
                 <div class="form-actions" style="margin-top:.8rem;">
-                  <button class="btn btn-secondary" id="btnSetup2fa" type="button">2FA einrichten</button>
+                  <button class="btn btn-secondary" id="btnSetup2fa" type="button" disabled>2FA einrichten</button>
                 </div>
               </div>
 
@@ -282,7 +282,7 @@
               <div class="form-actions">
                 <button class="btn btn-secondary" id="btnSignOutOtherSessions" type="button">Andere Sessions ausloggen</button>
               </div>
-              <span class="form-hint">Browser-Session-Management ist eingeschränkt (Firebase Web). UI ist vorbereitet.</span>
+              <span class="form-hint">Browser-Session-Management ist eingeschränkt (Firebase Web).</span>
             </div>
           </div>
 
@@ -378,25 +378,10 @@
     <script src="js/legal-modal.js"></script>
     <script src="js/notify.js"></script>
     <script src="js/modal-dialog.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/overlays.js"></script>
     <script src="js/fonts.js"></script>
     <script src="js/tickets.js"></script>
     <script src="js/account.js"></script>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        document.body.classList.add("loaded");
-
-        fetch("header.html").then(r => r.text()).then(html => {
-          document.getElementById("header-placeholder").innerHTML = html;
-          if (typeof initHeaderScripts === "function") initHeaderScripts();
-          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-        }).catch(() => {});
-
-        fetch("footer.html").then(r => r.text()).then(html => {
-          document.getElementById("footer-placeholder").innerHTML = html;
-        }).catch(() => {});
-      });
-    </script>
   </body>
 </html>

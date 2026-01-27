@@ -1,4 +1,4 @@
-/* Group Settings Modal Sections */
+﻿
 .settings-section {
   background: rgba(0, 0, 0, 0.55);
   border: 1px solid rgba(0, 255, 136, 0.12);
@@ -15,7 +15,7 @@
   }
 }
 
-/* Connect: Single Main Card Shell */
+
 .connect-single-card-shell {
   width: 100%;
   max-width: none;
@@ -26,10 +26,10 @@
   gap: 1.5rem;
 }
 
-/* Desktop: make space for left rail + group strip (fixed) */
+
 @media (min-width: 901px) {
   .connect-page .app-shell__main {
-    /* app-shell already reserves the left rail column; keep only light page padding */
+    
     padding-left: 12px;
     padding-right: 12px;
   }
@@ -138,11 +138,9 @@
   }
 }
 
-/* Buttons
-   Base styles come from css/style.css (.btn).
-   Keep Connect CSS focused on layout/states only. */
 
-/* Input Styles (scoped) */
+
+
 .connect-page input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 .connect-page select,
 .connect-page textarea {
@@ -165,9 +163,7 @@
   box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.12);
 }
 
-/* ==========================================
-   3-COLUMN LAYOUT
-   ========================================== */
+
 .connect-workspace {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr) 310px;
@@ -339,7 +335,7 @@ html.connect-compact .connect-chat-area {
   }
 }
 
-/* LEFT COLUMN: Groups & Friends */
+
 .connect-panel--left {
   min-height: 0;
   overflow-y: auto;
@@ -473,7 +469,7 @@ html.connect-compact .connect-chat-area {
   font-size: 0.8rem;
 }
 
-/* MIDDLE COLUMN: Chat */
+
 .connect-panel--middle {
   min-height: 0;
   display: flex;
@@ -661,7 +657,7 @@ html.connect-compact .connect-chat-area {
   object-fit: contain;
 }
 
-/* Mobile: show screen share as a full-screen sheet (Discord-like) */
+
 @media (max-width: 900px) {
   .chat-call-bar__actions{
     flex-wrap: nowrap;
@@ -699,7 +695,7 @@ html.connect-compact .connect-chat-area {
     padding-bottom: 8px;
   }
 
-  /* Focus on the remote screen; hide local preview on mobile */
+  
   #local-screen-preview{
     display: none;
   }
@@ -717,7 +713,7 @@ html.connect-compact .connect-chat-area {
   }
 }
 
-/* voiceStatus state colors, now used inside call bar */
+
 #voiceStatus[data-state="ringing"] {
   color: #ffd54a;
 }
@@ -730,7 +726,7 @@ html.connect-compact .connect-chat-area {
   color: #ff3366;
 }
 
-/* Chat header call button should feel primary */
+
 .connect-page #btnStartCall.chat-settings-btn {
   background: rgba(0, 255, 136, 0.18);
   border-color: rgba(0, 255, 136, 0.45);
@@ -958,12 +954,12 @@ html.connect-compact .connect-chat-area {
   color: #fff;
 }
 
-/* Ensure account quick modal sits above the fixed header */
+
 .modal-overlay#accountQuickModal {
   z-index: 100002;
 }
 
-/* Voice Section */
+
 .voice-section {
   display: flex;
   flex-direction: column;
@@ -974,7 +970,7 @@ html.connect-compact .connect-chat-area {
   border-radius: 12px;
 }
 
-/* (moved) voice status is now in .chat-call-bar via #voiceStatus */
+
 
 .voice-buttons {
   display: flex;
@@ -998,7 +994,7 @@ html.connect-compact .connect-chat-area {
   border-radius: 8px;
 }
 
-/* RIGHT COLUMN: Members */
+
 .connect-panel--right {
   min-height: 0;
   overflow-y: auto;
@@ -1050,7 +1046,7 @@ html.connect-compact .connect-chat-area {
   .chat-group-title{ overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
-/* Settings only on mobile: hide on desktop */
+
 @media (min-width: 901px) {
   #btnGroupSettings {
     display: none;
@@ -1297,9 +1293,7 @@ html.connect-compact .connect-chat-area {
   background: rgba(0, 255, 136, 0.15);
 }
 
-/* ==========================================
-   SETTINGS MODAL
-   ========================================== */
+
 
 .group-settings-modal {
   display: none;
@@ -1483,18 +1477,14 @@ html.connect-compact .connect-chat-area {
   50% { opacity: 0.5; }
 }
 
-/* ==========================================
-   VOICE BUTTON STYLES
-   ========================================== */
+
 
 #btnToggleMic.is-muted {
   border-color: rgba(255, 51, 102, 0.3);
   color: #ff3366;
 }
 
-/* ==========================================
-   UTILITIES
-   ========================================== */
+
 
 .empty-state {
   padding: 2rem 1rem;
@@ -1523,7 +1513,7 @@ html.connect-compact .connect-chat-area {
   background: rgba(0, 255, 136, 0.5);
 }
 
-/* Responsive */
+
 @media (max-width: 900px) {
   .connect-single-card-shell{
     margin: 0;
@@ -1555,12 +1545,12 @@ html.connect-compact .connect-chat-area {
     gap: 10px;
   }
 
-  /* Hide footer on mobile Connect (prevents overlap / blocked controls) */
+  
   .connect-page #footer-placeholder{
     display: none !important;
   }
 
-  /* Hide switcher while logged out (layout is hidden) */
+  
   .connect-workspace[hidden] ~ .connect-mobile-switcher{
     display: none !important;
   }
@@ -1610,7 +1600,7 @@ html.connect-compact .connect-chat-area {
     max-height: none;
   }
 
-  /* Panel switching via [data-mobile-panel] (current layout uses left/chat/right panels) */
+  
   .connect-main-card[data-mobile-panel="left"] .connect-chat-area,
   .connect-main-card[data-mobile-panel="left"] .connect-right-panel,
   .connect-main-card[data-mobile-panel="middle"] .connect-left-panel,
@@ -1620,7 +1610,7 @@ html.connect-compact .connect-chat-area {
     display: none;
   }
 
-  /* Show a back button in chat header on mobile */
+  
   .chat-settings-btn--back{
     display: inline-flex;
   }
@@ -1707,9 +1697,7 @@ html.connect-compact .connect-chat-area {
   }
 }
 
-/* ============================================
-   Context Menu (Groups right-click)
-   ============================================ */
+
 
 .connect-page .context-menu{
   position: fixed;
@@ -1767,9 +1755,7 @@ html.connect-compact .connect-chat-area {
   background: rgba(255,255,255,0.08);
 }
 
-/* ============================================
-   Quick Account: Device Selectors
-   ============================================ */
+
 
 .connect-page .account-quick-devices{
   margin-top: 12px;
@@ -1795,9 +1781,7 @@ html.connect-compact .connect-chat-area {
   font-size: 0.92rem;
 }
 
-/* ============================================
-   Discord-like Structure Additions (Connect)
-   ============================================ */
+
 
 .connect-page .connect-nav-block__title{
   font-weight: 820;

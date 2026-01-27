@@ -4,8 +4,6 @@
   if (window.__ECHTLUCKY_GROUP_STRIP_V2__) return;
   window.__ECHTLUCKY_GROUP_STRIP_V2__ = true;
 
-  // NOTE: The "dock" (bottom bar) was intentionally removed.
-  // This module now only powers the header "Groups" dropdown + its context menu.
 
   const DEFAULT_GROUPS = [
     { id: "group-1", name: "Connect Hub", unread: 4, color: "#00ff88", type: "group" },
@@ -53,8 +51,7 @@
     contextMenu.innerHTML = [
       { label: "Öffnen", action: "open" },
       { label: "Als gelesen markieren", action: "mark-read" },
-      { label: "Einstellungen", action: "settings" },
-      { label: "Gruppe löschen", action: "delete" }
+      { label: "Einstellungen", action: "settings" }
     ]
       .map(
         (item) =>
@@ -77,7 +74,6 @@
 
     menu.innerHTML = "";
 
-    // Header dropdown should show ONLY groups + create (no DMs).
     currentGroups
       .filter((g) => g.type === "group" || g.type === "create")
       .forEach((group) => {
@@ -146,8 +142,6 @@
       window.notify?.show?.({ type: "success", title: "Gelesen", message: `${group.name} ist nun als gelesen markiert.`, duration: 2400 });
     } else if (action === "settings") {
       window.notify?.show?.({ type: "info", title: "Einstellungen", message: `Einstellungen für ${group.name} öffnen.`, duration: 2400 });
-    } else if (action === "delete") {
-      window.notify?.show?.({ type: "error", title: "Gruppe löschen", message: `${group.name} wird (später) gelöscht.`, duration: 2400 });
     }
 
     closeContextMenu();
@@ -189,7 +183,6 @@
         }))
         .filter((g) => g.type === "group" || g.type === "create");
 
-      // Ensure there's always a create entry at the end.
       if (!currentGroups.some((g) => g.id === "__create__")) {
         currentGroups.push({ id: "__create__", name: "Gruppe erstellen", unread: 0, color: "#00ff88", type: "create" });
       }

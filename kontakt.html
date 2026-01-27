@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="css/pages/blog.css" />
 </head>
 
-<body class="page-transition loaded">
+<body class="page-transition kontakt-page">
   <div id="header-placeholder"></div>
 
   <main class="container">
@@ -33,8 +33,7 @@
 
       <h3>Nachricht senden</h3>
       <p style="opacity:.82; margin-top:.4rem;">
-        Das Formular nutzt einen <strong>Mail-Client-Fallback</strong> (öffnet dein E-Mail-Programm mit fertigem Text).
-        Wenn du später “richtiges Auto-Senden ohne Mailprogramm” willst, bauen wir Formspree/Netlify dazu.
+        Das Formular öffnet dein E-Mail-Programm mit fertigem Text.
       </p>
 
       <form id="contactForm" style="margin-top:1.2rem; display:grid; gap:0.9rem;">
@@ -72,77 +71,24 @@
       </form>
     </section>
 
-    <div id="footer-placeholder"></div>
-
-    <script src="firebase.js"></script>
-    <script src="js/auth-state.js"></script>
-    <script src="js/menu.js"></script>
-    <script src="js/legal-modal.js"></script>
-    <script src="js/notify.js"></script>
-    <script src="js/modal-dialog.js"></script>
-    <script src="js/overlays.js"></script>
-    <script src="js/fonts.js"></script>
-    <script src="js/tickets.js"></script>
-
-    <script>
-      (function () {
-        const form = document.getElementById('contactForm');
-        const hint = document.getElementById('hint');
-        const copyBtn = document.getElementById('copyBtn');
-
-        function buildMailto() {
-          const name = document.getElementById('name').value.trim();
-          const email = document.getElementById('email').value.trim();
-          const subject = document.getElementById('subject').value.trim();
-          const message = document.getElementById('message').value.trim();
-
-          const body =
-`Name: ${name}
-E-Mail: ${email}
-
-Nachricht:
-${message}
-`;
-
-          const to = "lucassteckel04@gmail.com";
-          const mailto = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-          return { mailto, body };
-        }
-
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const { mailto } = buildMailto();
-          window.location.href = mailto;
-          hint.textContent = "Wenn nichts passiert: Pop-up Blocker prüfen oder den Text kopieren und manuell schicken.";
-        });
-
-        copyBtn.addEventListener('click', async () => {
-          try {
-            const { body } = buildMailto();
-            await navigator.clipboard.writeText(body);
-            hint.textContent = "Copied ✅ — jetzt kannst du’s überall einfügen.";
-          } catch {
-            hint.textContent = "Copy ging nicht (Browser/Permission). Markier den Text im Feld und kopier manuell.";
-          }
-        });
-      })();
-    </script>
-
-    <script>
-      fetch("header.html?v=" + Date.now())
-        .then((res) => res.text())
-        .then((html) => {
-          document.getElementById("header-placeholder").innerHTML = html;
-          if (typeof initHeaderScripts === "function") initHeaderScripts();
-          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-        });
-
-      fetch("footer.html?v=" + Date.now())
-        .then((res) => res.text())
-        .then((html) => {
-          document.getElementById("footer-placeholder").innerHTML = html;
-        });
-    </script>
   </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+  <script src="firebase.js"></script>
+  <script src="js/auth-state.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/legal-modal.js"></script>
+  <script src="js/notify.js"></script>
+  <script src="js/modal-dialog.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/overlays.js"></script>
+  <script src="js/fonts.js"></script>
+  <script src="js/tickets.js"></script>
+  <script src="js/kontakt.js"></script>
 </body>
 </html>

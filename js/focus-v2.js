@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   "use strict";
 
   if (window.__ECHTLUCKY_FOCUS_V2_LOADED__) return;
@@ -106,7 +106,7 @@
       .slice(0, 20)
       .map((s) => {
         const startedAt = new Date(s.startedAt);
-        const label = s.kind === "break" ? "Break" : "Focus";
+        const label = s.kind === "break" ? "Pause" : "Fokus";
         const line = `${label} • ${fmt(s.durationSec)} • ${startedAt.toLocaleString()}`;
         return `<div class="history-item">${line}</div>`;
       })
@@ -130,7 +130,7 @@
   function renderStatus() {
     const active = loadActive();
     if (!active) {
-      if (statusLabel) statusLabel.textContent = "Idle";
+      if (statusLabel) statusLabel.textContent = "Bereit";
       if (timerDisplay) timerDisplay.textContent = "00:00";
       setButtons({ running: false });
       return;
@@ -147,7 +147,7 @@
       : settings.focusMin;
     const remainingSec = Math.max(0, targetMin * 60 - elapsedSec);
 
-    if (statusLabel) statusLabel.textContent = active.pausedAt ? "Paused" : active.kind === "break" ? "Break" : "In Session";
+    if (statusLabel) statusLabel.textContent = active.pausedAt ? "Pausiert" : active.kind === "break" ? "Pause" : "Läuft";
     if (timerDisplay) timerDisplay.textContent = fmt(remainingSec);
     setButtons({ running: !active.pausedAt });
   }
@@ -227,7 +227,7 @@
     saveActive(null);
 
     if (logs) {
-      const label = entry.kind === "break" ? "Break" : "Focus";
+      const label = entry.kind === "break" ? "Pause" : "Fokus";
       logs.insertAdjacentHTML("afterbegin", `<div class="log-item">${label} beendet: ${fmt(entry.durationSec)}</div>`);
       if (entry.distractions?.[0]?.text) {
         logs.insertAdjacentHTML("afterbegin", `<div class="log-item">Letzte Ablenkung: ${entry.distractions[0].text}</div>`);

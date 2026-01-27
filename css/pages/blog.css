@@ -1,4 +1,4 @@
-/* Blog Layout — aligned with Home look (uses global style.css buttons/inputs) */
+﻿
 .blog-discord-shell {
   max-width: var(--content-max);
   width: 100%;
@@ -45,10 +45,7 @@
     gap: 1.1rem;
   }
 }
-/* =========================
-   BLOG • page-specific
-   airy + premium + consistent
-========================= */
+
 
 .page-head {
   text-align: center;
@@ -69,7 +66,7 @@
   margin: 0 auto;
 }
 
-/* Toolbar */
+
 .blog-toolbar {
   display: flex;
   justify-content: space-between;
@@ -98,7 +95,7 @@
   white-space: nowrap;
 }
 
-/* Loader */
+
 .loading-spinner {
   display: flex;
   flex-direction: column;
@@ -133,7 +130,7 @@
   color: #aaa;
 }
 
-/* Grid */
+
 .blog-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -142,7 +139,7 @@
   min-height: 200px;
 }
 
-/* Premium Card */
+
 .blog-card {
   position: relative;
   border-radius: 22px;
@@ -230,7 +227,7 @@
   font-size: 0.95rem;
 }
 
-/* Modal */
+
 .modal {
   display: none;
   position: fixed;
@@ -318,7 +315,7 @@
 }
 .post-content a:hover{ text-decoration: underline; }
 
-/* Comments */
+
 .post-comments{
   margin-top: 2rem;
   padding-top: 1.4rem;
@@ -477,7 +474,7 @@
   opacity: .95;
 }
 
-/* Load more */
+
 .load-more-wrap {
   display: flex;
   justify-content: center;
@@ -493,7 +490,7 @@
   pointer-events: none;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .page-head h1 { font-size: 2.7rem; }
   .modal-content { padding: 2.4rem 1.8rem; }

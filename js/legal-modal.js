@@ -1,5 +1,4 @@
-// js/legal-modal.js – robust bei Footer via fetch (lazy DOM lookup)
-
+﻿
 (function () {
   document.addEventListener('click', async (e) => {
     const a = e.target.closest('a[data-modal]');
@@ -7,13 +6,11 @@
 
     e.preventDefault();
 
-    // Modal-Elemente erst beim Klick holen (Footer kann später geladen sein)
     const modal = document.getElementById('legalModal');
     const contentEl = document.getElementById('legalModalContent');
     const titleEl = document.getElementById('legalModalTitle');
     const closeBtn = document.getElementById('legalModalClose');
 
-    // Wenn Modal noch nicht existiert -> normale Navigation statt Freeze
     if (!modal || !contentEl || !titleEl) {
       window.location.href = a.getAttribute('href') || a.dataset.modal;
       return;
@@ -36,7 +33,6 @@
       contentEl.innerHTML = "";
     }
 
-    // Close Binding nur 1x
     if (closeBtn && !closeBtn.dataset.bound) {
       closeBtn.dataset.bound = "1";
       closeBtn.addEventListener('click', closeModal);

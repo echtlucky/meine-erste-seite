@@ -86,34 +86,19 @@
       <div id="footer-placeholder"></div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
     <script src="firebase.js"></script>
     <script src="js/auth-state.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/legal-modal.js"></script>
     <script src="js/notify.js"></script>
     <script src="js/modal-dialog.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/overlays.js"></script>
     <script src="js/fonts.js"></script>
     <script src="js/tickets.js"></script>
-
-    <script>
-      document.body.classList.add("loaded");
-
-      fetch("header.html?v=" + Date.now())
-        .then((r) => r.text())
-        .then((html) => {
-          document.getElementById("header-placeholder").innerHTML = html;
-          if (typeof initHeaderScripts === "function") initHeaderScripts();
-          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-        })
-        .catch(() => {});
-
-      fetch("footer.html?v=" + Date.now())
-        .then((r) => r.text())
-        .then((html) => {
-          document.getElementById("footer-placeholder").innerHTML = html;
-        })
-        .catch(() => {});
-    </script>
   </body>
 </html>

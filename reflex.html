@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -108,7 +108,7 @@
       </footer>
     </section>
 
-    <!-- RESULT -->
+    
     <section class="reflex-result" id="resultCard" style="display:none;">
       <header class="reflex-result__head">
         <h2 class="reflex-result__title">Run Result</h2>
@@ -141,7 +141,7 @@
     </section>
   </main>
 
-  <!-- FULLSCREEN GAME OVERLAY -->
+  
   <div class="reflex-game" id="gameOverlay" aria-hidden="true">
     <div class="reflex-game__topbar">
       <div class="topbar-left">
@@ -164,7 +164,7 @@
       </div>
     </div>
 
-    <!-- Crosshair overlay -->
+    
     <div class="crosshair" id="crosshair" aria-hidden="true">
       <div class="crosshair__h"></div>
       <div class="crosshair__v"></div>
@@ -174,7 +174,7 @@
 
   <div id="footer-placeholder"></div>
 
-  <!-- Firebase SDKs -->
+  
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -185,27 +185,10 @@
   <script src="js/legal-modal.js"></script>
   <script src="js/notify.js"></script>
   <script src="js/modal-dialog.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/overlays.js"></script>
   <script src="js/fonts.js"></script>
   <script src="js/tickets.js"></script>
   <script src="js/reflex.js"></script>
-
-  <script>
-    document.body.classList.add('loaded');
-
-    fetch('header.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-        if (typeof initHeaderScripts === "function") initHeaderScripts();
-        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-      });
-
-    fetch('footer.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      });
-  </script>
 </body>
 </html>

@@ -180,8 +180,8 @@
         <article class="ranked-card history-card">
           <header class="ranked-card__head">
             <div>
-              <p class="ranked-card__title">Match History</p>
-              <p class="ranked-card__hint">Letzte 10 Sessions</p>
+              <p class="ranked-card__title">Session-Verlauf</p>
+              <p class="ranked-card__hint">Letzte Sessions</p>
             </div>
             <button class="btn btn-ghost btn-sm" type="button">Heatmap öffnen</button>
           </header>
@@ -199,33 +199,19 @@
         <article class="ranked-card badges-card">
           <header class="ranked-card__head">
             <div>
-              <p class="ranked-card__title">Badges &amp; Achievements</p>
+              <p class="ranked-card__title">Badges &amp; Erfolge</p>
               <p class="ranked-card__hint">7 / 30 / 100 Streak</p>
             </div>
             <span class="tag tag-primary">Badge-Feed</span>
           </header>
           <div class="badges-grid" data-role="badges-grid"></div>
         </article>
-
-        <article class="ranked-card future-card">
-          <header class="ranked-card__head">
-            <div>
-              <p class="ranked-card__title">Future Preview</p>
-              <p class="ranked-card__hint">Plan für Morgen &amp; Woche</p>
-            </div>
-            <button class="btn btn-ghost btn-sm" type="button">Add Notes</button>
-          </header>
-          <div class="future-grid">
-            <p>Morgen: Warm-Up Run + Aim Drills</p>
-            <p>Woche: 3 Ranked Matches + 1 Review</p>
-          </div>
-        </article>
       </section>
     </div>
 
-    <button class="floating-add-session" type="button">
+    <button class="floating-add-session" type="button" aria-label="Session hinzufügen">
       <i class="fa-solid fa-plus"></i>
-      Add Session
+      Session hinzufügen
     </button>
 
     <div class="skeleton-loader">
@@ -245,24 +231,9 @@
   <script src="js/ranked.js"></script>
   <script src="js/notify.js"></script>
   <script src="js/modal-dialog.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/overlays.js"></script>
   <script src="js/fonts.js"></script>
   <script src="js/tickets.js"></script>
-  <script>
-    document.body.classList.add('loaded');
-    fetch('header.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-        if (typeof initHeaderScripts === "function") initHeaderScripts();
-        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-      });
-
-    fetch('footer.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      });
-  </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-(() => {
+ï»¿(() => {
   "use strict";
 
   const LS_KEY = "echtlucky_ranked_v2";
@@ -38,83 +38,51 @@
   ];
 
   const DIFFICULTY_CONFIG = {
-    easy: { label: "Easy", multiplier: 0.92 },
+    easy: { label: "Leicht", multiplier: 0.92 },
     normal: { label: "Normal", multiplier: 1 },
-    hard: { label: "Hard", multiplier: 1.12 },
+    hard: { label: "Schwer", multiplier: 1.12 },
   };
 
   const WEEKLY_CHALLENGES_TEMPLATE = [
     {
       id: "weekly-heat",
-      title: "Heatmap Run",
+      title: "Heatmap-Run",
       desc: "15 Min Fokus auf Tracking & Flicks.",
       status: "in-progress",
     },
     {
       id: "weekly-coach",
-      title: "Coach Session",
+      title: "Coaching-Session",
       desc: "Custom mit Feedback + Dos/Don'ts.",
       status: "ready",
     },
     {
       id: "weekly-focus",
-      title: "Focus Mode",
+      title: "Fokus-Modus",
       desc: "3 Matches ohne Tilt, nur win-conditions.",
       status: "locked",
     },
     {
       id: "weekly-resets",
-      title: "Reset Ritual",
-      desc: "After warm-up: 2 aim resets, 1 rehydration.",
+      title: "Reset-Ritual",
+      desc: "Nach Warm-up: 2 Aim-Resets, 1x Rehydration.",
       status: "locked",
     },
   ];
 
-  const HISTORY_TEMPLATE = (() => {
-    const now = Date.now();
-    return [
-      {
-        id: "history-1",
-        label: "Scrim vs. Cipher",
-        xp: 18,
-        type: "Scrim",
-        ts: now - 1000 * 60 * 45,
-      },
-      {
-        id: "history-2",
-        label: "VOD Review Mission",
-        xp: 12,
-        type: "Review",
-        ts: now - 1000 * 60 * 90,
-      },
-      {
-        id: "history-3",
-        label: "High-Stakes Run",
-        xp: 25,
-        type: "Ranked",
-        ts: now - 1000 * 60 * 130,
-      },
-      {
-        id: "history-4",
-        label: "Warm-up Sprint",
-        xp: 9,
-        type: "Warm-up",
-        ts: now - 1000 * 60 * 200,
-      },
-    ];
-  })();
+  const HISTORY_TEMPLATE = [];
 
   const BADGE_TEMPLATE = [
-    { id: "badge-7", label: "7-Day Streak", type: "streak", threshold: 7 },
-    { id: "badge-30", label: "30 XP Drops", type: "xp", threshold: 300 },
+    { id: "badge-7", label: "7-Tage-Streak", type: "streak", threshold: 7 },
+    { id: "badge-30", label: "300 XP", type: "xp", threshold: 300 },
     { id: "badge-50", label: "50 Matches", type: "matches", threshold: 50 },
   ];
 
   const SKILL_TEMPLATE = [
     { label: "Aim", base: 82, scale: 2.3 },
     { label: "Gamesense", base: 74, scale: 1.8 },
-    { label: "Consistency", base: 69, scale: 1.6 },
-    { label: "Warm-Up", base: 91, scale: 1.2 },
+    { label: "Konstanz", base: 69, scale: 1.6 },
+    { label: "Warm-up", base: 91, scale: 1.2 },
   ];
 
   const RANKS = [
@@ -445,7 +413,7 @@
       item.innerHTML = `
         <div>
           <p class="history-label">${entry.label}</p>
-          <small class="history-meta">${time} · ${entry.type}</small>
+          <small class="history-meta">${time} ï¿½ ${entry.type}</small>
         </div>
         <strong>+${entry.xp} XP</strong>
       `;
@@ -611,7 +579,7 @@
     const res = completeDayCore(currentState);
     currentState = res.state;
     if (res.gainedXp > 0) {
-      recordSession("Daily Completion", res.gainedXp, "Daily");
+      recordSession("Daily abgeschlossen", res.gainedXp, "Daily");
       currentState.monthly.progress = Math.min(1, (currentState.monthly.progress || 0.5) + 0.05);
       currentState.monthly.streakDays = currentState.streak;
       currentState.monthly.previousDayXp = res.gainedXp;
@@ -694,9 +662,7 @@
         },
         { merge: true }
       );
-    } catch (error) {
-      console.warn("Ranked cloud save failed", error);
-    }
+    } catch {}
   }
 
   async function loadCloud(user) {
@@ -769,7 +735,7 @@
 
   els.addSessionBtn?.addEventListener("click", () => {
     const xp = Math.round(12 + Math.random() * 18);
-    recordSession("Custom Session", xp, "Custom");
+    recordSession("Eigene Session", xp, "Custom");
     saveLocal(currentState);
     renderAll(currentState);
     syncCloud();

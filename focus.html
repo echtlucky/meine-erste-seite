@@ -19,17 +19,17 @@
       <main class="focus-shell">
         <section class="focus-hero">
           <div class="focus-hero__text">
-            <p class="focus-tag">Focus Sessions</p>
-            <h1>Stay locked in, stay fresh.</h1>
-            <p>Start/Stop Trainingsläufe, track Pomodoro-Runden und dokumentiere Ablenkungen.</p>
+            <p class="focus-tag">Fokus-Sessions</p>
+            <h1>Fokus halten, frisch bleiben.</h1>
+            <p>Starte/stoppe Sessions, tracke Pomodoro-Runden und dokumentiere Ablenkungen.</p>
           </div>
           <div class="focus-hero__meta">
             <div>
-              <p class="hero-label">Live Session</p>
-              <p class="hero-value" id="focusStatus">Idle</p>
+              <p class="hero-label">Live-Session</p>
+              <p class="hero-value" id="focusStatus">Bereit</p>
             </div>
             <div>
-              <p class="hero-label">Accumulated Focus</p>
+              <p class="hero-label">Gesamter Fokus</p>
               <p class="hero-value" id="focusTime">00:00</p>
             </div>
             <button class="btn btn-secondary" id="btnToggleFocusMode" type="button">
@@ -49,7 +49,7 @@
             </header>
             <div class="session-settings" aria-label="Session Einstellungen">
               <div class="session-settings__row">
-                <label class="session-settings__label" for="focusMinutesSelect">Focus</label>
+                <label class="session-settings__label" for="focusMinutesSelect">Fokus</label>
                 <select id="focusMinutesSelect" class="session-settings__select">
                   <option value="25">25 min</option>
                   <option value="35">35 min</option>
@@ -57,7 +57,7 @@
                 </select>
               </div>
               <div class="session-settings__row">
-                <label class="session-settings__label" for="breakMinutesSelect">Break</label>
+                <label class="session-settings__label" for="breakMinutesSelect">Pause</label>
                 <select id="breakMinutesSelect" class="session-settings__select">
                   <option value="5">5 min</option>
                   <option value="10">10 min</option>
@@ -65,7 +65,7 @@
                 </select>
               </div>
               <div class="session-settings__row">
-                <label class="session-settings__label" for="longBreakMinutesSelect">Long</label>
+                <label class="session-settings__label" for="longBreakMinutesSelect">Lang</label>
                 <select id="longBreakMinutesSelect" class="session-settings__select">
                   <option value="15">15 min</option>
                   <option value="20">20 min</option>
@@ -84,7 +84,7 @@
 
           <article class="focus-card card-history">
             <header>
-              <p class="card-label">Focus History</p>
+              <p class="card-label">Verlauf</p>
               <button class="btn btn-sm" id="btnClearHistory" type="button">Alles löschen</button>
             </header>
             <div class="history-list" id="focusHistory">
@@ -94,15 +94,15 @@
 
           <article class="focus-card card-output">
             <header>
-              <p class="card-label">Session Overview</p>
+              <p class="card-label">Übersicht</p>
             </header>
             <div class="overview-stats">
               <div>
-                <p class="stat-label">Today</p>
+                <p class="stat-label">Heute</p>
                 <p class="stat-value" id="todayCount">0 Sessions</p>
               </div>
               <div>
-                <p class="stat-label">Average</p>
+                <p class="stat-label">Ø Dauer</p>
                 <p class="stat-value" id="avgDuration">00:00</p>
               </div>
             </div>
@@ -111,7 +111,7 @@
             </div>
             <div class="distraction-row" aria-label="Ablenkung loggen">
               <input id="distractionInput" type="text" placeholder="Ablenkung notieren (z.B. Discord, Handy…)" />
-              <button class="btn btn-sm btn-secondary" id="btnLogDistraction" type="button">Log</button>
+              <button class="btn btn-sm btn-secondary" id="btnLogDistraction" type="button">Speichern</button>
             </div>
           </article>
         </section>
@@ -130,28 +130,10 @@
     <script src="js/legal-modal.js"></script>
     <script src="js/notify.js"></script>
     <script src="js/modal-dialog.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/overlays.js"></script>
     <script src="js/fonts.js"></script>
     <script src="js/tickets.js"></script>
     <script src="js/focus-v2.js"></script>
-
-    <script>
-      document.body.classList.add("loaded");
-
-      fetch("header.html?v=" + Date.now())
-        .then((r) => r.text())
-        .then((html) => {
-          document.getElementById("header-placeholder").innerHTML = html;
-          if (typeof initHeaderScripts === "function") initHeaderScripts();
-          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-          window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
-        });
-
-      fetch("footer.html?v=" + Date.now())
-        .then((r) => r.text())
-        .then((html) => {
-          document.getElementById("footer-placeholder").innerHTML = html;
-        });
-    </script>
   </body>
 </html>

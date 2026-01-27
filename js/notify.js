@@ -1,5 +1,4 @@
-// js/notify.js — echtlucky (global toasts)
-(() => {
+﻿(() => {
   "use strict";
 
   if (window.notify) return; // prevent double load
@@ -69,21 +68,16 @@
     const closeBtn = toast.querySelector(".notify__close");
     closeBtn.addEventListener("click", () => removeToast(toast));
 
-    // click anywhere -> close (optional nice UX)
     toast.addEventListener("click", (e) => {
       if (e.target === closeBtn) return;
-      // don’t close when selecting text
       if (window.getSelection && String(window.getSelection()).length) return;
       removeToast(toast);
     });
 
-    // Insert newest on top
     stack.prepend(toast);
 
-    // animate in
     requestAnimationFrame(() => toast.classList.add("is-in"));
 
-    // auto dismiss with progress
     const duration = Number(o.duration ?? 6000);
     const progressSpan = toast.querySelector(".notify__progress > span");
 
@@ -93,11 +87,9 @@
       requestAnimationFrame(() => (progressSpan.style.transform = "scaleX(0)"));
       timer = window.setTimeout(() => removeToast(toast), duration);
     } else {
-      // sticky: hide progress
       toast.querySelector(".notify__progress").style.display = "none";
     }
 
-    // return control
     return {
       el: toast,
       close: () => {
@@ -107,7 +99,6 @@
     };
   }
 
-  // Public API
   window.notify = {
     show,
     info: (message, title = "Info", duration) => show({ type: "info", title, message, duration }),
@@ -115,10 +106,7 @@
     warn: (message, title = "In Bearbeitung", duration) => show({ type: "warn", title, message, duration }),
     error: (message, title = "Fehler", duration) => show({ type: "error", title, message, duration }),
 
-    // nice helper: replace alert()
     alert: (message, type = "info") => show({ type, title: type.toUpperCase(), message }),
 
-    // optional: confirm style (lightweight)
-    // (wenn du willst, bauen wir dir als nächstes ein richtiges modal-confirm im gleichen design)
   };
 })();

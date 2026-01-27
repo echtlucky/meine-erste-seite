@@ -1,11 +1,9 @@
-// js/modal-dialog.js — echtlucky Input Modal System (globales System für alle Eingaben)
-(() => {
+﻿(() => {
   "use strict";
 
   if (window.echtluckyModal) return; // prevent double load
 
   const echtluckyModal = {
-    // Input Dialog
     input: function(options = {}) {
       return new Promise((resolve) => {
         const {
@@ -16,11 +14,9 @@
           confirmText = "Bestätigen"
         } = options;
 
-        // Create overlay
         const overlay = document.createElement("div");
         overlay.className = "modal-overlay";
 
-        // Create modal
         const modal = document.createElement("div");
         modal.className = "modal-dialog input-dialog";
 
@@ -50,10 +46,8 @@
         const cancelBtn = modal.querySelector(".cancel-btn");
         const confirmBtn = modal.querySelector(".confirm-btn");
 
-        // Focus input
         input.focus();
 
-        // Event listeners
         cancelBtn.addEventListener("click", () => {
           overlay.remove();
           resolve(null);
@@ -70,35 +64,30 @@
           resolve(value);
         });
 
-        // Enter key
         input.addEventListener("keypress", (e) => {
           if (e.key === "Enter") {
             confirmBtn.click();
           }
         });
 
-        // Escape key
         input.addEventListener("keydown", (e) => {
           if (e.key === "Escape") {
             cancelBtn.click();
           }
         });
 
-        // Click overlay to close
         overlay.addEventListener("click", (e) => {
           if (e.target === overlay) {
             cancelBtn.click();
           }
         });
 
-        // Animation
         setTimeout(() => {
           overlay.classList.add("show");
         }, 10);
       });
     },
 
-    // Confirmation Dialog
     confirm: function(options = {}) {
       return new Promise((resolve) => {
         const {
@@ -109,11 +98,9 @@
           type = "warning" // warning, danger, info
         } = options;
 
-        // Create overlay
         const overlay = document.createElement("div");
         overlay.className = "modal-overlay";
 
-        // Create modal
         const modal = document.createElement("div");
         modal.className = `modal-dialog confirm-dialog confirm-${type}`;
 
@@ -136,7 +123,6 @@
         const cancelBtn = modal.querySelector(".cancel-btn");
         const confirmBtn = modal.querySelector(".confirm-btn");
 
-        // Event listeners
         cancelBtn.addEventListener("click", () => {
           overlay.remove();
           resolve(false);
@@ -147,31 +133,26 @@
           resolve(true);
         });
 
-        // Escape key
         overlay.addEventListener("keydown", (e) => {
           if (e.key === "Escape") {
             cancelBtn.click();
           }
         });
 
-        // Click overlay to close
         overlay.addEventListener("click", (e) => {
           if (e.target === overlay) {
             cancelBtn.click();
           }
         });
 
-        // Animation
         setTimeout(() => {
           overlay.classList.add("show");
         }, 10);
 
-        // Focus confirm btn
         confirmBtn.focus();
       });
     },
 
-    // Alert Dialog
     alert: function(options = {}) {
       return new Promise((resolve) => {
         const {
@@ -181,11 +162,9 @@
           type = "info" // info, success, error, warning
         } = options;
 
-        // Create overlay
         const overlay = document.createElement("div");
         overlay.className = "modal-overlay";
 
-        // Create modal
         const modal = document.createElement("div");
         modal.className = `modal-dialog alert-dialog alert-${type}`;
 
@@ -206,44 +185,36 @@
 
         const btn = modal.querySelector(".confirm-btn");
 
-        // Event listeners
         btn.addEventListener("click", () => {
           overlay.remove();
           resolve(true);
         });
 
-        // Escape key
         overlay.addEventListener("keydown", (e) => {
           if (e.key === "Escape") {
             btn.click();
           }
         });
 
-        // Click overlay to close
         overlay.addEventListener("click", (e) => {
           if (e.target === overlay) {
             btn.click();
           }
         });
 
-        // Animation
         setTimeout(() => {
           overlay.classList.add("show");
         }, 10);
 
-        // Focus button
         btn.focus();
       });
     }
   };
 
-  // Global API
   window.echtluckyModal = echtluckyModal;
 
-  // Backwards compatibility - replace native prompt/confirm/alert if needed
   window.promptModal = (title, placeholder) => {
     return echtluckyModal.input({ title, placeholder });
   };
 
-  console.log("✅ modal-dialog.js loaded");
 })();

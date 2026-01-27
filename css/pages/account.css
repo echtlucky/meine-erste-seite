@@ -1,4 +1,4 @@
-/* Discord-Style Account Layout */
+﻿
 .account-discord-shell {
   max-width: 520px;
   margin: 0 auto;
@@ -74,10 +74,7 @@
     border-radius: 12px;
   }
 }
-/* =========================
-   Account • echtlucky
-   File: css/pages/account.css
-========================= */
+
 
 .account-page{
   --acc-glass: rgba(0,0,0,.58);
@@ -104,7 +101,7 @@
   gap: 1.2rem;
 }
 
-/* HERO */
+
 .account-hero{
   border-radius: var(--acc-radius-xl);
   border: 1px solid var(--acc-border2);
@@ -179,7 +176,7 @@
   font-size: .92rem;
 }
 
-/* PROFILE CARD */
+
 .profile-card{
   border-radius: var(--acc-radius-lg);
   border: 1px solid rgba(0,255,136,.12);
@@ -246,7 +243,7 @@
   justify-content: flex-end;
 }
 
-/* GRID */
+
 .account-grid{
   display: grid;
   grid-template-columns: 1fr;
@@ -313,7 +310,7 @@
   white-space: nowrap;
 }
 
-/* STATS */
+
 .stats-grid{
   display:grid;
   grid-template-columns: repeat(2, minmax(0,1fr));
@@ -379,7 +376,7 @@
   line-height: 1.55;
 }
 
-/* PREVIEW */
+
 .preview{
   display:grid;
   gap: .65rem;
@@ -409,7 +406,7 @@
   word-break: break-word;
 }
 
-/* DANGER */
+
 .danger-zone{
   border-radius: var(--acc-radius-lg);
   border: 1px solid rgba(255,51,102,.22);
@@ -435,7 +432,7 @@
   background: rgba(255,51,102,.14) !important;
 }
 
-/* PROFILE EDIT SECTION */
+
 .profile-edit-section{
   border-radius: var(--acc-radius-lg);
   border: 1px solid rgba(0,255,136,.12);
@@ -538,7 +535,7 @@
   color: rgba(255,51,102,.95);
 }
 
-/* FORM INPUT GROUP - für Username/Email */
+
 .form-input-group{
   display: flex;
   gap: .5rem;
@@ -581,7 +578,7 @@
   border: 1px solid rgba(255,51,102,.20);
 }
 
-/* SYNC INFO BOX */
+
 .sync-info-box{
   border-radius: var(--acc-radius-md);
   border: 1px solid rgba(0,255,136,.12);
@@ -597,7 +594,7 @@
   line-height: 1.5;
 }
 
-/* DANGER CARD SPECIAL STYLE */
+
 .danger-card{
   border-color: rgba(255,51,102,.20) !important;
   background: rgba(255,51,102,.08) !important;
@@ -607,7 +604,7 @@
   margin-bottom: 1.2rem;
 }
 
-/* CHART CONTAINER */
+
 .chart-container{
   margin-top: .75rem;
 }
@@ -624,7 +621,7 @@
   max-width: 100%;
 }
 
-/* Override legacy Discord-ish rules at file top (keep account in echtlucky style) */
+
 .account-page .btn,
 .account-page .btn-primary,
 .account-page .btn-danger,

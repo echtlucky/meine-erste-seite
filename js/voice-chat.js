@@ -1,86 +1,7 @@
-﻿  // ========== PUSH-BENACHRICHTIGUNGEN (CALLS) =============
-  let messaging = null;
-  async function initPushNotifications() {
-    if (!window.firebase?.messaging) return;
-    try {
-      messaging = window.firebase.messaging();
-      await messaging.requestPermission?.();
-      const token = await messaging.getToken();
-      // Token kann im User-Dokument gespeichert werden
-      const currentAuth = window.auth;
-      const currentDb = window.db;
-      if (currentAuth?.currentUser && token && currentDb) {
-        await currentDb.collection("users").doc(currentAuth.currentUser.uid).update({ fcmToken: token });
-      }
-      messaging.onMessage((payload) => {
-        // Zeige Notification bei eingehendem Call
-        if (payload?.notification) {
-          window.notify?.show({
-            type: "info",
-            title: payload.notification.title,
-            message: payload.notification.body,
-            duration: 6000
-          });
-        }
-      });
-    } catch (e) {
-      console.warn("Push-Benachrichtigung konnte nicht aktiviert werden", e);
-    }
-  }
-
-  // Call: Push senden (Platzhalter, Backend muss FCM nutzen)
-  async function sendCallPush(toUid, title, body, data) {
-    // Hier müsste ein Cloud Function/Backend-Service das FCM-Token holen und Push senden
-    // (Demo: Log-Ausgabe)
-    console.log("[Push] Sende Call-Push an", toUid, title, body, data);
-  }
-// js/voice-chat.js — echtlucky Voice Integration
-// WebRTC + Firebase Signaling für Gruppen-Calls + Direktanrufe (1:1)
-
-/*
-==============================
- ANRUF-SYSTEM: KONZEPT & JSON-MODELLE
-==============================
-
-Firestore-Struktur für Calls:
-
-// Für Gruppen-Calls:
-groups/{groupId}/voice-calls/{callId} {
-  initiator: <uid>,
-  initiatorName: <string>,
-  createdAt: <timestamp>,
-  participants: [<uid>, ...],
-  status: "active" | "ended" | "ringing" | "pending",
-  type: "group"
-}
-
-// (Hinweis) Direktanrufe (/calls) und users/{uid}/callRequests werden hier nicht genutzt,
-// da die aktuellen Firestore Rules diese Schreibpfade nicht freigeben.
-
-// Ablauf (Gruppenanruf):
-// 1. Initiator startet Call: status="ringing" im group voice-call Doc
-// 2. Andere Mitglieder sehen Modal + Klingelton, können annehmen/ablehnen
-// 3. Bei Annahme: status="active", Teilnehmer wird zu participants hinzugefügt
-// 4. Bei Ablehnung: eigener UID wird zu rejectedBy hinzugefügt
-// 5. Status/Teilnehmer werden in Echtzeit überwacht
-
-// Klingelton: Audio-Element, das bei eingehendem Anruf abgespielt wird, bis angenommen/abgelehnt
-// Modal: Zeigt Anrufer, Gruppe/Name, Buttons für Annehmen/Ablehnen
-*/
-// Guard: prevent double-load
-
-(function () {
+﻿(function () {
   "use strict";
 
-  const DEBUG = false;
-  const log = (...args) => {
-    if (DEBUG) console.log(...args);
-  };
-
-  if (window.__ECHTLUCKY_VOICE_CHAT_LOADED__) {
-    console.warn("voice-chat.js already loaded – skipping");
-    return;
-  }
+  if (window.__ECHTLUCKY_VOICE_CHAT_LOADED__) return;
   window.__ECHTLUCKY_VOICE_CHAT_LOADED__ = true;
 
   const appNS = (window.echtlucky = window.echtlucky || {});
@@ -94,7 +15,6 @@ groups/{groupId}/voice-calls/{callId} {
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        log("✅ voice-chat.js: Firebase ready");
         resolve();
         return;
       }
@@ -103,7 +23,6 @@ groups/{groupId}/voice-calls/{callId} {
         auth = window.auth;
         db = window.db;
         firebase = window.firebase;
-        log("✅ voice-chat.js: Firebase ready via event");
         resolve();
       };
 
@@ -113,7 +32,6 @@ groups/{groupId}/voice-calls/{callId} {
   }
 
 
-  // ========== INCOMING CALL MODAL & RINGTONE =============
   const incomingCallModal = document.getElementById("incomingCallModal");
   const incomingCallTitle = document.getElementById("incomingCallTitle");
   const incomingCallFrom = document.getElementById("incomingCallFrom");
@@ -174,7 +92,6 @@ groups/{groupId}/voice-calls/{callId} {
         return;
       }
     } catch (e) {
-      console.warn("Teilnehmer konnte nicht hinzugefügt werden", e);
     }
   };
   if (btnRejectCall) btnRejectCall.onclick = async () => {
@@ -202,15 +119,11 @@ groups/{groupId}/voice-calls/{callId} {
         return;
       }
     } catch (e) {
-      console.warn("Reject konnte nicht gespeichert werden", e);
     } finally {
       hideIncomingCallModal();
     }
   };
 
-  // ========== LISTEN FOR INCOMING GROUP CALLS =============
-  // Firestore Rules in this project only allow group-member reads/writes in /groups/...,
-  // so users/{uid}/callRequests and the top-level /calls collection are intentionally not used here.
   let incomingGroupUnsubscribe = null;
   let incomingDirectUnsubscribe = null;
   let watchedGroupId = null;
@@ -341,9 +254,6 @@ groups/{groupId}/voice-calls/{callId} {
 
   let initialized = false;
 
-  // ============================================
-  // STATE
-  // ============================================
 
   const CALL_KIND_GROUP = "group";
   const CALL_KIND_DIRECT = "direct";
@@ -368,16 +278,12 @@ groups/{groupId}/voice-calls/{callId} {
   let remoteStreams = new Map(); // uid -> MediaStream
   let firebaseUnsubscribes = []; // Track listeners for cleanup
 
-  // RTCPeerConnection config with multiple STUN servers
   const peerConfig = {
     iceServers: [
       { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun4.l.google.com:19302"] }
     ]
   };
 
-  // ============================================
-  // DOM ELEMENTS
-  // ============================================
 
   const voiceStatus = document.getElementById("voiceStatus");
   const voiceParticipants = document.getElementById("voiceParticipants");
@@ -392,12 +298,9 @@ groups/{groupId}/voice-calls/{callId} {
   const btnShareScreen = document.getElementById("btnShareScreen");
   const shareQualitySelect = document.getElementById("shareQuality");
 
-  // Check if required elements exist
   const hasRequiredElements = btnStartVoiceCall && btnEndVoiceCall;
   
-  if (!hasRequiredElements) {
-    console.warn("voice-chat.js: Required DOM elements missing");
-  }
+  if (!hasRequiredElements) return;
 
   function isMobileUi() {
     return window.matchMedia ? window.matchMedia("(max-width: 900px)").matches : false;
@@ -469,7 +372,6 @@ groups/{groupId}/voice-calls/{callId} {
     const deviceId = getStoredDeviceId(AUDIO_INPUT_KEY);
     if (!deviceId) return base;
 
-    // "ideal" avoids hard failure when the device disappeared.
     return { ...base, deviceId: { ideal: deviceId } };
   }
 
@@ -500,8 +402,6 @@ groups/{groupId}/voice-calls/{callId} {
     if (!localStream) return;
     if (processedStream) return;
 
-    // Desktop speech can sound very quiet on some setups (notably BT “hands-free”).
-    // A light compressor + small gain improves intelligibility while avoiding clipping.
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return;
@@ -577,11 +477,9 @@ groups/{groupId}/voice-calls/{callId} {
     if (!screenShareArea) return;
     screenShareArea.hidden = !show;
 
-    // Mobile: treat as a sheet/modal to prevent background scrolling.
     if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
       document.body.classList.toggle("modal-open", !!show);
       if (show) {
-        // ensure it stays visible on mobile (users otherwise miss it)
         try { btnCloseScreenShare?.focus?.(); } catch {}
       }
     }
@@ -666,7 +564,6 @@ groups/{groupId}/voice-calls/{callId} {
       }
 
       const preset = getSharePreset();
-      // Try to capture system/tab audio too (browser-dependent). If it fails, fall back to video-only.
       try {
         screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: {
@@ -690,7 +587,6 @@ groups/{groupId}/voice-calls/{callId} {
       screenTrack = screenStream.getVideoTracks()[0] || null;
       if (!screenTrack) return;
 
-      // Improve screen/video quality hints when supported.
       try { screenTrack.contentHint = "detail"; } catch {}
 
       try {
@@ -701,8 +597,6 @@ groups/{groupId}/voice-calls/{callId} {
         });
       } catch {}
 
-      // Mix display audio into our outgoing audio track (no renegotiation required),
-      // only if we have audio processing enabled (AudioContext).
       const displayAudioTrack = screenStream.getAudioTracks()?.[0] || null;
       if (displayAudioTrack) {
         ensureAudioProcessing();
@@ -717,12 +611,10 @@ groups/{groupId}/voice-calls/{callId} {
             screenAudioSourceNode = audioContext.createMediaStreamSource(displayAudioStream);
             screenAudioSourceNode.connect(micCompressorNode);
           } catch (_) {
-            // If mixing fails, keep screen share without audio.
             try { displayAudioTrack.stop(); } catch {}
             screenAudioSourceNode = null;
           }
         } else {
-          // Browser doesn't allow mixing here; keep video-only share.
           try { displayAudioTrack.stop(); } catch {}
         }
       }
@@ -784,17 +676,11 @@ groups/{groupId}/voice-calls/{callId} {
     updateOpenScreenShareButton();
   }
 
-  // ============================================
-  // CREATE PEER CONNECTION
-  // ============================================
 
   function createPeerConnection(remoteUid) {
-    log(`Creating peer connection with ${remoteUid}`);
     
     const peerConnection = new RTCPeerConnection(peerConfig);
 
-    // Always include a video m-line so screen sharing can start/stop without renegotiation.
-    // We keep a sender reference per peer and swap the track via replaceTrack().
     try {
       const videoTransceiver = peerConnection.addTransceiver("video", { direction: "sendrecv" });
       if (videoTransceiver?.sender) {
@@ -806,18 +692,14 @@ groups/{groupId}/voice-calls/{callId} {
       }
     } catch {}
 
-    // Add local audio tracks (optionally processed)
     const outgoing = getOutgoingStream();
     if (outgoing) {
       outgoing.getAudioTracks().forEach(track => {
         peerConnection.addTrack(track, outgoing);
-        log(`Added local audio track to peer ${remoteUid}`);
       });
     }
 
-    // Handle incoming remote tracks
     peerConnection.ontrack = (event) => {
-      log("Remote track received from", remoteUid, event.track.kind);
       const remoteStream = event.streams[0];
       remoteStreams.set(remoteUid, remoteStream);
 
@@ -834,7 +716,6 @@ groups/{groupId}/voice-calls/{callId} {
         return;
       }
       
-      // Create or update audio element for remote user
       let audioElement = document.getElementById(`remote-audio-${remoteUid}`);
       if (!audioElement) {
         audioElement = document.createElement("audio");
@@ -847,15 +728,14 @@ groups/{groupId}/voice-calls/{callId} {
       
       applyPreferredOutputDevice(audioElement);
       audioElement.srcObject = remoteStream;
-      audioElement.play().catch(e => log("Auto-play blocked:", e));
+      audioElement.play().catch(() => {});
     };
 
-    // Handle ICE candidates
     peerConnection.onicecandidate = (event) => {
       if (event.candidate && currentVoiceCall) {
-        const groupRef = db.collection("groups").doc(currentVoiceCall.groupId);
-        const callRef = groupRef.collection("voice-calls").doc(currentVoiceCall.callId);
-        
+        const callRef = getCallRefFromActiveCall();
+        if (!callRef || !auth?.currentUser?.uid) return;
+
         callRef.collection("ice-candidates").doc(`${auth.currentUser.uid}-${Date.now()}-${Math.random()}`).set({
           candidate: event.candidate.candidate,
           sdpMLineIndex: event.candidate.sdpMLineIndex,
@@ -863,13 +743,11 @@ groups/{groupId}/voice-calls/{callId} {
           from: auth.currentUser.uid,
           to: remoteUid,
           createdAt: new Date()
-        }).catch(e => console.error("ICE candidate send error:", e));
+        }).catch(() => {});
       }
     };
 
-    // Handle connection state changes
     peerConnection.onconnectionstatechange = () => {
-      log("Connection state with", remoteUid, ":", peerConnection.connectionState);
       if (peerConnection.connectionState === "failed" || peerConnection.connectionState === "disconnected") {
         closePeerConnection(remoteUid);
         window.notify?.show({
@@ -881,25 +759,16 @@ groups/{groupId}/voice-calls/{callId} {
       }
     };
 
-    // Handle ICE connection state
-    peerConnection.oniceconnectionstatechange = () => {
-      log("ICE connection state with", remoteUid, ":", peerConnection.iceConnectionState);
-    };
-
     peerConnections.set(remoteUid, peerConnection);
     return peerConnection;
   }
 
-  // ============================================
-  // CLOSE PEER CONNECTION
-  // ============================================
 
   function closePeerConnection(uid) {
     const peerConnection = peerConnections.get(uid);
     if (peerConnection) {
       peerConnection.close();
       peerConnections.delete(uid);
-      log(`Closed peer connection with ${uid}`);
     }
 
     const audioElement = document.getElementById(`remote-audio-${uid}`);
@@ -917,14 +786,10 @@ groups/{groupId}/voice-calls/{callId} {
     remoteStreams.delete(uid);
   }
 
-  // ============================================
-  // SIGNALING: Create & Send Offer
-  // ============================================
 
   async function createAndSendOffer(callRef, remoteUid) {
     try {
       if (peerConnections.has(remoteUid)) {
-        log(`Offer already sent to ${remoteUid}`);
         return;
       }
 
@@ -937,9 +802,7 @@ groups/{groupId}/voice-calls/{callId} {
       });
 
       await peerConnection.setLocalDescription(offer);
-      log(`Offer created for ${remoteUid}`);
 
-      // Store offer in Firestore
       await callRef.collection("offers").doc(remoteUid).set({
         from: auth.currentUser.uid,
         to: remoteUid,
@@ -947,16 +810,11 @@ groups/{groupId}/voice-calls/{callId} {
         createdAt: new Date()
       });
 
-      log(`Offer sent to ${remoteUid}`);
 
     } catch (error) {
-      console.error("Offer creation error:", error);
     }
   }
 
-  // ============================================
-  // SIGNALING: Listen & Create Answer
-  // ============================================
 
   function listenForOffers(callRef) {
     if (!callRef) return () => {};
@@ -965,7 +823,6 @@ groups/{groupId}/voice-calls/{callId} {
         const { from, sdp } = doc.data();
         
         if (!peerConnections.has(from)) {
-          log(`Received offer from ${from}`);
           const peerConnection = createPeerConnection(from);
           
           try {
@@ -975,9 +832,7 @@ groups/{groupId}/voice-calls/{callId} {
 
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
-            log(`Answer created for ${from}`);
 
-            // Send answer back
             await callRef.collection("answers").doc(from).set({
               from: auth.currentUser.uid,
               to: from,
@@ -985,10 +840,8 @@ groups/{groupId}/voice-calls/{callId} {
               createdAt: new Date()
             });
 
-            log(`Answer sent to ${from}`);
 
           } catch (error) {
-            console.error("Answer creation error:", error);
           }
         }
       }
@@ -998,9 +851,6 @@ groups/{groupId}/voice-calls/{callId} {
     return unsubscribe;
   }
 
-  // ============================================
-  // SIGNALING: Listen for Answers
-  // ============================================
 
   function listenForAnswers(callRef) {
     if (!callRef) return () => {};
@@ -1010,14 +860,11 @@ groups/{groupId}/voice-calls/{callId} {
         const peerConnection = peerConnections.get(from);
 
         if (peerConnection && peerConnection.remoteDescription === null) {
-          log(`Received answer from ${from}`);
           try {
             await peerConnection.setRemoteDescription(
               new RTCSessionDescription({ type: "answer", sdp })
             );
-            log(`Remote description set for ${from}`);
           } catch (error) {
-            console.error("Setting remote description error:", error);
           }
         }
       }
@@ -1027,9 +874,6 @@ groups/{groupId}/voice-calls/{callId} {
     return unsubscribe;
   }
 
-  // ============================================
-  // ICE CANDIDATES: Listen & Add
-  // ============================================
 
   function listenForIceCandidates(callRef) {
     if (!callRef) return () => {};
@@ -1043,9 +887,7 @@ groups/{groupId}/voice-calls/{callId} {
             peerConnection.addIceCandidate(
               new RTCIceCandidate({ candidate, sdpMLineIndex, sdpMid })
             );
-            log(`ICE candidate added from ${from}`);
           } catch (error) {
-            console.error("ICE candidate error:", error);
           }
         }
       });
@@ -1055,9 +897,6 @@ groups/{groupId}/voice-calls/{callId} {
     return unsubscribe;
   }
 
-  // ============================================
-  // Subscribe to Call Doc (status + participants)
-  // ============================================
 
   function subscribeToCallDoc(callRef, kind) {
     if (!callRef) return () => {};
@@ -1099,9 +938,6 @@ groups/{groupId}/voice-calls/{callId} {
     return unsubscribe;
   }
 
-  // ============================================
-  // START VOICE CALL (Initiator)
-  // ============================================
 
   async function startRingingGroupCall(groupId) {
     try {
@@ -1177,7 +1013,6 @@ groups/{groupId}/voice-calls/{callId} {
         duration: 4500
       });
     } catch (err) {
-      console.error("startRingingGroupCall error:", err);
       const errorMsg =
         err.name === "NotAllowedError"
           ? "Mikrofonzugriff verweigert. Bitte erlaube Audiovorbereitung!"
@@ -1216,7 +1051,6 @@ groups/{groupId}/voice-calls/{callId} {
         return;
       }
 
-      // Request microphone
       localStream = await navigator.mediaDevices.getUserMedia({
         audio: buildAudioConstraints(),
         video: false
@@ -1234,7 +1068,6 @@ groups/{groupId}/voice-calls/{callId} {
         isInitiator: true
       };
 
-      // Create call document in Firestore
       const callRef = getGroupCallRef(groupId, callId);
       await callRef.set({
         initiator: user.uid,
@@ -1244,13 +1077,11 @@ groups/{groupId}/voice-calls/{callId} {
         status: "active"
       });
 
-      // Setup listeners
       callUnsubscribe = subscribeToCallDoc(callRef, CALL_KIND_GROUP);
       listenForOffers(callRef);
       listenForAnswers(callRef);
       listenForIceCandidates(callRef);
 
-      // Show voice panel
       updateVoiceUI(true, "Gruppenanruf: aktiv", "in_call");
 
       window.notify?.show({
@@ -1261,7 +1092,6 @@ groups/{groupId}/voice-calls/{callId} {
       });
 
     } catch (err) {
-      console.error("startVoiceCall error:", err);
       const errorMsg = err.name === "NotAllowedError" 
         ? "Mikrofonzugriff verweigert. Bitte erlaube Audiovorbereitung!"
         : err.name === "NotFoundError"
@@ -1277,9 +1107,6 @@ groups/{groupId}/voice-calls/{callId} {
     }
   }
 
-  // ============================================
-  // JOIN EXISTING VOICE CALL
-  // ============================================
 
   async function joinVoiceCall(groupId, callId) {
     try {
@@ -1303,7 +1130,6 @@ groups/{groupId}/voice-calls/{callId} {
         return;
       }
 
-      // Request microphone
       localStream = await navigator.mediaDevices.getUserMedia({
         audio: buildAudioConstraints(),
         video: false
@@ -1321,7 +1147,6 @@ groups/{groupId}/voice-calls/{callId} {
 
       const callRef = getGroupCallRef(groupId, callId);
 
-      // Add self to participants
       await callRef.update({
         participants: window.firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
       });
@@ -1329,7 +1154,6 @@ groups/{groupId}/voice-calls/{callId} {
       const callDoc = await callRef.get();
       const existingParticipants = callDoc.data()?.participants || [];
 
-      // Create offers for each existing participant (they will answer)
       for (const participantUid of existingParticipants) {
         if (participantUid !== auth.currentUser.uid) {
           currentVoiceCall.peerUid = participantUid;
@@ -1337,7 +1161,6 @@ groups/{groupId}/voice-calls/{callId} {
         }
       }
 
-      // Setup listeners
       listenForOffers(callRef);
       listenForAnswers(callRef);
       listenForIceCandidates(callRef);
@@ -1353,7 +1176,6 @@ groups/{groupId}/voice-calls/{callId} {
       });
 
     } catch (err) {
-      console.error("joinVoiceCall error:", err);
       const errorMsg = err.name === "NotAllowedError" 
         ? "Mikrofonzugriff verweigert"
         : "Fehler beim Beitreten zum Sprachchat";
@@ -1367,9 +1189,6 @@ groups/{groupId}/voice-calls/{callId} {
     }
   }
 
-  // ============================================
-  // DIRECT CALLS (1:1)
-  // ============================================
 
   async function startRingingDirectCall(targetUid, targetName) {
     try {
@@ -1434,7 +1253,6 @@ groups/{groupId}/voice-calls/{callId} {
 
       updateVoiceUI(true, "Direktanruf: klingelt…", "ringing");
     } catch (err) {
-      console.error("startRingingDirectCall error:", err);
       const errorMsg =
         err.name === "NotAllowedError"
           ? "Mikrofonzugriff verweigert. Bitte erlaube Audiovorbereitung!"
@@ -1493,7 +1311,6 @@ groups/{groupId}/voice-calls/{callId} {
 
       const callRef = getDirectCallRef(id);
 
-      // Add self to participants
       await callRef.set({
         participants: window.firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
       }, { merge: true });
@@ -1501,7 +1318,6 @@ groups/{groupId}/voice-calls/{callId} {
       const callDoc = await callRef.get();
       const existingParticipants = callDoc.data()?.participants || [];
 
-      // Create offers for each existing participant (they will answer)
       for (const participantUid of existingParticipants) {
         if (participantUid !== auth.currentUser.uid) {
           currentVoiceCall.peerUid = participantUid;
@@ -1516,7 +1332,6 @@ groups/{groupId}/voice-calls/{callId} {
 
       updateVoiceUI(true, "Direktanruf: Verbindung wird hergestellt", "in_call");
     } catch (err) {
-      console.error("joinDirectCall error:", err);
       const errorMsg = err.name === "NotAllowedError"
         ? "Mikrofonzugriff verweigert"
         : "Fehler beim Beitreten zum Direktanruf";
@@ -1530,28 +1345,22 @@ groups/{groupId}/voice-calls/{callId} {
     }
   }
 
-  // ============================================
-  // END VOICE CALL
-  // ============================================
 
   async function endVoiceCall() {
     try {
       stopScreenShare();
 
-      // Stop all audio tracks
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
         localStream = null;
       }
       cleanupAudioProcessing();
 
-      // Close all peer connections
       peerConnections.forEach((pc) => {
         pc.close();
       });
       peerConnections.clear();
 
-      // Clean up remote streams
       remoteStreams.forEach((stream, uid) => {
         const audioElement = document.getElementById(`remote-audio-${uid}`);
         if (audioElement) {
@@ -1561,7 +1370,6 @@ groups/{groupId}/voice-calls/{callId} {
       });
       remoteStreams.clear();
 
-      // Unsubscribe from all Firestore listeners
       firebaseUnsubscribes.forEach(unsub => unsub());
       firebaseUnsubscribes = [];
 
@@ -1570,7 +1378,6 @@ groups/{groupId}/voice-calls/{callId} {
         callUnsubscribe = null;
       }
 
-      // Update Firestore: mark ended (initiator) and remove self from call
       if (currentVoiceCall) {
         const callRef = getCallRefFromActiveCall();
 
@@ -1584,47 +1391,39 @@ groups/{groupId}/voice-calls/{callId} {
             }
           }
 
-          // Remove participant
           if (callRef && auth?.currentUser?.uid) {
             await callRef.set({
               participants: window.firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid)
             }, { merge: true });
           }
 
-          // If initiator, delete entire call and all subcollections
           if (currentVoiceCall.isInitiator) {
             if (!callRef) return;
 
-            // Clean up offers
             const offerSnap = await callRef.collection("offers").get();
             for (const doc of offerSnap.docs) {
               await doc.ref.delete();
             }
 
-            // Clean up answers
             const answerSnap = await callRef.collection("answers").get();
             for (const doc of answerSnap.docs) {
               await doc.ref.delete();
             }
 
-            // Clean up ICE candidates
             const iceSnap = await callRef.collection("ice-candidates").get();
             for (const doc of iceSnap.docs) {
               await doc.ref.delete();
             }
 
-            // Delete call document
             await callRef.delete();
           }
         } catch (error) {
-          console.error("Error updating Firestore:", error);
         }
       }
 
       currentVoiceCall = null;
       isMicMuted = false;
 
-      // Update UI
       updateVoiceUI(false, "Anruf beendet", "ended");
       btnToggleMic.classList.remove("is-muted");
       btnToggleMic.textContent = "🔇 Stummschalten";
@@ -1637,13 +1436,9 @@ groups/{groupId}/voice-calls/{callId} {
       });
 
     } catch (error) {
-      console.error("endVoiceCall error:", error);
     }
   }
 
-  // ============================================
-  // UPDATE UI
-  // ============================================
 
   function updateVoiceUI(isActive, statusText, state) {
     if (isActive) {
@@ -1652,7 +1447,6 @@ groups/{groupId}/voice-calls/{callId} {
       if (voiceStatus) voiceStatus.setAttribute("data-state", uiCallState);
       if (chatCallBar) chatCallBar.hidden = false;
       if (btnStartVoiceCall) btnStartVoiceCall.hidden = true;
-      // Start-call button is handled in the chat header (connect-minimal), not here.
       if (btnEndVoiceCall) btnEndVoiceCall.hidden = false;
       if (btnToggleMic) btnToggleMic.hidden = false;
       if (btnToggleMic) btnToggleMic.disabled = false;
@@ -1670,7 +1464,6 @@ groups/{groupId}/voice-calls/{callId} {
       }
       if (chatCallBar) chatCallBar.hidden = true;
       if (btnStartVoiceCall) btnStartVoiceCall.hidden = false;
-      // Start-call button is handled in the chat header (connect-minimal), not here.
       if (btnEndVoiceCall) btnEndVoiceCall.hidden = true;
       if (btnToggleMic) btnToggleMic.hidden = true;
       if (btnToggleMic) btnToggleMic.disabled = true;
@@ -1731,9 +1524,6 @@ groups/{groupId}/voice-calls/{callId} {
     });
   }
 
-  // ============================================
-  // TOGGLE MICROPHONE
-  // ============================================
 
   function toggleMic() {
     if (!localStream) return isMicMuted;
@@ -1749,8 +1539,6 @@ groups/{groupId}/voice-calls/{callId} {
       });
     } catch (_) {}
 
-    // When audio processing is enabled, the sent track lives on `processedStream`.
-    // Toggling only `localStream` does not reliably mute the outgoing audio.
     if (outgoing && outgoing !== localStream) {
       try {
         outgoing.getAudioTracks().forEach((track) => {
@@ -1768,29 +1556,20 @@ groups/{groupId}/voice-calls/{callId} {
   function setMicMuted(muted) {
     const wantMuted = !!muted;
     if (wantMuted === isMicMuted) return isMicMuted;
-    // Re-use toggle logic to keep streams + UI in sync.
     return toggleMic();
   }
 
-  // ============================================
-  // EVENT LISTENERS
-  // ============================================
-  // INITIALIZATION
-  // ============================================
 
   async function initModule() {
     if (initialized) return;
     initialized = true;
 
-    log("🔵 voice-chat.js initializing");
     await waitForFirebase();
 
     if (!auth || !db) {
-      console.error("❌ voice-chat.js: Firebase not ready");
       return;
     }
 
-    // Setup event listeners if DOM elements exist
     if (btnStartVoiceCall && btnEndVoiceCall) {
       btnStartVoiceCall.addEventListener("click", async () => {
         if (!getSelectedGroupId()) {
@@ -1822,7 +1601,6 @@ groups/{groupId}/voice-calls/{callId} {
 
           await startVoiceCall(groupId);
         } catch (e) {
-          console.error("btnStartVoiceCall click error:", e);
           window.notify?.show({
             type: "error",
             title: "Voice",
@@ -1835,7 +1613,6 @@ groups/{groupId}/voice-calls/{callId} {
       btnEndVoiceCall.addEventListener("click", endVoiceCall);
     }
 
-    // Start-call is triggered via chat header button (#btnStartCall) and handled in connect-minimal.
 
     if (btnToggleMic) {
       btnToggleMic.addEventListener("click", toggleMic);
@@ -1868,7 +1645,6 @@ groups/{groupId}/voice-calls/{callId} {
       });
     }
 
-    // Re-open viewer after dismissing (important for mobile UX)
     const openBtn = ensureOpenScreenShareButton();
     if (openBtn && !openBtn.__wired) {
       openBtn.__wired = true;
@@ -1897,7 +1673,6 @@ groups/{groupId}/voice-calls/{callId} {
       });
     }
 
-    // Incoming calls + labels: event-driven (no polling)
     bindSelectedGroupEvents();
     handleSelectedGroupChange(getSelectedGroupId());
 
@@ -1916,17 +1691,14 @@ groups/{groupId}/voice-calls/{callId} {
     });
     syncAuthDependentListeners();
 
-    // Push-Benachrichtigungen initialisieren
     initPushNotifications();
 
-    // Cleanup on page unload
     window.addEventListener("beforeunload", () => {
       if (currentVoiceCall) {
-        endVoiceCall().catch(err => console.error("Cleanup error:", err));
+        endVoiceCall().catch(() => {});
       }
     });
 
-    log("✅ voice-chat.js setup complete");
   }
 
   if (document.readyState === "loading") {
@@ -1935,9 +1707,6 @@ groups/{groupId}/voice-calls/{callId} {
     initModule();
   }
 
-  // ============================================
-  // EXPORT API
-  // ============================================
 
   appNS.voiceChat = {
     startCall: startVoiceCall,
@@ -1959,5 +1728,4 @@ groups/{groupId}/voice-calls/{callId} {
     window.dispatchEvent(new CustomEvent("echtlucky:voice-chat-ready"));
   } catch (_) {}
 
-  log("✅ voice-chat.js initialized with full WebRTC support");
 })();

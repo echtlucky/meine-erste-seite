@@ -109,32 +109,10 @@
     <script src="js/legal-modal.js"></script>
     <script src="js/notify.js"></script>
     <script src="js/modal-dialog.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/overlays.js"></script>
     <script src="js/fonts.js"></script>
     <script src="js/tickets.js"></script>
     <script src="js/blog.js"></script>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        document.body.classList.add("loaded");
-
-        fetch("header.html?v=" + Date.now())
-          .then((r) => r.text())
-          .then((html) => {
-            document.getElementById("header-placeholder").innerHTML = html;
-            if (typeof initHeaderScripts === "function") initHeaderScripts();
-            if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
-            window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
-          })
-          .catch(() => {});
-
-        fetch("footer.html?v=" + Date.now())
-          .then((r) => r.text())
-          .then((html) => {
-            document.getElementById("footer-placeholder").innerHTML = html;
-          })
-          .catch(() => {});
-      });
-    </script>
   </body>
 </html>

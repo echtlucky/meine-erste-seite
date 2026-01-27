@@ -1,50 +1,31 @@
-rules_version = '2';
+﻿rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // ==========================================
-    // USERS COLLECTION
-    // ==========================================
+
     match /users/{userId} {
-      // Users can read all user profiles (for online status, friends list)
       allow read: if request.auth != null;
-      
-      // Users can only write their own data
+
       allow write: if request.auth != null && request.auth.uid == userId;
-      
-      // Admins can read and write all user data
+
       allow read, write: if isAdmin();
     }
 
-    // ==========================================
-    // USERNAMES COLLECTION (for username lookup)
-    // ==========================================
     match /usernames/{usernameLower} {
-      // Anyone authenticated can read to check availability
       allow read: if request.auth != null;
-      
-      // Only users can write their own username mapping
+
       allow write: if request.auth != null && request.auth.uid == request.resource.data.uid;
-      
-      // Admins can manage all
+
       allow read, write: if isAdmin();
     }
-    
-    // ==========================================
-    // GROUPS COLLECTION
-    // ==========================================
+
     match /groups/{groupId} {
-      // Read: user must be a member of the group OR admin
-      allow read: if request.auth != null && 
+      allow read: if request.auth != null &&
                      (request.auth.uid in resource.data.members || isAdmin());
-      
-      // Create: authenticated users can create groups
-      allow create: if request.auth != null && 
+
+      allow create: if request.auth != null &&
                        request.resource.data.createdBy == request.auth.uid;
-      
-      // Update/Delete: group creator, group admin, or global admin.
-      // Members may also leave a group (remove themselves) with a constrained update.
-      allow update, delete: if request.auth != null && 
+
+      allow update, delete: if request.auth != null &&
                               (isAdmin() || isGroupCreator() || isGroupAdmin() || canLeaveGroup());
 
       function isGroupCreator() {
@@ -57,81 +38,58 @@ service cloud.firestore {
                (resource.data.roles[request.auth.uid] == 'admin');
       }
 
-      // Allow a member to remove only themselves from the members array.
       function canLeaveGroup() {
         return request.auth != null &&
                (request.auth.uid in resource.data.members) &&
-               // Only existing keys, and only "members" may change.
                request.resource.data.keys().hasOnly(resource.data.keys()) &&
                request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']) &&
-               // Must remove exactly one member (self), and must not add new members.
                request.resource.data.members.size() == resource.data.members.size() - 1 &&
                !(request.auth.uid in request.resource.data.members) &&
                resource.data.members.hasAll(request.resource.data.members);
       }
-      
-      // ==========================================
-      // GROUP MESSAGES
-      // ==========================================
+
       match /messages/{messageId} {
-        // Read: members of parent group can read
-        allow read: if request.auth != null && 
+        allow read: if request.auth != null &&
                        request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
-        
-        // Create: members can add messages
-        allow create: if request.auth != null && 
+
+        allow create: if request.auth != null &&
                         request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members &&
                         request.resource.data.authorUid == request.auth.uid;
-        
-        // Update: message author or admin can update
-        allow update: if request.auth != null && 
+
+        allow update: if request.auth != null &&
                         (request.auth.uid == resource.data.authorUid || isAdmin());
-        
-        // Delete: message author or admin can delete
-        allow delete: if request.auth != null && 
+
+        allow delete: if request.auth != null &&
                         (request.auth.uid == resource.data.authorUid || isAdmin());
       }
-      
-      // ==========================================
-      // VOICE CALLS
-      // ==========================================
+
       match /voice-calls/{callId} {
-        // Read/Write: group members only
-        allow read, write: if request.auth != null && 
+        allow read, write: if request.auth != null &&
                              request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
-        
-        // Subcollections for signaling
+
         match /offers/{offerId} {
-          allow read, write: if request.auth != null && 
+          allow read, write: if request.auth != null &&
                                request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
         }
-        
+
         match /answers/{answerId} {
-          allow read, write: if request.auth != null && 
+          allow read, write: if request.auth != null &&
                                request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
         }
-        
+
         match /ice-candidates/{candidateId} {
-          allow read, write: if request.auth != null && 
+          allow read, write: if request.auth != null &&
                                request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
         }
       }
     }
-    
-    // ==========================================
-    // PRESENCE COLLECTION (for online status)
-    // ==========================================
+
     match /presence/{userId} {
-      // Users can read all presence data (for online friends list)
       allow read: if request.auth != null;
-      
-      // Users can only write their own presence
+
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // ==========================================
-    // DIRECT CALLS (1:1 Voice)
-    // ==========================================
     match /direct-calls/{callId} {
       allow read: if isDirectCallMember();
 
@@ -158,7 +116,6 @@ service cloud.firestore {
         request.resource.data.to == resource.data.to &&
         request.resource.data.type == 'direct' &&
         request.resource.data.status in ['ringing','active','in_call','ended'] &&
-        // Only allow a small set of mutable fields to change.
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'participants','status','rejectedBy','acceptedAt','endedAt'
         ]);
@@ -183,9 +140,6 @@ service cloud.firestore {
       }
     }
 
-    // ==========================================
-    // SUPPORT / TICKETS
-    // ==========================================
     match /tickets/{ticketId} {
       allow read: if canReadTicket();
 
@@ -207,7 +161,6 @@ service cloud.firestore {
         request.resource.data.title.size() <= 80 &&
         request.resource.data.assignedTo == null;
 
-      // Users: may close own tickets + update preview timestamps via message sends.
       allow update: if request.auth != null &&
         isTicketOwner() &&
         request.resource.data.keys().hasOnly(resource.data.keys()) &&
@@ -215,7 +168,6 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt','status','lastMessagePreview']) &&
         request.resource.data.status in ['open','closed','waiting_staff','waiting_user'];
 
-      // Staff: can claim, respond, change status/priority/tags, merge.
       allow update, delete: if isStaff() &&
         request.resource.data.keys().hasOnly([
           'createdBy','createdByName','createdByEmail',
@@ -238,16 +190,13 @@ service cloud.firestore {
           request.resource.data.text.size() >= 1 &&
           request.resource.data.text.size() <= 1200 &&
           (
-            // Ticket owner writes as user
             (isTicketOwnerById(ticketId) && request.resource.data.authorRole == 'user') ||
-            // Staff writes as staff role
             (isStaff() && request.resource.data.authorRole in ['admin','support','moderator'])
           );
 
         allow update, delete: if isStaff();
       }
 
-      // Internal notes are staff-only and must never be readable by users.
       match /internal/{noteId} {
         allow read: if isStaff();
         allow create: if isStaff() && request.auth != null &&
@@ -269,21 +218,15 @@ service cloud.firestore {
       }
     }
 
-    // ==========================================
-    // BLOG COLLECTION
-    // ==========================================
     match /blog/{documentId} {
-      // Public read (blog should be usable without login)
       allow read: if true;
-      
-      // Only creator or admin can write blog posts
-      allow create: if request.auth != null && 
+
+      allow create: if request.auth != null &&
                        request.resource.data.authorUid == request.auth.uid;
-      
-      allow update, delete: if request.auth != null && 
+
+      allow update, delete: if request.auth != null &&
                               (request.auth.uid == resource.data.authorUid || isAdmin());
 
-      // Comments subcollection (public read, auth write)
       match /comments/{commentId} {
         allow read: if true;
 
@@ -300,17 +243,11 @@ service cloud.firestore {
       }
     }
 
-    // ==========================================
-    // POSTS COLLECTION (Admin Blog)
-    // ==========================================
     match /posts/{documentId} {
-      // Public read (admin blog is still publicly readable)
       allow read: if true;
-      
-      // Only admin can write posts
+
       allow create, update, delete: if isAdmin();
 
-      // Comments subcollection (public read, auth write)
       match /comments/{commentId} {
         allow read: if true;
 
@@ -327,50 +264,29 @@ service cloud.firestore {
       }
     }
 
-    // ==========================================
-    // BANS COLLECTION (Admin)
-    // ==========================================
     match /bans/{documentId} {
-      // Only admin can read and write bans
       allow read, write: if isAdmin();
     }
 
-    // ==========================================
-    // ADMIN LOGS COLLECTION (Activity Logging)
-    // ==========================================
     match /admin-logs/{logId} {
-      // Only admin can read logs
       allow read: if isAdmin();
-      
-      // Admin or system can create logs
+
       allow create: if isAdmin() || request.auth == null;
     }
 
-    // ==========================================
-    // CHAT LOGS COLLECTION (Chat History/Comments)
-    // ==========================================
     match /chat-logs/{logId} {
-      // Only admin can read chat logs
       allow read: if isAdmin();
-      
-      // Anyone authenticated can create chat logs (for recording conversations)
-      allow create: if request.auth != null && 
+
+      allow create: if request.auth != null &&
                        request.resource.data.userId == request.auth.uid;
     }
 
-    // ==========================================
-    // ADMIN STATS COLLECTION (Statistics & Analytics)
-    // ==========================================
     match /admin-stats/{statId} {
-      // Only admin can read/write stats
       allow read, write: if isAdmin();
     }
-    
-    // ==========================================
-    // HELPER FUNCTIONS
-    // ==========================================
+
     function isAdmin() {
-      return request.auth != null && 
+      return request.auth != null &&
              (request.auth.email == 'lucassteckel04@gmail.com' ||
               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
