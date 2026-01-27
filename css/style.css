@@ -530,6 +530,14 @@ main{ flex:1; }
   }
 }
 
+/* Click / keyboard accessibility without JS (works with focus on the toggle button) */
+.nav-dropdown:focus-within .dropdown-menu{
+  display:block;
+}
+.header-groups:focus-within .dropdown-menu{
+  display:block;
+}
+
 .dropdown-item{
   display:block;
   width: 100%;
