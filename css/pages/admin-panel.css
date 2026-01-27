@@ -4,7 +4,8 @@
 ====================================== */
 
 body.admin-page{
-  padding-top: 60px; /* fixed site header */
+  /* body already reserves header space via css/style.css */
+  padding-top: 0;
 }
 
 /* New full-width shell (sidebar + content) */

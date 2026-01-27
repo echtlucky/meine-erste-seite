@@ -38,15 +38,29 @@
 .reflex-discord-shell .discord-card {
   border-radius: var(--radius-xl);
   border: 1px solid rgba(0,255,136,0.16);
-  background: linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,0,0,0.62));
+  background: rgba(0,0,0,0.58);
   backdrop-filter: blur(10px);
   box-shadow: 0 18px 70px rgba(0,0,0,0.55);
   padding: clamp(1.2rem, 2.2vw, 1.8rem);
   color: var(--text);
+  position: relative;
+  overflow: hidden;
 }
 
+.reflex-discord-shell .discord-card::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 16% 22%, rgba(0,255,136,0.12), transparent 62%),
+    radial-gradient(circle at 86% 76%, rgba(88,101,242,0.08), transparent 64%);
+  opacity: .85;
+}
+.reflex-discord-shell .discord-card > *{ position:relative; z-index:1; }
+
 .reflex-hero-card {
-  background: linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,0,0,0.62));
+  background: rgba(0,0,0,0.62);
 }
 
 .reflex-discord-shell .admin-stat {
@@ -94,7 +108,7 @@
 .reflex-card{
   border-radius: var(--r-xl);
   border: 1px solid var(--lab-border-soft);
-  background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(0,0,0,.74));
+  background: rgba(0,0,0,0.58);
   box-shadow: var(--lab-shadow);
   backdrop-filter: blur(18px);
   padding: 1.15rem;
