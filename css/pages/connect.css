@@ -336,6 +336,19 @@ input:focus, select:focus, textarea:focus {
   margin-bottom: 1rem;
 }
 
+.chat-header {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.8rem;
+}
+
+.chat-group-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
 .chat-group-info {
   display: flex;
   align-items: center;
@@ -372,6 +385,42 @@ input:focus, select:focus, textarea:focus {
 
 .chat-settings-btn:active {
   transform: scale(0.95);
+}
+
+.chat-call-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 136, 0.14);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.chat-call-bar__status {
+  font-weight: 900;
+  letter-spacing: -0.2px;
+  color: rgba(224, 255, 224, 0.85);
+}
+
+.chat-call-bar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* voiceStatus state colors, now used inside call bar */
+#voiceStatus[data-state="ringing"] {
+  color: #ffd54a;
+}
+
+#voiceStatus[data-state="active"] {
+  color: #00ff88;
+}
+
+#voiceStatus[data-state="ended"] {
+  color: #ff3366;
 }
 
 /* Chat header call button should feel primary */
@@ -594,6 +643,11 @@ input:focus, select:focus, textarea:focus {
   color: #fff;
 }
 
+/* Ensure account quick modal sits above the fixed header */
+.modal-overlay#accountQuickModal {
+  z-index: 100002;
+}
+
 /* Voice Section */
 .voice-section {
   display: flex;
@@ -605,23 +659,7 @@ input:focus, select:focus, textarea:focus {
   border-radius: 12px;
 }
 
-.voice-status {
-  font-size: 1.1rem;
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.voice-status[data-state="ringing"] {
-  color: #ffd54a;
-}
-
-.voice-status[data-state="active"] {
-  color: #00ff88;
-}
-
-.voice-status[data-state="ended"] {
-  color: #ff3366;
-}
+/* (moved) voice status is now in .chat-call-bar via #voiceStatus */
 
 .voice-buttons {
   display: flex;
@@ -745,6 +783,24 @@ input:focus, select:focus, textarea:focus {
   font-size: 0.95rem;
 }
 
+.user-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 255, 136, 0.14);
+  background: rgba(0, 255, 136, 0.08);
+  color: rgba(224, 255, 224, 0.85);
+  font-size: 0.82em;
+  font-weight: 800;
+}
+
+.user-tag i {
+  color: #00ff88;
+}
+
 .member-status-row {
   display: inline-flex;
   align-items: center;
@@ -860,6 +916,34 @@ input:focus, select:focus, textarea:focus {
   border-radius: 6px;
   font-size: 0.9rem;
   cursor: pointer;
+}
+
+.member-search-item__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.member-search-item__initials {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(0, 255, 136, 0.12);
+  color: rgba(224, 255, 224, 0.92);
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  flex: 0 0 auto;
+}
+
+.member-search-item__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .member-search-item:hover {

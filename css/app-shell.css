@@ -2,7 +2,8 @@
    Scope carefully: keep selectors prefixed with .app-shell / .connect-page to avoid side effects. */
 
 .app-shell {
-  min-height: 100dvh;
+  /* body already has padding-top: var(--header-h) for the fixed header */
+  min-height: calc(100dvh - var(--header-h));
   display: grid;
   grid-template-columns: 72px 1fr;
   grid-template-rows: auto 1fr;
@@ -24,7 +25,7 @@
   position: sticky;
   top: 0;
   align-self: start;
-  height: 100dvh;
+  height: calc(100dvh - var(--header-h));
   padding: 10px 8px;
   background: rgba(0, 0, 0, 0.55);
   border-right: 1px solid rgba(0, 255, 136, 0.12);

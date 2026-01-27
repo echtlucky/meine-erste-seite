@@ -292,6 +292,7 @@ groups/{groupId}/voice-calls/{callId} {
 
   const voiceStatus = document.getElementById("voiceStatus");
   const voiceParticipants = document.getElementById("voiceParticipants");
+  const chatCallBar = document.getElementById("chatCallBar");
   const btnStartVoiceCall = document.getElementById("btnStartVoice");
   const btnStartRingingCall = null;
   const btnEndVoiceCall = document.getElementById("btnEndVoice");
@@ -984,6 +985,7 @@ groups/{groupId}/voice-calls/{callId} {
       if (voiceStatus) voiceStatus.textContent = statusText;
       uiCallState = state || uiCallState || "active";
       if (voiceStatus) voiceStatus.setAttribute("data-state", uiCallState);
+      if (chatCallBar) chatCallBar.hidden = false;
       if (btnStartVoiceCall) btnStartVoiceCall.hidden = true;
       // Start-call button is handled in the chat header (connect-minimal), not here.
       if (btnEndVoiceCall) btnEndVoiceCall.hidden = false;
@@ -997,6 +999,7 @@ groups/{groupId}/voice-calls/{callId} {
       if (voiceStatus) voiceStatus.textContent = "Nicht im Call";
       uiCallState = state || "idle";
       if (voiceStatus) voiceStatus.removeAttribute("data-state");
+      if (chatCallBar) chatCallBar.hidden = true;
       if (btnStartVoiceCall) btnStartVoiceCall.hidden = false;
       // Start-call button is handled in the chat header (connect-minimal), not here.
       if (btnEndVoiceCall) btnEndVoiceCall.hidden = true;

@@ -35,9 +35,9 @@
           <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
         </a>
         <div class="app-rail__spacer"></div>
-        <a class="app-rail__link" href="account.html" title="Account" aria-label="Account">
+        <button class="app-rail__link" id="btnQuickAccount" type="button" title="Account" aria-label="Account">
           <i class="fa-solid fa-user" aria-hidden="true"></i>
-        </a>
+        </button>
       </nav>
 
       <div class="app-shell__main">
@@ -125,6 +125,15 @@
                           </button>
                         </div>
                       </div>
+
+                      <!-- Call controls live under the chat header (no separate call panel) -->
+                      <div class="chat-call-bar" id="chatCallBar" hidden>
+                        <div class="chat-call-bar__status" id="voiceStatus">Nicht im Call</div>
+                        <div class="chat-call-bar__actions">
+                          <button class="btn btn-secondary" id="btnToggleMic" type="button" hidden>🔇 Stummschalten</button>
+                          <button class="btn btn-danger" id="btnEndVoice" type="button" hidden>☎️ Beenden</button>
+                        </div>
+                      </div>
                     </div>
 
                     <div class="chat-tabs" role="tablist" aria-label="Chat/Voice Tabs">
@@ -162,11 +171,8 @@
 
                     <div class="chat-tab-content" data-tab="voice" role="tabpanel">
                       <div class="voice-section">
-                        <div class="voice-status" id="voiceStatus">Nicht im Call</div>
                         <div class="voice-buttons">
                           <button class="btn btn-secondary" id="btnStartVoice" type="button">🎤 Voice beitreten</button>
-                          <button class="btn btn-danger" id="btnEndVoice" type="button" hidden>☎️ Beenden</button>
-                          <button class="btn btn-secondary" id="btnToggleMic" type="button" hidden>🔇 Stummschalten</button>
                         </div>
                         <div class="voice-participants" id="voiceParticipants"></div>
                       </div>
@@ -210,6 +216,9 @@
             </div>
           </section>
         </main>
+
+        <!-- Footer via fetch (kept inside app shell so it remains visible) -->
+        <div id="footer-placeholder"></div>
       </div>
     </div>
 
@@ -256,6 +265,23 @@
       </div>
     </div>
 
+    <!-- QUICK ACCOUNT (Rail) -->
+    <div id="accountQuickModal" class="modal-overlay" hidden aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title">Konto</h3>
+        </div>
+        <div class="modal-body">
+          <p class="modal-message">Was möchtest du tun?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn" id="btnAccountQuickClose" type="button">Schließen</button>
+          <a class="modal-btn primary" id="btnAccountQuickManage" href="account.html">Konto verwalten</a>
+          <button class="modal-btn modal-btn--reject" id="btnAccountQuickLogout" type="button">Ausloggen</button>
+        </div>
+      </div>
+    </div>
+
     <!-- INCOMING CALL MODAL & RINGTONE AUDIO -->
     <div id="incomingCallModal" class="modal-overlay" hidden>
       <div class="modal-dialog incoming-call-dialog">
@@ -280,9 +306,6 @@
       </div>
     </div>
     <audio id="callRingtone" preload="auto" loop hidden></audio>
-
-    <!-- Footer via fetch -->
-    <div id="footer-placeholder"></div>
 
     <!-- FIREBASE CDN (Compat v10.14.1) -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>

@@ -191,6 +191,24 @@
     return String(str || "").replace(/[&<>"']/g, (m) => map[m]);
   }
 
+  function splitUserTag(displayName) {
+    const s = String(displayName || "").trim();
+    const m = s.match(/^(.*?)[#](\d{3,6})$/);
+    if (!m) return null;
+
+    const name = (m[1] || "").trim();
+    const tag = (m[2] || "").trim();
+    if (!name || !tag) return null;
+    return { name, tag };
+  }
+
+  function renderUserDisplayName(displayName) {
+    const parts = splitUserTag(displayName);
+    if (!parts) return escapeHtml(displayName || "");
+
+    return `${escapeHtml(parts.name)} <span class="user-tag"><i class="fa-solid fa-star" aria-hidden="true"></i>${escapeHtml(parts.tag)}</span>`;
+  }
+
   // Load current user's friends list
   function loadCurrentUserFriends() {
     if (!currentUser) return;
@@ -404,7 +422,7 @@
             <div class="member-info">
               <div class="member-avatar">${escapeHtml(initials)}</div>
               <div class="member-details">
-                <div class="member-name">${escapeHtml(label)}</div>
+                <div class="member-name">${renderUserDisplayName(label)}</div>
                 <div class="member-status-row">
                   <span class="member-presence-dot" data-state="${escapeHtml(presenceState)}"></span>
                   <span class="member-status-text">${escapeHtml(presenceText)}</span>
@@ -499,7 +517,7 @@
         const time = formatTime(m.createdAt);
         return `
           <div class="message${isMine ? " is-mine" : ""}">
-            <div class="message-author">${escapeHtml(author)}</div>
+            <div class="message-author">${renderUserDisplayName(author)}</div>
             <div class="message-text">${escapeHtml(text)}</div>
             ${time ? `<div class="message-time">${escapeHtml(time)}</div>` : ""}
           </div>
@@ -689,7 +707,10 @@
 
           return `
             <div class="member-search-item">
-              <div>${escapeHtml(initials)} ${escapeHtml(u.displayName)}</div>
+              <div class="member-search-item__label">
+                <span class="member-search-item__initials">${escapeHtml(initials)}</span>
+                <span class="member-search-item__name">${renderUserDisplayName(u.displayName)}</span>
+              </div>
               <button class="btn btn-sm" data-add-member="${escapeHtml(u.uid)}">➕</button>
             </div>
           `;
@@ -913,7 +934,7 @@
                   <div class="friend-search-item-avatar" style="background: linear-gradient(135deg, #00ff88, #0088ff);">
                     ${initials}
                   </div>
-                  <div class="friend-search-item-name">${escapeHtml(user.displayName)}</div>
+                  <div class="friend-search-item-name">${renderUserDisplayName(user.displayName)}</div>
                   <div class="friend-search-item-action">
                     <button class="btn btn-sm" data-friend-uid="${escapeHtml(user.uid)}" data-friend-name="${escapeHtml(user.displayName)}">
                       ➕ Hinzufügen
@@ -1093,6 +1114,44 @@
         } else if (!connectMainCard.hasAttribute("data-mobile-panel")) {
           setMobilePanel("left");
         }
+      });
+    }
+
+    // Rail quick account modal (desktop + mobile)
+    const btnQuickAccount = document.getElementById("btnQuickAccount");
+    const accountQuickModal = document.getElementById("accountQuickModal");
+    const btnAccountQuickClose = document.getElementById("btnAccountQuickClose");
+    const btnAccountQuickLogout = document.getElementById("btnAccountQuickLogout");
+
+    if (btnQuickAccount && accountQuickModal && !btnQuickAccount.__wired) {
+      btnQuickAccount.__wired = true;
+
+      const openAccountQuick = () => {
+        accountQuickModal.hidden = false;
+        accountQuickModal.setAttribute("aria-hidden", "false");
+        setTimeout(() => accountQuickModal.classList.add("show"), 10);
+      };
+
+      const closeAccountQuick = () => {
+        accountQuickModal.classList.remove("show");
+        accountQuickModal.setAttribute("aria-hidden", "true");
+        setTimeout(() => (accountQuickModal.hidden = true), 200);
+      };
+
+      btnQuickAccount.addEventListener("click", openAccountQuick);
+      btnAccountQuickClose?.addEventListener("click", closeAccountQuick);
+
+      btnAccountQuickLogout?.addEventListener("click", () => {
+        closeAccountQuick();
+        window.logout?.();
+      });
+
+      accountQuickModal.addEventListener("click", (e) => {
+        if (e.target === accountQuickModal) closeAccountQuick();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !accountQuickModal.hidden) closeAccountQuick();
       });
     }
 
