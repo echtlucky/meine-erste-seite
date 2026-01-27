@@ -277,6 +277,9 @@
       </div>
     </div>
 
+    <!-- GROUP CONTEXT MENU (Desktop right-click) -->
+    <div class="context-menu" id="groupContextMenu" hidden role="menu" aria-label="Gruppenmenü"></div>
+
     <!-- QUICK ACCOUNT (Rail) -->
     <div id="accountQuickModal" class="modal-overlay" hidden aria-hidden="true">
       <div class="modal-dialog">
@@ -285,6 +288,15 @@
         </div>
         <div class="modal-body">
           <p class="modal-message">Was möchtest du tun?</p>
+          <div class="account-quick-devices" aria-label="Audio Einstellungen">
+            <label class="account-quick-devices__label" for="audioInputSelect">🎙️ Mikrofon</label>
+            <select id="audioInputSelect" class="account-quick-devices__select"></select>
+
+            <label class="account-quick-devices__label" for="audioOutputSelect">🔊 Ausgabe</label>
+            <select id="audioOutputSelect" class="account-quick-devices__select"></select>
+
+            <p class="account-quick-devices__hint">Geräteauswahl wirkt ab dem nächsten Call (Browser-Funktion).</p>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="modal-btn" id="btnAccountQuickClose" type="button">Schließen</button>

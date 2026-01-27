@@ -1,10 +1,11 @@
 /* Group Settings Modal Sections */
 .settings-section {
-  background: #23272a;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(0, 255, 136, 0.12);
   border-radius: 1.2rem;
-  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45);
   padding: 1.5rem 1.5rem 1.2rem 1.5rem;
-  color: #fff;
+  color: var(--text);
   margin-bottom: 0;
 }
 @media (max-width: 700px) {
@@ -26,12 +27,27 @@
 }
 
 .connect-main-card {
+  position: relative;
   background: rgba(0, 0, 0, 0.52);
   border: 1px solid rgba(0, 255, 136, 0.14);
   border-radius: 18px;
   box-shadow: 0 26px 90px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   overflow: hidden;
+}
+
+.connect-main-card::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(900px 520px at 10% 0%, rgba(0, 255, 136, 0.14), transparent 60%),
+    radial-gradient(900px 520px at 90% 0%, rgba(88, 101, 242, 0.10), transparent 55%);
+  pointer-events: none;
+}
+
+.connect-main-card > *{
+  position: relative;
 }
 
 .connect-mobile-switcher {
@@ -115,21 +131,27 @@
    Base styles come from css/style.css (.btn).
    Keep Connect CSS focused on layout/states only. */
 
-/* Input Styles */
-input, select, textarea {
-  background: var(--bg-panel);
+/* Input Styles (scoped) */
+.connect-page input,
+.connect-page select,
+.connect-page textarea {
+  background: rgba(0, 0, 0, 0.55);
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.7em 1em;
+  border: 1px solid rgba(0, 255, 136, 0.14);
+  border-radius: 12px;
+  padding: 0.75em 1em;
   font-size: 1rem;
   margin-bottom: 1rem;
   width: 100%;
   box-sizing: border-box;
 }
-input:focus, select:focus, textarea:focus {
+
+.connect-page input:focus,
+.connect-page select:focus,
+.connect-page textarea:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: rgba(0, 255, 136, 0.38);
+  box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.12);
 }
 
 /* ==========================================
@@ -213,7 +235,7 @@ input:focus, select:focus, textarea:focus {
 
 .group-item {
   padding: 1rem;
-  background: rgba(0, 255, 136, 0.05);
+  background: linear-gradient(180deg, rgba(0, 255, 136, 0.06), rgba(255, 255, 255, 0.02));
   border: 1px solid rgba(0, 255, 136, 0.15);
   border-radius: 10px;
   cursor: pointer;
@@ -221,14 +243,14 @@ input:focus, select:focus, textarea:focus {
 }
 
 .group-item:hover {
-  background: rgba(0, 255, 136, 0.12);
-  border-color: rgba(0, 255, 136, 0.3);
+  background: linear-gradient(180deg, rgba(0, 255, 136, 0.12), rgba(255, 255, 255, 0.03));
+  border-color: rgba(0, 255, 136, 0.30);
   transform: translateX(4px);
 }
 
 .group-item.is-active {
-  background: rgba(0, 255, 136, 0.2);
-  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(0, 255, 136, 0.16), rgba(0, 0, 0, 0.32));
+  border-color: rgba(0, 255, 136, 0.40);
 }
 
 .group-item-name {
@@ -252,9 +274,9 @@ input:focus, select:focus, textarea:focus {
 .friend-search-input {
   width: 100%;
   padding: 0.75rem;
-  background: rgba(0, 255, 136, 0.05);
-  border: 1px solid rgba(0, 255, 136, 0.2);
-  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(0, 255, 136, 0.14);
+  border-radius: 12px;
   color: var(--text);
   font-size: 0.9rem;
 }
@@ -265,8 +287,8 @@ input:focus, select:focus, textarea:focus {
 
 .friend-search-input:focus {
   outline: none;
-  border-color: var(--accent);
-  background: rgba(0, 255, 136, 0.1);
+  border-color: rgba(0, 255, 136, 0.38);
+  box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.12);
 }
 
 .friends-search-results {
@@ -1299,7 +1321,7 @@ input:focus, select:focus, textarea:focus {
   .chat-header {
     position: sticky;
     top: 0;
-    background: rgba(0,0,0,0.92);
+    background: rgba(0, 0, 0, 0.86);
     z-index: 10;
     padding-bottom: 0.5rem;
     margin-bottom: 0.5rem;
@@ -1308,7 +1330,7 @@ input:focus, select:focus, textarea:focus {
     position: sticky;
     bottom: 0;
     z-index: 10;
-    background: rgba(0, 0, 0, 0.92);
+    background: rgba(0, 0, 0, 0.86);
     border: 1px solid rgba(0, 255, 136, 0.12);
     padding: calc(0.6rem + env(safe-area-inset-bottom)) 0.4rem 0.6rem 0.4rem;
   }
@@ -1321,7 +1343,7 @@ input:focus, select:focus, textarea:focus {
   .chat-input-area {
     position: sticky;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.92);
+    background: rgba(0, 0, 0, 0.86);
     padding: calc(0.6rem + env(safe-area-inset-bottom)) 0.4rem 0.6rem 0.4rem;
     border-top: 1px solid rgba(0, 255, 136, 0.12);
     z-index: 10;
@@ -1342,4 +1364,92 @@ input:focus, select:focus, textarea:focus {
     border-radius: 14px;
     font-size: 1.02rem;
   }
+}
+
+/* ============================================
+   Context Menu (Groups right-click)
+   ============================================ */
+
+.connect-page .context-menu{
+  position: fixed;
+  z-index: 2500;
+  min-width: 220px;
+  max-width: min(320px, calc(100vw - 24px));
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid var(--border-soft);
+  background: linear-gradient(180deg, rgba(0,0,0,0.78), rgba(0,0,0,0.62));
+  box-shadow: 0 22px 70px rgba(0,0,0,0.62);
+  backdrop-filter: blur(14px);
+}
+
+.connect-page .context-menu[hidden]{ display:none !important; }
+
+.connect-page .context-menu__item{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.connect-page .context-menu__item .context-menu__hint{
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.connect-page .context-menu__item:hover{
+  background: rgba(0,255,136,0.08);
+  border-color: rgba(0,255,136,0.16);
+}
+
+.connect-page .context-menu__item:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0,255,136,0.22);
+}
+
+.connect-page .context-menu__item[data-variant="danger"]{
+  color: rgba(255, 94, 128, 0.98);
+}
+
+.connect-page .context-menu__sep{
+  height: 1px;
+  margin: 8px 6px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* ============================================
+   Quick Account: Device Selectors
+   ============================================ */
+
+.connect-page .account-quick-devices{
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: grid;
+  gap: 8px;
+}
+
+.connect-page .account-quick-devices__label{
+  font-weight: 700;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+
+.connect-page .account-quick-devices__select{
+  margin: 0;
+}
+
+.connect-page .account-quick-devices__hint{
+  margin: 6px 0 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
 }

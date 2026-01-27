@@ -279,6 +279,7 @@ groups/{groupId}/voice-calls/{callId} {
   let micCompressorNode = null;
   let screenStream = null;
   let screenTrack = null;
+  let screenAudioSourceNode = null;
   const videoSenders = new Map(); // remoteUid -> RTCRtpSender
   let isMicMuted = false;
   let uiCallState = "idle"; // idle | ringing | active | ended
@@ -321,10 +322,45 @@ groups/{groupId}/voice-calls/{callId} {
     return window.matchMedia ? window.matchMedia("(max-width: 900px)").matches : false;
   }
 
+  const AUDIO_INPUT_KEY = "echtlucky:audioInputDeviceId";
+  const AUDIO_OUTPUT_KEY = "echtlucky:audioOutputDeviceId";
+
+  function getStoredDeviceId(key) {
+    try {
+      return localStorage.getItem(key) || "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function buildAudioConstraints() {
+    const base = {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+      typingNoiseDetection: true
+    };
+
+    const deviceId = getStoredDeviceId(AUDIO_INPUT_KEY);
+    if (!deviceId) return base;
+
+    // "ideal" avoids hard failure when the device disappeared.
+    return { ...base, deviceId: { ideal: deviceId } };
+  }
+
+  function applyPreferredOutputDevice(audioEl) {
+    const deviceId = getStoredDeviceId(AUDIO_OUTPUT_KEY);
+    if (!deviceId) return;
+    if (!audioEl || typeof audioEl.setSinkId !== "function") return;
+
+    audioEl.setSinkId(deviceId).catch(() => {});
+  }
+
   function cleanupAudioProcessing() {
     try { micSourceNode?.disconnect(); } catch {}
     try { micCompressorNode?.disconnect(); } catch {}
     try { micGainNode?.disconnect(); } catch {}
+    try { screenAudioSourceNode?.disconnect?.(); } catch {}
     try { audioContext?.close?.(); } catch {}
 
     micSourceNode = null;
@@ -332,6 +368,7 @@ groups/{groupId}/voice-calls/{callId} {
     micGainNode = null;
     audioContext = null;
     processedStream = null;
+    screenAudioSourceNode = null;
   }
 
   function ensureAudioProcessing() {
@@ -436,17 +473,32 @@ groups/{groupId}/voice-calls/{callId} {
       }
 
       const preset = getSharePreset();
-      screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          frameRate: 30,
-          width: { ideal: preset.width },
-          height: { ideal: preset.height }
-        },
-        audio: false
-      });
+      // Try to capture system/tab audio too (browser-dependent). If it fails, fall back to video-only.
+      try {
+        screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            frameRate: 30,
+            width: { ideal: preset.width },
+            height: { ideal: preset.height }
+          },
+          audio: true
+        });
+      } catch (_) {
+        screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            frameRate: 30,
+            width: { ideal: preset.width },
+            height: { ideal: preset.height }
+          },
+          audio: false
+        });
+      }
 
       screenTrack = screenStream.getVideoTracks()[0] || null;
       if (!screenTrack) return;
+
+      // Improve screen/video quality hints when supported.
+      try { screenTrack.contentHint = "detail"; } catch {}
 
       try {
         await screenTrack.applyConstraints({
@@ -455,6 +507,32 @@ groups/{groupId}/voice-calls/{callId} {
           frameRate: 30
         });
       } catch {}
+
+      // Mix display audio into our outgoing audio track (no renegotiation required),
+      // only if we have audio processing enabled (AudioContext).
+      const displayAudioTrack = screenStream.getAudioTracks()?.[0] || null;
+      if (displayAudioTrack) {
+        ensureAudioProcessing();
+        try { await audioContext?.resume?.(); } catch {}
+
+        if (audioContext && micCompressorNode) {
+          try {
+            screenAudioSourceNode?.disconnect?.();
+          } catch {}
+          try {
+            const displayAudioStream = new MediaStream([displayAudioTrack]);
+            screenAudioSourceNode = audioContext.createMediaStreamSource(displayAudioStream);
+            screenAudioSourceNode.connect(micCompressorNode);
+          } catch (_) {
+            // If mixing fails, keep screen share without audio.
+            try { displayAudioTrack.stop(); } catch {}
+            screenAudioSourceNode = null;
+          }
+        } else {
+          // Browser doesn't allow mixing here; keep video-only share.
+          try { displayAudioTrack.stop(); } catch {}
+        }
+      }
 
       showScreenShareArea(true);
       upsertVideoEl("local-screen-preview", new MediaStream([screenTrack]), true);
@@ -490,8 +568,10 @@ groups/{groupId}/voice-calls/{callId} {
   }
 
   function stopScreenShare() {
-    try { screenTrack?.stop?.(); } catch {}
+    try { screenStream?.getTracks?.().forEach((t) => t.stop()); } catch {}
     screenTrack = null;
+    try { screenAudioSourceNode?.disconnect?.(); } catch {}
+    screenAudioSourceNode = null;
     screenStream = null;
 
     peerConnections.forEach((pc, remoteUid) => {
@@ -568,6 +648,7 @@ groups/{groupId}/voice-calls/{callId} {
         document.body.appendChild(audioElement);
       }
       
+      applyPreferredOutputDevice(audioElement);
       audioElement.srcObject = remoteStream;
       audioElement.play().catch(e => log("Auto-play blocked:", e));
     };
@@ -865,12 +946,7 @@ groups/{groupId}/voice-calls/{callId} {
       }
 
       localStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          typingNoiseDetection: true
-        },
+        audio: buildAudioConstraints(),
         video: false
       });
       cleanupAudioProcessing();
@@ -950,12 +1026,7 @@ groups/{groupId}/voice-calls/{callId} {
 
       // Request microphone
       localStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          typingNoiseDetection: true
-        },
+        audio: buildAudioConstraints(),
         video: false
       });
       cleanupAudioProcessing();
@@ -1040,12 +1111,7 @@ groups/{groupId}/voice-calls/{callId} {
 
       // Request microphone
       localStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          typingNoiseDetection: true
-        },
+        audio: buildAudioConstraints(),
         video: false
       });
       cleanupAudioProcessing();
@@ -1409,6 +1475,25 @@ groups/{groupId}/voice-calls/{callId} {
         } else {
           await startScreenShare();
         }
+      });
+    }
+
+    if (shareQualitySelect) {
+      shareQualitySelect.addEventListener("change", async () => {
+        if (!screenTrack) return;
+        const preset = getSharePreset();
+        try {
+          await screenTrack.applyConstraints({
+            width: preset.width,
+            height: preset.height,
+            frameRate: 30
+          });
+        } catch {}
+
+        peerConnections.forEach((pc, remoteUid) => {
+          const sender = videoSenders.get(remoteUid);
+          if (sender) setVideoSenderBitrate(sender);
+        });
       });
     }
 

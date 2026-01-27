@@ -51,6 +51,7 @@
   const btnLogin = document.getElementById("btnLogin");
   const connectLayout = document.getElementById("connectLayout");
   const groupsListPanel = document.getElementById("groupsListPanel");
+  const groupContextMenu = document.getElementById("groupContextMenu");
   const btnCreateGroup = document.getElementById("btnCreateGroup");
   const friendSearchInput = document.getElementById("friendSearchInput");
   const friendsSearchResults = document.getElementById("friendsSearchResults");
@@ -63,6 +64,8 @@
   let friendSearchTimeout = null;
   let currentUserFriends = [];
   const userCache = new Map(); // uid -> { displayName, email }
+  const groupsCache = new Map(); // groupId -> groupData (from snapshot)
+  let groupContextState = null; // { groupId, groupData }
   const connectMainCard = document.querySelector(".connect-main-card");
   const mobileSwitcher = document.querySelector(".connect-mobile-switcher");
 
@@ -232,6 +235,7 @@
       db.collection("groups")
         .where("members", "array-contains", currentUser.uid)
         .onSnapshot((snapshot) => {
+          groupsCache.clear();
           groupsListPanel.innerHTML = "";
 
           if (snapshot.empty) {
@@ -242,16 +246,22 @@
 
           snapshot.forEach((doc) => {
             const group = doc.data();
+            groupsCache.set(doc.id, group);
             const div = document.createElement("div");
             div.className = "group-item";
             if (selectedGroupId === doc.id) div.classList.add("is-active");
 
             div.innerHTML = `
               <div class="group-item-name">${escapeHtml(group.name || "Gruppe")}</div>
-              <div class="group-item-meta">${group.members?.length || 0} Members</div>
+              <div class="group-item-meta">${group.members?.length || 0} Mitglieder</div>
             `;
 
             div.addEventListener("click", () => selectGroup(doc.id, group, div));
+            div.addEventListener("contextmenu", (e) => {
+              e.preventDefault();
+              selectGroup(doc.id, group, div);
+              openGroupContextMenu(e.clientX, e.clientY, doc.id, group);
+            });
             groupsListPanel.appendChild(div);
           });
         });
@@ -324,6 +334,151 @@
     if (groupDoc.createdBy === uid) return true;
     if (groupDoc.roles && groupDoc.roles[uid] === "admin") return true;
     return false;
+  }
+
+  function canDeleteGroup(groupDoc) {
+    const uid = auth?.currentUser?.uid;
+    if (!uid || !groupDoc) return false;
+    // Destructive action: restrict to creator only.
+    return groupDoc.createdBy === uid;
+  }
+
+  function closeGroupContextMenu() {
+    if (!groupContextMenu) return;
+    groupContextMenu.hidden = true;
+    groupContextMenu.style.left = "";
+    groupContextMenu.style.top = "";
+    groupContextMenu.innerHTML = "";
+    groupContextState = null;
+  }
+
+  function positionContextMenu(x, y) {
+    if (!groupContextMenu) return;
+
+    const margin = 10;
+    const vw = window.innerWidth || 0;
+    const vh = window.innerHeight || 0;
+
+    // Place near cursor first; then clamp into viewport after measuring.
+    groupContextMenu.style.left = `${Math.max(margin, Math.min(x, vw - margin))}px`;
+    groupContextMenu.style.top = `${Math.max(margin, Math.min(y, vh - margin))}px`;
+
+    const rect = groupContextMenu.getBoundingClientRect();
+    let left = rect.left;
+    let top = rect.top;
+
+    if (rect.right > vw - margin) left = Math.max(margin, vw - margin - rect.width);
+    if (rect.bottom > vh - margin) top = Math.max(margin, vh - margin - rect.height);
+
+    groupContextMenu.style.left = `${left}px`;
+    groupContextMenu.style.top = `${top}px`;
+  }
+
+  function renderContextMenuItems(items) {
+    if (!groupContextMenu) return;
+
+    groupContextMenu.innerHTML = items
+      .map((it) => {
+        if (it.type === "sep") return '<div class="context-menu__sep" role="separator"></div>';
+        const variantAttr = it.variant ? ` data-variant="${escapeHtml(it.variant)}"` : "";
+        const hint = it.hint ? `<span class="context-menu__hint">${escapeHtml(it.hint)}</span>` : "";
+        return `<button class="context-menu__item" type="button" data-action="${escapeHtml(it.action)}"${variantAttr} role="menuitem">${escapeHtml(it.label)}${hint}</button>`;
+      })
+      .join("");
+  }
+
+  async function renameGroup(groupId, groupDoc) {
+    if (!groupId || !groupDoc) return;
+    if (!canManageGroupMembers(groupDoc)) {
+      window.notify?.show({
+        type: "warn",
+        title: "Keine Berechtigung",
+        message: "Du darfst diese Gruppe nicht verwalten.",
+        duration: 3500
+      });
+      return;
+    }
+
+    const nextName = await window.echtluckyModal?.input?.({
+      title: "Gruppe umbenennen",
+      placeholder: "Neuer Gruppenname…",
+      confirmText: "Speichern",
+      cancelText: "Abbrechen",
+      initialValue: groupDoc.name || ""
+    });
+
+    if (!nextName) return;
+
+    try {
+      await db.collection("groups").doc(groupId).update({ name: String(nextName).slice(0, 60) });
+      window.notify?.show({
+        type: "success",
+        title: "Gespeichert",
+        message: "Gruppenname aktualisiert.",
+        duration: 2500
+      });
+    } catch (err) {
+      console.error("renameGroup error:", err);
+      window.notify?.show({
+        type: "error",
+        title: "Fehler",
+        message: "Konnte nicht umbenennen.",
+        duration: 4500
+      });
+    }
+  }
+
+  function focusAddMemberUi(groupDoc) {
+    if (!groupDoc || !canManageGroupMembers(groupDoc)) {
+      window.notify?.show({
+        type: "warn",
+        title: "Keine Berechtigung",
+        message: "Du darfst keine Mitglieder hinzufügen.",
+        duration: 3500
+      });
+      return;
+    }
+
+    // Mobile: switch to members panel
+    if (connectMainCard && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
+      connectMainCard.setAttribute("data-mobile-panel", "right");
+      document.querySelectorAll(".connect-mobile-tab").forEach((b) => {
+        const isActive = b.dataset.panel === "right";
+        b.classList.toggle("is-active", isActive);
+        b.setAttribute("aria-selected", String(isActive));
+      });
+    }
+
+    const membersAddSection = document.getElementById("membersAddSection");
+    if (membersAddSection) membersAddSection.hidden = false;
+
+    const input = document.getElementById("addMemberInput");
+    input?.focus?.();
+    input?.select?.();
+  }
+
+  function openGroupContextMenu(x, y, groupId, groupDoc) {
+    if (!groupContextMenu) return;
+
+    const items = [];
+    if (!groupId || !groupDoc) {
+      items.push({ action: "create", label: "Neue Gruppe erstellen", hint: "+" });
+    } else {
+      items.push({ action: "rename", label: "Umbenennen" });
+      items.push({ action: "add-member", label: "Mitglied hinzufügen" });
+      items.push({ type: "sep" });
+      items.push({ action: "leave", label: "Gruppe verlassen" });
+      if (canDeleteGroup(groupDoc)) {
+        items.push({ action: "delete", label: "Gruppe löschen", variant: "danger" });
+      }
+    }
+
+    groupContextState = groupId ? { groupId, groupData: groupDoc } : null;
+    renderContextMenuItems(items);
+    groupContextMenu.hidden = false;
+    positionContextMenu(x, y);
+
+    groupContextMenu.querySelector(".context-menu__item")?.focus?.();
   }
 
   function getCachedUserLabel(uid) {
@@ -1122,14 +1277,113 @@
     const accountQuickModal = document.getElementById("accountQuickModal");
     const btnAccountQuickClose = document.getElementById("btnAccountQuickClose");
     const btnAccountQuickLogout = document.getElementById("btnAccountQuickLogout");
+    const audioInputSelect = document.getElementById("audioInputSelect");
+    const audioOutputSelect = document.getElementById("audioOutputSelect");
 
     if (btnQuickAccount && accountQuickModal && !btnQuickAccount.__wired) {
       btnQuickAccount.__wired = true;
+
+      const AUDIO_INPUT_KEY = "echtlucky:audioInputDeviceId";
+      const AUDIO_OUTPUT_KEY = "echtlucky:audioOutputDeviceId";
+
+      const getStored = (key) => {
+        try { return localStorage.getItem(key) || ""; } catch (_) { return ""; }
+      };
+
+      const setStored = (key, value) => {
+        try { localStorage.setItem(key, value || ""); } catch (_) {}
+      };
+
+      const fillSelect = (selectEl, devices, storedId, placeholder) => {
+        if (!selectEl) return;
+        selectEl.innerHTML = "";
+
+        const optAuto = document.createElement("option");
+        optAuto.value = "";
+        optAuto.textContent = placeholder || "Automatisch";
+        selectEl.appendChild(optAuto);
+
+        (devices || []).forEach((d, idx) => {
+          const opt = document.createElement("option");
+          opt.value = d.deviceId || "";
+          opt.textContent = d.label || `${placeholder || "Gerät"} ${idx + 1}`;
+          selectEl.appendChild(opt);
+        });
+
+        selectEl.value = storedId || "";
+      };
+
+      const refreshDeviceSelectors = async () => {
+        if (!audioInputSelect && !audioOutputSelect) return;
+        if (!navigator.mediaDevices?.enumerateDevices) {
+          if (audioInputSelect) {
+            audioInputSelect.innerHTML = '<option value="">Nicht unterstützt</option>';
+            audioInputSelect.disabled = true;
+          }
+          if (audioOutputSelect) {
+            audioOutputSelect.innerHTML = '<option value="">Nicht unterstützt</option>';
+            audioOutputSelect.disabled = true;
+          }
+          return;
+        }
+
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const inputs = devices.filter((d) => d.kind === "audioinput");
+          const outputs = devices.filter((d) => d.kind === "audiooutput");
+
+          if (audioInputSelect) {
+            audioInputSelect.disabled = false;
+            fillSelect(audioInputSelect, inputs, getStored(AUDIO_INPUT_KEY), "Automatisch");
+          }
+
+          if (audioOutputSelect) {
+            const canSetSink = !!HTMLMediaElement.prototype.setSinkId;
+            audioOutputSelect.disabled = !canSetSink;
+            fillSelect(audioOutputSelect, outputs, getStored(AUDIO_OUTPUT_KEY), canSetSink ? "Automatisch" : "Nicht verfügbar");
+          }
+        } catch (err) {
+          console.warn("refreshDeviceSelectors error:", err);
+        }
+      };
+
+      if (audioInputSelect && !audioInputSelect.__wired) {
+        audioInputSelect.__wired = true;
+        audioInputSelect.addEventListener("change", () => {
+          setStored(AUDIO_INPUT_KEY, audioInputSelect.value);
+          window.notify?.show({
+            type: "success",
+            title: "Mikrofon",
+            message: "Auswahl gespeichert (wirkt ab dem nächsten Call).",
+            duration: 2500
+          });
+        });
+      }
+
+      if (audioOutputSelect && !audioOutputSelect.__wired) {
+        audioOutputSelect.__wired = true;
+        audioOutputSelect.addEventListener("change", () => {
+          setStored(AUDIO_OUTPUT_KEY, audioOutputSelect.value);
+          window.notify?.show({
+            type: "success",
+            title: "Audio-Ausgabe",
+            message: "Auswahl gespeichert (Browser-abhängig).",
+            duration: 2500
+          });
+        });
+      }
+
+      if (navigator.mediaDevices?.addEventListener) {
+        navigator.mediaDevices.addEventListener("devicechange", () => {
+          if (!accountQuickModal.hidden) refreshDeviceSelectors();
+        });
+      }
 
       const openAccountQuick = () => {
         accountQuickModal.hidden = false;
         accountQuickModal.setAttribute("aria-hidden", "false");
         setTimeout(() => accountQuickModal.classList.add("show"), 10);
+        refreshDeviceSelectors();
       };
 
       const closeAccountQuick = () => {
@@ -1171,6 +1425,66 @@
 
         window.echtlucky?.voiceChat?.startRingingCall?.(selectedGroupId);
       });
+    }
+
+    // Groups: right-click context menu (desktop)
+    if (groupsListPanel && groupContextMenu) {
+      // Right-click on empty area -> quick create
+      groupsListPanel.addEventListener("contextmenu", (e) => {
+        if (e.target?.closest?.(".group-item")) return;
+        e.preventDefault();
+        openGroupContextMenu(e.clientX, e.clientY, null, null);
+      });
+
+      groupContextMenu.addEventListener("click", (e) => {
+        const btn = e.target?.closest?.(".context-menu__item");
+        if (!btn) return;
+
+        const action = btn.getAttribute("data-action") || "";
+        const state = groupContextState;
+        closeGroupContextMenu();
+
+        if (action === "create") {
+          createGroup();
+          return;
+        }
+
+        if (!state?.groupId || !state?.groupData) return;
+
+        if (action === "rename") {
+          renameGroup(state.groupId, state.groupData);
+          return;
+        }
+
+        if (action === "add-member") {
+          focusAddMemberUi(state.groupData);
+          return;
+        }
+
+        if (action === "leave") {
+          leaveSelectedGroup().catch((err) => console.error(err));
+          return;
+        }
+
+        if (action === "delete") {
+          deleteSelectedGroup().catch((err) => console.error(err));
+          return;
+        }
+      });
+
+      // Close on outside click / escape / scroll / resize
+      document.addEventListener("pointerdown", (e) => {
+        if (groupContextMenu.hidden) return;
+        if (e.target === groupContextMenu || e.target?.closest?.("#groupContextMenu")) return;
+        closeGroupContextMenu();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeGroupContextMenu();
+      });
+
+      window.addEventListener("resize", closeGroupContextMenu);
+      window.addEventListener("scroll", closeGroupContextMenu, true);
     }
 
     initGroupSettingsModal();
