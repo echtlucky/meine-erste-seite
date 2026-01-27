@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Schriftgenerator | echtlucky</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/fonts.css" />
+  </head>
+
+  <body class="page-transition fonts-page">
+    <div class="group-strip group-strip--home" data-group-strip="home" aria-label="Gruppen-Leiste"></div>
+
+    <div class="app-shell">
+      <header class="app-topbar">
+        <div id="header-placeholder"></div>
+      </header>
+
+      <main class="container fonts-shell">
+        <section class="fonts-hero">
+          <div class="fonts-hero__text">
+            <span class="fonts-tag">Schriftgenerator</span>
+            <h1>Mach deinen Namen einzigartig</h1>
+            <p>
+              20 Styles für Games, Socials und die Connect Zone. Highlight: Community Tag
+              <strong>ˡᶜᵏʸ</strong>.
+            </p>
+          </div>
+
+          <div class="fonts-hero__actions">
+            <button class="btn btn-secondary" id="btnUseLcky" type="button">„ˡᶜᵏʸ“ preset</button>
+            <button class="btn" id="btnCopyBest" type="button">Besten Style kopieren</button>
+          </div>
+        </section>
+
+        <section class="fonts-card">
+          <header class="fonts-card__head">
+            <div>
+              <p class="card-label">Input</p>
+              <h2>Dein Text</h2>
+            </div>
+            <div class="fonts-tools">
+              <input
+                id="fontsFilter"
+                class="fonts-filter"
+                type="search"
+                placeholder="Style suchen…"
+                autocomplete="off"
+              />
+              <button class="btn btn-sm btn-secondary" id="btnResetFonts" type="button">Reset</button>
+            </div>
+          </header>
+
+          <div class="fonts-input">
+            <label for="fontsText" class="fonts-label">Text</label>
+            <input
+              id="fontsText"
+              type="text"
+              placeholder="z.B. lucassteckel"
+              autocomplete="off"
+              maxlength="40"
+            />
+            <p class="fonts-hint" id="fontsHint">Tipp: Klick auf einen Style kopiert ihn direkt.</p>
+          </div>
+        </section>
+
+        <section class="fonts-card">
+          <header class="fonts-card__head">
+            <div>
+              <p class="card-label">Styles</p>
+              <h2>Vorschau</h2>
+            </div>
+            <div class="fonts-pill" id="fontsCount">0 Styles</div>
+          </header>
+
+          <div class="fonts-grid" id="fontsGrid" aria-label="Schriften Vorschau"></div>
+        </section>
+      </main>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="firebase.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/legal-modal.js"></script>
+    <script src="js/notify.js"></script>
+    <script src="js/modal-dialog.js"></script>
+    <script src="js/group-strip.js"></script>
+    <script src="js/fonts.js"></script>
+
+    <script>
+      document.body.classList.add("loaded");
+
+      fetch("header.html?v=" + Date.now())
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("header-placeholder").innerHTML = html;
+          if (typeof initHeaderScripts === "function") initHeaderScripts();
+          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+          window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
+        });
+
+      fetch("footer.html?v=" + Date.now())
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("footer-placeholder").innerHTML = html;
+        });
+    </script>
+  </body>
+</html>
+
