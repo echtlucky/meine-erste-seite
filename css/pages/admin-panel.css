@@ -605,6 +605,15 @@ body.admin-page{
 
 /* Responsive */
 @media (max-width: 900px){
+  .admin-shell{
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar{
+    position: static;
+    height: auto;
+  }
+
   .admin-hero{
     flex-direction: column;
     align-items: flex-start;

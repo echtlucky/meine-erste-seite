@@ -1,32 +1,31 @@
 # TODO (Priorisiert) — UI/UX + Layout + Fixes
 
 ## P0 — Blocker / kaputte Seiten
-- [ ] `blog.html`: Datei ist aktuell **ungültiges HTML** (Code steht nach `</html>`), deshalb wird die Seite leer/kaputt gerendert → bereinigen, `js/blog.js` korrekt einbinden, Header/Footer laden, `body.loaded` setzen.
-- [ ] `account.html`: Datei ist ebenfalls **vermischt/duplicated** (zweiter Block nach `</html>` + mehrfach `#footer-placeholder`) → bereinigen, nur 1 Footer-Placeholder, korrektes Script-Setup (`js/account.js`), responsive Layout.
-- [ ] `admin-panel.html`: Datei ist **duplicated** (doppeltes `#footer-placeholder` + extra Content nach `</html>`) → bereinigen, Tabs zuverlässig, Logs-Bereich neu strukturieren.
+- [x] `blog.html`: ungültiges HTML gefixt → Seite rendert wieder, `js/blog.js` eingebunden, Header/Footer + `body.loaded`.
+- [x] `account.html`: vermischtes/duplicated HTML gefixt → 1 Footer-Placeholder, modernes Layout, Scripts korrekt.
+- [x] `admin-panel.html`: duplicated HTML gefixt → neue Struktur + Tabs wieder klickbar.
 
 ## P1 — Globales Layout (alle Seiten)
-- [ ] Hintergrundbild entfernen (nur noch “Kacheln/Tile”-Look über CSS, kein Unsplash-Foto).
-- [ ] Cards/Seiten-Container sollen **100% Breite** nutzen (keine festen max-width Container) und sauber mitskalieren.
-- [ ] Footer auf **allen Seiten** immer am unteren Rand (keine Placeholder-Duplikate, Layout-Flex/MinHeight sauber).
+- [x] Hintergrundbild entfernt (nur noch CSS-“Kacheln”, kein Unsplash-Foto).
+- [x] Container/Seiten-Shells auf **Fullwidth** umgestellt (Home/Blog/Ranked/Reflex/Connect/Account/Admin).
+- [x] Footer: Duplikate entfernt + Layout so, dass Footer wieder am Rand sitzt.
 
 ## P1 — Connect Mobile UX (Handy)
-- [ ] Mobile Layout von Connect neu ausrichten (weniger „links-lastig“, klare Hierarchie).
+- [~] Mobile Layout von Connect neu ausrichten (Re-Layout + sticky Bottom-Tabs; weitere Feinschliffe noch offen).
 - [ ] Touch-Ziele/Spacing optimieren (Tabs, Buttons, Lists).
 - [ ] Screen-Share Viewer auf Mobile: stabil, immer auffindbar, Reopen-Flow über Call-Bar.
 
 ## P1 — Account Seite (Style wie Startseite)
-- [ ] `css/pages/account.css`: Discord-graue Optik raus, Home/Glass-Theme rein.
-- [ ] Sections als Tiles/Fullwidth, responsiv (Grid → Stack).
-- [ ] Footer/Scroll-Bugs entfernen (Inhalte dürfen nicht unter dem Rand “verschwinden”).
+- [x] `account.html` auf modernes Tiles-Layout umgestellt.
+- [x] Fullwidth + Footer/Scroll-Bugs entfernt (keine doppelten Placeholder mehr).
+- [ ] `css/pages/account.css`: weitere Cleanup-Runde (alte Discord-Styles komplett entfernen statt nur scopen).
 
 ## P1 — Admin Panel (Logs links, zuverlässig)
-- [ ] „Aktivität“ → **Logs**: links als dauerhaft sichtbare Card (Sticky/Sidebar).
-- [ ] Logs-Quelle stabilisieren (kein zufälliges UI-Flackern, klare Reihenfolge, Limit/Load more).
-- [ ] Tabs/Navigation: „Logs“ aus der Top-Menüleiste entfernen (weil links), Rest-Tabs wieder klickbar.
+- [x] Logs links als Sidebar-Card (Sticky) + „Logs“ aus Top-Nav entfernt.
+- [x] Logs stabilisiert: Realtime Listener auf `admin-logs` (geordnet, limit).
+- [x] Tabs/Navigation wieder klickbar (HTML/JS Klassen konsistent).
 
 ## P2 — Cleanup / Qualität
 - [ ] Encoding/UTF-8 Probleme entfernen (kaputte Umlaute/Emoji in HTML/JS).
 - [ ] Doppelte/alte CSS-Selektoren entfernen, Mobile-first konsolidieren.
 - [ ] Smoke-Checks: JS Syntax ok, keine DOM-Null-Errors, Layout in 360px/768px/1440px.
-

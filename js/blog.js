@@ -199,7 +199,8 @@
       const snapshot = await query.get();
 
       if (snapshot.empty) {
-        getElements().loadMoreBtn?.style.display = "none";
+        const btn = getElements().loadMoreBtn;
+        if (btn) btn.style.display = "none";
         return;
       }
 

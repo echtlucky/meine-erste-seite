@@ -55,6 +55,7 @@
   let userList, banEmail, banReason, banAddBtn, banList;
   let logsList, statTotalUsers, statTotalPosts, statTotalBans, activityList;
   let saveSettingsBtn, resetSettingsBtn;
+  let logsFeedUnsub = null;
 
   function initDOM() {
     adminStatus = document.getElementById("adminStatus");
@@ -137,35 +138,57 @@
     }
   }
 
-  async function loadAdminLogs() {
-    try {
-      logsList.innerHTML = "";
-      const snap = await db.collection("admin-logs").orderBy("timestamp", "desc").limit(50).get();
-      
-      if (snap.empty) {
-        logsList.innerHTML = `<p style="padding: 20px; color: var(--text-muted);">Keine Logs</p>`;
-        return;
-      }
+  function renderAdminLogsSnapshot(snap) {
+    if (!logsList) return;
 
-      snap.forEach((doc) => {
-        const data = doc.data();
-        const item = document.createElement("div");
-        item.className = "admin-log-item";
-        item.innerHTML = `
-          <div class="admin-log-header">
-            <span class="admin-log-action">📝 ${escapeHtml(data.action)}</span>
-            <span class="admin-log-time">${formatDate(data.timestamp)}</span>
-          </div>
-          <div class="admin-log-details">
-            <small>${escapeHtml(data.details || "—")}</small>
-            <small style="color: var(--text-muted);">von ${escapeHtml(data.admin || "—")}</small>
-          </div>
-        `;
-        logsList.appendChild(item);
-      });
-    } catch (err) {
-      logsList.innerHTML = `<p style="color: #ff3366;">Fehler: ${escapeHtml(err.message)}</p>`;
+    if (!snap || snap.empty) {
+      logsList.innerHTML = `<p style="padding: 12px; color: var(--text-muted);">Keine Logs</p>`;
+      return;
     }
+
+    logsList.innerHTML = "";
+    snap.forEach((doc) => {
+      const data = doc.data() || {};
+      const item = document.createElement("div");
+      item.className = "admin-log-item";
+      item.innerHTML = `
+        <div class="admin-log-item__top">
+          <span class="admin-log-item__action">${escapeHtml(String(data.action || "log"))}</span>
+          <span class="admin-log-item__time">${escapeHtml(formatDate(data.timestamp))}</span>
+        </div>
+        <div class="admin-log-item__meta">
+          ${escapeHtml(String(data.details || "—"))}<br/>
+          <span style="color: var(--text-muted);">von ${escapeHtml(String(data.admin || "—"))}</span>
+        </div>
+      `;
+      logsList.appendChild(item);
+    });
+  }
+
+  function startLogsFeed() {
+    if (!db || !logsList) return;
+    if (logsFeedUnsub) return;
+
+    try {
+      logsFeedUnsub = db
+        .collection("admin-logs")
+        .orderBy("timestamp", "desc")
+        .limit(60)
+        .onSnapshot(
+          (snap) => renderAdminLogsSnapshot(snap),
+          (err) => {
+            console.error("Logs listener error:", err);
+            if (logsList) logsList.innerHTML = `<p style="color: #ff3366;">Fehler: ${escapeHtml(err.message)}</p>`;
+          }
+        );
+    } catch (err) {
+      console.error("startLogsFeed error:", err);
+    }
+  }
+
+  async function loadAdminLogs() {
+    // Backwards-compat: when a "logs" tab is opened, ensure the realtime feed is running.
+    startLogsFeed();
   }
 
   async function loadPosts() {
@@ -604,7 +627,8 @@
         if (adminStatus) adminStatus.textContent = `✅ Admin (${user.email})`;
 
         await logAdminAction("panel_opened", "Admin-Panel geöffnet");
-
+        startLogsFeed();
+ 
         // Load initial data
         console.log("🔄 Loading initial data...");
         await loadPosts();
