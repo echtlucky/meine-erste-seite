@@ -280,6 +280,8 @@ groups/{groupId}/voice-calls/{callId} {
   let screenStream = null;
   let screenTrack = null;
   let screenAudioSourceNode = null;
+  let screenShareDismissed = false;
+  let btnOpenScreenShare = null;
   const videoSenders = new Map(); // remoteUid -> RTCRtpSender
   let isMicMuted = false;
   let uiCallState = "idle"; // idle | ringing | active | ended
@@ -440,6 +442,43 @@ groups/{groupId}/voice-calls/{callId} {
         try { btnCloseScreenShare?.focus?.(); } catch {}
       }
     }
+
+    updateOpenScreenShareButton();
+  }
+
+  function ensureOpenScreenShareButton() {
+    if (btnOpenScreenShare) return btnOpenScreenShare;
+    if (!chatCallBar) return null;
+    if (!btnShareScreen) return null;
+
+    const actions = chatCallBar.querySelector(".chat-call-bar__actions");
+    if (!actions) return null;
+
+    const existing = actions.querySelector("#btnOpenScreenShare");
+    if (existing) {
+      btnOpenScreenShare = existing;
+      return btnOpenScreenShare;
+    }
+
+    const btn = document.createElement("button");
+    btn.id = "btnOpenScreenShare";
+    btn.type = "button";
+    btn.className = "btn btn-secondary";
+    btn.textContent = "📺 Ansehen";
+    btn.hidden = true;
+
+    actions.insertBefore(btn, btnShareScreen);
+    btnOpenScreenShare = btn;
+    return btnOpenScreenShare;
+  }
+
+  function updateOpenScreenShareButton() {
+    const btn = ensureOpenScreenShareButton();
+    if (!btn) return;
+
+    const hasAnyVideo = !!screenShareGrid?.querySelector("video");
+    const isHidden = !!screenShareArea?.hidden;
+    btn.hidden = !(hasAnyVideo && isHidden);
   }
 
   function upsertVideoEl(id, stream, isLocal) {
@@ -466,6 +505,7 @@ groups/{groupId}/voice-calls/{callId} {
     if (!el) return;
     try { el.srcObject = null; } catch {}
     el.remove();
+    updateOpenScreenShareButton();
   }
 
   async function startScreenShare() {
@@ -547,6 +587,7 @@ groups/{groupId}/voice-calls/{callId} {
       showScreenShareArea(true);
       screenShareDismissed = false;
       upsertVideoEl("local-screen-preview", new MediaStream([screenTrack]), true);
+      updateOpenScreenShareButton();
 
       peerConnections.forEach((pc, remoteUid) => {
         const sender = videoSenders.get(remoteUid);
@@ -597,6 +638,7 @@ groups/{groupId}/voice-calls/{callId} {
     }
 
     if (btnShareScreen) btnShareScreen.textContent = "🖥️ Teilen";
+    updateOpenScreenShareButton();
   }
 
   // ============================================
@@ -639,6 +681,7 @@ groups/{groupId}/voice-calls/{callId} {
       if (event.track.kind === "video") {
         if (!screenShareDismissed) showScreenShareArea(true);
         upsertVideoEl(`remote-screen-${remoteUid}`, new MediaStream([event.track]), false);
+        updateOpenScreenShareButton();
         event.track.onended = () => {
           removeVideoEl(`remote-screen-${remoteUid}`);
           if (screenShareGrid && screenShareGrid.querySelectorAll("video").length === 0) {
@@ -1496,6 +1539,16 @@ groups/{groupId}/voice-calls/{callId} {
       });
     }
 
+    // Re-open viewer after dismissing (important for mobile UX)
+    const openBtn = ensureOpenScreenShareButton();
+    if (openBtn && !openBtn.__wired) {
+      openBtn.__wired = true;
+      openBtn.addEventListener("click", () => {
+        screenShareDismissed = false;
+        showScreenShareArea(true);
+      });
+    }
+
     if (shareQualitySelect) {
       shareQualitySelect.addEventListener("change", async () => {
         if (!screenTrack) return;
@@ -1553,6 +1606,3 @@ groups/{groupId}/voice-calls/{callId} {
 
   log("✅ voice-chat.js initialized with full WebRTC support");
 })();
-
-
-  let screenShareDismissed = false;

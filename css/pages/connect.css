@@ -868,6 +868,38 @@
   gap: 0.5rem;
 }
 
+.chat-group-info{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.chat-back-btn{
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,136,0.14);
+  background: rgba(0,0,0,0.35);
+  color: rgba(224,255,224,0.88);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.chat-back-btn:hover{
+  background: rgba(0,255,136,0.10);
+  border-color: rgba(0,255,136,0.28);
+  color: rgba(224,255,224,0.95);
+}
+
+.chat-back-btn:active{ transform: scale(0.96); }
+
+@media (max-width: 900px){
+  .chat-back-btn{ display: inline-flex; align-items:center; justify-content:center; }
+  .chat-group-title{ overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
 /* Settings only on mobile: hide on desktop */
 @media (min-width: 901px) {
   #btnGroupSettings {

@@ -1270,6 +1270,13 @@
           setMobilePanel("left");
         }
       });
+
+      // Mobile back button (chat header) -> go back to groups
+      const btnMobileBack = document.getElementById("btnMobileBack");
+      if (btnMobileBack && !btnMobileBack.__wired) {
+        btnMobileBack.__wired = true;
+        btnMobileBack.addEventListener("click", () => setMobilePanel("left"));
+      }
     }
 
     // Rail quick account modal (desktop + mobile)
