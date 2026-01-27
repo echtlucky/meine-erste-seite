@@ -1,77 +1,35 @@
-/* Discord-Style Blog Layout */
+/* Blog Layout — aligned with Home look (uses global style.css buttons/inputs) */
 .blog-discord-shell {
-  max-width: 700px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 2.2rem 0.5rem 2.2rem 0.5rem;
+  padding: clamp(1.2rem, 2.6vw, 2.2rem);
   display: flex;
   flex-direction: column;
-  gap: 2.2rem;
+  gap: 1.6rem;
 }
-.discord-card {
-  background: #40444b;
-  border-radius: 18px;
-  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
-  padding: 2rem 1.5rem;
-  border: 1px solid #232428;
-  color: #f6f6f7;
+
+.blog-discord-shell .discord-card {
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(0,255,136,0.16);
+  background: linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,0,0,0.62));
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
+  padding: clamp(1.2rem, 2.2vw, 1.8rem);
+  color: var(--text);
 }
-.discord-card h2 {
+
+.blog-discord-shell .discord-card h2 {
   margin-top: 0;
-  color: #5865f2;
+  color: var(--accent);
   font-size: 1.4rem;
-  font-weight: 800;
+  font-weight: 850;
+  letter-spacing: -0.6px;
 }
-.btn, .btn-primary, .btn-danger, .btn-success, .btn-secondary {
-  border-radius: 10px;
-  font-weight: 700;
-  padding: 0.7em 1.4em;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  margin-bottom: 0.2rem;
-}
-.btn-primary { background: #5865f2; color: #fff; }
-.btn-primary:hover { background: #8ea1e1; }
-.btn-danger { background: #ed4245; color: #fff; }
-.btn-success { background: #43b581; color: #fff; }
-.btn-secondary { background: #232428; color: #fff; border: 1px solid #5865f2; }
-.btn-secondary:hover { background: #5865f2; color: #fff; }
-input, select {
-  background: #36393f;
-  color: #f6f6f7;
-  border: 1px solid #232428;
-  border-radius: 8px;
-  padding: 0.7em 1em;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-input:focus, select:focus {
-  outline: none;
-  border-color: #5865f2;
-}
+
 @media (max-width: 700px) {
   .blog-discord-shell {
-    padding: 1.2rem 0.1rem;
+    padding: 1.2rem 0.75rem;
     gap: 1.1rem;
-  }
-  .discord-card {
-    padding: 1.1rem 0.7rem;
-    border-radius: 12px;
-  }
-  .btn, .btn-primary, .btn-danger, .btn-success, .btn-secondary {
-    min-height: 48px;
-    font-size: 1.08em;
-    border-radius: 14px;
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
-  input, select {
-    min-height: 44px;
-    font-size: 1.08em;
-    border-radius: 12px;
   }
 }
 /* =========================
