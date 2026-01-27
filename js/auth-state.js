@@ -185,14 +185,41 @@
         lastUid = user.uid;
         localStorage.setItem("__echtlucky_lastuid", user.uid);
         try {
-          await db.collection("users").doc(user.uid).set({
+          const fb = window.firebase;
+          const userRef = db.collection("users").doc(user.uid);
+          const snap = await userRef.get();
+          const data = snap.exists ? (snap.data() || {}) : {};
+
+          const authName = user.displayName || (user.email ? user.email.split("@")[0] : "");
+          const existingName = String(data.username || data.displayName || "").trim();
+          const baseName = existingName || authName || "user";
+          const sanitize = typeof appNS.sanitizeUsername === "function"
+            ? appNS.sanitizeUsername
+            : (raw) => String(raw || "").trim().toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9_.-]/g, "").slice(0, 20);
+          const uname = sanitize(baseName);
+          const ts = fb?.firestore?.FieldValue?.serverTimestamp?.() || new Date();
+
+          const patch = {
             isOnline: true,
             lastSeen: new Date(),
-            email: user.email,
-            displayName: user.displayName || user.email?.split("@")[0],
-            uid: user.uid,
-            createdAt: new Date()
-          }, { merge: true });
+            email: user.email || "",
+            uid: user.uid
+          };
+
+          if (!snap.exists) {
+            patch.createdAt = ts;
+            patch.username = uname;
+            patch.usernameLower = uname;
+            patch.displayName = uname;
+          } else {
+            if (!String(data.username || "").trim() && uname) patch.username = uname;
+            if (!String(data.usernameLower || "").trim() && uname) patch.usernameLower = uname;
+            if (!String(data.displayName || "").trim() && (String(data.username || "").trim() || uname)) {
+              patch.displayName = String(data.username || "").trim() || uname;
+            }
+          }
+
+          await userRef.set(patch, { merge: true });
         } catch (_) {}
       } else if (!user && db && db.collection && lastUid !== "__init__") {
         try {

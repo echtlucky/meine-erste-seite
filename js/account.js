@@ -733,9 +733,24 @@
       return showFormMsg("Email ist erforderlich.", "error");
     }
 
-    const cooldown = checkUsernameCooldown();
-    if (!cooldown.canChange) {
-      return showFormMsg(`Benutzername noch ${cooldown.daysLeft} Tag(e) gesperrt.`, "error");
+    const sanitize =
+      typeof window.echtlucky?.sanitizeUsername === "function"
+        ? window.echtlucky.sanitizeUsername
+        : (raw) => String(raw || "").trim().toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9_.-]/g, "").slice(0, 20);
+
+    const desired = sanitize(username);
+    if (!desired || desired.length < 3) {
+      return showFormMsg("Username ungültig (min. 3 Zeichen).", "error");
+    }
+
+    const current = sanitize(cachedUserDoc?.usernameLower || cachedUserDoc?.username || cachedUserDoc?.displayName || "");
+    const willChangeUsername = desired !== current;
+
+    if (willChangeUsername) {
+      const cooldown = checkUsernameCooldown();
+      if (!cooldown.canChange) {
+        return showFormMsg(`Benutzername noch ${cooldown.daysLeft} Tag(e) gesperrt.`, "error");
+      }
     }
 
     try {
@@ -744,14 +759,28 @@
         btnSaveSettings.textContent = "Speichern...";
       }
 
-      await db.collection(USER_COLLECTION).doc(user.uid).set({
-        username: username,
-        displayName: username,
-        preferences: nextPrefs,
-        settingsUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      }, { merge: true });
+      if (willChangeUsername) {
+        if (typeof window.echtlucky?.changeUsername === "function") {
+          const next = await window.echtlucky.changeUsername(user, username);
+          if (inputUsername) inputUsername.value = next;
+          cachedUserDoc = { ...(cachedUserDoc || {}), username: next, usernameLower: next, displayName: next };
+        } else if (typeof window.echtlucky?.saveUsername === "function") {
+          const next = await window.echtlucky.saveUsername(user, username);
+          if (inputUsername) inputUsername.value = next;
+          cachedUserDoc = { ...(cachedUserDoc || {}), username: next, usernameLower: next, displayName: next };
+        } else {
+          throw new Error("Username-Service nicht verfügbar.");
+        }
+        localStorage.setItem(LS_USERNAME_CHANGE, Date.now().toString());
+      }
 
-      localStorage.setItem(LS_USERNAME_CHANGE, Date.now().toString());
+      await db.collection(USER_COLLECTION).doc(user.uid).set(
+        {
+          preferences: nextPrefs,
+          settingsUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        },
+        { merge: true }
+      );
 
       if (email !== user.email) {
         try {

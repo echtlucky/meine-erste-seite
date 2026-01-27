@@ -88,13 +88,17 @@
     const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
     const now = firebase.firestore.FieldValue.serverTimestamp();
+    const fallbackName = user.displayName || (user.email ? user.email.split("@")[0] : "");
+    const fallbackUsername = sanitizeUsername(fallbackName);
 
     if (!snap.exists) {
       const initialRole = isAdminByEmail(user) ? "admin" : "user";
 
       await ref.set({
         email: user.email || "",
-        username: user.displayName || "",
+        username: fallbackUsername,
+        usernameLower: fallbackUsername,
+        displayName: fallbackUsername,
         role: initialRole,
         createdAt: now,
         lastLoginAt: now,
@@ -102,13 +106,89 @@
       });
     } else {
       const data = snap.data() || {};
-      await ref.update({
+      const patch = {
         email: user.email || "",
-        username: user.displayName || data.username || "",
         lastLoginAt: now,
         ...extra,
-      });
+      };
+
+      const existingUsername = String(data.username || "").trim();
+      const existingDisplayName = String(data.displayName || "").trim();
+      const existingLower = String(data.usernameLower || "").trim();
+
+      if (!existingUsername && fallbackUsername) {
+        patch.username = fallbackUsername;
+      }
+
+      if (!existingDisplayName && (existingUsername || fallbackUsername)) {
+        patch.displayName = existingUsername || fallbackUsername;
+      }
+
+      if (!existingLower && (existingUsername || fallbackUsername)) {
+        patch.usernameLower = sanitizeUsername(existingUsername || fallbackUsername);
+      }
+
+      await ref.set(patch, { merge: true });
     }
+  }
+
+  async function changeUsername(user, usernameRaw) {
+    if (!user?.uid) throw new Error("Nicht eingeloggt.");
+    const uname = sanitizeUsername(usernameRaw);
+    if (!uname || uname.length < 3) throw new Error("Username ungültig (min. 3 Zeichen).");
+
+    const now = firebase.firestore.FieldValue.serverTimestamp();
+    const userRef = db.collection("users").doc(user.uid);
+    const unameRef = db.collection("usernames").doc(uname);
+
+    await db.runTransaction(async (tx) => {
+      const [userSnap, unameSnap] = await Promise.all([tx.get(userRef), tx.get(unameRef)]);
+
+      if (unameSnap.exists) {
+        const mappedUid = String(unameSnap.data()?.uid || "").trim();
+        if (mappedUid && mappedUid !== user.uid) {
+          throw new Error("Username ist schon vergeben.");
+        }
+      }
+
+      const data = userSnap.exists ? (userSnap.data() || {}) : {};
+      const prevLower = String(data.usernameLower || sanitizeUsername(data.username || data.displayName || "")).trim();
+
+      if (prevLower && prevLower !== uname) {
+        const prevRef = db.collection("usernames").doc(prevLower);
+        const prevSnap = await tx.get(prevRef);
+        if (prevSnap.exists) {
+          tx.delete(prevRef);
+        }
+      }
+
+      tx.set(
+        unameRef,
+        {
+          uid: user.uid,
+          updatedAt: now,
+          createdAt: unameSnap.exists ? (unameSnap.data()?.createdAt || now) : now
+        },
+        { merge: true }
+      );
+
+      tx.set(
+        userRef,
+        {
+          username: uname,
+          usernameLower: uname,
+          displayName: uname,
+          updatedAt: now
+        },
+        { merge: true }
+      );
+    });
+
+    try {
+      await user.updateProfile({ displayName: uname });
+    } catch (_) {}
+
+    return uname;
   }
 
   
@@ -130,7 +210,6 @@
     await unameRef.set(
       {
         uid: user.uid,
-        email: user.email || "",
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdAt: existing.exists
           ? (existing.data()?.createdAt || firebase.firestore.FieldValue.serverTimestamp())
@@ -139,7 +218,7 @@
       { merge: true }
     );
 
-    await ensureUserDoc(user, { username: uname });
+    await ensureUserDoc(user, { username: uname, usernameLower: uname, displayName: uname });
 
     return uname;
   }
@@ -156,6 +235,7 @@
 
   appNS.ensureUserDoc = ensureUserDoc;
   appNS.saveUsername = saveUsername;
+  appNS.changeUsername = changeUsername;
   appNS.sanitizeUsername = sanitizeUsername;
 
   

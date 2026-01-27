@@ -163,7 +163,7 @@
   let messagesUnsubscribe = null;
   let friendSearchTimeout = null;
   let currentUserFriends = [];
-  const userCache = new Map(); // uid -> { displayName, email }
+  const userCache = new Map();
   const groupsCache = new Map(); // groupId -> groupData (from snapshot)
   let groupContextState = null; // { groupId, groupData }
   let userContextState = null; // { uid, name }
@@ -277,6 +277,44 @@
     return "online";
   }
   const userCacheInFlight = new Set(); // uid
+  const userProfileSubscriptions = new Map();
+
+  function subscribeUserProfiles(uids) {
+    if (!db) return;
+
+    const toSub = Array.from(new Set(uids || [])).filter(Boolean);
+    toSub.forEach((uid) => {
+      if (userProfileSubscriptions.has(uid)) return;
+
+      try {
+        const unsub = db.collection("users").doc(uid).onSnapshot(
+          (snap) => {
+            const data = snap.exists ? (snap.data() || {}) : {};
+            const username = String(data.username || "").trim();
+            const displayName = String(data.displayName || "").trim();
+            const email = String(data.email || "").trim();
+            userCache.set(uid, { username, displayName, email });
+
+            if (activeChatMode === "dm" && selectedDmUid === uid) {
+              updateDmHeaderTitle();
+            }
+
+            if (Array.isArray(currentUserFriends) && currentUserFriends.includes(uid)) {
+              renderDmList();
+            }
+
+            if (selectedGroupId && selectedGroupData) {
+              renderMembers(Object.assign({ id: selectedGroupId }, selectedGroupData));
+            }
+          },
+          () => {}
+        );
+        userProfileSubscriptions.set(uid, unsub);
+      } catch (_) {
+        userProfileSubscriptions.set(uid, null);
+      }
+    });
+  }
 
   function escapeHtml(str) {
     const map = {
@@ -350,6 +388,7 @@
       return;
     }
 
+    subscribeUserProfiles(ids);
     fetchUserProfiles(ids).catch(() => {});
     refreshPresence(ids).catch(() => {});
 
@@ -407,13 +446,16 @@
     if (emptyChatState) emptyChatState.hidden = true;
 
     const chatGroupTitle = document.getElementById("chatGroupTitle");
-    if (chatGroupTitle) chatGroupTitle.textContent = `Direktnachricht: ${name || "User"}`;
+    subscribeUserProfiles([uid]);
+    const dmLabel = getCachedUserLabel(uid).label || name || "User";
+    if (chatGroupTitle) chatGroupTitle.textContent = `Direktnachricht: ${dmLabel}`;
 
     const btnGroupSettings = document.getElementById("btnGroupSettings");
     if (btnGroupSettings) btnGroupSettings.hidden = true;
 
     const rightPanel = document.querySelector(".connect-right-panel");
     if (rightPanel) rightPanel.hidden = true;
+    if (connectLayout) connectLayout.classList.add("connect-workspace--no-right");
     const membersAddSection = document.getElementById("membersAddSection");
     if (membersAddSection) membersAddSection.hidden = true;
     const membersList = document.getElementById("membersList");
@@ -428,6 +470,13 @@
     renderMessages(messages);
     updateChatControls();
     renderDmList();
+  }
+
+  function updateDmHeaderTitle() {
+    const chatGroupTitle = document.getElementById("chatGroupTitle");
+    if (!chatGroupTitle) return;
+    if (activeChatMode !== "dm" || !selectedDmUid) return;
+    chatGroupTitle.textContent = `Direktnachricht: ${getCachedUserLabel(selectedDmUid).label || "User"}`;
   }
 
   async function sendMessageToSelectedDm() {
@@ -598,6 +647,7 @@
 
     const rightPanel = document.querySelector(".connect-right-panel");
     if (rightPanel) rightPanel.hidden = false;
+    if (connectLayout) connectLayout.classList.remove("connect-workspace--no-right");
 
     clearReplyState();
 
@@ -926,6 +976,7 @@
 
     const cached = userCache.get(uid);
     const displayName =
+      cached?.username ||
       cached?.displayName ||
       cached?.email?.split("@")?.[0] ||
       `User ${String(uid).slice(0, 6)}`;
@@ -959,11 +1010,12 @@
           try {
             const snap = await db.collection("users").doc(uid).get();
             const data = snap.exists ? snap.data() : null;
-            const displayName = data?.displayName || "";
-            const email = data?.email || "";
-            userCache.set(uid, { displayName, email });
+            const username = String(data?.username || "").trim();
+            const displayName = String(data?.displayName || "").trim();
+            const email = String(data?.email || "").trim();
+            userCache.set(uid, { username, displayName, email });
           } catch (_) {
-            userCache.set(uid, { displayName: "", email: "" });
+            userCache.set(uid, { username: "", displayName: "", email: "" });
           } finally {
             userCacheInFlight.delete(uid);
           }
@@ -981,6 +1033,7 @@
 
     const members = Array.isArray(groupDoc?.members) ? groupDoc.members : [];
     membersCount.textContent = String(members.length);
+    subscribeUserProfiles(members);
 
     if (members.length === 0) {
       membersList.innerHTML = '<div class="empty-state"><p>Keine Mitglieder</p></div>';
@@ -991,6 +1044,7 @@
 
     const missing = members.filter((m) => m && !userCache.has(m) && m !== uid);
     if (missing.length) {
+      subscribeUserProfiles(missing);
       fetchUserProfiles(missing).then(() => {
         if (selectedGroupId === groupDoc?.id || selectedGroupId) {
           renderMembers(groupDoc);
@@ -1087,6 +1141,7 @@
     const ids = (messages || []).map((m) => m?.authorUid).filter(Boolean);
     const missing = ids.filter((uid) => uid && uid !== myUid && !userCache.has(uid) && !userCacheInFlight.has(uid));
     if (missing.length) {
+      subscribeUserProfiles(missing);
       fetchUserProfiles(missing).then(() => renderMessages(messages));
     }
 
@@ -1109,7 +1164,8 @@
     list.innerHTML = messages
       .map((m) => {
         const authorUid = m.authorUid;
-        const author = authorUid === myUid ? "Du" : (userCache.get(authorUid)?.displayName || m.authorName || `User ${String(authorUid || "").slice(0, 6)}`);
+        const cachedName = userCache.get(authorUid)?.username || userCache.get(authorUid)?.displayName;
+        const author = authorUid === myUid ? "Du" : (cachedName || m.authorName || `User ${String(authorUid || "").slice(0, 6)}`);
         const text = m.text || "";
         const isMine = m.authorUid === myUid;
         const time = formatTime(m.createdAt);
@@ -1243,7 +1299,7 @@
     snap.forEach((doc) => {
       const user = doc.data() || {};
       const uid = doc.id;
-      const displayName = user.displayName || user.email?.split("@")[0] || "User";
+      const displayName = user.username || user.displayName || user.email?.split("@")[0] || "User";
 
       if (uid === currentUser.uid) return;
       if (groupMembers.includes(uid)) return;
@@ -1408,6 +1464,9 @@
       const emptyChatState = document.getElementById("emptyChatState");
       if (chatContainer) chatContainer.hidden = true;
       if (emptyChatState) emptyChatState.hidden = false;
+      const rightPanel = document.querySelector(".connect-right-panel");
+      if (rightPanel) rightPanel.hidden = true;
+      if (connectLayout) connectLayout.classList.add("connect-workspace--no-right");
     } catch (err) {
       window.notify?.show({
         type: "error",
@@ -1450,6 +1509,9 @@
       const emptyChatState = document.getElementById("emptyChatState");
       if (chatContainer) chatContainer.hidden = true;
       if (emptyChatState) emptyChatState.hidden = false;
+      const rightPanel = document.querySelector(".connect-right-panel");
+      if (rightPanel) rightPanel.hidden = true;
+      if (connectLayout) connectLayout.classList.add("connect-workspace--no-right");
     } catch (err) {
       window.notify?.show({
         type: "error",
@@ -1516,7 +1578,7 @@
           snapshot.forEach((doc) => {
             const user = doc.data();
             const displayName =
-              user.displayName || user.email?.split("@")[0] || "User";
+              user.username || user.displayName || user.email?.split("@")[0] || "User";
 
             if (doc.id === currentUser.uid || currentUserFriends.includes(doc.id)) {
               return;
@@ -1711,6 +1773,9 @@
     if (btnLogin) btnLogin.hidden = true;
     if (authStatusCard) authStatusCard.hidden = true;
     if (connectLayout) connectLayout.hidden = false;
+    if (connectLayout) connectLayout.classList.add("connect-workspace--no-right");
+    const rightPanel = document.querySelector(".connect-right-panel");
+    if (rightPanel) rightPanel.hidden = true;
 
     renderUserBarIdentity(display, avatarUrl);
 

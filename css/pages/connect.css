@@ -166,20 +166,30 @@
 
 .connect-workspace {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) 310px;
+  grid-template-columns: 300px minmax(0, 1fr) 320px;
   gap: 1.6rem;
   margin-top: 1.75rem;
 }
 
 html.connect-compact .connect-workspace {
   gap: 1.1rem;
-  grid-template-columns: 240px minmax(0, 1fr) 280px;
+  grid-template-columns: 280px minmax(0, 1fr) 300px;
 }
 
 html.connect-compact .connect-left-panel,
 html.connect-compact .connect-right-panel,
 html.connect-compact .connect-chat-area {
   padding: 1.15rem;
+}
+
+@media (min-width: 1101px) {
+  .connect-workspace.connect-workspace--no-right {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+
+  html.connect-compact .connect-workspace.connect-workspace--no-right {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
 }
 
 .connect-left-panel,
