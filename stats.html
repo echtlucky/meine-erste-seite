@@ -27,15 +27,15 @@
           <div class="stats-hero__meta">
             <div>
               <p class="hero-label">Current Rank</p>
-              <p class="hero-value">Unreal 2475 XP</p>
+              <p class="hero-value" id="statsRankValue">—</p>
             </div>
             <div>
               <p class="hero-label">Streak</p>
-              <p class="hero-value">12 Tage</p>
+              <p class="hero-value" id="statsStreakValue">—</p>
             </div>
             <div>
               <p class="hero-label">Focus Mode</p>
-              <p class="hero-value">Aktiv</p>
+              <p class="hero-value" id="statsFocusValue">—</p>
             </div>
           </div>
         </section>
@@ -45,7 +45,7 @@
             <header>
               <div>
                 <p class="card-label">XP Verlauf</p>
-                <h3>+1.280 XP diese Woche</h3>
+                <h3 id="xpWeekTitle">—</h3>
               </div>
               <span class="status-pill">Weekly</span>
             </header>
@@ -53,10 +53,10 @@
             <div class="progress-row">
               <div class="progress-label">
                 <span>Heute</span>
-                <span>+320 XP</span>
+                <span id="xpTodayDelta">—</span>
               </div>
               <div class="progress-track">
-                <div class="progress-fill" data-value="0.64"></div>
+                <div class="progress-fill" id="xpTodayFill"></div>
               </div>
             </div>
           </article>
@@ -66,33 +66,33 @@
             <div class="skill-row">
               <p>Aim</p>
               <div class="skill-track">
-                <div class="skill-fill" data-value="0.78"></div>
+                <div class="skill-fill" id="skillAimFill"></div>
               </div>
-              <span>78%</span>
+              <span id="skillAimValue">—</span>
             </div>
             <div class="skill-row">
               <p>Gamesense</p>
               <div class="skill-track">
-                <div class="skill-fill" data-value="0.63"></div>
+                <div class="skill-fill" id="skillGamesenseFill"></div>
               </div>
-              <span>63%</span>
+              <span id="skillGamesenseValue">—</span>
             </div>
             <div class="skill-row">
               <p>Consistency</p>
               <div class="skill-track">
-                <div class="skill-fill" data-value="0.71"></div>
+                <div class="skill-fill" id="skillConsistencyFill"></div>
               </div>
-              <span>71%</span>
+              <span id="skillConsistencyValue">—</span>
             </div>
           </article>
 
           <article class="stats-card stats-streak">
             <header>
               <p class="card-label">Streak</p>
-              <span class="status-pill status-pill--accent">+12 Tage</span>
+              <span class="status-pill status-pill--accent" id="statsStreakPill">—</span>
             </header>
             <div class="streak-rows" id="streakRows"></div>
-            <p class="card-foot">Keep the grind steady. Blick auf morgen: XP +210</p>
+            <p class="card-foot" id="streakFoot">—</p>
           </article>
         </section>
 
@@ -112,19 +112,19 @@
             </header>
             <div class="compare-row">
               <span>Today</span>
-              <strong>+1.2 Win Rate</strong>
+              <strong id="compareTodayValue">—</strong>
             </div>
             <div class="compare-row">
               <span>Yesterday</span>
-              <strong>+0.6 Win Rate</strong>
+              <strong id="compareYesterdayValue">—</strong>
             </div>
-            <p class="card-foot">Schreibe Notizen zu Matches, um die Trends zu verfolgen.</p>
+            <p class="card-foot" id="compareFoot">Schreibe Notizen zu Matches, um die Trends zu verfolgen.</p>
           </article>
 
           <article class="stats-card stats-notes">
             <header>
               <p class="card-label">Daily Notes</p>
-              <button class="btn btn-sm">+ Neue Notiz</button>
+              <button class="btn btn-sm" id="btnAddNote">+ Neue Notiz</button>
             </header>
             <div class="notes-list" id="noteList">
               <div class="note">Taktische Anpassung: Focus auf Anchor-Positionen.</div>

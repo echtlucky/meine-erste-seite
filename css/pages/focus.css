@@ -89,6 +89,48 @@
   font-size: 0.9rem;
 }
 
+.session-settings{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.session-settings__row{
+  display: grid;
+  gap: 0.35rem;
+}
+
+.session-settings__label{
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.session-settings__select{
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,136,0.18);
+  background: rgba(0,0,0,0.45);
+  color: var(--text);
+  padding: 0.7rem 0.85rem;
+}
+
+.distraction-row{
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.distraction-row input{
+  flex: 1;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,136,0.18);
+  background: rgba(0,0,0,0.45);
+  color: var(--text);
+  padding: 0.85rem 0.95rem;
+}
+
 .history-list {
   min-height: 180px;
   background: rgba(0, 0, 0, 0.3);
@@ -158,5 +200,14 @@
 
   .focus-controls {
     flex-direction: column;
+  }
+
+  .session-settings{
+    grid-template-columns: 1fr;
+  }
+
+  .distraction-row{
+    flex-direction: column;
+    align-items: stretch;
   }
 }

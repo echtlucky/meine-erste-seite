@@ -65,6 +65,7 @@
   }
 
   function initLogin(authRef, dbRef, firebaseObj) {
+    const ADMIN_EMAIL = window.echtlucky?.ADMIN_EMAIL || "lucassteckel04@gmail.com";
 
     // ---- DOM
     const tabLogin = document.getElementById("tabLogin");
@@ -137,13 +138,13 @@
     function setTab(mode) {
       clearMsg();
       if (mode === "login") {
-        tabLogin?.classList.add("active");
-        tabRegister?.classList.remove("active");
+        tabLogin?.classList.add("is-active");
+        tabRegister?.classList.remove("is-active");
         loginForm?.classList.remove("hidden");
         registerForm?.classList.add("hidden");
       } else {
-        tabRegister?.classList.add("active");
-        tabLogin?.classList.remove("active");
+        tabRegister?.classList.add("is-active");
+        tabLogin?.classList.remove("is-active");
         registerForm?.classList.remove("hidden");
         loginForm?.classList.add("hidden");
       }

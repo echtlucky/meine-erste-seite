@@ -48,13 +48,39 @@
               </div>
               <span class="status-pill">Session</span>
             </header>
+            <div class="session-settings" aria-label="Session Einstellungen">
+              <div class="session-settings__row">
+                <label class="session-settings__label" for="focusMinutesSelect">Focus</label>
+                <select id="focusMinutesSelect" class="session-settings__select">
+                  <option value="25">25 min</option>
+                  <option value="35">35 min</option>
+                  <option value="50">50 min</option>
+                </select>
+              </div>
+              <div class="session-settings__row">
+                <label class="session-settings__label" for="breakMinutesSelect">Break</label>
+                <select id="breakMinutesSelect" class="session-settings__select">
+                  <option value="5">5 min</option>
+                  <option value="10">10 min</option>
+                  <option value="15">15 min</option>
+                </select>
+              </div>
+              <div class="session-settings__row">
+                <label class="session-settings__label" for="longBreakMinutesSelect">Long</label>
+                <select id="longBreakMinutesSelect" class="session-settings__select">
+                  <option value="15">15 min</option>
+                  <option value="20">20 min</option>
+                  <option value="30">30 min</option>
+                </select>
+              </div>
+            </div>
             <div class="session-display" id="sessionClock">00:00</div>
             <div class="focus-controls">
               <button class="btn btn-sm" id="btnStartFocus" type="button">Start</button>
               <button class="btn btn-sm" id="btnPauseFocus" type="button" disabled>Pause</button>
               <button class="btn btn-sm btn-secondary" id="btnEndFocus" type="button" disabled>Beenden</button>
             </div>
-            <p class="focus-hint">Standard-Sitzung: 25 Minuten. Nach 4 Sessions eine längere Pause.</p>
+            <p class="focus-hint" id="focusHint">Standard: 25 Minuten. Nach 4 Sessions eine längere Pause.</p>
           </article>
 
           <article class="focus-card card-history">
@@ -84,6 +110,10 @@
             <div class="focus-logs" id="focusLogs">
               <div class="log-item">Letzte Ablenkung: keine</div>
             </div>
+            <div class="distraction-row" aria-label="Ablenkung loggen">
+              <input id="distractionInput" type="text" placeholder="Ablenkung notieren (z.B. Discord, Handy…)" />
+              <button class="btn btn-sm btn-secondary" id="btnLogDistraction" type="button">Log</button>
+            </div>
           </article>
         </section>
       </main>
@@ -102,7 +132,7 @@
     <script src="js/notify.js"></script>
     <script src="js/modal-dialog.js"></script>
     <script src="js/group-strip.js"></script>
-    <script src="js/focus.js"></script>
+    <script src="js/focus-v2.js"></script>
 
     <script>
       document.body.classList.add("loaded");
