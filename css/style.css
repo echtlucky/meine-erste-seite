@@ -243,6 +243,7 @@ main{ flex:1; }
   align-items:center;
   justify-content:center;
   gap: 1.2rem;
+  z-index: 100006;
 }
 
 /* Middle links */
@@ -477,6 +478,9 @@ main{ flex:1; }
 
     border-bottom: 1px solid var(--border-soft);
     box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+    z-index: 100006;
+    max-height: calc(100vh - var(--header-h));
+    overflow-y: auto;
   }
 
   #mainNav.header-nav.open{ display:flex; }

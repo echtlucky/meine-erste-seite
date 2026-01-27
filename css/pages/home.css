@@ -33,11 +33,15 @@ body.home-page::after{
 
 /* Layout rhythm */
 .home-shell{
-  padding-top: clamp(1.2rem, 3vw, 2.4rem);
-  padding-bottom: clamp(3.0rem, 5.5vw, 4.8rem);
+  padding-top: clamp(1.4rem, 3vw, 2.6rem);
+  padding-bottom: clamp(3.2rem, 5vw, 5rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-gap);
 }
 .home-shell > section{
-  margin: var(--home-gap) auto;
+  width: min(1400px, calc(100% - clamp(2.4rem, 4vw, 3rem)));
+  margin: 0 auto;
 }
 
 /* Shared section head */
@@ -63,7 +67,6 @@ body.home-page::after{
 .home-stats,
 .home-discord,
 .home-more{
-  width: min(1120px, calc(100% - 1.6rem));
   border-radius: 30px;
   border: 1px solid rgba(0,255,136,0.16);
   background: rgba(0,0,0,0.58);
@@ -71,7 +74,8 @@ body.home-page::after{
   box-shadow: 0 26px 90px rgba(0,0,0,0.58);
   position: relative;
   overflow: hidden;
-  padding: clamp(1.6rem, 3.2vw, 2.4rem);
+  min-height: 260px;
+  padding: clamp(1.6rem, 3.2vw, 2.6rem);
 }
 
 .home-hero::before,

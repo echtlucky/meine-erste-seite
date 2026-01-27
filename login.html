@@ -16,58 +16,112 @@
       </header>
 
       <main class="login-main">
-        <section class="login-hero">
-          <div class="login-hero__tag">Community Tag: ˡᶜᵏʸ</div>
-          <h1>Willkommen zurück.</h1>
+        <section class="login-intro">
+          <span class="login-intro__tag">Community Tag ˡᶜᵏʸ</span>
+          <h1>Dein Connect-Zugang</h1>
           <p>
-            Logge dich ein, um deine Connect-Zone zu betreten: Gruppen, Chat, Calls,
-            Screenshares und alles weitere, was echtlucky ausmacht.
+            Log dich ein, um deine Gruppen, Chats, Call-Settings und Screen Shares direkt über die Website
+            zu steuern. Wir bringen die Discord-/WhatsApp-Feel mit klaren Buttons, schnellen Aktionen und
+            echten Realtime-Features.
           </p>
-          <div class="login-hero__bullets">
-            <span>20+ Schriftarten (inkl. ˡᶜᵏʸ Custom Tag)</span>
-            <span>Realtime-Calls &amp; Screen-Share</span>
-            <span>Direct Login &amp; Account-Management</span>
+          <div class="login-intro__features">
+            <span>20 Schriftarten (inkl. ˡᶜᵏʸ)</span>
+            <span>Realtime Voice + Screen Sharing</span>
+            <span>Firebase Auth &amp; Device-Auswahl</span>
           </div>
         </section>
 
         <section class="login-card">
           <div class="login-card__header">
-            <h2>Account einloggen</h2>
-            <p>Du kannst Benutzername oder E-Mail verwenden.</p>
+            <h2>Account-Login</h2>
+            <p>Benutzername, E-Mail oder Google verwenden.</p>
           </div>
 
-          <form class="login-form" id="loginForm">
+          <div class="login-tabs" role="tablist">
+            <button id="tabLogin" class="login-tab is-active" type="button" role="tab" aria-selected="true">
+              Login
+            </button>
+            <button id="tabRegister" class="login-tab" type="button" role="tab" aria-selected="false">
+              Registrieren
+            </button>
+          </div>
+
+          <div id="msgBox" class="msg" role="status" aria-live="polite"></div>
+
+          <form id="loginForm" class="auth-form" novalidate>
             <label for="loginIdentifier">Benutzername / E-Mail</label>
-            <input id="loginIdentifier" type="text" name="identifier" placeholder="max1234 oder email@domain.com" required />
+            <input
+              id="loginIdentifier"
+              type="text"
+              name="identifier"
+              placeholder="max1234 oder email@domain.com"
+              required
+            />
 
             <label for="loginPassword">Passwort</label>
-            <input id="loginPassword" type="password" name="password" placeholder="mind. 6 Zeichen" required />
+            <input
+              id="loginPassword"
+              type="password"
+              name="password"
+              placeholder="mind. 6 Zeichen"
+              required
+            />
 
             <div class="login-form__actions">
               <button class="btn" type="submit">Login</button>
-              <button class="btn btn-secondary" type="button" id="btnForgot">Passwort vergessen?</button>
-            </div>
-
-            <div class="login-form__hint">
-              <span>Daten werden via Firebase Auth gesichert.</span>
-              <a href="account.html">Account verwalten</a>
+              <button class="btn btn-secondary" type="button" id="forgotPw">Passwort vergessen?</button>
             </div>
           </form>
 
-          <div class="login-card__footer">
-            <p>Oder starte direkt über soziale Anmeldung.</p>
-            <div class="login-card__socials">
-              <button class="btn btn-social">Mit Google starten</button>
-              <button class="btn btn-social btn-secondary">Mit Apple starten</button>
-            </div>
+          <form id="registerForm" class="auth-form hidden" novalidate>
+            <label for="regUsername">Username</label>
+            <input id="regUsername" type="text" placeholder="Username wählen" required />
+
+            <label for="regEmail">E-Mail</label>
+            <input id="regEmail" type="email" placeholder="email@domain.com" required />
+
+            <label for="regPassword">Passwort</label>
+            <input id="regPassword" type="password" placeholder="mind. 6 Zeichen" required />
+
+            <button class="btn" type="submit">Registrieren</button>
+          </form>
+
+          <div class="login-divider">
+            <span>Oder</span>
           </div>
+
+          <div class="login-card__socials">
+            <button id="googleLoginBtn" class="btn btn-social">Mit Google einloggen</button>
+            <button id="googleRegisterBtn" class="btn btn-social btn-secondary">
+              Mit Google registrieren
+            </button>
+          </div>
+
+          <p class="login-card__hint">
+            Wenn dein Browser Pop-ups blockiert, erlaube sie für echte echlucky Calls. Wir speichern
+            nur E-Mail + Displayname in Firebase.
+          </p>
         </section>
       </main>
 
       <div id="footer-placeholder"></div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+    <script src="firebase.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/legal-modal.js"></script>
+    <script src="js/login.js"></script>
+    <script src="js/notify.js"></script>
+    <script src="js/modal-dialog.js"></script>
+
     <script>
+      document.body.classList.add("loaded");
+
       fetch("header.html?v=" + Date.now())
         .then((r) => r.text())
         .then((html) => {
@@ -82,19 +136,6 @@
         .then((html) => {
           document.getElementById("footer-placeholder").innerHTML = html;
         });
-
-      document.getElementById("loginForm")?.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const identifier = document.getElementById("loginIdentifier")?.value.trim();
-        const password = document.getElementById("loginPassword")?.value;
-        if (!identifier || !password) return;
-        localStorage.setItem("echtlucky:returnTo", "connect.html");
-        window.location.href = "connect.html";
-      });
-
-      document.getElementById("btnForgot")?.addEventListener("click", () => {
-        window.location.href = "account.html";
-      });
     </script>
   </body>
 </html>
