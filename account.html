@@ -1,248 +1,245 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Konto verwalten | echtlucky</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/pages/account.css" />
-</head>
-<body class="page-transition account-page">
-  <div id="header-placeholder"></div>
-  <main class="account-discord-shell">
-    <section class="discord-card account-profile-card">
-      <div style="display:flex;align-items:center;gap:1.5rem;">
-        <div style="width:64px;height:64px;border-radius:50%;background:#5865f2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.2rem;">U</div>
-        <div>
-          <div style="font-weight:700;font-size:1.2rem;">Username#1234</div>
-          <div style="color:#b9bbbe;font-size:0.98rem;">Status: <span id="profileStatus">Online</span></div>
-        </div>
-      </div>
-      <div style="margin-top:1.5rem;">
-        <label>Benutzername</label>
-        <input type="text" id="profileUsername" value="Gast" />
-        <label>Status</label>
-        <select id="profileStatusSelect">
-          <option value="online">Online</option>
-          <option value="offline">Offline</option>
-          <option value="dnd">Nicht stören</option>
-        </select>
-        <button class="btn btn-success" id="saveProfileBtn">Speichern</button>
-      </div>
-      <div style="margin-top:1.2rem;display:flex;gap:1rem;">
-        <a class="btn btn-secondary" href="index.html">Home</a>
-        <button class="btn btn-danger" id="btnSignOut" type="button">Ausloggen</button>
-      </div>
-    </section>
-    <section class="discord-card account-stats-card">
-      <h2>Ranked Stats</h2>
-      <div class="stats-mini-grid">
-        <div class="stat-tile">
-          <div class="stat-label">Level</div>
-          <div class="stat-value" id="rankedLevel"></div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-label">XP</div>
-          <div class="stat-value" id="rankedXp"></div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-label">Streak</div>
-          <div class="stat-value" id="rankedStreak"></div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-label">Last</div>
-          <div class="stat-value" id="rankedMeta"></div>
-        </div>
-      </div>
-    </section>
-    <section class="discord-card account-loggedout-card" id="loggedOutCard" style="display:none;">
-      <h2>Du bist nicht eingeloggt</h2>
-      <p>Log dich ein, damit dein Fortschritt im Account landet.</p>
-      <div style="margin-top:1.2rem;display:flex;gap:1rem;">
-        <a class="btn btn-primary" href="login.html">Zum Login</a>
-        <a class="btn btn-secondary" href="index.html">Zur Startseite</a>
-      </div>
-    </section>
-  </main>
-  <div id="footer-placeholder"></div>
-</body>
-</html>
-          <h3 class="chart-title">Rank Verlauf</h3>
-          <canvas id="rankChartCanvas" style="max-height: 250px;"></canvas>
-        </div>
-      </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Konto verwalten | echtlucky</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/account.css" />
+  </head>
+  <body class="page-transition account-page">
+    <div id="header-placeholder"></div>
 
-      <!-- REFLEX STATS CARD -->
-      <div class="account-card">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title"> Reflex Mode</h2>
-            <p class="card-hint">Deine Reflex-Bestleistungen</p>
-          </div>
-        </div>
-
-        <div class="stats-mini-grid">
-          <div class="stat-tile">
-            <div class="stat-label">Best Avg</div>
-            <div class="stat-value" id="reflexAvg"></div>
-          </div>
-          <div class="stat-tile">
-            <div class="stat-label">Best Hit</div>
-            <div class="stat-value" id="reflexBest"></div>
-          </div>
-          <div class="stat-tile">
-            <div class="stat-label">Rating</div>
-            <div class="stat-value" id="reflexRating"></div>
-          </div>
-          <div class="stat-tile">
-            <div class="stat-label">Last Run</div>
-            <div class="stat-value" id="reflexLast"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ACCOUNT SETTINGS CARD -->
-      <div class="account-card">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title"> Account Einstellungen</h2>
-            <p class="card-hint">Ändere deine Accountdaten</p>
-          </div>
-        </div>
-
-        <form id="accountSettingsForm" class="profile-form">
-          <div class="form-group">
-            <label for="inputUsername">Benutzername</label>
-            <div class="form-input-group">
-              <input type="text" id="inputUsername" placeholder="Dein Benutzername" />
-              <span class="form-status" id="usernameStatus"></span>
+    <main class="account-main">
+      <section class="account-wrap">
+        <header class="account-hero">
+          <div class="profile-card">
+            <div class="profile-top">
+              <div class="avatar" id="avatarInitial">U</div>
+              <div>
+                <div class="profile-name" id="profileName">User</div>
+                <div class="profile-email" id="profileEmail">—</div>
+              </div>
             </div>
-            <span class="form-hint" id="usernameHint">Öffentlich sichtbar  Änderbar alle 7 Tage</span>
-          </div>
 
-          <div class="form-group">
-            <label for="inputEmail">Email Adresse</label>
-            <div class="form-input-group">
-              <input type="email" id="inputEmail" placeholder="Deine Email" />
-              <span class="form-status" id="emailStatus"></span>
+            <div class="profile-actions">
+              <button class="btn btn-danger" id="btnSignOut" type="button">Ausloggen</button>
             </div>
-            <span class="form-hint" id="emailHint">Du kannst deine Email ändern</span>
           </div>
 
+          <div class="account-hero__meta">
+            <div class="pill" id="pillStatus">Status: …</div>
+            <div class="pill" id="pillProvider">Provider: …</div>
+            <div class="pill" id="pillUpdated">Updated: …</div>
+          </div>
+        </header>
+
+        <section class="account-card" id="loggedOutCard" style="display:none;">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Du bist nicht eingeloggt</h2>
+              <p class="card-hint">Log dich ein, damit dein Fortschritt im Account landet.</p>
+            </div>
+          </div>
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary" id="btnSaveSettings">Speichern</button>
-            <button type="button" class="btn btn-secondary" id="btnCancelSettings">Abbrechen</button>
+            <a class="btn btn-primary" href="login.html">Zum Login</a>
+            <a class="btn btn-secondary" href="index.html">Zur Startseite</a>
+          </div>
+        </section>
+
+        <section class="account-grid" id="accountGrid">
+          <div class="account-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Ranked Stats</h2>
+                <p class="card-hint">Dein aktueller Stand</p>
+              </div>
+              <div class="pill" id="chipSync">Sync: …</div>
+            </div>
+
+            <div class="stats-mini-grid">
+              <div class="stat-tile">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="rankedLevel"></div>
+              </div>
+              <div class="stat-tile">
+                <div class="stat-label">XP</div>
+                <div class="stat-value" id="rankedXp"></div>
+              </div>
+              <div class="stat-tile">
+                <div class="stat-label">Streak</div>
+                <div class="stat-value" id="rankedStreak"></div>
+              </div>
+              <div class="stat-tile">
+                <div class="stat-label">Last</div>
+                <div class="stat-value" id="rankedMeta"></div>
+              </div>
+            </div>
+
+            <div class="chart-wrap">
+              <h3 class="chart-title">Rank Verlauf</h3>
+              <canvas id="rankChartCanvas" style="max-height: 250px;"></canvas>
+            </div>
           </div>
 
-          <div id="settingsFormMsg" class="form-msg"></div>
-        </form>
-      </div>
+          <div class="account-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Reflex Mode</h2>
+                <p class="card-hint">Deine Reflex-Bestleistungen</p>
+              </div>
+            </div>
 
-      <!-- DATA SYNC CARD -->
-      <div class="account-card">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title"> Daten Synchronisierung</h2>
-            <p class="card-hint">Local  Cloud Sync</p>
+            <div class="stats-mini-grid">
+              <div class="stat-tile">
+                <div class="stat-label">Best Avg</div>
+                <div class="stat-value" id="reflexAvg"></div>
+              </div>
+              <div class="stat-tile">
+                <div class="stat-label">Best Hit</div>
+                <div class="stat-value" id="reflexBest"></div>
+              </div>
+              <div class="stat-tile">
+                <div class="stat-label">Rating</div>
+                <div class="stat-value" id="reflexRating"></div>
+              </div>
+              <div class="stat-tile">
+                <div class="stat-label">Last Run</div>
+                <div class="stat-value" id="reflexLast"></div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="sync-info-box">
-          <p>Synchronisiere deine Stats zwischen lokalem Gerät und Cloud-Account.</p>
-        </div>
+          <div class="account-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Account Einstellungen</h2>
+                <p class="card-hint">Ändere deine Accountdaten</p>
+              </div>
+            </div>
 
-        <div class="sync-actions">
-          <button class="btn btn-primary" id="btnUploadLocal" type="button"> Local  Account</button>
-          <button class="btn btn-secondary" id="btnDownloadCloud" type="button"> Account  Local</button>
-          <button class="btn btn-ghost" id="btnClearLocal" type="button"> Local löschen</button>
-        </div>
+            <form id="accountSettingsForm" class="profile-form">
+              <div class="form-group">
+                <label for="inputUsername">Benutzername</label>
+                <div class="form-input-group">
+                  <input type="text" id="inputUsername" placeholder="Dein Benutzername" />
+                  <span class="form-status" id="usernameStatus"></span>
+                </div>
+                <span class="form-hint" id="usernameHint">Öffentlich sichtbar • Änderbar alle 7 Tage</span>
+              </div>
 
-        <p class="mini-note">
-           Account  Local überschreibt deine lokalen Werte.
-        </p>
-      </div>
+              <div class="form-group">
+                <label for="inputEmail">Email Adresse</label>
+                <div class="form-input-group">
+                  <input type="email" id="inputEmail" placeholder="Deine Email" />
+                  <span class="form-status" id="emailStatus"></span>
+                </div>
+                <span class="form-hint" id="emailHint">Du kannst deine Email ändern</span>
+              </div>
 
-      <!-- ACCOUNT DATA PREVIEW CARD -->
-      <div class="account-card">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title"> Cloud Daten</h2>
-            <p class="card-hint">Im Firestore gespeichert</p>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="btnSaveSettings">Speichern</button>
+                <button type="button" class="btn btn-secondary" id="btnCancelSettings">Abbrechen</button>
+              </div>
+
+              <div id="settingsFormMsg" class="form-msg"></div>
+            </form>
           </div>
-        </div>
 
-        <div class="preview">
-          <div class="preview-row">
-            <div class="preview-k">UID</div>
-            <div class="preview-v" id="pvUid"></div>
+          <div class="account-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Daten Synchronisierung</h2>
+                <p class="card-hint">Local • Cloud Sync</p>
+              </div>
+            </div>
+
+            <div class="sync-info-box">
+              <p>Synchronisiere deine Stats zwischen lokalem Gerät und Cloud-Account.</p>
+            </div>
+
+            <div class="sync-actions">
+              <button class="btn btn-primary" id="btnUploadLocal" type="button">Local → Account</button>
+              <button class="btn btn-secondary" id="btnDownloadCloud" type="button">Account → Local</button>
+              <button class="btn btn-ghost" id="btnClearLocal" type="button">Local löschen</button>
+            </div>
+
+            <p class="mini-note">Account → Local überschreibt deine lokalen Werte.</p>
           </div>
-          <div class="preview-row">
-            <div class="preview-k">Ranked</div>
-            <div class="preview-v" id="pvRanked"></div>
+
+          <div class="account-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Cloud Daten</h2>
+                <p class="card-hint">Im Firestore gespeichert</p>
+              </div>
+            </div>
+
+            <div class="preview">
+              <div class="preview-row">
+                <div class="preview-k">UID</div>
+                <div class="preview-v" id="pvUid"></div>
+              </div>
+              <div class="preview-row">
+                <div class="preview-k">Ranked</div>
+                <div class="preview-v" id="pvRanked"></div>
+              </div>
+              <div class="preview-row">
+                <div class="preview-k">Reflex</div>
+                <div class="preview-v" id="pvReflex"></div>
+              </div>
+              <div class="preview-row">
+                <div class="preview-k">Updated</div>
+                <div class="preview-v" id="pvUpdated"></div>
+              </div>
+            </div>
           </div>
-          <div class="preview-row">
-            <div class="preview-k">Reflex</div>
-            <div class="preview-v" id="pvReflex"></div>
+
+          <div class="account-card danger-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Danger Zone</h2>
+                <p class="card-hint">Löschungen sind nicht rückgängig zu machen</p>
+              </div>
+            </div>
+
+            <button class="btn btn-ghost danger" id="btnWipeCloud" type="button">Cloud Stats zurücksetzen</button>
           </div>
-          <div class="preview-row">
-            <div class="preview-k">Updated</div>
-            <div class="preview-v" id="pvUpdated"></div>
-          </div>
-        </div>
-      </div>
+        </section>
+      </section>
+    </main>
 
-      <!-- DANGER ZONE CARD -->
-      <div class="account-card danger-card">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title"> Danger Zone</h2>
-            <p class="card-hint">Löschungen sind nicht rückgängig zu machen</p>
-          </div>
-        </div>
+    <div id="footer-placeholder"></div>
 
-        <button class="btn btn-ghost danger" id="btnWipeCloud" type="button">
-           Cloud Stats zurücksetzen
-        </button>
-      </div>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    </section>
-  </main>
+    <script src="firebase.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/legal-modal.js"></script>
+    <script src="js/notify.js"></script>
+    <script src="js/modal-dialog.js"></script>
+    <script src="js/account.js"></script>
 
-  <div id="footer-placeholder"></div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.classList.add("loaded");
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+        fetch("header.html").then(r => r.text()).then(html => {
+          document.getElementById("header-placeholder").innerHTML = html;
+          if (typeof initHeaderScripts === "function") initHeaderScripts();
+          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+        }).catch(() => {});
 
-  <!-- Chart.js für Rank-Verlauf -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-  <script src="firebase.js"></script>
-  <script src="js/auth-state.js"></script>
-  <script src="js/menu.js"></script>
-  <script src="js/legal-modal.js"></script>
-  <script src="js/notify.js"></script>
-  <script src="js/modal-dialog.js"></script>
-  <script src="js/account.js"></script>
-
-  <script>
-    document.body.classList.add('loaded');
-
-    fetch('header.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-        if (typeof initHeaderScripts === "function") initHeaderScripts();
-        if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+        fetch("footer.html").then(r => r.text()).then(html => {
+          document.getElementById("footer-placeholder").innerHTML = html;
+        }).catch(() => {});
       });
-
-    fetch('footer.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
+

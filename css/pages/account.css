@@ -7,7 +7,7 @@
   flex-direction: column;
   gap: 2.2rem;
 }
-.discord-card {
+.account-page .discord-card {
   background: #40444b;
   border-radius: 18px;
   box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
@@ -15,13 +15,13 @@
   border: 1px solid #232428;
   color: #f6f6f7;
 }
-.discord-card h2 {
+.account-page .discord-card h2 {
   margin-top: 0;
   color: #5865f2;
   font-size: 1.4rem;
   font-weight: 800;
 }
-.btn, .btn-primary, .btn-danger, .btn-success, .btn-secondary {
+.account-page .btn, .account-page .btn-primary, .account-page .btn-danger, .account-page .btn-success, .account-page .btn-secondary {
   border-radius: 10px;
   font-weight: 700;
   padding: 0.7em 1.4em;
@@ -31,13 +31,13 @@
   transition: background 0.2s, color 0.2s;
   margin-bottom: 0.2rem;
 }
-.btn-primary { background: #5865f2; color: #fff; }
-.btn-primary:hover { background: #8ea1e1; }
-.btn-danger { background: #ed4245; color: #fff; }
-.btn-success { background: #43b581; color: #fff; }
-.btn-secondary { background: #232428; color: #fff; border: 1px solid #5865f2; }
-.btn-secondary:hover { background: #5865f2; color: #fff; }
-input, select {
+.account-page .btn-primary { background: #5865f2; color: #fff; }
+.account-page .btn-primary:hover { background: #8ea1e1; }
+.account-page .btn-danger { background: #ed4245; color: #fff; }
+.account-page .btn-success { background: #43b581; color: #fff; }
+.account-page .btn-secondary { background: #232428; color: #fff; border: 1px solid #5865f2; }
+.account-page .btn-secondary:hover { background: #5865f2; color: #fff; }
+.account-page input, .account-page select {
   background: #36393f;
   color: #f6f6f7;
   border: 1px solid #232428;
@@ -48,7 +48,7 @@ input, select {
   width: 100%;
   box-sizing: border-box;
 }
-input:focus, select:focus {
+.account-page input:focus, .account-page select:focus {
   outline: none;
   border-color: #5865f2;
 }
@@ -57,18 +57,18 @@ input:focus, select:focus {
     padding: 1.2rem 0.1rem;
     gap: 1.1rem;
   }
-  .discord-card {
+  .account-page .discord-card {
     padding: 1.1rem 0.7rem;
     border-radius: 12px;
   }
-  .btn, .btn-primary, .btn-danger, .btn-success, .btn-secondary {
+  .account-page .btn, .account-page .btn-primary, .account-page .btn-danger, .account-page .btn-success, .account-page .btn-secondary {
     min-height: 48px;
     font-size: 1.08em;
     border-radius: 14px;
     width: 100%;
     margin-bottom: 0.5rem;
   }
-  input, select {
+  .account-page input, .account-page select {
     min-height: 44px;
     font-size: 1.08em;
     border-radius: 12px;
@@ -96,9 +96,9 @@ input:focus, select:focus {
 }
 
 .account-wrap{
-  width: min(1100px, 92%);
+  width: 100%;
   margin: 0 auto;
-  padding: clamp(1.6rem, 3vw, 2.4rem) 0;
+  padding: clamp(1.2rem, 3vw, 2.4rem) clamp(0.9rem, 2.6vw, 2rem);
   display: grid;
   gap: 1.2rem;
 }

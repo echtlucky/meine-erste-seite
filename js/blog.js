@@ -55,7 +55,7 @@
     console.log("✅ blog.js setup complete");
     loadPosts();
     setupEventListeners();
-    loadHeader();
+    // Header/Footer werden per HTML-Template geladen (blog.html).
   }
 
   // Start when DOM is ready

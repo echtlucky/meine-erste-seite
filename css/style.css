@@ -62,9 +62,7 @@ body{
   font-weight: 460;
 
   background:
-    linear-gradient(rgba(0,0,0,0.64), rgba(0,0,0,0.88)),
-    url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2400')
-    center/cover no-repeat fixed;
+    linear-gradient(180deg, rgba(0,0,0,0.82), rgba(0,0,0,0.94));
 }
 
 /* Decorative overlays (global, safe) */
@@ -104,7 +102,7 @@ p{ color: var(--text-soft); }
 ====================================== */
 main{ flex:1; }
 .container{
-  max-width: 1180px;
+  max-width: none;
   margin: 0 auto;
   padding: 0 clamp(1.1rem, 3vw, 2rem);
 }

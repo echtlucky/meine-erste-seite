@@ -18,9 +18,9 @@
 /* Connect: Single Main Card Shell */
 .connect-single-card-shell {
   width: 100%;
-  max-width: 1200px;
+  max-width: none;
   margin: 1.25rem auto 2rem auto;
-  padding: 0 1.5rem;
+  padding: 0 clamp(0.9rem, 2.6vw, 2rem);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -1375,19 +1375,43 @@
 
 /* Responsive */
 @media (max-width: 900px) {
+  .connect-single-card-shell{
+    margin: 0;
+    padding: 0;
+    gap: 0.75rem;
+  }
+
+  .connect-main-card{
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
   .connect-mobile-switcher {
     display: grid;
+    position: sticky;
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    z-index: 20;
+    order: 3;
+    border-top: 1px solid rgba(0, 255, 136, 0.10);
+    border-bottom: none;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(14px);
   }
 
   .connect-layout {
     grid-template-columns: 1fr;
     gap: 1rem;
+    order: 1;
   }
   .connect-main-card .connect-layout {
     gap: 0;
+    min-height: calc(100dvh - var(--header-h) - 84px - env(safe-area-inset-bottom));
   }
   .connect-panel {
-    padding: 1rem 0.5rem;
+    padding: 0.95rem 0.9rem;
     min-width: 0;
   }
   .chat-settings-btn {
@@ -1396,7 +1420,18 @@
     font-size: 1.1rem;
   }
   .voice-section {
-    padding: 1rem 0.5rem;
+    padding: 1rem 0.9rem;
+  }
+
+  .groups-list{
+    max-height: none;
+  }
+
+  .connect-panel--left,
+  .connect-panel--middle,
+  .connect-panel--right{
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Panel switching via [data-mobile-panel] */
