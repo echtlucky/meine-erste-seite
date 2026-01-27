@@ -55,36 +55,7 @@
               <span class="focus-toggle__state">Off</span>
             </button>
           </header>
-          <div class="skill-grid">
-            <div class="skill">
-              <span>Aim</span>
-              <div class="skill-meter">
-                <span style="width: 82%;"></span>
-              </div>
-              <strong>82%</strong>
-            </div>
-            <div class="skill">
-              <span>Gamesense</span>
-              <div class="skill-meter">
-                <span style="width: 74%;"></span>
-              </div>
-              <strong>74%</strong>
-            </div>
-            <div class="skill">
-              <span>Consistency</span>
-              <div class="skill-meter">
-                <span style="width: 69%;"></span>
-              </div>
-              <strong>69%</strong>
-            </div>
-            <div class="skill">
-              <span>Warm-Up</span>
-              <div class="skill-meter">
-                <span style="width: 91%;"></span>
-              </div>
-              <strong>91%</strong>
-            </div>
-          </div>
+          <div class="skill-grid" data-role="skill-grid"></div>
         </article>
 
         <article class="ranked-card streak-card">
@@ -95,13 +66,7 @@
             </div>
             <button class="btn btn-ghost btn-sm" type="button">Reset-History</button>
           </header>
-          <div class="streak-timeline">
-            <div class="streak-step active"><span>Mo</span><strong>7</strong></div>
-            <div class="streak-step active"><span>Di</span><strong>9</strong></div>
-            <div class="streak-step"><span>Mi</span><strong>6</strong></div>
-            <div class="streak-step pending"><span>Do</span><strong>0</strong></div>
-            <div class="streak-step pending"><span>Fr</span><strong>0</strong></div>
-          </div>
+          <div class="streak-timeline" data-role="streak-timeline"></div>
           <p class="streak-note">Spiele deine Daily, damit du den Fortschritt behältst. Bonus-XP nach 5 Tagen.</p>
         </article>
 
@@ -115,6 +80,30 @@
       </section>
 
       <section class="ranked-column ranked-column--middle">
+        <article class="ranked-card daily-card">
+          <header class="ranked-card__head">
+            <div>
+              <p class="ranked-card__title">Daily Grind</p>
+              <p class="ranked-card__hint">3 Tasks pro Tag · hydrate, warm-up, repeat</p>
+            </div>
+            <span class="tag tag-primary">Auto Saved</span>
+          </header>
+          <div class="daily-progress">
+            <div class="ranked-progress daily-progress-bar">
+              <div class="ranked-progress__bar" data-role="daily-progress"></div>
+            </div>
+            <div class="daily-progress__meta">
+              <span class="daily-progress-count">0 / 3</span>
+              <span class="daily-progress-xp">+0 XP</span>
+            </div>
+          </div>
+          <div class="daily-task-list"></div>
+          <div class="daily-actions">
+            <button class="btn btn-primary" data-action="complete-day" type="button"><i class="fa-solid fa-check"></i> Complete Day</button>
+            <button class="btn btn-ghost" data-action="reroll" type="button"><i class="fa-solid fa-dice"></i> Reroll</button>
+            <button class="btn btn-ghost" data-action="reset" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
+          </div>
+        </article>
         <article class="ranked-card weekly-card">
           <header class="ranked-card__head">
             <div>
@@ -123,31 +112,15 @@
             </div>
             <span class="tag tag-primary">+25% XP</span>
           </header>
-          <div class="weekly-list">
-            <div class="weekly-item">
-              <div>
-                <h3>Challenge 1</h3>
-                <p>Perfekte Heatmap-Session (15 Min)</p>
-              </div>
-              <span>In Progress</span>
+          <div class="weekly-progress">
+            <div class="ranked-progress weekly-progress-bar">
+              <div class="ranked-progress__bar" data-role="weekly-progress"></div>
             </div>
-            <div class="weekly-item">
-              <div>
-                <h3>Challenge 2</h3>
-                <p>Warming-Up mit Coach</p>
-              </div>
-              <span>Ready</span>
-            </div>
-            <div class="weekly-item">
-              <div>
-                <h3>Challenge 3</h3>
-                <p>Focus-Mode &amp; kein Tilt</p>
-              </div>
-              <span>Locked</span>
-            </div>
+            <p class="weekly-progress-label">Bonus-XP Track: <span class="weekly-progress-percent">0%</span></p>
           </div>
+          <div class="weekly-list" data-role="weekly-list"></div>
           <div class="challenge-note">
-            <textarea placeholder="Notizen pro Challenge – z.B. Temperatur, Audio-Einstellungen, Partner"></textarea>
+            <textarea data-role="weekly-notes" placeholder="Notizen pro Challenge – z.B. Temperatur, Audio-Einstellungen, Partner"></textarea>
           </div>
         </article>
 
@@ -161,9 +134,11 @@
           </header>
           <div class="monthly-progress">
             <div class="monthly-progress__bar">
-              <div class="monthly-progress__fill" style="width: 54%;"></div>
+              <div class="monthly-progress__fill" data-role="monthly-progress" style="width: 54%;"></div>
             </div>
-            <p>Today vs Yesterday: <strong>+3.1%</strong> | Streak: <strong>14 Tage</strong></p>
+            <p class="monthly-progress-summary">
+              Today vs Yesterday: <strong data-role="monthly-delta">+3.1%</strong> | Streak: <strong data-role="monthly-streak">14 Tage</strong>
+            </p>
           </div>
           <div class="daily-difficulty">
             <span>Schwierigkeit</span>
@@ -186,15 +161,15 @@
           <div class="compare-grid">
             <div>
               <p>Heute</p>
-              <strong>+12 XP</strong>
+              <strong data-role="compare-today">+12 XP</strong>
             </div>
             <div>
               <p>Gestern</p>
-              <strong>+4 XP</strong>
+              <strong data-role="compare-yesterday">+4 XP</strong>
             </div>
             <div>
               <p>Δ</p>
-              <strong>+8 XP</strong>
+              <strong data-role="compare-delta">+8 XP</strong>
             </div>
           </div>
         </article>
@@ -209,33 +184,14 @@
             </div>
             <button class="btn btn-ghost btn-sm" type="button">Heatmap öffnen</button>
           </header>
-          <ul class="history-list">
-            <li>
-              <span>Session 1</span>
-              <strong>+18 XP</strong>
-            </li>
-            <li>
-              <span>Session 2</span>
-              <strong>+12 XP</strong>
-            </li>
-            <li>
-              <span>Session 3</span>
-              <strong>+25 XP</strong>
-            </li>
-          </ul>
+          <ul class="history-list" data-role="history-list"></ul>
         </article>
 
         <article class="ranked-card heatmap-card">
           <header class="ranked-card__head">
             <p class="ranked-card__title">Performance-Heatmap</p>
           </header>
-          <div class="heatmap-grid">
-            <!-- Placeholder grid -->
-            <span></span><span></span><span></span>
-            <span></span><span></span><span></span>
-            <span></span><span></span><span></span>
-            <span></span><span></span><span></span>
-          </div>
+          <div class="heatmap-grid" data-role="heatmap-grid"></div>
           <p class="heatmap-note">Beste Zeiten: 20:00–23:00 | 42% Win-Rate</p>
         </article>
 
@@ -247,20 +203,7 @@
             </div>
             <span class="tag tag-primary">Badge-Feed</span>
           </header>
-          <div class="badges-grid">
-            <div>
-              <strong>7</strong>
-              <span>Streak</span>
-            </div>
-            <div>
-              <strong>30</strong>
-              <span>XP Drops</span>
-            </div>
-            <div>
-              <strong>100</strong>
-              <span>Matches</span>
-            </div>
-          </div>
+          <div class="badges-grid" data-role="badges-grid"></div>
         </article>
 
         <article class="ranked-card future-card">
