@@ -12,7 +12,6 @@
     { id: "group-5", name: "Updates", unread: 3, color: "#ff9a00" }
   ];
 
-  const stripSlots = document.querySelectorAll("[data-group-strip]");
   const contextMenu = document.getElementById("groupStripContextMenu");
   let currentGroups = defaultGroups.slice();
   let contextTarget = null;
@@ -50,9 +49,14 @@
     return wrapper;
   }
 
+  function getStripSlots() {
+    return Array.from(document.querySelectorAll("[data-group-strip]"));
+  }
+
   function renderStrip() {
-    if (!stripSlots.length) return;
-    stripSlots.forEach((slot) => {
+    const slots = getStripSlots();
+    if (!slots.length) return;
+    slots.forEach((slot) => {
       slot.innerHTML = "";
       currentGroups.slice(0, 8).forEach((group) => {
         slot.appendChild(buildIcon(group));
@@ -147,10 +151,16 @@
     renderStrip();
   };
 
-  document.addEventListener("DOMContentLoaded", () => {
+  function initStrip() {
     renderStrip();
     wireContextMenu();
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initStrip);
+  } else {
+    initStrip();
+  }
 
   document.addEventListener("echtlucky:auth-change", (event) => {
     if (!event.detail?.user) {
