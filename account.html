@@ -186,6 +186,122 @@
           <div class="account-card">
             <div class="card-head">
               <div>
+                <h2 class="card-title">Status</h2>
+                <p class="card-hint">Online-Status &amp; Custom Status (Connect)</p>
+              </div>
+            </div>
+
+            <div class="profile-form" aria-label="Status Einstellungen">
+              <div class="form-group">
+                <label for="accountStatusSelect">Status</label>
+                <select id="accountStatusSelect">
+                  <option value="online">Online</option>
+                  <option value="away">Abwesend</option>
+                  <option value="dnd">Bitte nicht stören</option>
+                  <option value="invisible">Unsichtbar</option>
+                </select>
+                <span class="form-hint">Wird in Connect angezeigt (Firestore).</span>
+              </div>
+
+              <div class="form-group">
+                <label for="accountCustomStatus">Custom Status</label>
+                <input id="accountCustomStatus" type="text" placeholder="z. B. 'Grinding Ranked' (optional)" maxlength="80" />
+                <span class="form-hint">Kurzer Text unter deinem Namen (optional).</span>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" id="btnSaveStatus" type="button">Speichern</button>
+                <button class="btn btn-secondary" id="btnClearStatus" type="button">Zurücksetzen</button>
+              </div>
+
+              <div id="statusFormMsg" class="form-msg"></div>
+            </div>
+          </div>
+
+          <div class="account-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Security &amp; Login</h2>
+                <p class="card-hint">E-Mail/Passwort, 2FA, Backup-Codes</p>
+              </div>
+            </div>
+
+            <div class="profile-form" aria-label="Security Einstellungen">
+              <div class="form-group">
+                <label>Verknüpfte Logins</label>
+                <div class="sync-info-box" style="margin-bottom:0;">
+                  <div id="linkedProvidersList" style="display:grid; gap:8px;"></div>
+                </div>
+                <span class="form-hint">OAuth-Verknüpfungen (Google etc.) – future-ready.</span>
+              </div>
+
+              <div class="divider-line" aria-hidden="true"></div>
+
+              <div class="form-actions">
+                <button class="btn btn-secondary" id="btnChangeEmail" type="button">E-Mail ändern</button>
+                <button class="btn btn-secondary" id="btnChangePassword" type="button">Passwort ändern</button>
+              </div>
+
+              <div class="divider-line" aria-hidden="true"></div>
+
+              <div class="form-group">
+                <label>2FA (Authenticator)</label>
+                <div class="sync-info-box" style="margin-bottom:0;">
+                  <p style="margin:0;">Vorbereitung (UI). TOTP/Authenticator-Flow wird später serverseitig finalisiert.</p>
+                </div>
+                <div class="form-actions" style="margin-top:.8rem;">
+                  <button class="btn btn-secondary" id="btnSetup2fa" type="button">2FA einrichten</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Backup-Codes</label>
+                <div class="form-actions" style="margin-bottom:.6rem;">
+                  <button class="btn btn-secondary" id="btnGenerateBackupCodes" type="button">Backup-Codes generieren</button>
+                  <button class="btn btn-ghost" id="btnCopyBackupCodes" type="button">Kopieren</button>
+                </div>
+                <textarea id="backupCodesBox" rows="5" readonly placeholder="(noch keine Codes generiert)"></textarea>
+                <span class="form-hint">Codes werden lokal erzeugt. Speichere sie sicher.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="account-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Sessions &amp; Geräte</h2>
+                <p class="card-hint">Aktive Session (Client) &amp; Übersicht</p>
+              </div>
+            </div>
+
+            <div class="profile-form" aria-label="Sessions">
+              <div class="sync-info-box">
+                <div id="sessionsList" style="display:grid; gap:10px;"></div>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-secondary" id="btnSignOutOtherSessions" type="button">Andere Sessions ausloggen</button>
+              </div>
+              <span class="form-hint">Browser-Session-Management ist eingeschränkt (Firebase Web). UI ist vorbereitet.</span>
+            </div>
+          </div>
+
+          <div class="account-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Account Export</h2>
+                <p class="card-hint">Exportiere deine Daten als JSON</p>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-secondary" id="btnExportAccount" type="button">Account exportieren</button>
+              <button class="btn btn-secondary" id="btnExportAll" type="button">Alles exportieren (Local + Cloud)</button>
+            </div>
+          </div>
+
+          <div class="account-card">
+            <div class="card-head">
+              <div>
                 <h2 class="card-title">Daten Synchronisierung</h2>
                 <p class="card-hint">Local • Cloud Sync</p>
               </div>
@@ -241,6 +357,7 @@
             </div>
 
             <button class="btn btn-ghost danger" id="btnWipeCloud" type="button">Cloud Stats zurücksetzen</button>
+            <button class="btn btn-danger" id="btnDeleteAccount" type="button" style="margin-top:10px;">Account löschen</button>
           </div>
         </section>
       </section>

@@ -73,8 +73,15 @@
                     <div class="dm-list" id="dmListPanel"></div>
                   </div>
 
-                  <!-- Legacy groups list (selection is driven by the left strip like Discord servers) -->
-                  <div id="groupsListPanel" hidden></div>
+                  <div class="connect-nav-block" aria-label="Gruppen">
+                    <div class="connect-nav-block__titleRow">
+                      <div class="connect-nav-block__title">Gruppen</div>
+                      <button class="btn btn-sm" id="btnCreateGroup" type="button" title="Gruppe erstellen" aria-label="Gruppe erstellen">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                    <div id="groupsListPanel" class="connect-groups-list" aria-label="Gruppenliste"></div>
+                  </div>
 
                   <div class="connect-userbar" id="connectUserBar" aria-label="User Controls">
                     <button class="connect-userbar__identity" id="btnUserBarAccount" type="button" aria-label="Account">
@@ -99,6 +106,9 @@
                   <div class="chat-container" id="chatContainer" hidden>
                     <div class="chat-header">
                       <div class="chat-group-info">
+                        <button class="chat-settings-btn chat-settings-btn--back" id="btnMobileBack" type="button" aria-label="Zurück" title="Zurück">
+                          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                        </button>
                         <h2 class="chat-group-title" id="chatGroupTitle">Gruppe</h2>
                         <div class="chat-header-actions" aria-label="Chat Aktionen">
                           <button class="chat-settings-btn" id="btnStartCall" type="button" title="Anruf starten" aria-label="Anruf starten">
@@ -214,6 +224,22 @@
                   </div>
                 </aside>
               </div>
+
+              <!-- Mobile panel switcher (DMs / Chat / Members) -->
+              <div class="connect-mobile-switcher" role="tablist" aria-label="Ansicht wechseln">
+                <button class="connect-mobile-tab" type="button" data-panel="left" role="tab" aria-selected="true">
+                  <i class="fa-solid fa-comments" aria-hidden="true"></i>
+                  <span>Chats</span>
+                </button>
+                <button class="connect-mobile-tab" type="button" data-panel="middle" role="tab" aria-selected="false">
+                  <i class="fa-solid fa-message" aria-hidden="true"></i>
+                  <span>Chat</span>
+                </button>
+                <button class="connect-mobile-tab" type="button" data-panel="right" role="tab" aria-selected="false">
+                  <i class="fa-solid fa-users" aria-hidden="true"></i>
+                  <span>Members</span>
+                </button>
+              </div>
             </div>
           </section>
         </main>
@@ -226,7 +252,7 @@
     <!-- SETTINGS MODAL -->
     <div class="group-settings-modal" id="groupSettingsModal" aria-hidden="true">
       <div class="settings-modal-panel" role="dialog" aria-modal="true" aria-label="Gruppeneinstellungen">
-        <button class="settings-modal-close" id="closeGroupSettings" type="button" aria-label="SchlieÃŸen">Ã—</button>
+        <button class="settings-modal-close" id="closeGroupSettings" type="button" aria-label="Schließen">×</button>
 
         <div class="settings-modal-header">
           <h3>Gruppeneinstellungen</h3>
@@ -234,10 +260,10 @@
 
         <div class="settings-modal-content">
           <div class="settings-section">
-            <h4>ðŸ‘¤ Mitglieder hinzufÃ¼gen</h4>
+            <h4>Mitglieder hinzufügen</h4>
             <div class="setting-row">
-              <input type="text" id="addMemberSearchInput" class="setting-input" placeholder="Benutzernameâ€¦" />
-              <button class="btn btn-sm" id="btnModalAddMember" type="button">HinzufÃ¼gen</button>
+              <input type="text" id="addMemberSearchInput" class="setting-input" placeholder="Benutzername…" />
+              <button class="btn btn-sm" id="btnModalAddMember" type="button">Hinzufügen</button>
             </div>
             <div class="modal-member-search-results" id="modalMemberResults"></div>
           </div>
@@ -245,7 +271,7 @@
           <hr class="settings-separator" />
 
           <div class="settings-section">
-            <h4>âš™ï¸ Informationen</h4>
+            <h4>⚙️ Informationen</h4>
             <div class="setting-row">
               <label>Gruppenname</label>
               <input type="text" id="groupNameInput" class="setting-input" disabled />
@@ -259,17 +285,17 @@
           <hr class="settings-separator" />
 
           <div class="settings-section settings-danger">
-            <button class="btn btn-secondary" id="btnLeaveGroupModal" type="button">ðŸ‘‹ Gruppe verlassen</button>
-            <button class="btn btn-danger" id="btnDeleteGroupModal" type="button">ðŸ—‘ï¸ Gruppe lÃ¶schen</button>
+            <button class="btn btn-secondary" id="btnLeaveGroupModal" type="button">Gruppe verlassen</button>
+            <button class="btn btn-danger" id="btnDeleteGroupModal" type="button">Gruppe löschen</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- GROUP CONTEXT MENU (Desktop right-click) -->
-    <div class="context-menu" id="groupContextMenu" hidden role="menu" aria-label="GruppenmenÃ¼"></div>
+    <div class="context-menu" id="groupContextMenu" hidden role="menu" aria-label="Gruppenmenü"></div>
     <!-- USER CONTEXT MENU (Desktop right-click) -->
-    <div class="context-menu" id="userContextMenu" hidden role="menu" aria-label="BenutzermenÃ¼"></div>
+    <div class="context-menu" id="userContextMenu" hidden role="menu" aria-label="Benutzermenü"></div>
 
     <!-- ADD FRIEND MODAL -->
     <div id="addFriendModal" class="modal-overlay" hidden aria-hidden="true">
@@ -388,19 +414,19 @@
           <h3 class="modal-title">Konto</h3>
         </div>
         <div class="modal-body">
-          <p class="modal-message">Was mÃ¶chtest du tun?</p>
+          <p class="modal-message">Was möchtest du tun?</p>
           <div class="account-quick-devices" aria-label="Audio Einstellungen">
-            <label class="account-quick-devices__label" for="audioInputSelect">ðŸŽ™ï¸ Mikrofon</label>
+            <label class="account-quick-devices__label" for="audioInputSelect">Mikrofon</label>
             <select id="audioInputSelect" class="account-quick-devices__select"></select>
 
-            <label class="account-quick-devices__label" for="audioOutputSelect">ðŸ”Š Ausgabe</label>
+            <label class="account-quick-devices__label" for="audioOutputSelect">Ausgabe</label>
             <select id="audioOutputSelect" class="account-quick-devices__select"></select>
 
-            <p class="account-quick-devices__hint">GerÃ¤teauswahl wirkt ab dem nÃ¤chsten Call (Browser-Funktion).</p>
+            <p class="account-quick-devices__hint">Geräteauswahl wirkt ab dem nächsten Call (Browser-Funktion).</p>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="modal-btn" id="btnAccountQuickClose" type="button">SchlieÃŸen</button>
+          <button class="modal-btn" id="btnAccountQuickClose" type="button">Schließen</button>
           <a class="modal-btn primary" id="btnAccountQuickManage" href="account.html">Konto verwalten</a>
           <button class="modal-btn modal-btn--reject" id="btnAccountQuickLogout" type="button">Ausloggen</button>
         </div>
@@ -415,7 +441,7 @@
         </div>
         <div class="modal-body">
           <div class="incoming-call-center">
-            <div class="incoming-call-icon">ðŸ“ž</div>
+            <div class="incoming-call-icon">📞</div>
             <div id="incomingCallFrom" class="incoming-call-from">
               Anrufer
             </div>
@@ -479,4 +505,5 @@
     </script>
   </body>
 </html>
+
 

@@ -21,6 +21,17 @@
   const audioCtx =
     typeof window.AudioContext !== "undefined" ? new window.AudioContext() : null;
 
+  function isCallSoundsEnabled() {
+    try {
+      const raw = localStorage.getItem("echtlucky:connect:prefs:v1");
+      if (!raw) return true;
+      const parsed = JSON.parse(raw);
+      return parsed?.callSounds !== false;
+    } catch (_) {
+      return true;
+    }
+  }
+
   async function waitForFirebase() {
     return new Promise((resolve) => {
       if (window.firebaseReady && window.auth && window.db) {
@@ -45,8 +56,10 @@
     });
   }
 
-  function playToneSequence(sequence) {
+  function playToneSequence(sequence, gainMax = 0.12) {
     if (!audioCtx) return;
+    if (!isCallSoundsEnabled()) return;
+    if (audioCtx.state === "suspended") audioCtx.resume();
     const now = audioCtx.currentTime;
     sequence.forEach(({ freq = 440, duration = 0.18, start = 0, type = "sine" }) => {
       const osc = audioCtx.createOscillator();
@@ -54,8 +67,8 @@
       osc.type = type;
       osc.frequency.setValueAtTime(freq, now + start);
       gain.gain.setValueAtTime(0, now + start);
-      gain.gain.linearRampToValueAtTime(0.35, now + start + 0.01);
-      gain.gain.setValueAtTime(0.35, now + start + duration - 0.02);
+      gain.gain.linearRampToValueAtTime(gainMax, now + start + 0.02);
+      gain.gain.setValueAtTime(gainMax, now + start + Math.max(0.04, duration - 0.05));
       gain.gain.linearRampToValueAtTime(0, now + start + duration);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
@@ -64,29 +77,59 @@
     });
   }
 
+  function playRingTick() {
+    // Soft, relaxed "ring" (single tick). Looping handled elsewhere.
+    playToneSequence(
+      [
+        { freq: 440, duration: 0.18, start: 0, type: "sine" },
+        { freq: 554, duration: 0.18, start: 0.16, type: "sine" }
+      ],
+      0.09
+    );
+  }
+
   function playIncomingTone() {
-    playToneSequence([
-      { freq: 520, duration: 0.12, start: 0 },
-      { freq: 640, duration: 0.12, start: 0.16 },
-      { freq: 760, duration: 0.14, start: 0.32 }
-    ]);
+    playRingTick();
   }
 
   function playCallTone() {
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-    playToneSequence([
-      { freq: 280, duration: 0.2, start: 0, type: "triangle" },
-      { freq: 360, duration: 0.2, start: 0.18, type: "triangle" },
-      { freq: 440, duration: 0.2, start: 0.36, type: "triangle" }
-    ]);
+    // Gentle "connected" confirmation.
+    playToneSequence(
+      [
+        { freq: 392, duration: 0.14, start: 0, type: "triangle" },
+        { freq: 523, duration: 0.16, start: 0.12, type: "triangle" }
+      ],
+      0.10
+    );
   }
 
   function playHangupTone() {
-    playToneSequence([
-      { freq: 420, duration: 0.2, start: 0, type: "square" },
-      { freq: 320, duration: 0.2, start: 0.18, type: "square" },
-      { freq: 240, duration: 0.24, start: 0.36, type: "square" }
-    ]);
+    playToneSequence(
+      [
+        { freq: 330, duration: 0.16, start: 0, type: "triangle" },
+        { freq: 262, duration: 0.18, start: 0.14, type: "triangle" }
+      ],
+      0.10
+    );
+  }
+
+  let ringLoopTimer = null;
+
+  function stopRingLoop() {
+    if (ringLoopTimer) window.clearInterval(ringLoopTimer);
+    ringLoopTimer = null;
+  }
+
+  function startRingLoop() {
+    if (!audioCtx) return;
+    if (!isCallSoundsEnabled()) return;
+    if (ringLoopTimer) return;
+
+    // First tick immediately, then loop until stopped.
+    playRingTick();
+    ringLoopTimer = window.setInterval(() => {
+      playRingTick();
+    }, 2200);
   }
 
   let initialized = false;
@@ -319,6 +362,7 @@
 
     const q = String(dmSearchInput?.value || "").trim().toLowerCase();
     const ids = Array.isArray(currentUserFriends) ? currentUserFriends.filter(Boolean) : [];
+    const blocked = readBlockedFriendsSet();
 
     if (!ids.length) {
       dmListPanel.innerHTML = '<div class="empty-state"><p>Keine Direktnachrichten</p></div>';
@@ -336,6 +380,7 @@
         const stateLabel = state === "online" ? "Online" : state === "away" ? "Abwesend" : "Offline";
         return { uid, label, initials, state, stateLabel };
       })
+      .filter((it) => !blocked.has(it.uid))
       .filter((it) => !q || String(it.label).toLowerCase().includes(q))
       .slice(0, 60);
 
@@ -358,6 +403,16 @@
   }
 
   function selectDm(uid, name) {
+    if (readBlockedFriendsSet().has(uid)) {
+      window.notify?.show({
+        type: "warn",
+        title: "Blockiert",
+        message: "Dieser User ist blockiert.",
+        duration: 3200
+      });
+      return;
+    }
+
     activeChatMode = "dm";
     selectedDmUid = uid;
     selectedDmName = name || "";
@@ -386,6 +441,7 @@
   async function sendMessageToSelectedDm() {
     const myUid = auth?.currentUser?.uid;
     if (!myUid || !selectedDmUid) return;
+    if (readBlockedFriendsSet().has(selectedDmUid)) return;
 
     const input = document.getElementById("messageInput");
     const text = (input?.value || "").trim();
@@ -692,13 +748,27 @@
     return `echtlucky:friends-muted:${myUid}`;
   }
 
+  function getBlockedFriendsKey() {
+    const myUid = auth?.currentUser?.uid || currentUser?.uid || "";
+    return `echtlucky:friends-blocked:${myUid}`;
+  }
+
   function readMutedFriendsSet() {
     const arr = safeJsonParse(localStorage.getItem(getMutedFriendsKey()) || "[]");
     return new Set(Array.isArray(arr) ? arr : []);
   }
 
+  function readBlockedFriendsSet() {
+    const arr = safeJsonParse(localStorage.getItem(getBlockedFriendsKey()) || "[]");
+    return new Set(Array.isArray(arr) ? arr : []);
+  }
+
   function writeMutedFriendsSet(set) {
     localStorage.setItem(getMutedFriendsKey(), JSON.stringify(Array.from(set || [])));
+  }
+
+  function writeBlockedFriendsSet(set) {
+    localStorage.setItem(getBlockedFriendsKey(), JSON.stringify(Array.from(set || [])));
   }
 
   async function showUserProfile(uid, fallbackName) {
@@ -721,12 +791,14 @@
 
     const isFriend = Array.isArray(currentUserFriends) && currentUserFriends.includes(targetUid);
     const muted = readMutedFriendsSet().has(targetUid);
+    const blocked = readBlockedFriendsSet().has(targetUid);
 
     const items = [];
 
     if (source === "friend") {
       items.push({ action: "view-profile", label: "Profil ansehen" });
       items.push({ action: "toggle-mute", label: muted ? "Stummschaltung aufheben" : "Stummschalten" });
+      items.push({ action: "toggle-block", label: blocked ? "Blockierung aufheben" : "Blockieren", variant: "danger" });
       items.push({ type: "sep" });
       items.push({ action: "remove-friend", label: "Aus Freundesliste entfernen", variant: "danger" });
       items.push({ type: "sep" });
@@ -737,6 +809,8 @@
       } else {
         items.push({ action: "add-friend", label: "Freund hinzufügen" });
       }
+      items.push({ type: "sep" });
+      items.push({ action: "toggle-block", label: blocked ? "Blockierung aufheben" : "Blockieren", variant: "danger" });
       items.push({ type: "sep" });
       items.push({ action: "copy-name", label: "Benutzername kopieren", hint: "⧉" });
     }
@@ -1899,37 +1973,58 @@
           return;
         }
 
-        playCallTone();
+        startRingLoop();
 
         window.echtlucky?.voiceChat?.startRingingCall?.(selectedGroupId);
       });
     }
 
     btnEndVoice?.addEventListener("click", () => {
+      stopRingLoop();
       playHangupTone();
     });
 
     btnAcceptCall?.addEventListener("click", () => {
+      stopRingLoop();
       playCallTone();
     });
 
     btnRejectCall?.addEventListener("click", () => {
+      stopRingLoop();
       playHangupTone();
     });
 
     if (incomingCallModal) {
+      const updateRingLoop = () => {
+        const isModalOpen = !incomingCallModal.hidden;
+        const state = document.getElementById("voiceStatus")?.getAttribute("data-state") || "";
+        const isRinging = state === "ringing";
+
+        if (isModalOpen || isRinging) startRingLoop();
+        else stopRingLoop();
+      };
+
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.attributeName === "hidden") {
             if (!incomingCallModal.hidden) {
-              playIncomingTone();
+              updateRingLoop();
             } else {
+              updateRingLoop();
               playHangupTone();
             }
           }
         });
       });
       observer.observe(incomingCallModal, { attributes: true });
+
+      // Also react to voice UI state changes (set by voice-chat.js).
+      const voiceStatusEl = document.getElementById("voiceStatus");
+      if (voiceStatusEl && !voiceStatusEl.__ringObs) {
+        voiceStatusEl.__ringObs = true;
+        const sObs = new MutationObserver(() => updateRingLoop());
+        sObs.observe(voiceStatusEl, { attributes: true, attributeFilter: ["data-state"] });
+      }
     }
 
     // Groups: right-click context menu (desktop)
@@ -2039,6 +2134,34 @@
             title: "Aktualisiert",
             message: nextMuted ? "User stummgeschaltet." : "Stummschaltung aufgehoben.",
             duration: 2500
+          });
+          return;
+        }
+
+        if (action === "toggle-block") {
+          const set = readBlockedFriendsSet();
+          const nextBlocked = !set.has(state.uid);
+          if (nextBlocked) set.add(state.uid);
+          else set.delete(state.uid);
+          writeBlockedFriendsSet(set);
+
+          if (nextBlocked && selectedDmUid === state.uid) {
+            selectedDmUid = null;
+            selectedDmName = "";
+            clearReplyState();
+            updateChatControls();
+            const chatContainer = document.getElementById("chatContainer");
+            const emptyChatState = document.getElementById("emptyChatState");
+            if (chatContainer) chatContainer.hidden = true;
+            if (emptyChatState) emptyChatState.hidden = false;
+          }
+
+          renderDmList();
+          window.notify?.show({
+            type: nextBlocked ? "warn" : "success",
+            title: "Aktualisiert",
+            message: nextBlocked ? "User blockiert." : "Blockierung aufgehoben.",
+            duration: 2600
           });
           return;
         }

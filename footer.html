@@ -1,4 +1,4 @@
-<footer>
+﻿<footer>
   <div class="footer-content">
     <p>© 2026 echtlucky • Competitives Fortnite Journey</p>
     <div class="footer-links">
@@ -22,7 +22,6 @@
   </div>
 </div>
 
-
 <script>
 (function () {
   const modal = document.getElementById('legalModal');
@@ -31,7 +30,7 @@
   const closeBtn = document.getElementById('legalModalClose');
 
   function openModal(title) {
-    titleEl.textContent = title || "Info";
+    titleEl.textContent = title || 'Info';
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
@@ -41,7 +40,7 @@
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
-    contentEl.innerHTML = "";
+    contentEl.innerHTML = '';
   }
 
   async function loadIntoModal(url, title) {
@@ -49,8 +48,8 @@
     openModal(title);
 
     try {
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
 
       const html = await res.text();
       const temp = document.createElement('div');
@@ -59,12 +58,10 @@
       const main = temp.querySelector('main');
       contentEl.innerHTML = main ? main.innerHTML : temp.innerHTML;
     } catch (err) {
-      contentEl.innerHTML =
-        "<p style='color:#ff3366'>Fehler beim Laden: " + err.message + "</p>";
+      contentEl.innerHTML = "<p style='color:#ff3366'>Fehler beim Laden: " + err.message + '</p>';
     }
   }
 
-  // Links öffnen Modal (Impressum/Datenschutz/Kontakt)
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[data-modal]');
     if (!a) return;
@@ -73,15 +70,12 @@
     loadIntoModal(a.dataset.modal, a.textContent.trim());
   });
 
-  // X schließt Modal
   closeBtn.addEventListener('click', closeModal);
 
-  // Klick auf Backdrop schließt Modal
   modal.addEventListener('click', (e) => {
     if (e.target.dataset.close) closeModal();
   });
 
-  // ESC schließt Modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modal.classList.contains('show')) {
       closeModal();

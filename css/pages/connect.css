@@ -78,6 +78,10 @@
   font-weight: 800;
   letter-spacing: -0.2px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
 }
 
 .connect-mobile-tab.is-active {
@@ -483,6 +487,10 @@ html.connect-compact .connect-chat-area {
   justify-content: center;
   transition: all 0.25s ease;
   font-size: 1.1rem;
+}
+
+.chat-settings-btn--back{
+  display: none;
 }
 
 .chat-settings-btn:hover {
@@ -1481,61 +1489,92 @@ html.connect-compact .connect-chat-area {
     border-radius: 0;
     border-left: none;
     border-right: none;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
   }
 
   .connect-mobile-switcher {
     display: grid;
-    position: sticky;
-    bottom: calc(84px + env(safe-area-inset-bottom));
-    z-index: 20;
-    order: 3;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1100;
     border-top: 1px solid rgba(0, 255, 136, 0.10);
     border-bottom: none;
     background: rgba(0, 0, 0, 0.72);
     backdrop-filter: blur(14px);
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom)) 12px;
+    gap: 10px;
   }
 
-  .connect-layout {
+  /* Hide footer on mobile Connect (prevents overlap / blocked controls) */
+  .connect-page #footer-placeholder{
+    display: none !important;
+  }
+
+  /* Hide switcher while logged out (layout is hidden) */
+  .connect-workspace[hidden] ~ .connect-mobile-switcher{
+    display: none !important;
+  }
+
+  .connect-workspace{
     grid-template-columns: 1fr;
-    gap: 1rem;
-    order: 1;
-  }
-  .connect-main-card .connect-layout {
     gap: 0;
-    min-height: calc(100dvh - var(--header-h) - 84px - env(safe-area-inset-bottom));
+    margin-top: 0.5rem;
   }
-  .connect-panel {
-    padding: 0.95rem 0.9rem;
+  html.connect-compact .connect-workspace{
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .connect-left-panel,
+  .connect-chat-area,
+  .connect-right-panel{
+    padding: 1rem 0.95rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
     min-width: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(100dvh - var(--header-h) - 64px - env(safe-area-inset-bottom));
   }
+
+  .connect-left-panel{
+    padding-bottom: calc(1rem + 64px + env(safe-area-inset-bottom));
+  }
+
+  .connect-chat-area{
+    padding-bottom: calc(1rem + 64px + env(safe-area-inset-bottom));
+  }
+
+  .connect-chat-area{
+    min-height: calc(100dvh - var(--header-h) - 64px - env(safe-area-inset-bottom));
+  }
+
   .chat-settings-btn {
     width: 40px;
     height: 40px;
     font-size: 1.1rem;
-  }
-  .voice-section {
-    padding: 1rem 0.9rem;
   }
 
   .groups-list{
     max-height: none;
   }
 
-  .connect-panel--left,
-  .connect-panel--middle,
-  .connect-panel--right{
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
+  /* Panel switching via [data-mobile-panel] (current layout uses left/chat/right panels) */
+  .connect-main-card[data-mobile-panel="left"] .connect-chat-area,
+  .connect-main-card[data-mobile-panel="left"] .connect-right-panel,
+  .connect-main-card[data-mobile-panel="middle"] .connect-left-panel,
+  .connect-main-card[data-mobile-panel="middle"] .connect-right-panel,
+  .connect-main-card[data-mobile-panel="right"] .connect-left-panel,
+  .connect-main-card[data-mobile-panel="right"] .connect-chat-area{
+    display: none;
   }
 
-  /* Panel switching via [data-mobile-panel] */
-  .connect-main-card[data-mobile-panel="left"] .connect-panel--middle,
-  .connect-main-card[data-mobile-panel="left"] .connect-panel--right,
-  .connect-main-card[data-mobile-panel="middle"] .connect-panel--left,
-  .connect-main-card[data-mobile-panel="middle"] .connect-panel--right,
-  .connect-main-card[data-mobile-panel="right"] .connect-panel--left,
-  .connect-main-card[data-mobile-panel="right"] .connect-panel--middle {
-    display: none;
+  /* Show a back button in chat header on mobile */
+  .chat-settings-btn--back{
+    display: inline-flex;
   }
 }
 
@@ -1718,6 +1757,22 @@ html.connect-compact .connect-chat-area {
   font-size: 0.95rem;
   letter-spacing: -0.2px;
   margin: 0.2rem 0 0.4rem;
+}
+
+.connect-page .connect-nav-block__titleRow{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.connect-page .connect-nav-block__titleRow .btn.btn-sm{
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 14px;
+  display: inline-grid;
+  place-items: center;
 }
 
 .connect-page .dm-list{

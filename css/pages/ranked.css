@@ -1,6 +1,6 @@
 /* Ranked: fullwidth dark theme */
 .ranked-page {
-  background: #031409;
+  background: transparent;
   min-height: 100vh;
   color: var(--text);
 }

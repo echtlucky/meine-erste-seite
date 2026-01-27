@@ -1,4 +1,4 @@
-<header class="site-header" role="banner">
+﻿<header class="site-header" role="banner">
   <!-- Left -->
   <div class="header-left">
     <div class="header-groups">
@@ -10,13 +10,14 @@
         aria-haspopup="menu"
         aria-expanded="false"
       >
-        <span class="nav-icon" aria-hidden="true">&#128101; ▾</span>
+        <span class="chev chev--left" aria-hidden="true">▾</span>
+        <span class="nav-icon" aria-hidden="true">👥</span>
       </button>
       <div id="groupsMenu" class="dropdown-menu groups-menu" role="menu" aria-label="Gruppen"></div>
     </div>
 
     <a href="index.html" class="logo" aria-label="echtlucky Home">
-      echtlcky
+      echtlucky
       <span class="logo-glow" aria-hidden="true"></span>
     </a>
   </div>
@@ -25,6 +26,7 @@
   <nav id="mainNav" class="header-nav" aria-label="Hauptnavigation">
     <div class="nav-links">
       <a href="index.html">Home</a>
+
       <div class="nav-dropdown" data-nav-dropdown>
         <button
           id="hubToggle"
@@ -43,24 +45,21 @@
           <a href="reflex.html" class="dropdown-item" role="menuitem">Reflex Lab</a>
         </div>
       </div>
+
       <a href="blog.html">Blog</a>
     </div>
   </nav>
 
   <!-- Right / Account -->
   <div class="header-right">
-    <!-- Live/Connect Button -->
     <a href="connect.html" class="nav-live" id="connectNav" aria-label="Connect - Community">
       <span class="live-dot" aria-hidden="true"></span>
       <span class="live-text">Connect</span>
     </a>
 
-    <!-- Logged out -->
     <a href="login.html" id="login-link" class="nav-auth">Anmelden</a>
 
-    <!-- Logged in -->
     <div class="user-dropdown-wrapper">
-      <!-- ✅ Button statt Span: bessere UX (cursor/hover/click) -->
       <button
         id="user-name-display"
         class="user-name"
@@ -95,7 +94,6 @@
       </div>
     </div>
 
-    <!-- Mobile toggle -->
     <button
       class="menu-toggle"
       id="menuToggle"

@@ -1,17 +1,19 @@
-(() => {
+﻿(() => {
   "use strict";
 
   if (window.__ECHTLUCKY_GROUP_STRIP_V2__) return;
   window.__ECHTLUCKY_GROUP_STRIP_V2__ = true;
 
+  // NOTE: The "dock" (bottom bar) was intentionally removed.
+  // This module now only powers the header "Groups" dropdown + its context menu.
+
   const DEFAULT_GROUPS = [
-    { id: "__dm__", name: "Direktnachrichten", unread: 0, color: "#00ff88", type: "dm" },
     { id: "group-1", name: "Connect Hub", unread: 4, color: "#00ff88", type: "group" },
     { id: "group-2", name: "Ballistic", unread: 2, color: "#ff3366", type: "group" },
     { id: "group-3", name: "Reflex Lab", unread: 0, color: "#5865f2", type: "group" },
     { id: "group-4", name: "Community", unread: 0, color: "#00a8ff", type: "group" },
     { id: "group-5", name: "Updates", unread: 3, color: "#ff9a00", type: "group" },
-    { id: "__create__", name: "Gruppe erstellen", unread: 0, color: "#00ff88", type: "create" },
+    { id: "__create__", name: "Gruppe erstellen", unread: 0, color: "#00ff88", type: "create" }
   ];
 
   let currentGroups = DEFAULT_GROUPS.slice();
@@ -23,11 +25,6 @@
     const parts = String(name).trim().split(/\s+/);
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-
-  function ensureDockSlot() {
-    // Dock removed: do not create a bottom bar.
-    return null;
   }
 
   function ensureContextMenu() {
@@ -57,7 +54,7 @@
       { label: "Öffnen", action: "open" },
       { label: "Als gelesen markieren", action: "mark-read" },
       { label: "Einstellungen", action: "settings" },
-      { label: "Gruppe löschen", action: "delete" },
+      { label: "Gruppe löschen", action: "delete" }
     ]
       .map(
         (item) =>
@@ -74,101 +71,67 @@
     contextMenu.style.top = `${Math.max(10, safeY)}px`;
   }
 
-  function buildDockIcon(group) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "group-strip__item";
-    btn.dataset.groupId = group.id;
-    btn.dataset.groupName = group.name;
-    btn.style.setProperty("--group-color", group.color || "rgba(0,255,136,0.65)");
-
-    const iconContent =
-      group.type === "dm" ? "💬" : group.type === "create" ? "+" : getShortLabel(group.name);
-
-    btn.innerHTML = `
-      <span class="group-strip__icon">${iconContent}</span>
-      ${group.unread ? `<span class="group-strip__badge">${group.unread}</span>` : ""}
-    `;
-
-    btn.addEventListener("click", () => {
-      window.dispatchEvent(new CustomEvent("echtlucky:group-strip-select", { detail: { groupId: group.id } }));
-    });
-
-    btn.addEventListener("contextmenu", (event) => {
-      if (group.type && group.type !== "group") return;
-      event.preventDefault();
-      contextTarget = group;
-      openContextMenu(event.clientX, event.clientY);
-    });
-
-    return btn;
-  }
-
-  function renderDock() {
-    const dock = ensureDockSlot();
-    if (!dock) return;
-    dock.innerHTML = "";
-    currentGroups.slice(0, 10).forEach((g) => dock.appendChild(buildDockIcon(g)));
-  }
-
   function renderGroupsDropdown() {
     const menu = document.getElementById("groupsMenu");
     if (!menu) return;
 
     menu.innerHTML = "";
 
-    currentGroups.forEach((group) => {
-      const row = document.createElement("button");
-      row.type = "button";
-      row.className = "dropdown-item";
-      row.style.display = "flex";
-      row.style.alignItems = "center";
-      row.style.gap = "0.7rem";
+    // Header dropdown should show ONLY groups + create (no DMs).
+    currentGroups
+      .filter((g) => g.type === "group" || g.type === "create")
+      .forEach((group) => {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "dropdown-item";
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        row.style.gap = "0.7rem";
 
-      const icon = document.createElement("span");
-      icon.className = "group-strip__icon";
-      icon.style.width = "28px";
-      icon.style.height = "28px";
-      icon.style.borderRadius = "50%";
-      icon.style.background = group.color || "rgba(0,255,136,0.65)";
-      icon.textContent = group.type === "dm" ? "💬" : group.type === "create" ? "+" : getShortLabel(group.name);
+        const icon = document.createElement("span");
+        icon.className = "group-strip__icon";
+        icon.style.width = "28px";
+        icon.style.height = "28px";
+        icon.style.borderRadius = "50%";
+        icon.style.background = group.color || "rgba(0,255,136,0.65)";
+        icon.textContent = group.type === "create" ? "+" : getShortLabel(group.name);
 
-      const label = document.createElement("span");
-      label.textContent = group.name;
-      label.style.flex = "1";
+        const label = document.createElement("span");
+        label.textContent = group.name;
+        label.style.flex = "1";
 
-      row.appendChild(icon);
-      row.appendChild(label);
+        row.appendChild(icon);
+        row.appendChild(label);
 
-      if (group.unread) {
-        const badge = document.createElement("span");
-        badge.className = "group-strip__badge";
-        badge.style.position = "static";
-        badge.style.border = "none";
-        badge.style.minWidth = "24px";
-        badge.style.height = "18px";
-        badge.style.display = "inline-flex";
-        badge.style.alignItems = "center";
-        badge.style.justifyContent = "center";
-        badge.textContent = String(group.unread);
-        row.appendChild(badge);
-      }
+        if (group.unread) {
+          const badge = document.createElement("span");
+          badge.className = "group-strip__badge";
+          badge.style.position = "static";
+          badge.style.border = "none";
+          badge.style.minWidth = "24px";
+          badge.style.height = "18px";
+          badge.style.display = "inline-flex";
+          badge.style.alignItems = "center";
+          badge.style.justifyContent = "center";
+          badge.textContent = String(group.unread);
+          row.appendChild(badge);
+        }
 
-      row.addEventListener("click", () => {
-        window.dispatchEvent(new CustomEvent("echtlucky:group-strip-select", { detail: { groupId: group.id } }));
-        menu.classList.remove("show");
-        document.getElementById("groupsToggle")?.setAttribute("aria-expanded", "false");
+        row.addEventListener("click", () => {
+          window.dispatchEvent(new CustomEvent("echtlucky:group-strip-select", { detail: { groupId: group.id } }));
+          menu.classList.remove("show");
+          document.getElementById("groupsToggle")?.setAttribute("aria-expanded", "false");
+        });
+
+        row.addEventListener("contextmenu", (event) => {
+          if (group.type !== "group") return;
+          event.preventDefault();
+          contextTarget = group;
+          openContextMenu(event.clientX, event.clientY);
+        });
+
+        menu.appendChild(row);
       });
-
-      row.addEventListener("contextmenu", (event) => {
-        if (group.type && group.type !== "group") return;
-        event.preventDefault();
-        contextTarget = group;
-        openContextMenu(event.clientX, event.clientY);
-      });
-
-      menu.appendChild(row);
-    });
   }
 
   function handleContextMenuClick(event) {
@@ -215,16 +178,25 @@
 
   window.updateGroupStrip = function updateGroupStrip(groups) {
     if (Array.isArray(groups) && groups.length) {
-      currentGroups = groups.slice(0, 10).map((g) => ({
-        id: g.id,
-        name: g.name,
-        unread: g.unread || 0,
-        color: g.color || "rgba(0,255,136,0.65)",
-        type: g.type || "group",
-      }));
+      currentGroups = groups
+        .slice(0, 20)
+        .map((g) => ({
+          id: g.id,
+          name: g.name,
+          unread: g.unread || 0,
+          color: g.color || "rgba(0,255,136,0.65)",
+          type: g.type || "group"
+        }))
+        .filter((g) => g.type === "group" || g.type === "create");
+
+      // Ensure there's always a create entry at the end.
+      if (!currentGroups.some((g) => g.id === "__create__")) {
+        currentGroups.push({ id: "__create__", name: "Gruppe erstellen", unread: 0, color: "#00ff88", type: "create" });
+      }
     } else {
       currentGroups = DEFAULT_GROUPS.slice();
     }
+
     renderAll();
   };
 

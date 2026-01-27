@@ -78,8 +78,31 @@
   const prefDifficultyDefault = el("prefDifficultyDefault");
   const prefSounds = el("prefSounds");
 
+  // New: Status / Security / Sessions / Export
+  const accountStatusSelect = el("accountStatusSelect");
+  const accountCustomStatus = el("accountCustomStatus");
+  const btnSaveStatus = el("btnSaveStatus");
+  const btnClearStatus = el("btnClearStatus");
+  const statusFormMsg = el("statusFormMsg");
+
+  const linkedProvidersList = el("linkedProvidersList");
+  const btnChangeEmail = el("btnChangeEmail");
+  const btnChangePassword = el("btnChangePassword");
+  const btnSetup2fa = el("btnSetup2fa");
+  const btnGenerateBackupCodes = el("btnGenerateBackupCodes");
+  const btnCopyBackupCodes = el("btnCopyBackupCodes");
+  const backupCodesBox = el("backupCodesBox");
+
+  const sessionsList = el("sessionsList");
+  const btnSignOutOtherSessions = el("btnSignOutOtherSessions");
+
+  const btnExportAccount = el("btnExportAccount");
+  const btnExportAll = el("btnExportAll");
+  const btnDeleteAccount = el("btnDeleteAccount");
+
   // Chart
   let rankChart = null;
+  let cachedUserDoc = null;
 
   // Notify wrapper
   function toast(type, msg) {
@@ -101,6 +124,98 @@
     setTimeout(() => {
       settingsFormMsg.className = "form-msg";
     }, 4000);
+  }
+
+  function showInlineMsg(targetEl, text, type = "error") {
+    if (!targetEl) return;
+    targetEl.textContent = text;
+    targetEl.className = `form-msg show ${type}`;
+    setTimeout(() => {
+      targetEl.className = "form-msg";
+    }, 4000);
+  }
+
+  function downloadJson(filename, data) {
+    try {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast("error", "Export fehlgeschlagen: " + (e?.message || "Unbekannt"));
+    }
+  }
+
+  function providerLabel(providerId) {
+    if (providerId === "google.com") return "Google";
+    if (providerId === "password") return "E-Mail/Passwort";
+    if (providerId === "github.com") return "GitHub";
+    if (providerId === "twitter.com") return "Twitter/X";
+    return providerId || "Provider";
+  }
+
+  function renderLinkedProviders(user) {
+    if (!linkedProvidersList) return;
+    const providers = Array.isArray(user?.providerData) ? user.providerData : [];
+    const rows = providers.length
+      ? providers.map((p) => {
+          const label = providerLabel(p.providerId);
+          const detail = p.email || p.uid || "";
+          return `<div class=\"preview-row\"><div class=\"preview-k\">${label}</div><div class=\"preview-v\">${detail}</div></div>`;
+        })
+      : [`<div class=\"empty-state\"><p>Keine Provider-Daten</p></div>`];
+
+    linkedProvidersList.innerHTML = rows.join("");
+  }
+
+  function renderSessions(user) {
+    if (!sessionsList) return;
+    const ua = navigator.userAgent || "";
+    const meta = user?.metadata || {};
+    const createdAt = meta.creationTime || "";
+    const lastSignIn = meta.lastSignInTime || "";
+
+    sessionsList.innerHTML = `
+      <div class="preview-row">
+        <div class="preview-k">Aktives Gerät</div>
+        <div class="preview-v">${ua}</div>
+      </div>
+      <div class="preview-row">
+        <div class="preview-k">Created</div>
+        <div class="preview-v">${createdAt}</div>
+      </div>
+      <div class="preview-row">
+        <div class="preview-k">Last Sign-In</div>
+        <div class="preview-v">${lastSignIn}</div>
+      </div>
+    `;
+  }
+
+  function generateBackupCodes(count = 10) {
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const rand = (n) => {
+      let out = "";
+      for (let i = 0; i < n; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+      return out;
+    };
+    const codes = [];
+    for (let i = 0; i < count; i++) codes.push(`${rand(4)}-${rand(4)}`);
+    return codes;
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("success", "Kopiert.");
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   function msToLabel(ms) {
@@ -365,7 +480,7 @@
     if (canChange) {
       usernameStatus.textContent = "Änderbar";
       usernameStatus.className = "form-status available";
-      usernameHint.textContent = "Öffentlich sichtbar  Änderbar alle 7 Tage";
+      usernameHint.textContent = "Öffentlich sichtbar • Änderbar alle 7 Tage";
       inputUsername.disabled = false;
     } else {
       usernameStatus.textContent = `Noch ${daysLeft}d`;
@@ -381,6 +496,7 @@
       const doc = await db.collection(USER_COLLECTION).doc(user.uid).get();
       if (doc.exists) {
         const data = doc.data();
+        cachedUserDoc = data || null;
         if (inputUsername) inputUsername.value = data.username || data.displayName || "";
         if (inputEmail) inputEmail.value = user.email || "";
 
@@ -393,7 +509,7 @@
         const isGoogleAuth = user.providerData?.some(p => p.providerId === "google.com");
         if (isGoogleAuth && inputEmail) {
           inputEmail.disabled = true;
-          emailHint.textContent = "Mit Google angemeldet  Email nicht änderbar";
+          emailHint.textContent = "Mit Google angemeldet • E-Mail nicht änderbar";
         } else if (inputEmail) {
           inputEmail.disabled = false;
           emailHint.textContent = "Du kannst deine Email ändern";
@@ -402,9 +518,124 @@
         // Check username cooldown
         const cooldown = checkUsernameCooldown();
         updateUsernameStatus(cooldown.canChange, cooldown.daysLeft);
+
+        // Status fields
+        if (accountStatusSelect) accountStatusSelect.value = String(data.status || "online");
+        if (accountCustomStatus) accountCustomStatus.value = String(data.customStatus || "");
       }
     } catch (e) {
       console.warn("Fehler beim Laden der Einstellungen:", e);
+    }
+  }
+
+  async function saveStatus(user) {
+    if (!db) return showInlineMsg(statusFormMsg, "Firestore nicht bereit.", "error");
+    const status = String(accountStatusSelect?.value || "online");
+    const customStatus = String(accountCustomStatus?.value || "").trim().slice(0, 80);
+
+    try {
+      await db.collection(USER_COLLECTION).doc(user.uid).set(
+        {
+          status,
+          customStatus,
+          statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      showInlineMsg(statusFormMsg, "Status gespeichert.", "success");
+    } catch (e) {
+      showInlineMsg(statusFormMsg, "Konnte Status nicht speichern: " + (e?.message || "Unbekannt"), "error");
+    }
+  }
+
+  async function clearStatus(user) {
+    if (!db) return showInlineMsg(statusFormMsg, "Firestore nicht bereit.", "error");
+    try {
+      await db.collection(USER_COLLECTION).doc(user.uid).set(
+        {
+          status: "online",
+          customStatus: "",
+          statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      if (accountStatusSelect) accountStatusSelect.value = "online";
+      if (accountCustomStatus) accountCustomStatus.value = "";
+      showInlineMsg(statusFormMsg, "Status zurückgesetzt.", "success");
+    } catch (e) {
+      showInlineMsg(statusFormMsg, "Konnte Status nicht zurücksetzen: " + (e?.message || "Unbekannt"), "error");
+    }
+  }
+
+  async function promptForEmailChange(user) {
+    const next = await window.echtluckyModal?.prompt?.({
+      title: "E-Mail ändern",
+      message: "Neue E-Mail-Adresse eingeben. Du erhältst einen Bestätigungslink.",
+      placeholder: "name@example.com",
+      confirmText: "Link senden",
+      cancelText: "Abbrechen"
+    });
+    const email = String(next || "").trim();
+    if (!email) return;
+
+    try {
+      await user.verifyBeforeUpdateEmail(email);
+      toast("success", "Bestätigungslink versendet.");
+    } catch (e) {
+      toast("error", "E-Mail ändern fehlgeschlagen: " + (e?.message || "Unbekannt"));
+    }
+  }
+
+  async function promptForPasswordChange(user) {
+    const next = await window.echtluckyModal?.prompt?.({
+      title: "Passwort ändern",
+      message: "Neues Passwort eingeben (mind. 6 Zeichen).",
+      placeholder: "Neues Passwort",
+      confirmText: "Ändern",
+      cancelText: "Abbrechen",
+      inputType: "password"
+    });
+    const pw = String(next || "");
+    if (!pw) return;
+    if (pw.length < 6) return toast("warn", "Mindestens 6 Zeichen.");
+
+    try {
+      await user.updatePassword(pw);
+      toast("success", "Passwort aktualisiert.");
+    } catch (e) {
+      toast("error", "Passwort ändern fehlgeschlagen: " + (e?.message || "Unbekannt"));
+    }
+  }
+
+  async function deleteAccount(user) {
+    const confirmed = await window.echtluckyModal?.confirm?.({
+      title: "Account löschen",
+      message: "Dies löscht deinen Account. Dieser Vorgang ist nicht rückgängig zu machen.",
+      confirmText: "Account löschen",
+      cancelText: "Abbrechen",
+      type: "danger"
+    });
+    if (!confirmed) return;
+
+    try {
+      // Best-effort Firestore cleanup (allowed for own docs by rules)
+      const snap = await db.collection(USER_COLLECTION).doc(user.uid).get();
+      const data = snap.exists ? snap.data() : null;
+      const username = String(data?.username || data?.displayName || "").trim();
+      const usernameLower = String(data?.usernameLower || (username ? username.toLowerCase() : "")).trim();
+
+      await db.collection("presence").doc(user.uid).delete().catch(() => {});
+      await db.collection(USER_COLLECTION).doc(user.uid).delete().catch(() => {});
+
+      if (usernameLower) {
+        await db.collection("usernames").doc(usernameLower).delete().catch(() => {});
+      }
+
+      await user.delete();
+      toast("success", "Account gelöscht.");
+      window.location.href = "index.html";
+    } catch (e) {
+      toast("error", "Account löschen fehlgeschlagen: " + (e?.message || "Unbekannt"));
     }
   }
 
@@ -688,6 +919,8 @@
 
       // Load settings
       await loadSettingsData(user);
+      renderLinkedProviders(user);
+      renderSessions(user);
 
       // Profile avatar (Firestore)
       try {
@@ -855,6 +1088,91 @@
       if (user) {
         loadSettingsData(user);
       }
+    });
+
+    btnSaveStatus?.addEventListener("click", async () => {
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (!user) return toast("warn", "Bitte einloggen.");
+      await saveStatus(user);
+    });
+
+    btnClearStatus?.addEventListener("click", async () => {
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (!user) return toast("warn", "Bitte einloggen.");
+      await clearStatus(user);
+    });
+
+    btnChangeEmail?.addEventListener("click", async () => {
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (!user) return toast("warn", "Bitte einloggen.");
+      await promptForEmailChange(user);
+    });
+
+    btnChangePassword?.addEventListener("click", async () => {
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (!user) return toast("warn", "Bitte einloggen.");
+      await promptForPasswordChange(user);
+    });
+
+    btnSetup2fa?.addEventListener("click", async () => {
+      await window.echtluckyModal?.alert?.({
+        title: "2FA",
+        message: "2FA ist vorbereitet (UI). Serverseitige Verifizierung folgt in einem späteren Step.",
+        confirmText: "OK"
+      });
+    });
+
+    btnGenerateBackupCodes?.addEventListener("click", () => {
+      const codes = generateBackupCodes(10);
+      const text = codes.join("\n");
+      if (backupCodesBox) backupCodesBox.value = text;
+      toast("success", "Backup-Codes generiert.");
+    });
+
+    btnCopyBackupCodes?.addEventListener("click", async () => {
+      const text = String(backupCodesBox?.value || "").trim();
+      if (!text) return;
+      const ok = await copyText(text);
+      if (!ok) toast("warn", "Kopieren nicht möglich.");
+    });
+
+    btnSignOutOtherSessions?.addEventListener("click", async () => {
+      await window.echtluckyModal?.alert?.({
+        title: "Sessions",
+        message: "Firebase Web kann andere Sessions nicht zuverlässig serverseitig beenden. UI ist vorbereitet.",
+        confirmText: "OK"
+      });
+    });
+
+    btnExportAccount?.addEventListener("click", async () => {
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (!user) return toast("warn", "Bitte einloggen.");
+      const snap = await db.collection(USER_COLLECTION).doc(user.uid).get().catch(() => null);
+      const doc = snap && snap.exists ? snap.data() : null;
+      downloadJson(`echtlucky-account-${user.uid}.json`, {
+        user: { uid: user.uid, email: user.email, providers: user.providerData || [] },
+        profile: doc || {}
+      });
+    });
+
+    btnExportAll?.addEventListener("click", async () => {
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (!user) return toast("warn", "Bitte einloggen.");
+      const snap = await db.collection(USER_COLLECTION).doc(user.uid).get().catch(() => null);
+      const doc = snap && snap.exists ? snap.data() : null;
+      const localRanked = safeParse(localStorage.getItem(LS_RANKED) || "{}") || {};
+      const localReflex = safeParse(localStorage.getItem(LS_REFLEX) || "{}") || {};
+      downloadJson(`echtlucky-export-${user.uid}.json`, {
+        user: { uid: user.uid, email: user.email, providers: user.providerData || [], metadata: user.metadata || {} },
+        profile: doc || {},
+        local: { ranked: localRanked, reflex: localReflex }
+      });
+    });
+
+    btnDeleteAccount?.addEventListener("click", async () => {
+      const user = window.__ECHTLUCKY_CURRENT_USER__ || auth.currentUser;
+      if (!user) return toast("warn", "Bitte einloggen.");
+      await deleteAccount(user);
     });
   }
 

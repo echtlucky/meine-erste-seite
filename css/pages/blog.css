@@ -1,6 +1,6 @@
 /* Blog Layout — aligned with Home look (uses global style.css buttons/inputs) */
 .blog-discord-shell {
-  max-width: none;
+  max-width: var(--content-max);
   width: 100%;
   margin: 0 auto;
   padding: clamp(1.2rem, 2.6vw, 2.2rem);

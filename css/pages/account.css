@@ -657,7 +657,8 @@
 }
 
 .account-page input,
-.account-page select{
+.account-page select,
+.account-page textarea{
   background: rgba(0,0,0,.55);
   color: rgba(224,255,224,.95);
   border: 1px solid rgba(0,255,136,.16);
@@ -665,9 +666,11 @@
   padding: 0.75rem 0.95rem;
   width: 100%;
   box-sizing: border-box;
+  font-family: inherit;
 }
 .account-page input:focus,
-.account-page select:focus{
+.account-page select:focus,
+.account-page textarea:focus{
   outline: none;
   border-color: rgba(0,255,136,.38);
   box-shadow: 0 0 0 4px rgba(0,255,136,.12);
