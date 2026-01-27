@@ -11,59 +11,284 @@
 </head>
 <body class="page-transition ranked-page">
   <div id="header-placeholder"></div>
-  <main class="ranked-discord-shell">
-    <section class="discord-card ranked-hero-card">
-      <div style="display:flex;align-items:center;gap:1.5rem;">
-        <div style="width:56px;height:56px;border-radius:50%;background:#5865f2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:2rem;">
-          <i class="fa-solid fa-bolt"></i>
+  <main class="ranked-shell">
+    <div class="ranked-feedback-banner">
+      <span>Ranked-Feedback:</span>
+      <strong>Bronze → Unreal</strong> (heute: <span class="feedback-percent">73%</span> Erfolgsquote)
+    </div>
+    <header class="ranked-sticky-header">
+      <div>
+        <p class="ranked-header-label">Current Rank</p>
+        <h1 class="ranked-header-rank">Unreal</h1>
+      </div>
+      <div class="ranked-header-meta">
+        <div>
+          <span class="ranked-header-meta__label">XP</span>
+          <strong>18.450</strong>
         </div>
         <div>
-          <div style="font-weight:700;font-size:1.2rem;">Ranked Challenge</div>
-          <div style="color:#b9bbbe;font-size:0.98rem;">Kleine Tasks, großer Effekt. Mach die Daily, halt die Streak, bleib im Grind.</div>
+          <span class="ranked-header-meta__label">Level</span>
+          <strong>24</strong>
         </div>
-      </div>
-      <div style="margin-top:1.2rem;display:flex;gap:1.5rem;flex-wrap:wrap;">
-        <div class="admin-stat">
-          <span class="admin-stat__label">Streak</span>
-          <span class="admin-stat__value" id="streakValue">0</span>
-        </div>
-        <div class="admin-stat">
-          <span class="admin-stat__label">XP</span>
-          <span class="admin-stat__value" id="xpValue">0</span>
-        </div>
-        <div class="admin-stat">
-          <span class="admin-stat__label">Level</span>
-          <span class="admin-stat__value" id="levelValue">1</span>
-        </div>
-      </div>
-    </section>
-    <section class="discord-card ranked-main-card">
-      <header style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
         <div>
-          <h2>Heute</h2>
-          <p style="color:#b9bbbe;font-size:0.98rem;" id="todayLabel">Lädt…</p>
+          <span class="ranked-header-meta__label">Next Milestone</span>
+          <strong>Mythic</strong>
         </div>
-        <div style="display:flex;gap:0.7rem;">
-          <button class="btn btn-ghost" id="rerollBtn" type="button"><i class="fa-solid fa-dice"></i> Reroll</button>
-          <button class="btn btn-primary" id="resetBtn" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
-        </div>
-      </header>
-      <div class="ranked-progress">
-        <div class="ranked-progress__bar" id="progressBar"></div>
       </div>
-      <div class="ranked-progress__meta">
-        <span id="progressText">0/3 erledigt</span>
-        <span id="xpText">+0 XP</span>
+      <div class="ranked-header-progress">
+        <div class="ranked-progress__bar" aria-hidden="true"></div>
+        <span class="ranked-progress__meta">+12% vs gestern</span>
       </div>
-      <div class="ranked-list" id="taskList"></div>
-      <footer style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.5rem;">
-        <div style="display:flex;align-items:center;gap:0.6rem;color:#b9bbbe;font-size:0.98rem;">
-          <span class="dot"></span>
-          <span>Alles wird lokal gespeichert (kein Login nötig).</span>
-        </div>
-        <button class="btn btn-ghost" id="completeBtn" type="button"><i class="fa-solid fa-check"></i> Day complete</button>
-      </footer>
-    </section>
+    </header>
+
+    <div class="ranked-grid">
+      <section class="ranked-column ranked-column--left">
+        <article class="ranked-card stats-card">
+          <header class="ranked-card__head">
+            <div>
+              <p class="ranked-card__title">Skill Stats</p>
+              <p class="ranked-card__hint">Aim, Gamesense &amp; Consistency in Echtzeit</p>
+            </div>
+            <button class="btn btn-ghost btn-sm focus-toggle" type="button">
+              <i class="fa-solid fa-eye"></i>
+              Focus-Mode
+              <span class="focus-toggle__state">Off</span>
+            </button>
+          </header>
+          <div class="skill-grid">
+            <div class="skill">
+              <span>Aim</span>
+              <div class="skill-meter">
+                <span style="width: 82%;"></span>
+              </div>
+              <strong>82%</strong>
+            </div>
+            <div class="skill">
+              <span>Gamesense</span>
+              <div class="skill-meter">
+                <span style="width: 74%;"></span>
+              </div>
+              <strong>74%</strong>
+            </div>
+            <div class="skill">
+              <span>Consistency</span>
+              <div class="skill-meter">
+                <span style="width: 69%;"></span>
+              </div>
+              <strong>69%</strong>
+            </div>
+            <div class="skill">
+              <span>Warm-Up</span>
+              <div class="skill-meter">
+                <span style="width: 91%;"></span>
+              </div>
+              <strong>91%</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="ranked-card streak-card">
+          <header class="ranked-card__head">
+            <div>
+              <p class="ranked-card__title">Streak Timeline</p>
+              <p class="ranked-card__hint">Deine Serie bleibt sichtbar, egal was du machst</p>
+            </div>
+            <button class="btn btn-ghost btn-sm" type="button">Reset-History</button>
+          </header>
+          <div class="streak-timeline">
+            <div class="streak-step active"><span>Mo</span><strong>7</strong></div>
+            <div class="streak-step active"><span>Di</span><strong>9</strong></div>
+            <div class="streak-step"><span>Mi</span><strong>6</strong></div>
+            <div class="streak-step pending"><span>Do</span><strong>0</strong></div>
+            <div class="streak-step pending"><span>Fr</span><strong>0</strong></div>
+          </div>
+          <p class="streak-note">Spiele deine Daily, damit du den Fortschritt behältst. Bonus-XP nach 5 Tagen.</p>
+        </article>
+
+        <article class="ranked-card rank-card">
+          <p class="ranked-card__title">Rank Progress</p>
+          <div class="ranked-progress rank-progress--compact">
+            <div class="ranked-progress__bar" style="width: 68%;"></div>
+          </div>
+          <p class="ranked-card__hint">Bronze → Steel → Unreal (nächste Stufe: Mythic)</p>
+        </article>
+      </section>
+
+      <section class="ranked-column ranked-column--middle">
+        <article class="ranked-card weekly-card">
+          <header class="ranked-card__head">
+            <div>
+              <p class="ranked-card__title">Weekly Challenges</p>
+              <p class="ranked-card__hint">Bonus-XP Track + Notes</p>
+            </div>
+            <span class="tag tag-primary">+25% XP</span>
+          </header>
+          <div class="weekly-list">
+            <div class="weekly-item">
+              <div>
+                <h3>Challenge 1</h3>
+                <p>Perfekte Heatmap-Session (15 Min)</p>
+              </div>
+              <span>In Progress</span>
+            </div>
+            <div class="weekly-item">
+              <div>
+                <h3>Challenge 2</h3>
+                <p>Warming-Up mit Coach</p>
+              </div>
+              <span>Ready</span>
+            </div>
+            <div class="weekly-item">
+              <div>
+                <h3>Challenge 3</h3>
+                <p>Focus-Mode &amp; kein Tilt</p>
+              </div>
+              <span>Locked</span>
+            </div>
+          </div>
+          <div class="challenge-note">
+            <textarea placeholder="Notizen pro Challenge – z.B. Temperatur, Audio-Einstellungen, Partner"></textarea>
+          </div>
+        </article>
+
+        <article class="ranked-card monthly-card">
+          <header class="ranked-card__head">
+            <div>
+              <p class="ranked-card__title">Monats-Progress</p>
+              <p class="ranked-card__hint">Progressbar + Summary</p>
+            </div>
+            <span class="tag tag-outline">Compare Yesterday</span>
+          </header>
+          <div class="monthly-progress">
+            <div class="monthly-progress__bar">
+              <div class="monthly-progress__fill" style="width: 54%;"></div>
+            </div>
+            <p>Today vs Yesterday: <strong>+3.1%</strong> | Streak: <strong>14 Tage</strong></p>
+          </div>
+          <div class="daily-difficulty">
+            <span>Schwierigkeit</span>
+            <div class="difficulty-buttons">
+              <button class="btn btn-ghost btn-sm active">Easy</button>
+              <button class="btn btn-ghost btn-sm">Normal</button>
+              <button class="btn btn-ghost btn-sm">Hard</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="ranked-card compare-card">
+          <header class="ranked-card__head">
+            <div>
+              <p class="ranked-card__title">Compare Yesterday</p>
+              <p class="ranked-card__hint">Größere View für heute vs. gestern</p>
+            </div>
+            <span class="tag tag-secondary">+8%</span>
+          </header>
+          <div class="compare-grid">
+            <div>
+              <p>Heute</p>
+              <strong>+12 XP</strong>
+            </div>
+            <div>
+              <p>Gestern</p>
+              <strong>+4 XP</strong>
+            </div>
+            <div>
+              <p>Δ</p>
+              <strong>+8 XP</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="ranked-column ranked-column--right">
+        <article class="ranked-card history-card">
+          <header class="ranked-card__head">
+            <div>
+              <p class="ranked-card__title">Match History</p>
+              <p class="ranked-card__hint">Letzte 10 Sessions</p>
+            </div>
+            <button class="btn btn-ghost btn-sm" type="button">Heatmap öffnen</button>
+          </header>
+          <ul class="history-list">
+            <li>
+              <span>Session 1</span>
+              <strong>+18 XP</strong>
+            </li>
+            <li>
+              <span>Session 2</span>
+              <strong>+12 XP</strong>
+            </li>
+            <li>
+              <span>Session 3</span>
+              <strong>+25 XP</strong>
+            </li>
+          </ul>
+        </article>
+
+        <article class="ranked-card heatmap-card">
+          <header class="ranked-card__head">
+            <p class="ranked-card__title">Performance-Heatmap</p>
+          </header>
+          <div class="heatmap-grid">
+            <!-- Placeholder grid -->
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+          <p class="heatmap-note">Beste Zeiten: 20:00–23:00 | 42% Win-Rate</p>
+        </article>
+
+        <article class="ranked-card badges-card">
+          <header class="ranked-card__head">
+            <div>
+              <p class="ranked-card__title">Badges &amp; Achievements</p>
+              <p class="ranked-card__hint">7 / 30 / 100 Streak</p>
+            </div>
+            <span class="tag tag-primary">Badge-Feed</span>
+          </header>
+          <div class="badges-grid">
+            <div>
+              <strong>7</strong>
+              <span>Streak</span>
+            </div>
+            <div>
+              <strong>30</strong>
+              <span>XP Drops</span>
+            </div>
+            <div>
+              <strong>100</strong>
+              <span>Matches</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="ranked-card future-card">
+          <header class="ranked-card__head">
+            <div>
+              <p class="ranked-card__title">Future Preview</p>
+              <p class="ranked-card__hint">Plan für Morgen &amp; Woche</p>
+            </div>
+            <button class="btn btn-ghost btn-sm" type="button">Add Notes</button>
+          </header>
+          <div class="future-grid">
+            <p>Morgen: Warm-Up Run + Aim Drills</p>
+            <p>Woche: 3 Ranked Matches + 1 Review</p>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <button class="floating-add-session" type="button">
+      <i class="fa-solid fa-plus"></i>
+      Add Session
+    </button>
+
+    <div class="skeleton-loader">
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+    </div>
   </main>
   <div id="footer-placeholder"></div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
