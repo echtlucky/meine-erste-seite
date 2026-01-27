@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | echtlucky</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/login.css" />
+  </head>
+
+  <body class="page-transition login-page">
+    <div class="app-shell">
+      <header class="app-topbar">
+        <div id="header-placeholder"></div>
+      </header>
+
+      <main class="login-main">
+        <section class="login-hero">
+          <div class="login-hero__tag">Community Tag: ˡᶜᵏʸ</div>
+          <h1>Willkommen zurück.</h1>
+          <p>
+            Logge dich ein, um deine Connect-Zone zu betreten: Gruppen, Chat, Calls,
+            Screenshares und alles weitere, was echtlucky ausmacht.
+          </p>
+          <div class="login-hero__bullets">
+            <span>20+ Schriftarten (inkl. ˡᶜᵏʸ Custom Tag)</span>
+            <span>Realtime-Calls &amp; Screen-Share</span>
+            <span>Direct Login &amp; Account-Management</span>
+          </div>
+        </section>
+
+        <section class="login-card">
+          <div class="login-card__header">
+            <h2>Account einloggen</h2>
+            <p>Du kannst Benutzername oder E-Mail verwenden.</p>
+          </div>
+
+          <form class="login-form" id="loginForm">
+            <label for="loginIdentifier">Benutzername / E-Mail</label>
+            <input id="loginIdentifier" type="text" name="identifier" placeholder="max1234 oder email@domain.com" required />
+
+            <label for="loginPassword">Passwort</label>
+            <input id="loginPassword" type="password" name="password" placeholder="mind. 6 Zeichen" required />
+
+            <div class="login-form__actions">
+              <button class="btn" type="submit">Login</button>
+              <button class="btn btn-secondary" type="button" id="btnForgot">Passwort vergessen?</button>
+            </div>
+
+            <div class="login-form__hint">
+              <span>Daten werden via Firebase Auth gesichert.</span>
+              <a href="account.html">Account verwalten</a>
+            </div>
+          </form>
+
+          <div class="login-card__footer">
+            <p>Oder starte direkt über soziale Anmeldung.</p>
+            <div class="login-card__socials">
+              <button class="btn btn-social">Mit Google starten</button>
+              <button class="btn btn-social btn-secondary">Mit Apple starten</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script>
+      fetch("header.html?v=" + Date.now())
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("header-placeholder").innerHTML = html;
+          if (typeof initHeaderScripts === "function") initHeaderScripts();
+          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+          window.dispatchEvent(new CustomEvent("echtlucky:header-ready"));
+        });
+
+      fetch("footer.html?v=" + Date.now())
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("footer-placeholder").innerHTML = html;
+        });
+
+      document.getElementById("loginForm")?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const identifier = document.getElementById("loginIdentifier")?.value.trim();
+        const password = document.getElementById("loginPassword")?.value;
+        if (!identifier || !password) return;
+        localStorage.setItem("echtlucky:returnTo", "connect.html");
+        window.location.href = "connect.html";
+      });
+
+      document.getElementById("btnForgot")?.addEventListener("click", () => {
+        window.location.href = "account.html";
+      });
+    </script>
+  </body>
+</html>
