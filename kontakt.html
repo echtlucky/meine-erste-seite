@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kontakt</title>
+  <title>Kontakt | echtlucky</title>
     
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/blog.css" />
 </head>
 
-<body>
-  <main>
-    <section>
+<body class="page-transition loaded">
+  <div class="group-strip group-strip--dock" data-group-strip="dock" aria-label="Gruppen-Leiste"></div>
+  <div id="header-placeholder"></div>
+
+  <main class="container">
+    <section class="bio" style="text-align:left;">
       <h2>Kontakt</h2>
       <p style="opacity:.88; margin-top:.6rem;">
         Du willst mit mir connecten, Feedback geben oder bei der Community mitmachen?
@@ -69,6 +72,16 @@
       </form>
     </section>
 
+    <div id="footer-placeholder"></div>
+
+    <script src="firebase.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/legal-modal.js"></script>
+    <script src="js/notify.js"></script>
+    <script src="js/modal-dialog.js"></script>
+    <script src="js/group-strip-v2.js"></script>
+
     <script>
       (function () {
         const form = document.getElementById('contactForm');
@@ -111,6 +124,22 @@ ${message}
           }
         });
       })();
+    </script>
+
+    <script>
+      fetch("header.html?v=" + Date.now())
+        .then((res) => res.text())
+        .then((html) => {
+          document.getElementById("header-placeholder").innerHTML = html;
+          if (typeof initHeaderScripts === "function") initHeaderScripts();
+          if (typeof initSmartHeaderScroll === "function") initSmartHeaderScroll();
+        });
+
+      fetch("footer.html?v=" + Date.now())
+        .then((res) => res.text())
+        .then((html) => {
+          document.getElementById("footer-placeholder").innerHTML = html;
+        });
     </script>
   </main>
 </body>

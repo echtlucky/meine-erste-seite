@@ -5,18 +5,44 @@
       echtlucky
       <span class="logo-glow" aria-hidden="true"></span>
     </a>
+
+    <div class="header-groups">
+      <button
+        id="groupsToggle"
+        class="nav-auth nav-auth--ghost"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded="false"
+      >
+        Gruppen <span class="chev" aria-hidden="true">▾</span>
+      </button>
+      <div id="groupsMenu" class="dropdown-menu groups-menu" role="menu" aria-label="Gruppen"></div>
+    </div>
   </div>
 
   <!-- Center / Nav -->
   <nav id="mainNav" class="header-nav" aria-label="Hauptnavigation">
     <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="blog.html">Blog</a>
-      <a href="ranked.html">Ranked</a>
-      <a href="stats.html">Stats</a>
-      <a href="focus.html">Focus</a>
-      <a href="fonts.html">Fonts</a>
-      <a href="reflex.html">Reflex Lab</a>
+      <div class="nav-dropdown" data-nav-dropdown>
+        <button
+          id="hubToggle"
+          class="nav-link-btn"
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          HUB <span class="chev" aria-hidden="true">▾</span>
+        </button>
+        <div id="hubMenu" class="dropdown-menu hub-menu" role="menu" aria-label="Hub">
+          <a href="index.html" class="dropdown-item" role="menuitem">Home</a>
+          <a href="blog.html" class="dropdown-item" role="menuitem">Blog</a>
+          <a href="ranked.html" class="dropdown-item" role="menuitem">Ranked</a>
+          <a href="stats.html" class="dropdown-item" role="menuitem">Stats</a>
+          <a href="focus.html" class="dropdown-item" role="menuitem">Focus</a>
+          <a href="fonts.html" class="dropdown-item" role="menuitem">Schriftgenerator</a>
+          <a href="reflex.html" class="dropdown-item" role="menuitem">Reflex Lab</a>
+        </div>
+      </div>
     </div>
   </nav>
 

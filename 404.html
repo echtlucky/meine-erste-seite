@@ -58,6 +58,7 @@
   </head>
 
   <body class="page-transition error-page">
+    <div class="group-strip group-strip--dock" data-group-strip="dock" aria-label="Gruppen-Leiste"></div>
     <div class="app-shell error-app">
       <header class="app-topbar error-header">
         <div id="header-placeholder"></div>
@@ -85,7 +86,17 @@
       <div id="footer-placeholder"></div>
     </div>
 
+    <script src="firebase.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/legal-modal.js"></script>
+    <script src="js/notify.js"></script>
+    <script src="js/modal-dialog.js"></script>
+    <script src="js/group-strip-v2.js"></script>
+
     <script>
+      document.body.classList.add("loaded");
+
       fetch("header.html?v=" + Date.now())
         .then((r) => r.text())
         .then((html) => {

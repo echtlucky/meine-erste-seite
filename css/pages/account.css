@@ -8,16 +8,16 @@
   gap: 2.2rem;
 }
 .account-page .discord-card {
-  background: #40444b;
+  background: rgba(0, 0, 0, 0.58);
   border-radius: 18px;
-  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
   padding: 2rem 1.5rem;
-  border: 1px solid #232428;
-  color: #f6f6f7;
+  border: 1px solid rgba(0, 255, 136, 0.17);
+  color: var(--text);
 }
 .account-page .discord-card h2 {
   margin-top: 0;
-  color: #5865f2;
+  color: var(--accent);
   font-size: 1.4rem;
   font-weight: 800;
 }
@@ -31,16 +31,16 @@
   transition: background 0.2s, color 0.2s;
   margin-bottom: 0.2rem;
 }
-.account-page .btn-primary { background: #5865f2; color: #fff; }
-.account-page .btn-primary:hover { background: #8ea1e1; }
+.account-page .btn-primary { background: linear-gradient(90deg, #00ff88 0%, #00cc66 100%); color: #041a10; }
+.account-page .btn-primary:hover { filter: brightness(1.03); }
 .account-page .btn-danger { background: #ed4245; color: #fff; }
 .account-page .btn-success { background: #43b581; color: #fff; }
-.account-page .btn-secondary { background: #232428; color: #fff; border: 1px solid #5865f2; }
-.account-page .btn-secondary:hover { background: #5865f2; color: #fff; }
+.account-page .btn-secondary { background: rgba(0,0,0,0.35); color: var(--text); border: 1px solid rgba(0,255,136,0.18); }
+.account-page .btn-secondary:hover { background: rgba(0,255,136,0.10); color: var(--accent); }
 .account-page input, .account-page select {
-  background: #36393f;
-  color: #f6f6f7;
-  border: 1px solid #232428;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--text);
+  border: 1px solid rgba(0, 255, 136, 0.18);
   border-radius: 8px;
   padding: 0.7em 1em;
   font-size: 1rem;
@@ -50,7 +50,7 @@
 }
 .account-page input:focus, .account-page select:focus {
   outline: none;
-  border-color: #5865f2;
+  border-color: rgba(0, 255, 136, 0.35);
 }
 @media (max-width: 700px) {
   .account-discord-shell {

@@ -38,13 +38,18 @@
   ========================= */
   function setActiveNavLink() {
     const currentPath = window.location.pathname.split("/").pop() || "index.html";
-    document.querySelectorAll(".nav-links a").forEach((link) => {
+    const links = Array.from(document.querySelectorAll(".nav-links a, .hub-menu a"));
+    let anyActive = false;
+
+    links.forEach((link) => {
       const linkPath = link.getAttribute("href");
-      link.classList.toggle(
-        "active",
-        linkPath === currentPath || (currentPath === "" && linkPath === "index.html")
-      );
+      const isActive = linkPath === currentPath || (currentPath === "" && linkPath === "index.html");
+      link.classList.toggle("active", isActive);
+      anyActive = anyActive || isActive;
     });
+
+    const hubToggle = qs("hubToggle");
+    if (hubToggle) hubToggle.classList.toggle("active", anyActive);
   }
 
   /* =========================
@@ -199,13 +204,78 @@ window.renderAuthUI = function renderAuthUI(user) {
     });
   }
 
+  function closeDropdown(el) {
+    if (!el) return;
+    el.classList.remove("show");
+  }
+
+  function wireHubDropdown() {
+    const toggle = qs("hubToggle");
+    const menu = qs("hubMenu");
+    if (!toggle || !menu || toggle.__wired) return;
+
+    toggle.__wired = true;
+    toggle.setAttribute("aria-expanded", "false");
+
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.classList.toggle("show");
+      const isOpen = menu.classList.contains("show");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+        closeDropdown(menu);
+        toggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  function wireGroupsDropdown() {
+    const toggle = qs("groupsToggle");
+    const menu = qs("groupsMenu");
+    if (!toggle || !menu || toggle.__wired) return;
+
+    toggle.__wired = true;
+    toggle.setAttribute("aria-expanded", "false");
+
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.classList.toggle("show");
+      const isOpen = menu.classList.contains("show");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+        closeDropdown(menu);
+        toggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  function ensureGroupStripLoaded() {
+    if (window.__ECHTLUCKY_GROUP_STRIP_V2__) return;
+    const existing = document.querySelector("script[src*='js/group-strip-v2.js']");
+    if (existing) return;
+
+    const s = document.createElement("script");
+    s.src = "js/group-strip-v2.js?v=1";
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+
   /* =========================
      Public init (call after fetch(header.html))
   ========================= */
   window.initHeaderScripts = function initHeaderScripts() {
     wireMobileMenu();
     wireDropdown();
+    wireHubDropdown();
+    wireGroupsDropdown();
     setActiveNavLink();
+    ensureGroupStripLoaded();
 
     // apply current state immediately
     renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
