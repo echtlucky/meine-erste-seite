@@ -689,15 +689,15 @@ html.connect-compact .connect-chat-area {
 
 .ranked-card {
   border-radius: 20px;
-  border: 1px solid rgba(0, 255, 136, 0.15);
-  background: rgba(1, 20, 12, 0.6);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  background: rgba(8, 25, 15, 0.85);
   padding: 1.25rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .ranked-card__head {
@@ -711,14 +711,14 @@ html.connect-compact .connect-chat-area {
 .ranked-card__title {
   margin: 0;
   font-size: 1.15rem;
-  color: #f8fffc;
+  color: #ffffff;
   font-weight: 700;
 }
 
 .ranked-card__hint {
   margin: 0.15rem 0 0;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.85rem;
+  color: rgba(180, 255, 180, 0.85);
+  font-size: 0.9rem;
 }
 
 /* Skill Grid */
@@ -849,20 +849,21 @@ html.connect-compact .connect-chat-area {
   margin: 0;
   font-size: 1rem;
   font-weight: 800;
-  color: #fff;
+  color: #ffffff;
 }
 
 .daily-task__desc {
   margin: 0;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  color: rgba(180, 255, 180, 0.8);
 }
 
 .daily-task__xp {
   margin: 0;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  color: rgba(0, 255, 136, 0.9);
   text-align: right;
+  font-weight: 600;
 }
 
 .daily-actions {
@@ -1157,16 +1158,16 @@ html.connect-compact .connect-chat-area {
 }
 
 .stats-card {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(8, 25, 15, 0.85);
   border-radius: 20px;
-  border: 1px solid rgba(0, 255, 136, 0.15);
+  border: 1px solid rgba(0, 255, 136, 0.25);
   padding: 1.25rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .stats-card header {
@@ -1339,16 +1340,16 @@ html.connect-compact .connect-chat-area {
 }
 
 .focus-card {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(8, 25, 15, 0.85);
   border-radius: 20px;
-  border: 1px solid rgba(0, 255, 136, 0.15);
+  border: 1px solid rgba(0, 255, 136, 0.25);
   padding: 1.25rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .session-display {
@@ -1559,13 +1560,13 @@ html.connect-compact .connect-chat-area {
 }
 
 .reflex-main-card {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(8, 25, 15, 0.85);
   border-radius: 20px;
-  border: 1px solid rgba(0, 255, 136, 0.15);
+  border: 1px solid rgba(0, 255, 136, 0.25);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .reflex-main-header {
