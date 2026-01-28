@@ -14,7 +14,7 @@
   flex-direction: column;
   gap: 1.5rem;
   position: relative;
-  isolation: isolate;
+  z-index: 0;
 }
 
 .ranked-feedback-banner {
@@ -33,7 +33,7 @@
 .ranked-sticky-header {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 1;
   padding: 1rem 1.25rem;
   border-radius: 20px;
   background: rgba(1, 20, 12, 0.9);

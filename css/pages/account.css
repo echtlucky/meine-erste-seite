@@ -14,6 +14,8 @@
   padding: 2rem 1.5rem;
   border: 1px solid rgba(0, 255, 136, 0.17);
   color: var(--text);
+  position: relative;
+  z-index: 0;
 }
 .account-page .discord-card h2 {
   margin-top: 0;

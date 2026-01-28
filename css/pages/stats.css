@@ -23,6 +23,8 @@
   gap: 1.5rem;
   flex-wrap: wrap;
   box-shadow: 0 30px 110px rgba(0, 0, 0, 0.65);
+  position: relative;
+  z-index: 0;
 }
 
 .stats-hero__intro h1 {

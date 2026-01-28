@@ -43,6 +43,7 @@
   box-shadow: 0 26px 90px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   overflow: hidden;
+  z-index: 0;
 }
 
 .connect-main-card::before{
@@ -682,7 +683,7 @@ html.connect-compact .connect-chat-area {
   .screen-share-area{
     position: fixed;
     inset: 0;
-    z-index: 100003;
+    z-index: 99990;
     margin: 0;
     border-radius: 0;
     padding: 10px 12px calc(12px + env(safe-area-inset-bottom)) 12px;
@@ -967,7 +968,7 @@ html.connect-compact .connect-chat-area {
 
 
 .modal-overlay#accountQuickModal {
-  z-index: 100002;
+  z-index: 99990;
 }
 
 

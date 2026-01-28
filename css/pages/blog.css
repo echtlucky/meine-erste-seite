@@ -19,6 +19,7 @@
   color: var(--text);
   position: relative;
   overflow: hidden;
+  z-index: 0;
 }
 
 .blog-discord-shell .discord-card::before{

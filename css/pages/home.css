@@ -53,6 +53,7 @@ body.home-page{
   overflow: hidden;
   min-height: 260px;
   padding: clamp(1.6rem, 3.2vw, 2.6rem);
+  z-index: 0;
 }
 
 .home-hero::before,
@@ -101,6 +102,7 @@ body.home-page{
   overflow: hidden;
   padding: clamp(2rem, 3.8vw, 3.4rem);
   text-align: center;
+  z-index: 0;
 }
 
 .home-connect::before{

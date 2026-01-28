@@ -1,3 +1,8 @@
+/**
+ * Streaming Module - Professional Live Streaming Experience
+ * WebRTC-based streaming with robust state management and fullscreen support
+ */
+
 (() => {
   "use strict";
 
@@ -7,6 +12,7 @@
 
   const el = (id) => document.getElementById(id);
 
+  // DOM Elements
   const streamList = el("streamList");
   const streamSearchInput = el("streamSearchInput");
   const btnStartStream = el("btnStartStream");
@@ -20,6 +26,9 @@
   const btnStageMute = el("btnStageMute");
   const btnStageFullscreen = el("btnStageFullscreen");
   const btnStageCinema = el("btnStageCinema");
+  const btnStagePlay = el("btnStagePlay");
+  const btnStageVolume = el("btnStageVolume");
+  const volumeSlider = el("volumeSlider");
 
   const streamChatCard = el("streamChatCard");
   const streamChatSub = el("streamChatSub");
@@ -29,6 +38,7 @@
   const streamMiniChat = el("streamMiniChat");
   const miniChatList = el("miniChatList");
 
+  // State
   let activeCategory = "all";
   let searchQ = "";
   let selectedStreamId = "";
@@ -45,11 +55,14 @@
   let localStream = null;
   let isBroadcasting = false;
   let isStageMuted = true;
+  let isStagePlaying = false;
+  let stageVolume = 0.6;
   let isCinema = false;
+  let isFullscreen = false;
   let myDisplayNameCached = "";
   let chatSeq = 0;
 
-  const peerConnections = new Map(); // viewerUid -> RTCPeerConnection
+  const peerConnections = new Map();
   let viewerPc = null;
   let viewerCandidatesRef = null;
   let broadcasterCandidatesRef = null;
@@ -57,6 +70,17 @@
   const RTC_CONFIG = {
     iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
   };
+
+  // Stream States
+  const STREAM_STATE = {
+    OFFLINE: "offline",
+    PREPARING: "preparing",
+    LIVE: "live",
+    PAUSED: "paused",
+    ENDED: "ended"
+  };
+
+  let currentStreamState = STREAM_STATE.OFFLINE;
 
   function notify(type, title, message, duration) {
     try {
@@ -98,104 +122,129 @@
     if (!user?.uid) return user?.displayName || user?.email?.split("@")[0] || "User";
     try {
       const snap = await db.collection("users").doc(user.uid).get();
-      const data = snap.exists ? snap.data() || {} : {};
-      return data.username || data.displayName || user.displayName || user.email?.split("@")[0] || "User";
+      const data = snap.exists ? snap.data() : {};
+      const displayName = String(data.displayName || "").trim();
+      myDisplayNameCached = displayName || user.displayName || user.email?.split("@")[0] || "User";
+      return myDisplayNameCached;
     } catch (_) {
-      return user.displayName || user.email?.split("@")[0] || "User";
+      return user?.displayName || user?.email?.split("@")[0] || "User";
     }
   }
 
-  function setStageMeta(meta) {
-    streamTitle.textContent = meta.title || "Kein Stream ausgewählt";
-    streamSub.textContent = meta.sub || "";
-    streamCategory.textContent = meta.category || "—";
-    streamerName.textContent = meta.streamer || "—";
-    streamStatus.textContent = meta.status || "—";
-  }
-
-  function setStageEmpty(show) {
-    if (!stageEmpty) return;
-    stageEmpty.hidden = !show;
-  }
-
-  function setStageVideoStream(media) {
-    if (!stageVideo) return;
-    try {
-      stageVideo.srcObject = media || null;
-    } catch (_) {
-      stageVideo.srcObject = null;
-    }
-  }
-
-  function getCategoryLabel(raw) {
-    if (raw === "just_chatting") return "Just Chatting";
-    if (raw === "gaming") return "Gaming";
-    return "—";
+  function getCategoryLabel(cat) {
+    const map = { just_chatting: "Just Chatting", gaming: "Gaming" };
+    return map[cat] || "Stream";
   }
 
   function getInitials(name) {
-    const s = String(name || "U").trim();
-    if (!s) return "U";
-    const parts = s.split(/\s+/).filter(Boolean);
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return String(name || "U")
+      .split(" ")
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
   }
 
   function escapeHtml(str) {
-    const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
-    return String(str || "").replace(/[&<>"']/g, (m) => map[m]);
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function setStageVideoStream(mediaStream) {
+    if (!stageVideo) return;
+    if (mediaStream) {
+      stageVideo.srcObject = mediaStream;
+      stageVideo.muted = isStageMuted;
+      stageVideo.volume = isStageMuted ? 0 : stageVolume;
+      isStagePlaying = true;
+      updatePlayButton();
+    } else {
+      stageVideo.srcObject = null;
+      isStagePlaying = false;
+      updatePlayButton();
+    }
+  }
+
+  function setStageEmpty(empty) {
+    if (!stageEmpty || !stageVideo) return;
+    stageEmpty.hidden = !empty;
+    stageVideo.hidden = empty;
+    if (empty) {
+      setStageVideoStream(null);
+    }
+  }
+
+  function setStageMeta({ title, sub, category, streamer, status }) {
+    if (streamTitle) streamTitle.textContent = title || "";
+    if (streamSub) streamSub.textContent = sub || "";
+    if (streamCategory) streamCategory.textContent = category || "—";
+    if (streamerName) streamerName.textContent = streamer || "—";
+    if (streamStatus) {
+      streamStatus.textContent = status || "—";
+      streamStatus.className = "streaming-stat__value";
+      if (status === "Live") streamStatus.classList.add("is-live");
+      if (status === "Beendet") streamStatus.classList.add("is-ended");
+      if (status === "Pausiert") streamStatus.classList.add("is-paused");
+    }
+  }
+
+  function updatePlayButton() {
+    if (!btnStagePlay) return;
+    const icon = btnStagePlay.querySelector("i");
+    if (icon) {
+      icon.className = isStagePlaying ? "fa-solid fa-pause" : "fa-solid fa-play";
+    }
+    btnStagePlay.setAttribute("aria-label", isStagePlaying ? "Pause" : "Play");
+  }
+
+  function updateVolumeIcon() {
+    if (!btnStageVolume) return;
+    const icon = btnStageVolume.querySelector("i");
+    if (!icon) return;
+    
+    if (isStageMuted || stageVolume === 0) {
+      icon.className = "fa-solid fa-volume-xmark";
+    } else if (stageVolume < 0.3) {
+      icon.className = "fa-solid fa-volume-off";
+    } else if (stageVolume < 0.7) {
+      icon.className = "fa-solid fa-volume-low";
+    } else {
+      icon.className = "fa-solid fa-volume-high";
+    }
+  }
+
+  function updateFullscreenButton() {
+    if (!btnStageFullscreen) return;
+    const icon = btnStageFullscreen.querySelector("i");
+    if (icon) {
+      icon.className = isFullscreen 
+        ? "fa-solid fa-compress" 
+        : "fa-solid fa-expand";
+    }
+    btnStageFullscreen.setAttribute("aria-label", isFullscreen ? "Vollbild verlassen" : "Vollbild");
   }
 
   function cleanupSelectedStreamSubscriptions() {
     try {
-      if (typeof selectedStreamUnsub === "function") selectedStreamUnsub();
+      if (selectedStreamUnsub) selectedStreamUnsub();
     } catch (_) {}
     selectedStreamUnsub = null;
 
     try {
-      if (typeof viewersUnsub === "function") viewersUnsub();
-    } catch (_) {}
-    viewersUnsub = null;
-  }
-
-  async function cleanupViewer() {
-    try {
-      if (typeof viewerDocUnsub === "function") viewerDocUnsub();
+      if (viewerDocUnsub) viewerDocUnsub();
     } catch (_) {}
     viewerDocUnsub = null;
 
     try {
-      if (typeof viewerCandidatesUnsub === "function") viewerCandidatesUnsub();
+      if (viewerCandidatesUnsub) viewerCandidatesUnsub();
     } catch (_) {}
     viewerCandidatesUnsub = null;
 
     try {
-      if (typeof broadcasterCandidatesUnsub === "function") broadcasterCandidatesUnsub();
+      if (broadcasterCandidatesUnsub) broadcasterCandidatesUnsub();
     } catch (_) {}
     broadcasterCandidatesUnsub = null;
-
-    try {
-      if (viewerPc) viewerPc.close();
-    } catch (_) {}
-    viewerPc = null;
-    viewerCandidatesRef = null;
-    broadcasterCandidatesRef = null;
-
-    try {
-      if (selectedStreamId && auth?.currentUser?.uid && db) {
-        await db
-          .collection("streams")
-          .doc(selectedStreamId)
-          .collection("viewers")
-          .doc(auth.currentUser.uid)
-          .delete();
-      }
-    } catch (_) {}
-
-    if (!isBroadcasting) {
-      setStageVideoStream(null);
-      setStageEmpty(true);
-    }
   }
 
   function cleanupBroadcastPeers() {
@@ -222,6 +271,7 @@
     } catch (_) {}
     localStream = null;
     isBroadcasting = false;
+    currentStreamState = STREAM_STATE.ENDED;
 
     try {
       const uid = auth?.currentUser?.uid;
@@ -240,7 +290,18 @@
     selectedStreamId = "";
     setStageVideoStream(null);
     setStageEmpty(true);
-    setStageMeta({ title: "Kein Stream ausgewählt", sub: "Wähle links einen Stream aus.", category: "—", streamer: "—", status: "—" });
+    setStageMeta({ 
+      title: "Kein Stream ausgewählt", 
+      sub: "Wähle links einen Stream aus.", 
+      category: "—", 
+      streamer: "—", 
+      status: "—" 
+    });
+    
+    if (btnStartStream) {
+      btnStartStream.innerHTML = '<i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> Stream starten';
+      btnStartStream.classList.remove("is-live");
+    }
   }
 
   function renderStreams(items) {
@@ -257,15 +318,17 @@
         const owner = s.ownerName || "User";
         const cat = getCategoryLabel(s.category);
         const initials = getInitials(owner);
+        const viewerCount = s.viewerCount || 0;
         return `
           <div class="stream-item ${isActive ? "is-active" : ""}" role="button" tabindex="0" data-stream-id="${escapeHtml(s.id)}">
             <div class="stream-item__avatar">${escapeHtml(initials)}</div>
-            <div>
+            <div class="stream-item__info">
               <div class="stream-item__title">${escapeHtml(title)}</div>
               <div class="stream-item__sub">${escapeHtml(owner)} • ${escapeHtml(cat)}</div>
             </div>
-            <div class="stream-item__badge">
-              LIVE
+            <div class="stream-item__meta">
+              <span class="stream-item__viewers"><i class="fa-solid fa-eye" aria-hidden="true"></i> ${viewerCount}</span>
+              <div class="stream-item__badge">LIVE</div>
             </div>
           </div>
         `;
@@ -315,18 +378,33 @@
     cleanupSelectedStreamSubscriptions();
 
     setStageEmpty(true);
-    setStageMeta({ title: "Lade Stream…", sub: "", category: "—", streamer: "—", status: "—" });
+    setStageMeta({ 
+      title: "Lade Stream…", 
+      sub: "", 
+      category: "—", 
+      streamer: "—", 
+      status: "—" 
+    });
 
     const ref = db.collection("streams").doc(id);
     selectedStreamUnsub = ref.onSnapshot(
       (snap) => {
         if (!snap.exists) {
-          setStageMeta({ title: "Stream nicht verfügbar", sub: "", category: "—", streamer: "—", status: "—" });
+          setStageMeta({ 
+            title: "Stream nicht verfügbar", 
+            sub: "", 
+            category: "—", 
+            streamer: "—", 
+            status: "—" 
+          });
           setStageEmpty(true);
           return;
         }
         const d = snap.data() || {};
         const status = d.status || "live";
+        
+        currentStreamState = status === "live" ? STREAM_STATE.LIVE : STREAM_STATE.ENDED;
+        
         setStageMeta({
           title: d.title || "Stream",
           sub: "",
@@ -346,10 +424,33 @@
         }
       },
       () => {
-        setStageMeta({ title: "Fehler", sub: "Stream konnte nicht geladen werden.", category: "—", streamer: "—", status: "—" });
+        setStageMeta({ 
+          title: "Fehler", 
+          sub: "Stream konnte nicht geladen werden.", 
+          category: "—", 
+          streamer: "—", 
+          status: "—" 
+        });
         setStageEmpty(true);
       }
     );
+  }
+
+  async function cleanupViewer() {
+    if (viewerPc) {
+      try {
+        viewerPc.close();
+      } catch (_) {}
+      viewerPc = null;
+    }
+    
+    try {
+      const uid = auth?.currentUser?.uid;
+      if (uid && selectedStreamId && db) {
+        await db.collection("streams").doc(selectedStreamId)
+          .collection("viewers").doc(uid).delete();
+      }
+    } catch (_) {}
   }
 
   async function joinStreamAsViewer(streamId) {
@@ -357,7 +458,13 @@
 
     const user = auth.currentUser;
     if (!user?.uid) {
-      setStageMeta({ title: "Login erforderlich", sub: "Bitte einloggen, um Streams zu schauen.", category: "—", streamer: "—", status: "—" });
+      setStageMeta({ 
+        title: "Login erforderlich", 
+        sub: "Bitte einloggen, um Streams zu schauen.", 
+        category: "—", 
+        streamer: "—", 
+        status: "—" 
+      });
       setStageEmpty(true);
       setStageVideoStream(null);
       return;
@@ -380,7 +487,7 @@
         setStageVideoStream(ms);
         setStageEmpty(false);
         stageVideo.muted = isStageMuted;
-        stageVideo.volume = isStageMuted ? 0 : 0.6;
+        stageVideo.volume = isStageMuted ? 0 : stageVolume;
       }
     };
 
@@ -479,9 +586,20 @@
     const category = String(data.category || "").trim();
     if (!title || !["just_chatting", "gaming"].includes(category)) return;
 
+    // Preparing state
+    currentStreamState = STREAM_STATE.PREPARING;
+    setStageMeta({ 
+      title: "Stream wird vorbereitet...", 
+      sub: "Berechtigungen werden angefordert", 
+      category: getCategoryLabel(category), 
+      streamer: profileName, 
+      status: "Vorbereitung" 
+    });
+
     const liveSnap = await db.collection("streams").where("status", "==", "live").limit(12).get();
     if (liveSnap.size >= 10) {
       notify("warn", "Limit erreicht", "Aktuell sind 10 Streams live. Bitte später erneut versuchen.", 4500);
+      currentStreamState = STREAM_STATE.OFFLINE;
       return;
     }
 
@@ -491,6 +609,7 @@
       displayMedia = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
     } catch (_) {
       notify("error", "Abgebrochen", "Screen Capture wurde nicht gestartet.", 3800);
+      currentStreamState = STREAM_STATE.OFFLINE;
       return;
     }
 
@@ -506,6 +625,7 @@
 
     localStream = new MediaStream(tracks);
     isBroadcasting = true;
+    currentStreamState = STREAM_STATE.LIVE;
 
     setStageEmpty(false);
     setStageVideoStream(localStream);
@@ -525,7 +645,18 @@
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
 
-    setStageMeta({ title, sub: "Du bist live.", category: getCategoryLabel(category), streamer: profileName, status: "Live" });
+    setStageMeta({ 
+      title, 
+      sub: "Du bist live.", 
+      category: getCategoryLabel(category), 
+      streamer: profileName, 
+      status: "Live" 
+    });
+
+    if (btnStartStream) {
+      btnStartStream.innerHTML = '<i class="fa-solid fa-stop" aria-hidden="true"></i> Stream beenden';
+      btnStartStream.classList.add("is-live");
+    }
 
     displayMedia?.getVideoTracks?.()?.[0]?.addEventListener?.("ended", () => {
       stopBroadcast().catch(() => {});
@@ -603,7 +734,93 @@
     });
   }
 
+  // Fullscreen handling
+  function toggleFullscreen() {
+    const host = document.querySelector(".streaming-player");
+    if (!host) return;
+
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      host.requestFullscreen().catch(() => {});
+    }
+  }
+
+  function onFullscreenChange() {
+    isFullscreen = !!document.fullscreenElement;
+    updateFullscreenButton();
+    
+    const player = document.querySelector(".streaming-player");
+    if (player) {
+      player.classList.toggle("is-fullscreen", isFullscreen);
+    }
+    
+    // Show/hide exit fullscreen overlay button
+    const exitBtn = document.getElementById("btnExitFullscreen");
+    if (exitBtn) {
+      exitBtn.hidden = !isFullscreen;
+    }
+  }
+
+  // Cinema mode
+  function toggleCinema() {
+    isCinema = !isCinema;
+    document.body.classList.toggle("cinema-mode", isCinema);
+    if (btnStageCinema) {
+      btnStageCinema.setAttribute("aria-pressed", String(isCinema));
+      btnStageCinema.classList.toggle("is-active", isCinema);
+    }
+  }
+
+  // Volume handling
+  function toggleMute() {
+    isStageMuted = !isStageMuted;
+    if (stageVideo) {
+      stageVideo.muted = isStageMuted;
+      stageVideo.volume = isStageMuted ? 0 : stageVolume;
+    }
+    if (btnStageMute) {
+      btnStageMute.classList.toggle("is-active", isStageMuted);
+    }
+    updateVolumeIcon();
+  }
+
+  function setVolume(value) {
+    stageVolume = Math.max(0, Math.min(1, value));
+    if (stageVideo) {
+      stageVideo.volume = stageVolume;
+      if (stageVolume > 0 && isStageMuted) {
+        isStageMuted = false;
+        if (btnStageMute) btnStageMute.classList.remove("is-active");
+      }
+    }
+    if (volumeSlider) {
+      volumeSlider.value = stageVolume;
+    }
+    updateVolumeIcon();
+    
+    try {
+      localStorage.setItem("echtlucky:streaming:volume", String(stageVolume));
+    } catch (_) {}
+  }
+
+  function togglePlay() {
+    if (!stageVideo) return;
+    
+    if (stageVideo.paused) {
+      stageVideo.play().then(() => {
+        isStagePlaying = true;
+        updatePlayButton();
+      }).catch(() => {});
+    } else {
+      stageVideo.pause();
+      isStagePlaying = false;
+      updatePlayButton();
+    }
+  }
+
   function wireControls() {
+    // Category filters
     document.querySelectorAll("[data-category]").forEach((btn) => {
       btn.addEventListener("click", () => {
         activeCategory = btn.dataset.category || "all";
@@ -612,11 +829,13 @@
       });
     });
 
+    // Search
     streamSearchInput?.addEventListener("input", (e) => {
       searchQ = String(e.target.value || "").trim();
       refreshStreamListUI();
     });
 
+    // Start/Stop stream
     btnStartStream?.addEventListener("click", async () => {
       if (isBroadcasting) {
         const ok = await window.echtluckyModal?.confirm?.({
@@ -628,37 +847,53 @@
         });
         if (!ok) return;
         await stopBroadcast();
-        btnStartStream.textContent = "Stream starten";
         return;
       }
       await startBroadcastFlow();
-      if (isBroadcasting) btnStartStream.textContent = "Stream beenden";
     });
 
-    btnStageMute?.addEventListener("click", () => {
-      isStageMuted = !isStageMuted;
-      if (stageVideo) {
-        stageVideo.muted = isStageMuted;
-        stageVideo.volume = isStageMuted ? 0 : 0.6;
+    // Player controls
+    btnStageMute?.addEventListener("click", toggleMute);
+    
+    btnStagePlay?.addEventListener("click", togglePlay);
+    
+    btnStageVolume?.addEventListener("click", () => {
+      const slider = document.getElementById("volumeSliderContainer");
+      if (slider) {
+        slider.classList.toggle("is-visible");
       }
-      btnStageMute?.classList?.toggle?.("is-active", isStageMuted);
+    });
+    
+    volumeSlider?.addEventListener("input", (e) => {
+      setVolume(parseFloat(e.target.value));
+    });
+    
+    btnStageFullscreen?.addEventListener("click", toggleFullscreen);
+    
+    btnStageCinema?.addEventListener("click", toggleCinema);
+
+    // Fullscreen change events
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+    document.addEventListener("mozfullscreenchange", onFullscreenChange);
+    document.addEventListener("MSFullscreenChange", onFullscreenChange);
+
+    // ESC key for exiting fullscreen
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && isFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
     });
 
-    btnStageFullscreen?.addEventListener("click", () => {
-      const host = document.querySelector(".streaming-player");
-      if (!host) return;
-      const go = async () => {
-        try {
-          if (document.fullscreenElement) await document.exitFullscreen();
-          else await host.requestFullscreen();
-        } catch (_) {}
-      };
-      go();
-    });
-
+    // Video click to toggle play
+    stageVideo?.addEventListener("click", togglePlay);
+    
+    // Before unload cleanup
     window.addEventListener("beforeunload", () => {
       try {
-        if (isBroadcasting) db?.collection("streams")?.doc?.(selectedStreamId)?.set?.({ status: "ended" }, { merge: true });
+        if (isBroadcasting) {
+          db?.collection("streams")?.doc?.(selectedStreamId)?.set?.({ status: "ended" }, { merge: true });
+        }
       } catch (_) {}
     });
   }
@@ -698,12 +933,31 @@
     await waitForFirebase();
     if (!auth || !db || !firebase) return;
 
+    // Load saved volume
+    try {
+      const savedVol = localStorage.getItem("echtlucky:streaming:volume");
+      if (savedVol !== null) {
+        stageVolume = parseFloat(savedVol);
+        if (volumeSlider) volumeSlider.value = stageVolume;
+      }
+    } catch (_) {}
+
     wireControls();
     wireStreamListSelection();
     startStreamsFeed();
 
     setStageEmpty(true);
-    setStageMeta({ title: "Kein Stream ausgewählt", sub: "Wähle links einen Stream aus.", category: "—", streamer: "—", status: "—" });
+    setStageMeta({ 
+      title: "Kein Stream ausgewählt", 
+      sub: "Wähle links einen Stream aus.", 
+      category: "—", 
+      streamer: "—", 
+      status: "—" 
+    });
+    
+    updateVolumeIcon();
+    updatePlayButton();
+    updateFullscreenButton();
 
     auth.onAuthStateChanged(() => {});
   }
