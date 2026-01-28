@@ -203,40 +203,56 @@ main{ flex:1; }
 }
 
 
-.header-left{ display:flex; align-items:center; gap: .9rem; }
+/* HEADER LEFT */
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
 
+/* LOGO (ALT / GRÜN) */
 .logo{
   color: var(--accent);
   font-weight: 860;
   font-size: 1.8rem;
-  letter-spacing:-0.9px;
-  text-decoration:none;
+  letter-spacing: -0.9px;
+  text-decoration: none;
   text-shadow: 0 0 12px rgba(0,255,136,0.18);
-  user-select:none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
 }
 
-.red-dot-link{
+/* STREAMING DOT LINK */
+.streaming-indicator{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
+
+  width: 34px;
+  height: 34px;
+
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+
+  background: rgba(0,0,0,0.45);
+  text-decoration: none;
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.red-dot-link:hover {
-  transform: scale(1.1);
+.streaming-indicator:hover{
+  transform: scale(1.08);
+  box-shadow: 0 0 14px rgba(0,255,136,0.35);
 }
 
-.red-dot-large{
-  width: 14px;
-  height: 14px;
+/* RED STREAMING DOT */
+.streaming-dot{
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #ff3366;
-  display: inline-block;
-  box-shadow: 0 0 8px rgba(255,51,102,0.6);
-  animation: pulse-red 1.8s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(255,51,102,0.6);
+  animation: pulse-red 1.6s ease-in-out infinite;
 }
 
 @keyframes pulse-red {
