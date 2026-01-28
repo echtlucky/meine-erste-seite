@@ -75,6 +75,9 @@
                 <button class="icon-btn" id="btnStageMute" type="button" aria-label="Mute">
                   <i class="fa-solid fa-volume-xmark" aria-hidden="true"></i>
                 </button>
+                <button class="icon-btn" id="btnStageCinema" type="button" aria-label="Kino Modus" aria-pressed="false">
+                  <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
+                </button>
                 <button class="icon-btn" id="btnStageFullscreen" type="button" aria-label="Vollbild">
                   <i class="fa-solid fa-expand" aria-hidden="true"></i>
                 </button>
@@ -86,6 +89,13 @@
               <div class="streaming-player__empty" id="stageEmpty">
                 <div class="streaming-empty__title">Streaming</div>
                 <div class="streaming-empty__sub">Wähle einen Stream oder starte deinen eigenen.</div>
+              </div>
+              <div class="streaming-mini-chat" id="streamMiniChat" aria-label="Streamer Chat Overlay" hidden>
+                <div class="streaming-mini-chat__head">
+                  <span class="streaming-mini-chat__title">Chat</span>
+                  <span class="streaming-mini-chat__pill">Live</span>
+                </div>
+                <div class="streaming-mini-chat__list" id="miniChatList"></div>
               </div>
             </div>
 
@@ -104,16 +114,29 @@
               </div>
             </div>
           </div>
+        </section>
 
-          <div class="streaming-chat-card" aria-label="Zuschauer-Chat">
-            <div class="streaming-chat-head">
-              <div class="streaming-chat-title">Chat</div>
-              <div class="streaming-chat-sub">Vorbereitet</div>
+        <section class="streaming-chat-card" id="streamChatCard" aria-label="Live Chat">
+          <div class="streaming-chat-head">
+            <div>
+              <div class="streaming-chat-title">Live Chat</div>
+              <div class="streaming-chat-sub" id="streamChatSub">Wähle einen Stream.</div>
             </div>
-            <div class="streaming-chat-body">
-              <div class="empty-state">
-                <p>Chat wird in dieser Version vorbereitet.</p>
-              </div>
+          </div>
+          <div class="streaming-chat-body">
+            <div class="streaming-chat-messages" id="streamChatMessages" aria-live="polite"></div>
+            <div class="streaming-chat-composer">
+              <input
+                id="streamChatInput"
+                type="text"
+                placeholder="Nachricht schreiben…"
+                autocomplete="off"
+                aria-label="Chat Nachricht"
+                disabled
+              />
+              <button class="btn btn-secondary" id="btnStreamChatSend" type="button" disabled>
+                Senden
+              </button>
             </div>
           </div>
         </section>
@@ -139,4 +162,3 @@
     <script src="js/streaming.js"></script>
   </body>
 </html>
-

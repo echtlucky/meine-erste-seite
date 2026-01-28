@@ -19,6 +19,15 @@
   const streamStatus = el("streamStatus");
   const btnStageMute = el("btnStageMute");
   const btnStageFullscreen = el("btnStageFullscreen");
+  const btnStageCinema = el("btnStageCinema");
+
+  const streamChatCard = el("streamChatCard");
+  const streamChatSub = el("streamChatSub");
+  const streamChatMessages = el("streamChatMessages");
+  const streamChatInput = el("streamChatInput");
+  const btnStreamChatSend = el("btnStreamChatSend");
+  const streamMiniChat = el("streamMiniChat");
+  const miniChatList = el("miniChatList");
 
   let activeCategory = "all";
   let searchQ = "";
@@ -28,6 +37,7 @@
   let streamsUnsub = null;
   let selectedStreamUnsub = null;
   let viewersUnsub = null;
+  let chatUnsub = null;
   let viewerDocUnsub = null;
   let viewerCandidatesUnsub = null;
   let broadcasterCandidatesUnsub = null;
@@ -35,6 +45,9 @@
   let localStream = null;
   let isBroadcasting = false;
   let isStageMuted = true;
+  let isCinema = false;
+  let myDisplayNameCached = "";
+  let chatSeq = 0;
 
   const peerConnections = new Map(); // viewerUid -> RTCPeerConnection
   let viewerPc = null;

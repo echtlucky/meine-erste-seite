@@ -269,6 +269,7 @@
   let screenTrack = null;
   let screenAudioSourceNode = null;
   let screenShareDismissed = false;
+  let screenShareInFlight = false;
   let btnOpenScreenShare = null;
   const videoSenders = new Map(); // remoteUid -> RTCRtpSender
   let isMicMuted = false;
@@ -476,15 +477,26 @@
   function showScreenShareArea(show) {
     if (!screenShareArea) return;
     screenShareArea.hidden = !show;
-
-    if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
-      document.body.classList.toggle("modal-open", !!show);
-      if (show) {
-        try { btnCloseScreenShare?.focus?.(); } catch {}
-      }
+    if (show) {
+      try { btnCloseScreenShare?.focus?.(); } catch {}
     }
 
     updateOpenScreenShareButton();
+  }
+
+  async function applyTrackConstraintsSafe(track, constraints, timeoutMs) {
+    if (!track?.applyConstraints) return;
+    const ms = Number(timeoutMs || 0) || 0;
+    try {
+      if (ms <= 0) {
+        await track.applyConstraints(constraints);
+        return;
+      }
+      await Promise.race([
+        track.applyConstraints(constraints),
+        new Promise((resolve) => setTimeout(resolve, ms))
+      ]);
+    } catch (_) {}
   }
 
   function ensureOpenScreenShareButton() {
@@ -551,8 +563,12 @@
 
   async function startScreenShare() {
     if (!currentVoiceCall) return;
+    if (screenShareInFlight) return;
+    if (screenTrack) return;
 
     try {
+      screenShareInFlight = true;
+      if (btnShareScreen) btnShareScreen.disabled = true;
       if (!navigator.mediaDevices?.getDisplayMedia) {
         window.notify?.show({
           type: "error",
@@ -590,11 +606,11 @@
       try { screenTrack.contentHint = "detail"; } catch {}
 
       try {
-        await screenTrack.applyConstraints({
-          width: preset.width,
-          height: preset.height,
-          frameRate: 30
-        });
+        await applyTrackConstraintsSafe(
+          screenTrack,
+          { width: preset.width, height: preset.height, frameRate: 30 },
+          900
+        );
       } catch {}
 
       const displayAudioTrack = screenStream.getAudioTracks()?.[0] || null;
@@ -651,6 +667,9 @@
         message: "Konnte nicht starten (Berechtigung abgelehnt?).",
         duration: 4500
       });
+    } finally {
+      screenShareInFlight = false;
+      if (btnShareScreen) btnShareScreen.disabled = false;
     }
   }
 
@@ -911,6 +930,28 @@
       const data = snap.data() || {};
       const status = String(data.status || "");
       const participants = Array.isArray(data.participants) ? data.participants : [];
+
+      if (
+        kind === CALL_KIND_DIRECT &&
+        currentVoiceCall &&
+        currentVoiceCall.kind === CALL_KIND_DIRECT &&
+        currentVoiceCall.callId === callRef.id &&
+        auth?.currentUser?.uid
+      ) {
+        const myUid = auth.currentUser.uid;
+        const initiatorUid = String(data.initiator || "").trim();
+        const toUid = String(data.to || "").trim();
+
+        const isInitiator = initiatorUid && initiatorUid === myUid;
+        if (isInitiator) currentVoiceCall.isInitiator = true;
+
+        const peerUid = String(currentVoiceCall.peerUid || (isInitiator ? toUid : initiatorUid) || "").trim();
+        if (peerUid) currentVoiceCall.peerUid = peerUid;
+
+        if (status === "active" && currentVoiceCall.isInitiator && peerUid && participants.includes(peerUid)) {
+          createAndSendOffer(callRef, peerUid).catch(() => {});
+        }
+      }
 
       if (status === "ended") {
         window.notify?.show({
@@ -1318,13 +1359,23 @@
       }, { merge: true });
 
       const callDoc = await callRef.get();
-      const existingParticipants = callDoc.data()?.participants || [];
+      const callData = callDoc.exists ? (callDoc.data() || {}) : {};
+      const myUid = auth.currentUser.uid;
+      const initiatorUid = String(callData.initiator || "").trim();
+      const toUid = String(callData.to || "").trim();
 
-      for (const participantUid of existingParticipants) {
-        if (participantUid !== auth.currentUser.uid) {
-          currentVoiceCall.peerUid = participantUid;
-          await createAndSendOffer(callRef, participantUid);
-        }
+      const fallbackPeer = Array.isArray(callData.participants)
+        ? callData.participants.find((u) => u && u !== myUid) || ""
+        : "";
+
+      const isInitiator = initiatorUid && initiatorUid === myUid;
+      const peerUid = (isInitiator ? toUid : initiatorUid) || fallbackPeer || "";
+
+      currentVoiceCall.isInitiator = !!isInitiator;
+      currentVoiceCall.peerUid = peerUid || null;
+
+      if (currentVoiceCall.isInitiator && peerUid) {
+        await createAndSendOffer(callRef, peerUid);
       }
 
       listenForOffers(callRef);
@@ -1382,26 +1433,21 @@
 
       if (currentVoiceCall) {
         const callRef = getCallRefFromActiveCall();
+        const isDirect = currentVoiceCall.kind === CALL_KIND_DIRECT;
+        const myUid = auth?.currentUser?.uid || "";
 
         try {
-          if (currentVoiceCall.isInitiator) {
-            if (callRef) {
-              await callRef.set({
+          if (callRef && (isDirect || currentVoiceCall.isInitiator)) {
+            await callRef.set(
+              {
                 status: "ended",
                 endedAt: new Date()
-              }, { merge: true });
-            }
+              },
+              { merge: true }
+            );
           }
 
-          if (callRef && auth?.currentUser?.uid) {
-            await callRef.set({
-              participants: window.firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid)
-            }, { merge: true });
-          }
-
-          if (currentVoiceCall.isInitiator) {
-            if (!callRef) return;
-
+          if (callRef && currentVoiceCall.isInitiator) {
             const offerSnap = await callRef.collection("offers").get();
             for (const doc of offerSnap.docs) {
               await doc.ref.delete();
@@ -1418,6 +1464,13 @@
             }
 
             await callRef.delete();
+          } else if (callRef && myUid) {
+            await callRef.set(
+              {
+                participants: window.firebase.firestore.FieldValue.arrayRemove(myUid)
+              },
+              { merge: true }
+            );
           }
         } catch (error) {
         }
@@ -1632,6 +1685,7 @@
           return;
         }
 
+        if (screenShareInFlight) return;
         if (screenTrack) {
           stopScreenShare();
         } else {
@@ -1660,13 +1714,11 @@
       shareQualitySelect.addEventListener("change", async () => {
         if (!screenTrack) return;
         const preset = getSharePreset();
-        try {
-          await screenTrack.applyConstraints({
-            width: preset.width,
-            height: preset.height,
-            frameRate: 30
-          });
-        } catch {}
+        await applyTrackConstraintsSafe(
+          screenTrack,
+          { width: preset.width, height: preset.height, frameRate: 30 },
+          800
+        );
 
         peerConnections.forEach((pc, remoteUid) => {
           const sender = videoSenders.get(remoteUid);

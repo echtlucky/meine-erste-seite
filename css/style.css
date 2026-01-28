@@ -66,12 +66,27 @@ body > #galaxy-bg-layer{
   pointer-events: none;
   overflow: hidden;
   background: var(--bg);
+  contain: paint;
 }
 
 body > #galaxy-bg-layer > #galaxy-bg{
   width: 100%;
   height: 100%;
   display: block;
+  transform: scale(1.02);
+  transform-origin: center;
+}
+
+body > #galaxy-bg-layer::after{
+  content: "";
+  position: absolute;
+  inset: -2px;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 900px at 50% 40%, rgba(0,0,0,0) 0%, rgba(0,10,6,0.20) 55%, rgba(0,10,6,0.75) 100%),
+    radial-gradient(900px 700px at 15% 85%, rgba(0,255,136,0.03) 0%, rgba(0,0,0,0) 58%),
+    radial-gradient(900px 700px at 85% 20%, rgba(0,255,136,0.025) 0%, rgba(0,0,0,0) 58%);
+  mix-blend-mode: multiply;
 }
 
 html.galaxy-css body > #galaxy-bg-layer{
@@ -325,7 +340,7 @@ main{ flex:1; }
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent);
+  background: #ff3366;
   display: inline-block;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -333,11 +348,11 @@ main{ flex:1; }
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
-    box-shadow: 0 0 4px rgba(0,255,136,0.55);
+    box-shadow: 0 0 4px rgba(255,51,102,0.55);
   }
   50% {
     opacity: 0.6;
-    box-shadow: 0 0 8px rgba(0,255,136,0.35);
+    box-shadow: 0 0 8px rgba(255,51,102,0.35);
   }
 }
 
@@ -384,6 +399,12 @@ main{ flex:1; }
 }
 
 .dropdown-menu.show{ display:block; }
+
+.nav-dropdown{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
 
 
 .nav-dropdown:focus-within .dropdown-menu{

@@ -728,6 +728,7 @@ html.connect-compact .connect-chat-area {
   color: #ffd54a;
 }
 
+#voiceStatus[data-state="in_call"],
 #voiceStatus[data-state="active"] {
   color: #00ff88;
 }

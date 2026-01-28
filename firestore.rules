@@ -236,6 +236,29 @@ service cloud.firestore {
           allow delete: if request.auth != null && (request.auth.uid == streamOwnerUid(streamId) || isStaff());
         }
       }
+
+      match /chat/{messageId} {
+        allow read: if true;
+
+        allow create: if request.auth != null &&
+          request.resource.data.keys().hasOnly(['authorUid','authorName','text','createdAt','createdAtClient']) &&
+          request.resource.data.authorUid == request.auth.uid &&
+          request.resource.data.authorName is string &&
+          request.resource.data.authorName.size() >= 1 &&
+          request.resource.data.authorName.size() <= 40 &&
+          request.resource.data.text is string &&
+          request.resource.data.text.size() >= 1 &&
+          request.resource.data.text.size() <= 400;
+
+        allow update: if false;
+
+        allow delete: if request.auth != null &&
+          (
+            isAdmin() ||
+            request.auth.uid == streamOwnerUid(streamId) ||
+            resource.data.authorUid == request.auth.uid
+          );
+      }
     }
 
     match /tickets/{ticketId} {
