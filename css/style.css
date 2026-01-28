@@ -132,7 +132,7 @@ main{ flex:1; }
   z-index: 100000;
   overflow: visible;
 
-  background: rgba(0,0,0,0.72);
+  background: rgba(24, 24, 24, 0.72);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-soft);
   box-shadow: 0 10px 32px var(--shadow-1);
