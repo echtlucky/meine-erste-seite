@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Streaming | echtlcky</title>
+    <title>Streaming Platform | echtlcky</title>
 
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/components.css" />
@@ -15,7 +15,8 @@
     />
   </head>
 
-  <body class="page-transition streaming-page">
+  <body class="streaming-platform">
+    <!-- Galaxy Background -->
     <div id="galaxy-bg-layer">
       <svg id="galaxy-bg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
         <defs>
@@ -38,167 +39,694 @@
         <circle cx="1535" cy="216" r="400" fill="url(#glow3)"/>
       </svg>
     </div>
-    <header class="app-topbar">
-      <div id="header-placeholder"></div>
-    </header>
 
-    <main class="streaming-shell" aria-label="Streaming">
-      <section class="streaming-layout" aria-label="Streaming Layout">
-        <aside class="streaming-sidebar" aria-label="Streams">
-          <div class="streaming-sidebar__head">
-            <div class="streaming-filter">
-              <button class="pill is-active" type="button" data-category="all">
-                Alle
-              </button>
-              <button class="pill" type="button" data-category="just_chatting">
-                Just Chatting
-              </button>
-              <button class="pill" type="button" data-category="gaming">Gaming</button>
-            </div>
-
-            <div class="streaming-search">
-              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-              <input
-                id="streamSearchInput"
-                type="search"
-                placeholder="Streams suchen…"
-                aria-label="Streams suchen"
-                autocomplete="off"
-              />
-            </div>
+    <!-- Top Navigation Bar -->
+    <nav class="stream-topbar">
+      <div class="stream-topbar__left">
+        <a href="index.html" class="stream-back-btn">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Zurück zu Home</span>
+        </a>
+      </div>
+      
+      <div class="stream-topbar__center">
+        <div class="stream-brand">
+          <span class="stream-brand__dot"></span>
+          <span class="stream-brand__text">Streaming</span>
+        </div>
+      </div>
+      
+      <div class="stream-topbar__right">
+        <!-- Profile Dropdown -->
+        <div class="stream-profile-dropdown" id="profileDropdown">
+          <button class="stream-profile-btn" id="profileBtn" aria-label="Profil">
+            <div class="stream-profile__avatar" id="profileAvatar">U</div>
+            <span class="stream-profile__name" id="profileName">User</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="stream-profile__menu" id="profileMenu" hidden>
+            <a href="account.html" class="profile-menu__item">
+              <i class="fa-solid fa-user"></i>
+              <span>Mein Kanal</span>
+            </a>
+            <a href="#" class="profile-menu__item" id="streamerDashboardLink">
+              <i class="fa-solid fa-dashboard"></i>
+              <span>Streamer Dashboard</span>
+            </a>
+            <a href="#" class="profile-menu__item" id="uploadVideoLink">
+              <i class="fa-solid fa-upload"></i>
+              <span>Video hochladen</span>
+            </a>
+            <div class="profile-menu__divider"></div>
+            <a href="#" class="profile-menu__item" id="settingsLink">
+              <i class="fa-solid fa-gear"></i>
+              <span>Einstellungen</span>
+            </a>
+            <button class="profile-menu__item profile-menu__logout" id="logoutBtn">
+              <i class="fa-solid fa-sign-out-alt"></i>
+              <span>Abmelden</span>
+            </button>
           </div>
+        </div>
+      </div>
+    </nav>
 
-          <div class="streaming-list" id="streamList" aria-live="polite">
-            <div class="empty-state">
-              <p>Lade Streams…</p>
-            </div>
-          </div>
-        </aside>
+    <!-- Main Streaming Layout -->
+    <main class="stream-layout">
+      <!-- View Mode Tabs -->
+      <div class="stream-view-tabs">
+        <button class="view-tab is-active" data-view="watch" id="tabWatch">
+          <i class="fa-solid fa-play"></i>
+          <span>Watch</span>
+        </button>
+        <button class="view-tab" data-view="dashboard" id="tabDashboard">
+          <i class="fa-solid fa-dashboard"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="view-tab" data-view="vods" id="tabVods">
+          <i class="fa-solid fa-video"></i>
+          <span>Videos</span>
+        </button>
+        <button class="view-tab" data-view="studio" id="tabStudio">
+          <i class="fa-solid fa-tower-broadcast"></i>
+          <span>Studio</span>
+        </button>
+      </div>
 
-        <section class="streaming-stage" aria-label="Stream Player">
-          <div class="streaming-player-card">
-            <div class="streaming-player-head">
-              <div class="streaming-player-meta">
-                <div class="streaming-player-title" id="streamTitle">Kein Stream ausgewählt</div>
-                <div class="streaming-player-sub" id="streamSub">Wähle links einen Stream aus.</div>
-              </div>
-
-              <div class="streaming-player-controls" aria-label="Player Controls">
-                <button class="icon-btn" id="btnStagePlay" type="button" aria-label="Play">
-                  <i class="fa-solid fa-play" aria-hidden="true"></i>
-                </button>
+      <!-- WATCH VIEW -->
+      <div class="stream-view is-visible" id="viewWatch">
+        <div class="watch-layout">
+          <!-- Main Stage (Video + Chat) -->
+          <div class="watch-stage-area">
+            <!-- Video Player -->
+            <div class="video-player-container" id="videoPlayerContainer">
+              <div class="video-player" id="videoPlayer">
+                <video id="mainVideo" playsinline muted></video>
                 
-                <div style="position: relative;">
-                  <button class="icon-btn" id="btnStageVolume" type="button" aria-label="Volume">
-                    <i class="fa-solid fa-volume-xmark" aria-hidden="true"></i>
-                  </button>
-                  <div class="volume-slider-container" id="volumeSliderContainer">
-                    <input 
-                      type="range" 
-                      class="volume-slider" 
-                      id="volumeSlider" 
-                      min="0" 
-                      max="1" 
-                      step="0.05" 
-                      value="0.6"
-                      aria-label="Lautstärke"
-                    />
+                <!-- Video Overlay (when empty) -->
+                <div class="video-overlay" id="videoOverlay">
+                  <div class="video-overlay__content">
+                    <div class="video-overlay__icon">
+                      <i class="fa-solid fa-tower-broadcast"></i>
+                    </div>
+                    <h2 class="video-overlay__title">Live Streaming</h2>
+                    <p class="video-overlay__subtitle">Wähle einen Stream oder starte deinen eigenen</p>
+                    <button class="btn btn-primary btn-lg" id="btnStartBroadcast">
+                      <i class="fa-solid fa-tower-broadcast"></i>
+                      Stream starten
+                    </button>
+                    <p class="video-overlay__or">oder</p>
+                    <button class="btn btn-secondary" id="btnGoStudio">
+                      <i class="fa-solid fa-sliders"></i>
+                      Studio öffnen
+                    </button>
                   </div>
                 </div>
-                
-                <button class="icon-btn" id="btnStageMute" type="button" aria-label="Mute">
-                  <i class="fa-solid fa-volume-xmark" aria-hidden="true"></i>
+
+                <!-- Live Badge -->
+                <div class="live-badge" id="liveBadge" hidden>
+                  <span class="live-badge__dot"></span>
+                  <span>LIVE</span>
+                </div>
+
+                <!-- Viewer Count Overlay -->
+                <div class="viewer-count-overlay" id="viewerCountOverlay" hidden>
+                  <i class="fa-solid fa-eye"></i>
+                  <span id="viewerCountDisplay">0</span>
+                </div>
+
+                <!-- Stream Title Overlay -->
+                <div class="stream-title-overlay" id="streamTitleOverlay" hidden>
+                  <h3 id="overlayStreamTitle">Stream Title</h3>
+                  <span id="overlayStreamerName">Streamer</span>
+                </div>
+
+                <!-- Fullscreen Exit Button -->
+                <button class="exit-fullscreen-btn" id="btnExitFullscreen" hidden>
+                  <i class="fa-solid fa-compress"></i>
                 </button>
-                
-                <button class="icon-btn" id="btnStageCinema" type="button" aria-label="Kino Modus" aria-pressed="false">
-                  <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
+
+                <!-- Mini Chat Overlay -->
+                <div class="mini-chat-overlay" id="miniChatOverlay" hidden>
+                  <div class="mini-chat__header">
+                    <span>Chat</span>
+                    <button class="mini-chat__close" id="btnCloseMiniChat">
+                      <i class="fa-solid fa-times"></i>
+                    </button>
+                  </div>
+                  <div class="mini-chat__messages" id="miniChatMessages"></div>
+                </div>
+
+                <!-- Video Controls -->
+                <div class="video-controls" id="videoControls">
+                  <div class="video-controls__progress">
+                    <input type="range" class="seek-slider" id="seekSlider" min="0" max="100" value="0">
+                  </div>
+                  <div class="video-controls__row">
+                    <div class="video-controls__left">
+                      <button class="ctrl-btn" id="btnPlayPause" aria-label="Play/Pause">
+                        <i class="fa-solid fa-play"></i>
+                      </button>
+                      <button class="ctrl-btn" id="btnVolume" aria-label="Volume">
+                        <i class="fa-solid fa-volume-up"></i>
+                      </button>
+                      <div class="volume-control"> id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                      </div>
+                      <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+                    </div>
+                    <div class="video-controls__right">
+                      <button class="ctrl-btn" id="btnPlaybackSpeed" aria-label="Playback Speed">
+                        <i class="fa-solid fa-clock"></i>
+                      </button>
+                      <button class="ctrl-btn" id="btnQuality" aria-label="Quality">
+                        <i class="fa-solid fa-cog"></i>
+                      </button>
+                      <button class="ctrl-btn" id="btnToggleMiniChat" aria-label="Mini Chat">
+                        <i class="fa-solid fa-comments"></i>
+                      </button>
+                      <button class="ctrl-btn" id="btnTheaterMode" aria-label="Theater Mode">
+                        <i class="fa-solid fa-columns"></i>
+                      </button>
+                      <button class="ctrl-btn" id="btnFullscreen" aria-label="Fullscreen">
+                        <i class="fa-solid fa-expand"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stream Info Bar -->
+            <div class="stream-info-bar" id="streamInfoBar">
+              <div class="stream-info-main">
+                <h1 class="stream-title" id="currentStreamTitle">Stream auswählen</h1>
+                <div class="stream-meta">
+                  <span class="stream-category" id="currentCategory">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <span>—</span>
+                  </span>
+                  <span class="stream-viewers" id="currentViewers">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>0 Zuschauer</span>
+                  </span>
+                  <span class="stream-runtime" id="currentRuntime">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>—</span>
+                  </span>
+                </div>
+              </div>
+              <div class="stream-actions">
+                <button class="action-btn" id="btnFollow" title="Folgen">
+                  <i class="fa-solid fa-heart"></i>
+                  <span>Folgen</span>
                 </button>
-                
-                <button class="icon-btn" id="btnStageFullscreen" type="button" aria-label="Vollbild">
-                  <i class="fa-solid fa-expand" aria-hidden="true"></i>
+                <button class="action-btn" id="btnSubscribe" title="Abonnieren">
+                  <i class="fa-solid fa-star"></i>
+                  <span>Abonnieren</span>
+                </button>
+                <button class="action-btn" id="btnShare" title="Teilen">
+                  <i class="fa-solid fa-share"></i>
+                  <span>Teilen</span>
                 </button>
               </div>
             </div>
 
-            <div class="streaming-player" id="streamingPlayer">
-              <video id="stageVideo" playsinline autoplay muted></video>
-              
-              <div class="streaming-player__empty" id="stageEmpty">
-                <div>
-                  <div class="streaming-empty__title">Streaming</div>
-                  <div class="streaming-empty__sub">Wähle einen Stream oder starte deinen eigenen.</div>
-                  <button class="btn btn-primary" id="btnStartStream" type="button" style="margin-top: 20px;">
-                    <i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> Stream starten
+            <!-- Reactions Bar -->
+            <div class="reactions-bar" id="reactionsBar" hidden>
+              <button class="reaction-btn" data-reaction="🔥">🔥</button>
+              <button class="reaction-btn" data-reaction="❤️">❤️</button>
+              <button class="reaction-btn" data-reaction="😂">😂</button>
+              <button class="reaction-btn" data-reaction="👏">👏</button>
+              <button class="reaction-btn" data-reaction="🎉">🎉</button>
+              <button class="reaction-btn" data-reaction="😮">😮</button>
+              <button class="reaction-btn" data-reaction="😢">😢</button>
+            </div>
+          </div>
+
+          <!-- Chat Panel (Right) -->
+          <aside class="chat-panel" id="chatPanel">
+            <div class="chat-panel__header">
+              <div class="chat-panel__tabs">
+                <button class="chat-tab is-active" data-chat="live" id="chatTabLive">
+                  <i class="fa-solid fa-comments"></i>
+                  <span>Live Chat</span>
+                </button>
+                <button class="chat-tab" data-chat="stats" id="chatTabStats">
+                  <i class="fa-solid fa-chart-line"></i>
+                  <span>Statistiken</span>
+                </button>
+              </div>
+              <button class="chat-panel__toggle" id="btnToggleChat" aria-label="Chat ausblenden">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <!-- Live Chat View -->
+            <div class="chat-view is-visible" id="chatViewLive">
+              <!-- Chat Stats -->
+              <div class="chat-stats" id="chatStatsPanel" hidden>
+                <div class="stat-card">
+                  <div class="stat-value" id="statViewers">0</div>
+                  <div class="stat-label">Aktuelle Zuschauer</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="statPeak">0</div>
+                  <div class="stat-label">Peak</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="statChatRate">0</div>
+                  <div class="stat-label">Chat/Min</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="statNewFollowers">0</div>
+                  <div class="stat-label">Neue Follower</div>
+                </div>
+              </div>
+
+              <!-- Chat Messages -->
+              <div class="chat-messages" id="chatMessages">
+                <div class="chat-empty">
+                  <i class="fa-solid fa-comments"></i>
+                  <p>Wähle einen Stream, um den Chat zu sehen</p>
+                </div>
+              </div>
+
+              <!-- Pinned Message -->
+              <div class="pinned-message" id="pinnedMessage" hidden>
+                <div class="pinned-message__icon">
+                  <i class="fa-solid fa-thumbtack"></i>
+                </div>
+                <div class="pinned-message__content">
+                  <div class="pinned-message__author" id="pinnedAuthor">Streamer</div>
+                  <div class="pinned-message__text" id="pinnedText">Gepinnte Nachricht</div>
+                </div>
+                <button class="pinned-message__close" id="btnClosePinned">
+                  <i class="fa-solid fa-times"></i>
+                </button>
+              </div>
+
+              <!-- Chat Input -->
+              <div class="chat-input-area">
+                <div class="chat-input-wrapper">
+                  <input type="text" class="chat-input" id="chatInput" placeholder="Nachricht senden..." disabled>
+                  <button class="chat-emoji-btn" id="btnEmojiPicker" aria-label="Emoji">
+                    <i class="fa-regular fa-smile"></i>
+                  </button>
+                  <button class="chat-send-btn" id="btnChatSend" disabled aria-label="Senden">
+                    <i class="fa-solid fa-paper-plane"></i>
                   </button>
                 </div>
               </div>
-              
-              <button class="exit-fullscreen-btn" id="btnExitFullscreen" type="button" aria-label="Vollbild verlassen" hidden>
-                <i class="fa-solid fa-compress" aria-hidden="true"></i>
-              </button>
-              
-              <div class="streaming-mini-chat" id="streamMiniChat" aria-label="Streamer Chat Overlay" hidden>
-                <div class="streaming-mini-chat__head">
-                  <span class="streaming-mini-chat__title">Chat</span>
-                  <span class="streaming-mini-chat__pill">Live</span>
+            </div>
+          </aside>
+        </div>
+
+        <!-- Stream List Sidebar -->
+        <aside class="stream-list-sidebar" id="streamListSidebar">
+          <div class="sidebar-header">
+            <h3>Live Streams</h3>
+            <div class="stream-filter">
+              <button class="filter-pill is-active" data-filter="all">Alle</button>
+              <button class="filter-pill" data-filter="gaming">Gaming</button>
+              <button class="filter-pill" data-filter="just_chatting">Just Chatting</button>
+              <button class="filter-pill" data-filter="creative">Creative</button>
+            </div>
+          </div>
+          <div class="stream-list" id="streamList">
+            <!-- Populated by JS -->
+          </div>
+        </aside>
+      </div>
+
+      <!-- DASHBOARD VIEW -->
+      <div class="stream-view" id="viewDashboard">
+        <div class="dashboard-layout">
+          <div class="dashboard-header">
+            <h1>Streamer Dashboard</h1>
+            <button class="btn btn-primary" id="btnGoLive">
+              <i class="fa-solid fa-tower-broadcast"></i>
+              Jetzt live gehen
+            </button>
+          </div>
+
+          <!-- Dashboard Stats -->
+          <div class="dashboard-stats">
+            <div class="dashboard-stat-card">
+              <div class="stat-icon stat-icon--primary">
+                <i class="fa-solid fa-eye"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="dashTotalViews">0</div>
+                <div class="stat-label">Gesamtaufrufe</div>
+                <div class="stat-change stat-change--up">
+                  <i class="fa-solid fa-arrow-up"></i>
+                  <span>+12%</span>
                 </div>
-                <div class="streaming-mini-chat__list" id="miniChatList"></div>
               </div>
             </div>
-
-            <div class="streaming-player-foot">
-              <div class="streaming-stat">
-                <span class="streaming-stat__label">Kategorie</span>
-                <span class="streaming-stat__value" id="streamCategory">—</span>
+            <div class="dashboard-stat-card">
+              <div class="stat-icon stat-icon--secondary">
+                <i class="fa-solid fa-heart"></i>
               </div>
-              <div class="streaming-stat">
-                <span class="streaming-stat__label">Streamer</span>
-                <span class="streaming-stat__value" id="streamerName">—</span>
+              <div class="stat-content">
+                <div class="stat-value" id="dashTotalLikes">0</div>
+                <div class="stat-label">Likes</div>
+                <div class="stat-change stat-change--up">
+                  <i class="fa-solid fa-arrow-up"></i>
+                  <span>+8%</span>
+                </div>
               </div>
-              <div class="streaming-stat">
-                <span class="streaming-stat__label">Status</span>
-                <span class="streaming-stat__value" id="streamStatus">—</span>
+            </div>
+            <div class="dashboard-stat-card">
+              <div class="stat-icon stat-icon--tertiary">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="dashFollowers">0</div>
+                <div class="stat-label">Follower</div>
+                <div class="stat-change stat-change--up">
+                  <i class="fa-solid fa-arrow-up"></i>
+                  <span>+5%</span>
+                </div>
+              </div>
+            </div>
+            <div class="dashboard-stat-card">
+              <div class="stat-icon stat-icon--quaternary">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="dashWatchTime">0h</div>
+                <div class="stat-label">Watch Time</div>
+                <div class="stat-change stat-change--neutral">
+                  <i class="fa-solid fa-minus"></i>
+                  <span>0%</span>
+                </div>
               </div>
             </div>
           </div>
-        </section>
 
-        <section class="streaming-chat-card" id="streamChatCard" aria-label="Live Chat">
-          <div class="streaming-chat-head">
-            <div>
-              <div class="streaming-chat-title">Live Chat</div>
-              <div class="streaming-chat-sub" id="streamChatSub">Wähle einen Stream.</div>
-            </div>
-          </div>
-          <div class="streaming-chat-body">
-            <div class="streaming-chat-messages" id="streamChatMessages" aria-live="polite">
-              <div class="empty-state">
-                <p>Chat wird geladen…</p>
+          <!-- Dashboard Sections -->
+          <div class="dashboard-sections">
+            <!-- Recent Streams -->
+            <section class="dashboard-section">
+              <div class="section-header">
+                <h2>Letzte Streams</h2>
+                <a href="#" class="section-link">Alle anzeigen</a>
               </div>
-            </div>
-            <div class="streaming-chat-composer">
-              <input
-                id="streamChatInput"
-                type="text"
-                placeholder="Nachricht schreiben…"
-                autocomplete="off"
-                aria-label="Chat Nachricht"
-                disabled
-              />
-              <button class="btn btn-secondary" id="btnStreamChatSend" type="button" disabled>
-                Senden
+              <div class="streams-table" id="recentStreamsTable">
+                <div class="table-header">
+                  <span>Titel</span>
+                  <span>Datum</span>
+                  <span>Zuschauer</span>
+                  <span>Peak</span>
+                  <span>Dauer</span>
+                </div>
+                <div class="table-body" id="recentStreamsBody">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </section>
+
+            <!-- Recent VODs -->
+            <section class="dashboard-section">
+              <div class="section-header">
+                <h2>Letzte Videos</h2>
+                <a href="#" class="section-link">Alle anzeigen</a>
+              </div>
+              <div class="vods-grid" id="recentVodsGrid">
+                <!-- Populated by JS -->
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <!-- VODS VIEW -->
+      <div class="stream-view" id="viewVods">
+        <div class="vods-layout">
+          <div class="vods-header">
+            <h1>Meine Videos</h1>
+            <button class="btn btn-primary" id="btnUploadVod">
+              <i class="fa-solid fa-upload"></i>
+              Video hochladen
+            </button>
+          </div>
+
+          <!-- VODs Grid -->
+          <div class="vods-grid" id="vodsGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDIO VIEW -->
+      <div class="stream-view" id="viewStudio">
+        <div class="studio-layout">
+          <div class="studio-header">
+            <h1>Streaming Studio</h1>
+            <div class="studio-actions">
+              <button class="btn btn-secondary" id="btnTestStream">
+                <i class="fa-solid fa-flask"></i>
+                Test
+              </button>
+              <button class="btn btn-primary" id="btnGoLiveStudio">
+                <i class="fa-solid fa-tower-broadcast"></i>
+                Live gehen
               </button>
             </div>
           </div>
-        </section>
-      </section>
+
+          <div class="studio-content">
+            <!-- Preview Area -->
+            <div class="studio-preview">
+              <div class="preview-canvas" id="previewCanvas">
+                <video id="previewVideo" autoplay muted playsinline></video>
+                <div class="preview-overlay" id="previewOverlay">
+                  <i class="fa-solid fa-video"></i>
+                  <span>Kamera Vorschau</span>
+                </div>
+              </div>
+              
+              <!-- Preview Controls -->
+              <div class="preview-controls">
+                <button class="preview-btn" id="btnStartPreview">
+                  <i class="fa-solid fa-play"></i>
+                  <span>Vorschau starten</span>
+                </button>
+                <button class="preview-btn" id="btnStopPreview">
+                  <i class="fa-solid fa-stop"></i>
+                  <span>Stop</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Studio Settings -->
+            <div class="studio-settings">
+              <!-- Stream Settings -->
+              <div class="settings-group">
+                <h3>Stream-Einstellungen</h3>
+                <div class="form-group">
+                  <label for="streamTitleInput">Titel</label>
+                  <input type="text" id="streamTitleInput" placeholder="Stream-Titel eingeben..." maxlength="100">
+                </div>
+                <div class="form-group">
+                  <label for="streamCategorySelect">Kategorie</label>
+                  <select id="streamCategorySelect">
+                    <option value="gaming">Gaming</option>
+                    <option value="just_chatting">Just Chatting</option>
+                    <option value="creative">Creative</option>
+                    <option value="music">Music</option>
+                    <option value="sports">Sports</option>
+                    <option value="esports">Esports</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="streamTagsInput">Tags</label>
+                  <input type="text" id="streamTagsInput" placeholder="Tags eingeben (mit Komma trennen)">
+                </div>
+              </div>
+
+              <!-- Source Selection -->
+              <div class="settings-group">
+                <h3>Video-Quelle</h3>
+                <div class="source-grid">
+                  <button class="source-btn is-active" data-source="camera" id="sourceCamera">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Kamera</span>
+                  </button>
+                  <button class="source-btn" data-source="screen" id="sourceScreen">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Bildschirm</span>
+                  </button>
+                  <button class="source-btn" data-source="game" id="sourceGame">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <span>Spiel</span>
+                  </button>
+                  <button class="source-btn" data-source="image" id="sourceImage">
+                    <i class="fa-solid fa-image"></i>
+                    <span>Bild</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Audio Selection -->
+              <div class="settings-group">
+                <h3>Audio-Quelle</h3>
+                <div class="form-group">
+                  <label for="audioDeviceSelect">Mikrofon</label>
+                  <select id="audioDeviceSelect">
+                    <option value="">Standard</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="desktopAudioSelect">System-Audio</label>
+                  <select id="desktopAudioSelect">
+                    <option value="">Kein</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Scenes -->
+              <div class="settings-group">
+                <h3>Szenen</h3>
+                <div class="scenes-list" id="scenesList">
+                  <div class="scene-item is-active" data-scene="main">
+                    <span class="scene-name">Haupt-Szene</span>
+                    <button class="scene-edit-btn"><i class="fa-solid fa-pencil"></i></button>
+                  </div>
+                  <div class="scene-item" data-scene="brb">
+                    <span class="scene-name">Be right back</span>
+                    <button class="scene-edit-btn"><i class="fa-solid fa-pencil"></i></button>
+                  </div>
+                  <div class="scene-item" data-scene="starting">
+                    <span class="scene-name">Starting Soon</span>
+                    <button class="scene-edit-btn"><i class="fa-solid fa-pencil"></i></button>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btnAddScene">
+                  <i class="fa-solid fa-plus"></i>
+                  Neue Szene
+                </button>
+              </div>
+
+              <!-- Advanced -->
+              <div class="settings-group">
+                <h3>Erweitert</h3>
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="chkRecordLocally" checked>
+                    <span>Lokal aufnehmen</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="chkAutoPublishVod" checked>
+                    <span>Automatisch als VOD veröffentlichen</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="chkEnableR9k">
+                    <span>R9K-Modus (Unique Chat)</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="chkSlowMode">
+                    <span>Slow Mode</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
-    <div id="footer-placeholder"></div>
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="uploadModal" hidden>
+      <div class="modal upload-modal">
+        <div class="modal-header">
+          <h2>Video hochladen</h2>
+          <button class="modal-close" id="btnCloseUploadModal">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="upload-dropzone" id="uploadDropzone">
+            <i class="fa-solid fa-cloud-upload-alt"></i>
+            <p>Video hier ablegen oder klicken zum Auswählen</p>
+            <input type="file" id="videoFileInput" accept="video/*" hidden>
+          </div>
+          <div class="upload-progress" id="uploadProgress" hidden>
+            <div class="progress-bar">
+              <div class="progress-fill" id="uploadProgressFill"></div>
+            </div>
+            <span class="progress-text" id="uploadProgressText">0%</span>
+          </div>
+          <div class="form-group">
+            <label for="vodTitleInput">Titel</label>
+            <input type="text" id="vodTitleInput" placeholder="Video-Titel">
+          </div>
+          <div class="form-group">
+            <label for="vodDescInput">Beschreibung</label>
+            <textarea id="vodDescInput" rows="3" placeholder="Video-Beschreibung"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="vodPrivacySelect">Sichtbarkeit</label>
+            <select id="vodPrivacySelect">
+              <option value="public">Öffentlich</option>
+              <option value="unlisted">Nur mit Link</option>
+              <option value="private">Privat</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCancelUpload">Abbrechen</button>
+          <button class="btn btn-primary" id="btnPublishVod" disabled>
+            <i class="fa-solid fa-upload"></i>
+            Veröffentlichen
+          </button>
+        </div>
+      </div>
+    </div>
 
+    <!-- VOD Player Modal -->
+    <div class="modal-overlay" id="vodPlayerModal" hidden>
+      <div class="modal vod-player-modal">
+        <div class="modal-header">
+          <h2 id="vodPlayerTitle">Video-Titel</h2>
+          <button class="modal-close" id="btnCloseVodPlayer">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="vod-player-container">
+            <video id="vodVideoPlayer" controls playsinline></video>
+          </div>
+          <div class="vod-info">
+            <div class="vod-stats">
+              <span><i class="fa-solid fa-eye"></i> <span id="vodViewCount">0</span> Aufrufe</span>
+              <span><i class="fa-solid fa-thumbs-up"></i> <span id="vodLikeCount">0</span></span>
+              <span><i class="fa-solid fa-calendar"></i> <span id="vodDate">—</span></span>
+            </div>
+          </div>
+          <div class="vod-comments">
+            <h3>Kommentare</h3>
+            <div class="comment-input">
+              <input type="text" id="commentInput" placeholder="Kommentar schreiben...">
+              <button class="btn btn-secondary btn-sm" id="btnPostComment">Senden</button>
+            </div>
+            <div class="comments-list" id="commentsList">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 
     <script src="firebase.js"></script>
     <script src="js/auth-state.js"></script>
@@ -210,7 +738,6 @@
     <script src="js/fonts.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/tickets.js"></script>
-
     <script src="js/streaming.js"></script>
   </body>
 </html>
