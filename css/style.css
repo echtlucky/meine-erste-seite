@@ -128,9 +128,7 @@ main{ flex:1; }
   top:0; left:0;
   width:100%;
   height: var(--header-h);
-  z-index: 100000;
-  isolation: isolate;
-  pointer-events: auto;
+  z-index: 2147483647;
   overflow: visible;
 
   background: rgba(0, 0, 0, 0.72);
@@ -144,7 +142,7 @@ main{ flex:1; }
   padding: 0.8rem clamp(1.0rem, 3vw, 2.0rem);
 
   will-change: transform;
-  transform: translate3d(0,0,0);
+  transform: translateZ(0);
   transition: transform 0.35s ease;
 }
 
@@ -460,7 +458,7 @@ main{ flex:1; }
   border-radius: 14px;
   box-shadow: 0 18px 55px rgba(0,0,0,0.78);
   overflow:hidden;
-  z-index:100001;
+  z-index: 2147483647;
 }
 
 .dropdown-menu.show{ display:block; }
@@ -544,7 +542,7 @@ main{ flex:1; }
 
     border-bottom: 1px solid var(--border-soft);
     box-shadow: 0 18px 60px rgba(0,0,0,0.55);
-    z-index: 100001;
+    z-index: 2147483646;
     max-height: calc(100vh - var(--header-h));
     overflow-y: auto;
   }
