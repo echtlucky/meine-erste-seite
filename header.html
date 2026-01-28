@@ -1,19 +1,24 @@
 ﻿<header class="site-header" role="banner">
-  
+
   <div class="header-left">
-    <a href="index.html" class="logo" aria-label="echtlcky Home">
-      <span class="red-dot-large"></span>
-      <a href="streaming.html" class="red-dot-link" aria-label="Zur Streaming Seite">
+    <div class="logo-wrap">
+      <a href="index.html" class="logo-text" aria-label="echtlcky Home">
+        echtlcky
+      </a>
+
+      <a
+        href="streaming.html"
+        class="logo-live-dot"
+        aria-label="Zur Streaming Seite"
+      >
         <span class="red-dot-large"></span>
       </a>
-      echtlcky
-      <span class="logo-glow" aria-hidden="true"></span>
-    </a>
+    </div>
   </div>
 
-  
   <nav id="mainNav" class="header-nav" aria-label="Hauptnavigation">
     <div class="nav-links">
+
       <a href="index.html">Home</a>
 
       <div class="nav-dropdown" data-nav-dropdown>
@@ -24,13 +29,18 @@
           aria-haspopup="menu"
           aria-expanded="false"
         >
-          HUB <span class="chev" aria-hidden="true">▾</span>
+          HUB <span class="chev">▾</span>
         </button>
-        <div id="hubMenu" class="dropdown-menu hub-menu" role="menu" aria-label="Hub">
-          <a href="ranked.html" class="dropdown-item" role="menuitem">Ranked</a>
-          <a href="stats.html" class="dropdown-item" role="menuitem">Stats</a>
-          <a href="focus.html" class="dropdown-item" role="menuitem">Focus</a>
-          <a href="reflex.html" class="dropdown-item" role="menuitem">Reflex Lab</a>
+
+        <div
+          id="hubMenu"
+          class="dropdown-menu hub-menu"
+          role="menu"
+        >
+          <a href="ranked.html" class="dropdown-item">Ranked</a>
+          <a href="stats.html" class="dropdown-item">Stats</a>
+          <a href="focus.html" class="dropdown-item">Focus</a>
+          <a href="reflex.html" class="dropdown-item">Reflex Lab</a>
         </div>
       </div>
 
@@ -38,11 +48,11 @@
     </div>
   </nav>
 
-  
   <div class="header-right">
-    <a href="connect.html" class="nav-live" id="connectNav" aria-label="Connect - Community">
-      <span class="live-dot" aria-hidden="true"></span>
-      <span class="live-text">Connect</span>
+
+    <a href="connect.html" class="nav-live" aria-label="Connect">
+      <span class="live-dot"></span>
+      <span>Connect</span>
     </a>
 
     <a href="login.html" id="login-link" class="nav-auth">Anmelden</a>
@@ -54,29 +64,27 @@
         type="button"
         aria-haspopup="menu"
         aria-expanded="false"
-        style="display:none;"
+        hidden
       >
-        <span class="user-dot" aria-hidden="true"></span>
+        <span class="user-dot"></span>
         <span class="user-name-text">User</span>
-        <span class="chev" aria-hidden="true">▾</span>
+        <span class="chev">▾</span>
       </button>
 
-      <div id="dropdown-menu" class="dropdown-menu" role="menu" aria-label="Account Menü">
-        <a href="account.html" class="dropdown-item" role="menuitem">Konto verwalten</a>
-
+      <div id="dropdown-menu" class="dropdown-menu" role="menu">
+        <a href="account.html" class="dropdown-item">Konto verwalten</a>
         <a
           href="admin-panel.html"
           class="dropdown-item admin-panel"
           id="admin-panel-link"
-          role="menuitem"
-          style="display:none;"
+          hidden
         >
           Admin Panel
         </a>
 
-        <div class="dropdown-sep" aria-hidden="true"></div>
+        <div class="dropdown-sep"></div>
 
-        <a href="#" class="dropdown-item logout" role="menuitem" onclick="logout(); return false;">
+        <a href="#" class="dropdown-item logout" onclick="logout(); return false;">
           Ausloggen
         </a>
       </div>
@@ -86,11 +94,11 @@
       class="menu-toggle"
       id="menuToggle"
       aria-label="Menü öffnen"
-      aria-controls="mainNav"
       aria-expanded="false"
       type="button"
     >
-      <span class="burger" aria-hidden="true"></span>
+      <span class="burger"></span>
     </button>
+
   </div>
 </header>
