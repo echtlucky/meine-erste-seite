@@ -457,7 +457,7 @@
     const blocked = readBlockedFriendsSet();
 
     if (!ids.length) {
-      dmListPanel.innerHTML = '<div class="empty-state"><p>Keine Direktnachrichten</p></div>';
+      dmListPanel.innerHTML = '<div class="empty-state"><p>Keine Chats</p></div>';
       return;
     }
 
@@ -524,7 +524,7 @@
     const chatGroupTitle = document.getElementById("chatGroupTitle");
     subscribeUserProfiles([uid]);
     const dmLabel = getCachedUserLabel(uid).label || name || "User";
-    if (chatGroupTitle) chatGroupTitle.textContent = `Direktnachricht: ${dmLabel}`;
+    if (chatGroupTitle) chatGroupTitle.textContent = `Chat: ${dmLabel}`;
 
     const btnGroupSettings = document.getElementById("btnGroupSettings");
     if (btnGroupSettings) btnGroupSettings.hidden = true;
@@ -537,7 +537,7 @@
     const membersList = document.getElementById("membersList");
     const membersCount = document.getElementById("membersCount");
     if (membersCount) membersCount.textContent = "0";
-    if (membersList) membersList.innerHTML = '<div class="empty-state"><p>Direktnachricht</p></div>';
+    if (membersList) membersList.innerHTML = '<div class="empty-state"><p>Chat</p></div>';
 
     clearReplyState();
 
@@ -552,7 +552,7 @@
     const chatGroupTitle = document.getElementById("chatGroupTitle");
     if (!chatGroupTitle) return;
     if (activeChatMode !== "dm" || !selectedDmUid) return;
-    chatGroupTitle.textContent = `Direktnachricht: ${getCachedUserLabel(selectedDmUid).label || "User"}`;
+    chatGroupTitle.textContent = `Chat: ${getCachedUserLabel(selectedDmUid).label || "User"}`;
   }
 
   async function sendMessageToSelectedDm() {
@@ -646,9 +646,6 @@
         .where("members", "array-contains", currentUser.uid)
         .onSnapshot((snapshot) => {
           groupsCache.clear();
-          const stripData = [];
-
-          stripData.push({ id: "__dm__", name: "DM", unread: 0, color: "#00ff88", type: "dm" });
 
           if (!snapshot.empty) {
             if (groupsListPanel) groupsListPanel.innerHTML = "";
@@ -676,24 +673,12 @@
                 });
                 groupsListPanel.appendChild(div);
               }
-
-              stripData.push({
-                id: doc.id,
-                name: group.name || "Gruppe",
-                unread: group.unreadCount || group.unread || 0,
-                color: group.meta?.color || "#00ff88",
-                type: "group"
-              });
             });
           } else {
             if (groupsListPanel) {
               groupsListPanel.innerHTML = '<div class="empty-state"><p>📭 Keine Gruppen</p></div>';
             }
           }
-
-          stripData.push({ id: "__create__", name: "+", unread: 0, color: "#00ff88", type: "create" });
-
-          window.updateGroupStrip?.(stripData);
         });
     } catch (err) {
       if (groupsListPanel) {
@@ -2164,8 +2149,8 @@
           if (!selectedDmUid) {
             window.notify?.show({
               type: "error",
-              title: "Keine Direktnachricht ausgewählt",
-              message: "Bitte wähle links eine Direktnachricht aus.",
+              title: "Kein Chat ausgewählt",
+              message: "Bitte wähle links einen Chat aus.",
               duration: 4200
             });
             return;
@@ -2528,7 +2513,7 @@
         messageSounds: true,
         compactUi: false,
         reducedMotion: false,
-        remoteVolume: 1
+        remoteVolume: 0.65
       };
       try {
         const raw = localStorage.getItem(CONNECT_PREFS_KEY);
@@ -2866,34 +2851,6 @@
 
     window.addEventListener("echtlucky:reload-groups", () => {
       loadGroups();
-    });
-
-    window.addEventListener("echtlucky:group-strip-select", (event) => {
-      const groupId = event?.detail?.groupId;
-      if (!groupId) return;
-
-      if (groupId === "__dm__") {
-        activeChatMode = "dm";
-        selectedDmUid = null;
-        selectedDmName = "";
-        selectedGroupId = null;
-        selectedGroupData = null;
-        detachSelectedGroupListener();
-        detachMessagesListener();
-        clearReplyState();
-        renderDmList();
-        updateChatControls();
-        return;
-      }
-
-      if (groupId === "__create__") {
-        createGroup();
-        return;
-      }
-
-      const cached = groupsCache.get(groupId);
-      const item = groupsListPanel?.querySelector?.(`[data-group-id="${groupId}"]`) || null;
-      if (cached) selectGroup(groupId, cached, item);
     });
 
     updateAuthStatus().catch(() => {});

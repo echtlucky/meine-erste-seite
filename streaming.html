@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Streaming | echtlcky</title>
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/fonts.css" />
+    <link rel="stylesheet" href="css/pages/streaming.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+  </head>
+
+  <body class="page-transition streaming-page">
+    <main class="streaming-shell" aria-label="Streaming">
+      <header class="streaming-topbar">
+        <a class="streaming-back" href="index.html" aria-label="Zurück zu Home">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+          <span>Home</span>
+        </a>
+
+        <div class="streaming-brand" aria-label="Brand">
+          <span class="streaming-brand__dot" aria-hidden="true"></span>
+          <span class="streaming-brand__text">Streaming</span>
+        </div>
+
+        <div class="streaming-topbar__actions">
+          <button class="btn btn-secondary" id="btnStartStream" type="button">
+            Stream starten
+          </button>
+        </div>
+      </header>
+
+      <section class="streaming-layout" aria-label="Streaming Layout">
+        <aside class="streaming-sidebar" aria-label="Streams">
+          <div class="streaming-sidebar__head">
+            <div class="streaming-filter">
+              <button class="pill is-active" type="button" data-category="all">
+                Alle
+              </button>
+              <button class="pill" type="button" data-category="just_chatting">
+                Just Chatting
+              </button>
+              <button class="pill" type="button" data-category="gaming">Gaming</button>
+            </div>
+
+            <div class="streaming-search">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              <input
+                id="streamSearchInput"
+                type="search"
+                placeholder="Streams suchen…"
+                aria-label="Streams suchen"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div class="streaming-list" id="streamList" aria-live="polite"></div>
+        </aside>
+
+        <section class="streaming-stage" aria-label="Stream Player">
+          <div class="streaming-player-card">
+            <div class="streaming-player-head">
+              <div class="streaming-player-meta">
+                <div class="streaming-player-title" id="streamTitle">Kein Stream ausgewählt</div>
+                <div class="streaming-player-sub" id="streamSub">Wähle links einen Stream aus.</div>
+              </div>
+
+              <div class="streaming-player-controls" aria-label="Player Controls">
+                <button class="icon-btn" id="btnStageMute" type="button" aria-label="Mute">
+                  <i class="fa-solid fa-volume-xmark" aria-hidden="true"></i>
+                </button>
+                <button class="icon-btn" id="btnStageFullscreen" type="button" aria-label="Vollbild">
+                  <i class="fa-solid fa-expand" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="streaming-player">
+              <video id="stageVideo" playsinline autoplay muted></video>
+              <div class="streaming-player__empty" id="stageEmpty">
+                <div class="streaming-empty__title">Streaming</div>
+                <div class="streaming-empty__sub">Wähle einen Stream oder starte deinen eigenen.</div>
+              </div>
+            </div>
+
+            <div class="streaming-player-foot">
+              <div class="streaming-stat">
+                <span class="streaming-stat__label">Kategorie</span>
+                <span class="streaming-stat__value" id="streamCategory">—</span>
+              </div>
+              <div class="streaming-stat">
+                <span class="streaming-stat__label">Streamer</span>
+                <span class="streaming-stat__value" id="streamerName">—</span>
+              </div>
+              <div class="streaming-stat">
+                <span class="streaming-stat__label">Status</span>
+                <span class="streaming-stat__value" id="streamStatus">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="streaming-chat-card" aria-label="Zuschauer-Chat">
+            <div class="streaming-chat-head">
+              <div class="streaming-chat-title">Chat</div>
+              <div class="streaming-chat-sub">Vorbereitet</div>
+            </div>
+            <div class="streaming-chat-body">
+              <div class="empty-state">
+                <p>Chat wird in dieser Version vorbereitet.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+    <script src="firebase.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/legal-modal.js"></script>
+    <script src="js/notify.js"></script>
+    <script src="js/modal-dialog.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/overlays.js"></script>
+    <script src="js/fonts.js"></script>
+    <script src="js/tickets.js"></script>
+
+    <script src="js/streaming.js"></script>
+  </body>
+</html>
+

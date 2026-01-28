@@ -233,50 +233,12 @@ window.renderAuthUI = function renderAuthUI(user) {
     wireHoverDelay(toggle, menu);
   }
 
-  function wireGroupsDropdown() {
-    const toggle = qs("groupsToggle");
-    const menu = qs("groupsMenu");
-    if (!toggle || !menu || toggle.__wired) return;
-
-    toggle.__wired = true;
-    toggle.setAttribute("aria-expanded", "false");
-
-    toggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.classList.toggle("show");
-      const isOpen = menu.classList.contains("show");
-      toggle.setAttribute("aria-expanded", String(isOpen));
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-        closeDropdown(menu);
-        toggle.setAttribute("aria-expanded", "false");
-      }
-    });
-
-    wireHoverDelay(toggle, menu);
-  }
-
-  function ensureGroupStripLoaded() {
-    if (window.__ECHTLUCKY_GROUP_STRIP_V2__) return;
-    const existing = document.querySelector("script[src*='js/group-strip-v2.js']");
-    if (existing) return;
-
-    const s = document.createElement("script");
-    s.src = "js/group-strip-v2.js?v=1";
-    s.defer = true;
-    document.head.appendChild(s);
-  }
-
   
   window.initHeaderScripts = function initHeaderScripts() {
     wireMobileMenu();
     wireDropdown();
     wireHubDropdown();
-    wireGroupsDropdown();
     setActiveNavLink();
-    ensureGroupStripLoaded();
 
     renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
   };

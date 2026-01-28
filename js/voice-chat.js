@@ -723,6 +723,8 @@
         audioElement.autoplay = true;
         audioElement.playsinline = true;
         audioElement.hidden = true;
+        audioElement.volume = 0.65;
+        audioElement.dataset.baseVolume = "0.65";
         document.body.appendChild(audioElement);
       }
       

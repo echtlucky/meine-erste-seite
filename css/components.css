@@ -641,6 +641,55 @@ input:focus, select:focus, textarea:focus,
   animation: shake 0.3s ease;
 }
 
+.modal-form {
+  display: grid;
+  gap: 14px;
+}
+
+.modal-field {
+  display: grid;
+  gap: 8px;
+}
+
+.modal-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(224, 255, 224, 0.78);
+}
+
+.modal-select,
+.modal-textarea {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 12px;
+  color: #e0ffe0;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.25s ease;
+  font-family: inherit;
+}
+
+.modal-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.modal-select:focus,
+.modal-textarea:focus {
+  border-color: #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.15);
+}
+
+.modal-select.error,
+.modal-textarea.error {
+  border-color: #ff3366;
+  background: rgba(255, 51, 102, 0.08);
+  animation: shake 0.3s ease;
+}
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-8px); }
