@@ -279,6 +279,34 @@
   const userCacheInFlight = new Set(); // uid
   const userProfileSubscriptions = new Map();
 
+  function isMobileLayout() {
+    return window.matchMedia && window.matchMedia("(max-width: 900px)").matches;
+  }
+
+  function setMobilePanelUi(panel) {
+    if (!connectMainCard || !mobileSwitcher) return;
+    if (!isMobileLayout()) return;
+    const next = panel || "left";
+    connectMainCard.setAttribute("data-mobile-panel", next);
+    mobileSwitcher.querySelectorAll(".connect-mobile-tab").forEach((b) => {
+      const isActive = b.dataset.panel === next;
+      b.classList.toggle("is-active", isActive);
+      b.setAttribute("aria-selected", String(isActive));
+    });
+  }
+
+  function setMembersTabVisible(visible) {
+    if (!mobileSwitcher) return;
+    const btn = mobileSwitcher.querySelector('.connect-mobile-tab[data-panel="right"]');
+    if (!btn) return;
+    btn.hidden = !visible;
+    btn.setAttribute("aria-hidden", String(!visible));
+    if (!visible) {
+      const activePanel = connectMainCard?.getAttribute("data-mobile-panel") || "left";
+      if (activePanel === "right") setMobilePanelUi("middle");
+    }
+  }
+
   function subscribeUserProfiles(uids) {
     if (!db) return;
 
@@ -444,6 +472,8 @@
     const emptyChatState = document.getElementById("emptyChatState");
     if (chatContainer) chatContainer.hidden = false;
     if (emptyChatState) emptyChatState.hidden = true;
+    setMembersTabVisible(false);
+    setMobilePanelUi("middle");
 
     const chatGroupTitle = document.getElementById("chatGroupTitle");
     subscribeUserProfiles([uid]);
@@ -630,14 +660,8 @@
     if (chatContainer) chatContainer.hidden = false;
     if (emptyChatState) emptyChatState.hidden = true;
 
-    if (connectMainCard && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
-      connectMainCard.setAttribute("data-mobile-panel", "middle");
-      document.querySelectorAll(".connect-mobile-tab").forEach((b) => {
-        const isActive = b.dataset.panel === "middle";
-        b.classList.toggle("is-active", isActive);
-        b.setAttribute("aria-selected", String(isActive));
-      });
-    }
+    setMembersTabVisible(true);
+    setMobilePanelUi("middle");
 
     const chatGroupTitle = document.getElementById("chatGroupTitle");
     if (chatGroupTitle) chatGroupTitle.textContent = `Gruppe: ${groupData.name || "Gruppe"}`;
@@ -930,14 +954,8 @@
       return;
     }
 
-    if (connectMainCard && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
-      connectMainCard.setAttribute("data-mobile-panel", "right");
-      document.querySelectorAll(".connect-mobile-tab").forEach((b) => {
-        const isActive = b.dataset.panel === "right";
-        b.classList.toggle("is-active", isActive);
-        b.setAttribute("aria-selected", String(isActive));
-      });
-    }
+    setMembersTabVisible(true);
+    setMobilePanelUi("right");
 
     const membersAddSection = document.getElementById("membersAddSection");
     if (membersAddSection) membersAddSection.hidden = false;
@@ -1467,6 +1485,8 @@
       const rightPanel = document.querySelector(".connect-right-panel");
       if (rightPanel) rightPanel.hidden = true;
       if (connectLayout) connectLayout.classList.add("connect-workspace--no-right");
+      setMembersTabVisible(false);
+      setMobilePanelUi("left");
     } catch (err) {
       window.notify?.show({
         type: "error",
@@ -1512,6 +1532,8 @@
       const rightPanel = document.querySelector(".connect-right-panel");
       if (rightPanel) rightPanel.hidden = true;
       if (connectLayout) connectLayout.classList.add("connect-workspace--no-right");
+      setMembersTabVisible(false);
+      setMobilePanelUi("left");
     } catch (err) {
       window.notify?.show({
         type: "error",
@@ -1776,6 +1798,7 @@
     if (connectLayout) connectLayout.classList.add("connect-workspace--no-right");
     const rightPanel = document.querySelector(".connect-right-panel");
     if (rightPanel) rightPanel.hidden = true;
+    setMembersTabVisible(false);
 
     renderUserBarIdentity(display, avatarUrl);
 
