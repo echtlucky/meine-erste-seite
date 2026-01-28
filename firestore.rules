@@ -159,28 +159,19 @@ service cloud.firestore {
       allow read: if true;
 
       allow create: if request.auth != null &&
-        request.resource.data.keys().hasOnly([
-          'ownerUid','ownerName','title','category','status','createdAt','updatedAt','endedAt'
-        ]) &&
         request.resource.data.ownerUid == request.auth.uid &&
-        request.resource.data.ownerName is string &&
         request.resource.data.title is string &&
         request.resource.data.title.size() >= 3 &&
-        request.resource.data.title.size() <= 80 &&
-        request.resource.data.category in ['just_chatting','gaming'] &&
+        request.resource.data.title.size() <= 100 &&
+        request.resource.data.category in ['gaming','just_chatting','creative','music','sports','esports','other'] &&
         request.resource.data.status == 'live';
 
       allow update: if request.auth != null &&
         (request.auth.uid == resource.data.ownerUid || isStaff()) &&
-        request.resource.data.keys().hasOnly([
-          'ownerUid','ownerName','title','category','status','createdAt','updatedAt','endedAt'
-        ]) &&
-        request.resource.data.ownerUid == resource.data.ownerUid &&
-        request.resource.data.category == resource.data.category &&
-        request.resource.data.createdAt == resource.data.createdAt &&
         request.resource.data.status in ['live','ended'] &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'title','ownerName','status','updatedAt','endedAt'
+          'title','category','tags','status','viewerCount','peakViewers',
+          'startedAt','endedAt','updatedAt'
         ]);
 
       allow delete: if request.auth != null && (isAdmin() || request.auth.uid == resource.data.ownerUid);
@@ -190,75 +181,164 @@ service cloud.firestore {
 
         allow create: if request.auth != null &&
           request.auth.uid == viewerUid &&
-          request.resource.data.keys().hasOnly([
-            'viewerUid','viewerName','status','joinedAt','offer','answer','updatedAt','answeredAt'
-          ]) &&
           request.resource.data.viewerUid == viewerUid &&
           request.resource.data.viewerName is string &&
-          request.resource.data.status in ['watching','left'] &&
-          request.resource.data.offer == null &&
-          request.resource.data.answer == null;
-
-        // Viewer updates their own offer/status
-        allow update: if request.auth != null &&
-          request.auth.uid == viewerUid &&
-          request.resource.data.keys().hasOnly([
-            'viewerUid','viewerName','status','joinedAt','offer','answer','updatedAt','answeredAt'
-          ]) &&
-          request.resource.data.viewerUid == resource.data.viewerUid &&
-          request.resource.data.answer == resource.data.answer &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['offer','status','updatedAt']) &&
           request.resource.data.status in ['watching','left'];
 
-        // Broadcaster (or staff) writes answer
         allow update: if request.auth != null &&
-          (request.auth.uid == streamOwnerUid(streamId) || isStaff()) &&
-          request.resource.data.keys().hasOnly([
-            'viewerUid','viewerName','status','joinedAt','offer','answer','updatedAt','answeredAt'
-          ]) &&
-          request.resource.data.viewerUid == resource.data.viewerUid &&
-          request.resource.data.offer == resource.data.offer &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer','answeredAt','updatedAt','status']) &&
+          (request.auth.uid == viewerUid || request.auth.uid == streamOwnerUid(streamId) || isStaff()) &&
           request.resource.data.status in ['watching','left'];
 
         allow delete: if request.auth != null &&
           (request.auth.uid == viewerUid || request.auth.uid == streamOwnerUid(streamId) || isStaff());
-
-        match /viewerCandidates/{candidateId} {
-          allow read: if canReadStreamSignal(streamId, viewerUid);
-          allow create: if request.auth != null && request.auth.uid == viewerUid;
-          allow delete: if request.auth != null && (request.auth.uid == viewerUid || request.auth.uid == streamOwnerUid(streamId) || isStaff());
-        }
-
-        match /broadcasterCandidates/{candidateId} {
-          allow read: if canReadStreamSignal(streamId, viewerUid);
-          allow create: if request.auth != null && (request.auth.uid == streamOwnerUid(streamId) || isStaff());
-          allow delete: if request.auth != null && (request.auth.uid == streamOwnerUid(streamId) || isStaff());
-        }
       }
 
       match /chat/{messageId} {
         allow read: if true;
 
         allow create: if request.auth != null &&
-          request.resource.data.keys().hasOnly(['authorUid','authorName','text','createdAt','createdAtClient']) &&
           request.resource.data.authorUid == request.auth.uid &&
           request.resource.data.authorName is string &&
           request.resource.data.authorName.size() >= 1 &&
           request.resource.data.authorName.size() <= 40 &&
           request.resource.data.text is string &&
           request.resource.data.text.size() >= 1 &&
-          request.resource.data.text.size() <= 400;
+          request.resource.data.text.size() <= 500;
 
         allow update: if false;
 
         allow delete: if request.auth != null &&
           (
             isAdmin() ||
+            isStaff() ||
             request.auth.uid == streamOwnerUid(streamId) ||
             resource.data.authorUid == request.auth.uid
           );
       }
+    }
+
+    // Videos Collection (VODs)
+    match /videos/{videoId} {
+      allow read: if true;
+
+      allow create: if request.auth != null &&
+        request.resource.data.ownerId == request.auth.uid &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() >= 3 &&
+        request.resource.data.title.size() <= 100 &&
+        request.resource.data.privacy in ['public','unlisted','private'];
+
+      allow update: if request.auth != null &&
+        (request.auth.uid == resource.data.ownerId || isStaff()) &&
+        request.resource.data.privacy in ['public','unlisted','private'] &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'title','description','privacy','tags','views','likes',
+          'duration','thumbnail','videoUrl','updatedAt'
+        ]);
+
+      allow delete: if request.auth != null && (isAdmin() || request.auth.uid == resource.data.ownerId);
+
+      match /comments/{commentId} {
+        allow read: if true;
+
+        allow create: if request.auth != null &&
+          request.resource.data.authorUid == request.auth.uid &&
+          request.resource.data.authorName is string &&
+          request.resource.data.text is string &&
+          request.resource.data.text.size() >= 1 &&
+          request.resource.data.text.size() <= 1000;
+
+        allow update: if request.auth != null &&
+          (isAdmin() || isStaff() || resource.data.authorUid == request.auth.uid);
+
+        allow delete: if request.auth != null &&
+          (isAdmin() || isStaff() || resource.data.authorUid == request.auth.uid);
+      }
+    }
+
+    // Analytics Collection
+    match /analytics/{documentId} {
+      allow read: if isAdmin() || isStaff();
+
+      allow create: if isAdmin() || isStaff();
+
+      allow update: if isAdmin() || isStaff();
+
+      allow delete: if isAdmin();
+
+      match /events/{eventId} {
+        allow read: if isAdmin() || isStaff();
+
+        allow create: if request.auth != null &&
+          (
+            request.resource.data.type in ['stream_view','stream_join','stream_leave',
+              'video_view','video_like','video_comment','follow','subscribe'] ||
+            isAdmin() || isStaff()
+          );
+
+        allow update, delete: if isAdmin() || isStaff();
+      }
+    }
+
+    // Streamer Analytics Summary
+    match /streamer-analytics/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin() || isStaff());
+
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin() || isStaff());
+
+      allow delete: if isAdmin();
+    }
+
+    // Reactions Collection
+    match /reactions/{documentId} {
+      allow read: if true;
+
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.type in ['heart','clap','haha','wow','sad','angry'];
+
+      allow update, delete: if request.auth != null &&
+        (isAdmin() || resource.data.userId == request.auth.uid);
+    }
+
+    // Pinned Messages
+    match /pinned-messages/{documentId} {
+      allow read: if true;
+
+      allow create: if request.auth != null &&
+        (request.auth.uid == streamOwnerUid(request.resource.data.streamId) || isStaff());
+
+      allow update, delete: if request.auth != null &&
+        (request.auth.uid == streamOwnerUid(resource.data.streamId) || isStaff() || isAdmin());
+    }
+
+    // Highlights Collection
+    match /highlights/{highlightId} {
+      allow read: if true;
+
+      allow create: if request.auth != null &&
+        request.resource.data.ownerId == request.auth.uid &&
+        request.resource.data.streamId is string &&
+        request.resource.data.title is string;
+
+      allow update: if request.auth != null &&
+        (request.auth.uid == resource.data.ownerId || isAdmin());
+
+      allow delete: if request.auth != null &&
+        (request.auth.uid == resource.data.ownerId || isAdmin());
+    }
+
+    // Clips Collection
+    match /clips/{clipId} {
+      allow read: if true;
+
+      allow create: if request.auth != null &&
+        request.resource.data.creatorId == request.auth.uid;
+
+      allow update, delete: if request.auth != null &&
+        (request.auth.uid == resource.data.creatorId || isAdmin());
     }
 
     match /tickets/{ticketId} {

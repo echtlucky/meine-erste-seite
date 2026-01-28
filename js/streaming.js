@@ -44,6 +44,8 @@
     currentTime: 0,
     duration: 0,
     isFullscreen: false,
+    playbackRate: 1,
+    quality: "auto",
     
     // Chat state
     chatMessages: [],
@@ -57,6 +59,8 @@
     selectedVideoSource: "camera",
     selectedAudioSource: null,
     selectedDesktopAudio: null,
+    cameraDevices: [],
+    micDevices: [],
     scenes: [
       { id: "main", name: "Haupt-Szene" },
       { id: "brb", name: "Be right back" },
@@ -81,13 +85,16 @@
     cacheElements();
     await waitForFirebase();
     setupEventListeners();
+    setupHeaderIntegration();
     await loadUserProfile();
+    await loadMediaDevices();
     await loadMockData();
     renderStreams();
     renderDashboard();
     renderVods();
     setupViewTabs();
     setupProfileDropdown();
+    setupControlPopups();
     
     console.log("[Streaming] Platform initialized");
   }
@@ -95,11 +102,12 @@
   function cacheElements() {
     elements = {
       // Navigation
-      profileBtn: el("profileBtn"),
-      profileAvatar: el("profileAvatar"),
-      profileName: el("profileName"),
-      profileMenu: el("profileMenu"),
-      profileDropdown: el("profileDropdown"),
+      userNameDisplay: el("user-name-display"),
+      userNameText: el("user-name-text"),
+      userDot: el("user-dot"),
+      loginLink: el("login-link"),
+      dropdownMenu: el("dropdown-menu"),
+      adminPanelLink: el("admin-panel-link"),
       
       // View tabs
       tabWatch: el("tabWatch"),
@@ -122,9 +130,6 @@
       overlayStreamTitle: el("overlayStreamTitle"),
       overlayStreamerName: el("overlayStreamerName"),
       btnExitFullscreen: el("btnExitFullscreen"),
-      miniChatOverlay: el("miniChatOverlay"),
-      miniChatMessages: el("miniChatMessages"),
-      btnCloseMiniChat: el("btnCloseMiniChat"),
       videoControls: el("videoControls"),
       btnPlayPause: el("btnPlayPause"),
       btnVolume: el("btnVolume"),
@@ -134,6 +139,12 @@
       btnFullscreen: el("btnFullscreen"),
       btnTheaterMode: el("btnTheaterMode"),
       btnToggleMiniChat: el("btnToggleMiniChat"),
+      
+      // Quality/Speed popups
+      qualityPopupWrapper: el("qualityPopupWrapper"),
+      qualityPopup: el("qualityPopup"),
+      speedPopupWrapper: el("speedPopupWrapper"),
+      speedPopup: el("speedPopup"),
       
       // Stream info
       currentStreamTitle: el("currentStreamTitle"),
@@ -201,6 +212,7 @@
       sourceScreen: el("sourceScreen"),
       sourceGame: el("sourceGame"),
       sourceImage: el("sourceImage"),
+      cameraDeviceSelect: el("cameraDeviceSelect"),
       audioDeviceSelect: el("audioDeviceSelect"),
       desktopAudioSelect: el("desktopAudioSelect"),
       scenesList: el("scenesList"),
@@ -279,6 +291,27 @@
     });
   }
 
+  // ===== Header Integration =====
+  function setupHeaderIntegration() {
+    // Listen for auth state changes from the global header
+    window.addEventListener("echtlucky:auth-change", async (e) => {
+      if (e.detail && e.detail.user) {
+        state.user = e.detail.user;
+        state.isLoggedIn = true;
+        await loadUserProfile();
+      } else {
+        state.user = null;
+        state.isLoggedIn = false;
+        updateProfileUI();
+      }
+    });
+
+    // Listen for header ready event
+    window.addEventListener("echtlucky:header-ready", async () => {
+      await loadUserProfile();
+    });
+  }
+
   // ===== User Profile =====
   async function loadUserProfile() {
     if (!auth?.currentUser) {
@@ -302,17 +335,168 @@
   }
 
   function updateProfileUI() {
+    const userNameDisplay = elements.userNameDisplay;
+    const loginLink = elements.loginLink;
+    const dropdownMenu = elements.dropdownMenu;
+
     if (state.isLoggedIn && state.user) {
       const displayName = state.userProfile?.displayName || state.user.displayName || state.user.email?.split("@")[0] || "User";
-      const initials = getInitials(displayName);
       
-      elements.profileName.textContent = displayName;
-      elements.profileAvatar.textContent = initials;
-      elements.profileAvatar.style.display = "grid";
+      if (userNameDisplay) {
+        userNameDisplay.style.display = "flex";
+        elements.userNameText.textContent = displayName;
+        if (elements.userDot) {
+          elements.userDot.style.background = "#00ff88";
+        }
+      }
+      
+      if (loginLink) loginLink.style.display = "none";
+      
+      // Show admin link if user is admin
+      const adminLink = elements.adminPanelLink;
+      if (adminLink && state.userProfile?.role === "admin") {
+        adminLink.style.display = "block";
+      }
+      
+      // Enable chat input
+      if (elements.chatInput) {
+        elements.chatInput.disabled = false;
+        elements.chatInput.placeholder = "Nachricht senden...";
+      }
+      if (elements.btnChatSend) {
+        elements.btnChatSend.disabled = false;
+      }
     } else {
-      elements.profileName.textContent = "Login";
-      elements.profileAvatar.textContent = "?";
+      if (userNameDisplay) userNameDisplay.style.display = "none";
+      if (loginLink) loginLink.style.display = "inline-flex";
+      
+      // Disable chat input
+      if (elements.chatInput) {
+        elements.chatInput.disabled = true;
+        elements.chatInput.placeholder = "Bitte einloggen...";
+      }
+      if (elements.btnChatSend) {
+        elements.btnChatSend.disabled = true;
+      }
     }
+  }
+
+  // ===== Profile Dropdown =====
+  function setupProfileDropdown() {
+    const userNameDisplay = elements.userNameDisplay;
+    if (!userNameDisplay) return;
+
+    userNameDisplay.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = userNameDisplay.getAttribute("aria-expanded") === "true";
+      userNameDisplay.setAttribute("aria-expanded", !isOpen);
+      dropdownMenu?.classList.toggle("is-visible", !isOpen);
+    });
+
+    document.addEventListener("click", () => {
+      userNameDisplay?.setAttribute("aria-expanded", "false");
+      dropdownMenu?.classList.remove("is-visible");
+    });
+
+    dropdownMenu?.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  // ===== Media Devices =====
+  async function loadMediaDevices() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      
+      state.cameraDevices = devices.filter(d => d.kind === "videoinput");
+      state.micDevices = devices.filter(d => d.kind === "audioinput");
+      
+      // Populate camera select
+      const cameraSelect = elements.cameraDeviceSelect;
+      if (cameraSelect) {
+        cameraSelect.innerHTML = '<option value="">Standard-Kamera</option>';
+        state.cameraDevices.forEach((device, index) => {
+          const option = document.createElement("option");
+          option.value = device.deviceId;
+          option.textContent = device.label || `Kamera ${index + 1}`;
+          cameraSelect.appendChild(option);
+        });
+      }
+      
+      // Populate mic select
+      const micSelect = elements.audioDeviceSelect;
+      if (micSelect) {
+        micSelect.innerHTML = '<option value="">Standard</option>';
+        state.micDevices.forEach((device, index) => {
+          const option = document.createElement("option");
+          option.value = device.deviceId;
+          option.textContent = device.label || `Mikrofon ${index + 1}`;
+          micSelect.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error("Error loading media devices:", error);
+    }
+  }
+
+  // ===== Control Popups =====
+  function setupControlPopups() {
+    // Quality popup
+    const qualityBtn = elements.btnQuality;
+    const qualityPopup = elements.qualityPopup;
+    const qualityWrapper = elements.qualityPopupWrapper;
+    
+    if (qualityBtn && qualityPopup) {
+      qualityBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isVisible = !qualityPopup.hidden;
+        qualityPopup.hidden = isVisible;
+        elements.speedPopup?.setAttribute("hidden", "");
+        qualityWrapper?.classList.toggle("is-active", !isVisible);
+      });
+      
+      qualityPopup.querySelectorAll(".popup-option").forEach(option => {
+        option.addEventListener("click", () => {
+          qualityPopup.querySelectorAll(".popup-option").forEach(o => o.classList.remove("is-active"));
+          option.classList.add("is-active");
+          state.quality = option.dataset.quality;
+          showToast("info", "Qualität", `${option.textContent} ausgewählt`);
+        });
+      });
+    }
+    
+    // Speed popup
+    const speedBtn = elements.btnSpeed;
+    const speedPopup = elements.speedPopup;
+    const speedWrapper = elements.speedPopupWrapper;
+    
+    if (speedBtn && speedPopup) {
+      speedBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isVisible = !speedPopup.hidden;
+        speedPopup.hidden = isVisible;
+        qualityPopup?.setAttribute("hidden", "");
+        speedWrapper?.classList.toggle("is-active", !isVisible);
+      });
+      
+      speedPopup.querySelectorAll(".popup-option").forEach(option => {
+        option.addEventListener("click", () => {
+          speedPopup.querySelectorAll(".popup-option").forEach(o => o.classList.remove("is-active"));
+          option.classList.add("is-active");
+          state.playbackRate = parseFloat(option.dataset.speed);
+          elements.mainVideo.playbackRate = state.playbackRate;
+          showToast("info", "Geschwindigkeit", `${option.textContent} ausgewählt`);
+        });
+      });
+    }
+    
+    // Close popups when clicking outside
+    document.addEventListener("click", () => {
+      qualityPopup?.setAttribute("hidden", "");
+      speedPopup?.setAttribute("hidden", "");
+      qualityWrapper?.classList.remove("is-active");
+      speedWrapper?.classList.remove("is-active");
+    });
   }
 
   // ===== Mock Data =====
@@ -357,19 +541,6 @@
         tags: ["art", "drawing", "creative"],
         avatar: "D",
         startedAt: Date.now() - 5400000
-      },
-      {
-        id: "stream_4",
-        title: "Music Production Session",
-        streamer: "BeatMakerPro",
-        streamerId: "user_4",
-        category: "music",
-        viewerCount: 189,
-        peakViewers: 245,
-        isLive: true,
-        tags: ["music", "production", "beats"],
-        avatar: "B",
-        startedAt: Date.now() - 1800000
       }
     ];
 
@@ -407,17 +578,6 @@
         uploadedAt: Date.now() - 259200000,
         thumbnail: null,
         category: "just_chatting"
-      },
-      {
-        id: "vod_4",
-        title: "Digital Art Timelapse - Cyberpunk City",
-        streamer: "DigitalArtist",
-        duration: 1800,
-        views: 4567,
-        likes: 1234,
-        uploadedAt: Date.now() - 345600000,
-        thumbnail: null,
-        category: "creative"
       }
     ];
 
@@ -436,7 +596,6 @@
     elements.btnExitFullscreen?.addEventListener("click", exitFullscreen);
     elements.btnTheaterMode?.addEventListener("click", toggleTheaterMode);
     elements.btnToggleMiniChat?.addEventListener("click", toggleMiniChat);
-    elements.btnCloseMiniChat?.addEventListener("click", () => elements.miniChatOverlay?.classList.remove("is-visible"));
 
     // Chat
     elements.chatTabLive?.addEventListener("click", () => switchChatTab("live"));
@@ -500,9 +659,6 @@
     elements.btnCloseVodPlayer?.addEventListener("click", closeVodPlayer);
     elements.btnPostComment?.addEventListener("click", postComment);
 
-    // Logout
-    el("logoutBtn")?.addEventListener("click", handleLogout);
-
     // Keyboard shortcuts
     document.addEventListener("keydown", handleKeyboard);
   }
@@ -536,47 +692,6 @@
     // Special handling for studio view
     if (viewName === "studio" && !state.isLoggedIn) {
       showToast("info", "Login erforderlich", "Bitte logge dich ein, um das Studio zu nutzen.");
-    }
-  }
-
-  // ===== Profile Dropdown =====
-  function setupProfileDropdown() {
-    elements.profileBtn?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      elements.profileDropdown?.classList.toggle("is-open");
-    });
-
-    document.addEventListener("click", () => {
-      elements.profileDropdown?.classList.remove("is-open");
-    });
-
-    elements.profileMenu?.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
-
-    // Dashboard link
-    el("streamerDashboardLink")?.addEventListener("click", (e) => {
-      e.preventDefault();
-      switchToView("dashboard");
-      elements.profileDropdown?.classList.remove("is-open");
-    });
-
-    // Upload link
-    el("uploadVideoLink")?.addEventListener("click", (e) => {
-      e.preventDefault();
-      elements.uploadModal?.classList.add("is-visible");
-      elements.profileDropdown?.classList.remove("is-open");
-    });
-  }
-
-  async function handleLogout() {
-    try {
-      await auth.signOut();
-      showToast("success", "Abgemeldet", "Du wurdest erfolgreich abgemeldet.");
-      elements.profileDropdown?.classList.remove("is-open");
-      await loadUserProfile();
-    } catch (error) {
-      showToast("error", "Fehler", "Abmeldung fehlgeschlagen.");
     }
   }
 
@@ -646,7 +761,7 @@
   }
 
   function toggleMiniChat() {
-    elements.miniChatOverlay?.classList.toggle("is-visible");
+    showToast("info", "Mini Chat", "Mini-Chat-Funktion aktiviert");
   }
 
   // ===== Chat Functions =====
@@ -678,11 +793,6 @@
     state.chatMessages.push(message);
     renderChatMessage(message);
     elements.chatInput.value = "";
-
-    // Add to mini chat if visible
-    if (elements.miniChatOverlay?.classList.contains("is-visible")) {
-      renderMiniChatMessage(message);
-    }
   }
 
   function renderChatMessage(msg) {
@@ -706,34 +816,13 @@
     elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
   }
 
-  function renderMiniChatMessage(msg) {
-    if (!elements.miniChatMessages) return;
-
-    const div = document.createElement("div");
-    div.className = "mini-chat-line";
-    div.innerHTML = `
-      <span class="mini-chat-line__name" style="color: ${msg.color}">${escapeHtml(msg.author)}:</span>
-      <span class="mini-chat-line__text">${escapeHtml(msg.text)}</span>
-    `;
-
-    elements.miniChatMessages.appendChild(div);
-
-    // Keep only last 10 messages
-    while (elements.miniChatMessages.children.length > 10) {
-      elements.miniChatMessages.removeChild(elements.miniChatMessages.firstChild);
-    }
-  }
-
   function sendReaction(reaction) {
     if (!state.isLoggedIn) {
       showToast("info", "Reactions", "Bitte logge dich ein, um zu reagieren.");
       return;
     }
 
-    // Visual feedback
     showToast("success", "Reaction", `Du hast mit ${reaction} reagiert.`);
-    
-    // Could broadcast to chat in real implementation
   }
 
   // ===== Stream Management =====
@@ -798,8 +887,33 @@
     // Re-render streams to update active state
     renderStreams();
 
+    // Add some mock chat messages
+    addMockChatMessages();
+
     // Start simulated viewer count updates
     startViewerCountSimulation(stream);
+  }
+
+  function addMockChatMessages() {
+    const mockMessages = [
+      { author: "User123", text: "Mega geiler Stream!", color: "#00ff88" },
+      { author: "GamerPro", text: "Gute Plays!", color: "#ffbe3d" },
+      { author: "Neuling", text: "Wie aktiviert man die Fähigkeit?", color: "#3b82f6" },
+      { author: "ProPlayer", text: "Nice aim bro", color: "#a855f7" }
+    ];
+
+    mockMessages.forEach((msg, index) => {
+      setTimeout(() => {
+        const message = {
+          id: Date.now() + index,
+          text: msg.text,
+          author: msg.author,
+          timestamp: new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }),
+          color: msg.color
+        };
+        renderChatMessage(message);
+      }, index * 500);
+    });
   }
 
   function startViewerCountSimulation(stream) {
@@ -820,12 +934,6 @@
       btn.classList.toggle("is-active", btn.dataset.filter === filter);
     });
 
-    // Filter streams
-    const filteredStreams = filter === "all" 
-      ? state.streams 
-      : state.streams.filter(s => s.category === filter);
-
-    // Re-render with filtered data
     renderStreams();
   }
 
@@ -905,13 +1013,8 @@
     elements.vodLikeCount.textContent = formatNumber(vod.likes);
     elements.vodDate.textContent = formatDate(vod.uploadedAt);
     
-    // Mock video (in real app, would load actual video)
-    elements.vodVideoPlayer.poster = "";
-    elements.vodVideoPlayer.src = "";
-    
     elements.vodPlayerModal?.classList.add("is-visible");
     
-    // Render comments
     renderComments(vod.id);
   }
 
@@ -924,7 +1027,6 @@
   function renderComments(vodId) {
     if (!elements.commentsList) return;
 
-    // Mock comments
     const comments = [
       { author: "User123", text: "Tolles Video!", time: "vor 2 Stunden" },
       { author: "GamerPro", text: "Mega geil!", time: "vor 1 Stunde" },
@@ -975,10 +1077,12 @@
   // ===== Studio Functions =====
   async function startPreview() {
     try {
-      state.localStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
+      const constraints = {
+        video: state.selectedVideoSource === "camera" ? { facingMode: "user" } : true,
         audio: true
-      });
+      };
+      
+      state.localStream = await navigator.mediaDevices.getUserMedia(constraints);
 
       elements.previewVideo.srcObject = state.localStream;
       elements.previewOverlay.hidden = true;
@@ -1014,31 +1118,10 @@
       btn.classList.toggle("is-active", btn.dataset.source === source);
     });
 
-    try {
-      if (source === "camera") {
-        if (state.localDisplay) {
-          state.localDisplay.getTracks().forEach(track => track.stop());
-        }
-        state.localStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" },
-          audio: true
-        });
-      } else if (source === "screen") {
-        if (state.localStream) {
-          state.localStream.getTracks().forEach(track => track.stop());
-        }
-        state.localDisplay = await navigator.mediaDevices.getDisplayMedia({
-          video: true,
-          audio: true
-        });
-        state.localStream = state.localDisplay;
-      }
-
-      elements.previewVideo.srcObject = state.localStream;
-      elements.previewOverlay.hidden = true;
-    } catch (error) {
-      console.error("Source selection error:", error);
-      showToast("error", "Fehler", "Konnte Videoquelle nicht laden.");
+    // Show/hide camera device selector
+    const cameraGroup = elements.cameraDeviceSelect?.closest(".form-group");
+    if (cameraGroup) {
+      cameraGroup.style.display = source === "camera" ? "block" : "none";
     }
   }
 
@@ -1069,7 +1152,6 @@
       </div>
     `).join("");
 
-    // Re-attach listeners
     document.querySelectorAll(".scene-item").forEach(item => {
       item.addEventListener("click", () => selectScene(item.dataset.scene));
     });
@@ -1088,7 +1170,6 @@
     }
 
     try {
-      // Request camera/screen
       state.localStream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true
@@ -1134,12 +1215,10 @@
     const file = e.target.files[0];
     if (!file) return;
 
-    // Show progress
     elements.uploadProgress.hidden = false;
     elements.uploadDropzone.hidden = true;
     elements.btnPublishVod.disabled = false;
 
-    // Simulate upload progress
     let progress = 0;
     const interval = setInterval(() => {
       progress += Math.random() * 15;
@@ -1151,7 +1230,6 @@
       elements.uploadProgressText.textContent = `${Math.round(progress)}%`;
     }, 200);
 
-    // Store file reference
     state.uploadFile = file;
     state.uploadFileName = file.name;
   }
@@ -1164,7 +1242,6 @@
     }
 
     try {
-      // In real implementation, upload to Firebase Storage
       const vodRef = db.collection("videos").doc();
       await vodRef.set({
         id: vodRef.id,
@@ -1185,11 +1262,9 @@
 
       showToast("success", "Upload abgeschlossen", "Dein Video wurde veröffentlicht.");
 
-      // Reset and close
       elements.uploadModal?.classList.remove("is-visible");
       resetUploadModal();
 
-      // Refresh VODs
       await loadMockData();
       renderVods();
 
@@ -1253,7 +1328,6 @@
 
   // ===== Keyboard Shortcuts =====
   function handleKeyboard(e) {
-    // Ignore if typing in input
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
 
     switch (e.key) {

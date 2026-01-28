@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/app-shell.css" />
     <link rel="stylesheet" href="css/pages/fonts.css" />
     <link rel="stylesheet" href="css/pages/streaming.css" />
     <link
@@ -15,7 +16,7 @@
     />
   </head>
 
-  <body class="streaming-platform">
+  <body class="page-transition streaming-page">
     <!-- Galaxy Background -->
     <div id="galaxy-bg-layer">
       <svg id="galaxy-bg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
@@ -40,56 +41,63 @@
       </svg>
     </div>
 
-    <!-- Top Navigation Bar -->
-    <nav class="stream-topbar">
-      <div class="stream-topbar__left">
-        <a href="index.html" class="stream-back-btn">
-          <i class="fa-solid fa-arrow-left"></i>
-          <span>Zurück zu Home</span>
+    <!-- Global Header -->
+    <header class="site-header" role="banner">
+      <div class="header-left">
+        <a href="index.html" class="logo" aria-label="Zur Startseite">
+          echtlcky
+          <span class="logo-glow" aria-hidden="true"></span>
+        </a>
+        <a href="streaming.html" class="streaming-indicator is-active" aria-label="Zur Streaming Seite">
+          <span class="streaming-dot"></span>
         </a>
       </div>
-      
-      <div class="stream-topbar__center">
-        <div class="stream-brand">
-          <span class="stream-brand__dot"></span>
-          <span class="stream-brand__text">Streaming</span>
+
+      <nav id="mainNav" class="header-nav" aria-label="Hauptnavigation">
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="hub.html" class="nav-hub-link" data-hub-only>HUB</a>
+          <a href="streaming.html" class="active">Streaming</a>
+          <a href="blog.html">Blog</a>
         </div>
-      </div>
-      
-      <div class="stream-topbar__right">
-        <!-- Profile Dropdown -->
-        <div class="stream-profile-dropdown" id="profileDropdown">
-          <button class="stream-profile-btn" id="profileBtn" aria-label="Profil">
-            <div class="stream-profile__avatar" id="profileAvatar">U</div>
-            <span class="stream-profile__name" id="profileName">User</span>
-            <i class="fa-solid fa-chevron-down"></i>
+      </nav>
+
+      <div class="header-right">
+        <a href="hub.html" class="nav-live" id="connectNav" aria-label="HUB - Community">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span class="live-text">HUB</span>
+        </a>
+
+        <a href="login.html" id="login-link" class="nav-auth">Anmelden</a>
+
+        <div class="user-dropdown-wrapper">
+          <button
+            id="user-name-display"
+            class="user-name"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            style="display:none;"
+          >
+            <span class="user-dot" aria-hidden="true"></span>
+            <span class="user-name-text">User</span>
+            <span class="chev" aria-hidden="true">▾</span>
           </button>
-          <div class="stream-profile__menu" id="profileMenu" hidden>
-            <a href="account.html" class="profile-menu__item">
-              <i class="fa-solid fa-user"></i>
-              <span>Mein Kanal</span>
-            </a>
-            <a href="#" class="profile-menu__item" id="streamerDashboardLink">
-              <i class="fa-solid fa-dashboard"></i>
-              <span>Streamer Dashboard</span>
-            </a>
-            <a href="#" class="profile-menu__item" id="uploadVideoLink">
-              <i class="fa-solid fa-upload"></i>
-              <span>Video hochladen</span>
-            </a>
-            <div class="profile-menu__divider"></div>
-            <a href="#" class="profile-menu__item" id="settingsLink">
-              <i class="fa-solid fa-gear"></i>
-              <span>Einstellungen</span>
-            </a>
-            <button class="profile-menu__item profile-menu__logout" id="logoutBtn">
-              <i class="fa-solid fa-sign-out-alt"></i>
-              <span>Abmelden</span>
-            </button>
+
+          <div id="dropdown-menu" class="dropdown-menu" role="menu" aria-label="Account Menü">
+            <a href="account.html" class="dropdown-item" role="menuitem">Konto verwalten</a>
+            <a href="streaming.html" class="dropdown-item" role="menuitem">Streaming Studio</a>
+            <a href="admin-panel.html" class="dropdown-item admin-panel" id="admin-panel-link" role="menuitem" style="display:none;">Admin Panel</a>
+            <div class="dropdown-sep" aria-hidden="true"></div>
+            <a href="#" class="dropdown-item logout" role="menuitem" onclick="logout(); return false;">Ausloggen</a>
           </div>
         </div>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Menü öffnen" aria-controls="mainNav" aria-expanded="false" type="button">
+          <span class="burger" aria-hidden="true"></span>
+        </button>
       </div>
-    </nav>
+    </header>
 
     <!-- Main Streaming Layout -->
     <main class="stream-layout">
@@ -100,7 +108,7 @@
           <span>Watch</span>
         </button>
         <button class="view-tab" data-view="dashboard" id="tabDashboard">
-          <i class="fa-solid fa-dashboard"></i>
+          <i class="fa-solid fa-chart-line"></i>
           <span>Dashboard</span>
         </button>
         <button class="view-tab" data-view="vods" id="tabVods">
@@ -166,17 +174,6 @@
                   <i class="fa-solid fa-compress"></i>
                 </button>
 
-                <!-- Mini Chat Overlay -->
-                <div class="mini-chat-overlay" id="miniChatOverlay" hidden>
-                  <div class="mini-chat__header">
-                    <span>Chat</span>
-                    <button class="mini-chat__close" id="btnCloseMiniChat">
-                      <i class="fa-solid fa-times"></i>
-                    </button>
-                  </div>
-                  <div class="mini-chat__messages" id="miniChatMessages"></div>
-                </div>
-
                 <!-- Video Controls -->
                 <div class="video-controls" id="videoControls">
                   <div class="video-controls__progress">
@@ -190,23 +187,56 @@
                       <button class="ctrl-btn" id="btnVolume" aria-label="Volume">
                         <i class="fa-solid fa-volume-up"></i>
                       </button>
-                      <div class="volume-control"> id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                      <div class="volume-control">
+                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="1">
                       </div>
                       <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
                     </div>
                     <div class="video-controls__right">
-                      <button class="ctrl-btn" id="btnPlaybackSpeed" aria-label="Playback Speed">
-                        <i class="fa-solid fa-clock"></i>
-                      </button>
-                      <button class="ctrl-btn" id="btnQuality" aria-label="Quality">
-                        <i class="fa-solid fa-cog"></i>
-                      </button>
+                      <!-- Quality/Resolution Popup -->
+                      <div class="control-popup-wrapper" id="qualityPopupWrapper">
+                        <button class="ctrl-btn" id="btnQuality" aria-label="Quality">
+                          <i class="fa-solid fa-cog"></i>
+                        </button>
+                        <div class="control-popup" id="qualityPopup" hidden>
+                          <div class="popup-header">Qualität</div>
+                          <div class="popup-options">
+                            <button class="popup-option is-active" data-quality="auto">Auto</button>
+                            <button class="popup-option" data-quality="1080">1080p HD</button>
+                            <button class="popup-option" data-quality="720">720p</button>
+                            <button class="popup-option" data-quality="480">480p</button>
+                            <button class="popup-option" data-quality="360">360p</button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Playback Speed Popup -->
+                      <div class="control-popup-wrapper" id="speedPopupWrapper">
+                        <button class="ctrl-btn" id="btnSpeed" aria-label="Playback Speed">
+                          <i class="fa-solid fa-clock"></i>
+                        </button>
+                        <div class="control-popup" id="speedPopup" hidden>
+                          <div class="popup-header">Geschwindigkeit</div>
+                          <div class="popup-options">
+                            <button class="popup-option" data-speed="0.25">0.25x</button>
+                            <button class="popup-option" data-speed="0.5">0.5x</button>
+                            <button class="popup-option" data-speed="0.75">0.75x</button>
+                            <button class="popup-option is-active" data-speed="1">Normal</button>
+                            <button class="popup-option" data-speed="1.25">1.25x</button>
+                            <button class="popup-option" data-speed="1.5">1.5x</button>
+                            <button class="popup-option" data-speed="2">2x</button>
+                          </div>
+                        </div>
+                      </div>
+
                       <button class="ctrl-btn" id="btnToggleMiniChat" aria-label="Mini Chat">
                         <i class="fa-solid fa-comments"></i>
                       </button>
+                      
                       <button class="ctrl-btn" id="btnTheaterMode" aria-label="Theater Mode">
                         <i class="fa-solid fa-columns"></i>
                       </button>
+                      
                       <button class="ctrl-btn" id="btnFullscreen" aria-label="Fullscreen">
                         <i class="fa-solid fa-expand"></i>
                       </button>
@@ -567,6 +597,14 @@
                     <span>Bild</span>
                   </button>
                 </div>
+                
+                <!-- Camera Device Selection -->
+                <div class="form-group" id="cameraDeviceGroup">
+                  <label for="cameraDeviceSelect">Kamera</label>
+                  <select id="cameraDeviceSelect">
+                    <option value="">Standard-Kamera</option>
+                  </select>
+                </div>
               </div>
 
               <!-- Audio Selection -->
@@ -733,11 +771,12 @@
     <script src="js/legal-modal.js"></script>
     <script src="js/notify.js"></script>
     <script src="js/modal-dialog.js"></script>
-    <script src="js/layout.js"></script>
     <script src="js/overlays.js"></script>
     <script src="js/fonts.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/tickets.js"></script>
+    <script src="js/galaxy-bg.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/streaming.js"></script>
   </body>
 </html>
