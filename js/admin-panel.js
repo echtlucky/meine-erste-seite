@@ -46,6 +46,8 @@
   let logsList, statTotalUsers, statTotalPosts, statTotalBans, activityList;
   let saveSettingsBtn, resetSettingsBtn;
   let logsFeedUnsub = null;
+  let statsLastLoadedAt = 0;
+  let statsLoadInFlight = null;
 
   function initDOM() {
     adminStatus = document.getElementById("adminStatus");
@@ -241,7 +243,7 @@
   async function loadUsers() {
     try {
       userList.innerHTML = "";
-      const snap = await db.collection("users").get();
+      const snap = await db.collection("users").orderBy("email").limit(200).get();
 
       if (snap.empty) {
         userList.innerHTML = `<p style="padding: 20px;">Keine Users</p>`;
@@ -353,6 +355,12 @@
 
   async function loadStatistics() {
     try {
+      const now = Date.now();
+      if (statsLoadInFlight) return statsLoadInFlight;
+      if (now - statsLastLoadedAt < 60000) return;
+      statsLastLoadedAt = now;
+
+      statsLoadInFlight = (async () => {
       const usersSnap = await db.collection("users").get();
       if (statTotalUsers) statTotalUsers.textContent = usersSnap.size;
 
@@ -381,7 +389,13 @@
           activityList.appendChild(div);
         });
       }
+      })().finally(() => {
+        statsLoadInFlight = null;
+      });
+
+      return statsLoadInFlight;
     } catch (err) {
+      statsLoadInFlight = null;
     }
   }
 
@@ -518,9 +532,6 @@
         case "bans":
           await loadBans();
           break;
-        case "logs":
-          await loadAdminLogs();
-          break;
         case "stats":
           await loadStatistics();
           break;
@@ -567,22 +578,7 @@
 
         await logAdminAction("panel_opened", "Admin-Panel geöffnet");
         startLogsFeed();
- 
-        await loadPosts();
-        await loadUsers();
-        await loadBans();
-        await loadAdminLogs();
-        await loadStatistics();
-        loadSettings();
-
-
-        setInterval(async () => {
-          try {
-            await loadAdminLogs();
-            await loadStatistics();
-          } catch (e) {
-          }
-        }, 30000);
+        showTab("blog");
       } catch (err) {
         notify(`Fehler: ${err.message}`, "error");
       }

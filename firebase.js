@@ -90,12 +90,14 @@
     const now = firebase.firestore.FieldValue.serverTimestamp();
     const fallbackName = user.displayName || (user.email ? user.email.split("@")[0] : "");
     const fallbackUsername = sanitizeUsername(fallbackName);
+    const emailLower = String(user.email || "").trim().toLowerCase();
 
     if (!snap.exists) {
       const initialRole = isAdminByEmail(user) ? "admin" : "user";
 
       await ref.set({
         email: user.email || "",
+        emailLower,
         username: fallbackUsername,
         usernameLower: fallbackUsername,
         displayName: fallbackUsername,
@@ -108,6 +110,7 @@
       const data = snap.data() || {};
       const patch = {
         email: user.email || "",
+        emailLower,
         lastLoginAt: now,
         ...extra,
       };
@@ -166,6 +169,7 @@
         unameRef,
         {
           uid: user.uid,
+          email: user.email || "",
           updatedAt: now,
           createdAt: unameSnap.exists ? (unameSnap.data()?.createdAt || now) : now
         },
@@ -210,6 +214,7 @@
     await unameRef.set(
       {
         uid: user.uid,
+        email: user.email || "",
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdAt: existing.exists
           ? (existing.data()?.createdAt || firebase.firestore.FieldValue.serverTimestamp())

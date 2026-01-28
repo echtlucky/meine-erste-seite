@@ -203,6 +203,7 @@
             isOnline: true,
             lastSeen: new Date(),
             email: user.email || "",
+            emailLower: String(user.email || "").trim().toLowerCase(),
             uid: user.uid
           };
 

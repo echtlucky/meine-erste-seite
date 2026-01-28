@@ -159,29 +159,35 @@
 
       const uid = user.uid;
       const email = user.email || "";
+      const emailLower = String(email || "").trim().toLowerCase();
       const username = (usernameMaybe || user.displayName || "").trim();
+      const usernameLower = sanitizeUsername(username);
 
       const ref = dbRef.collection("users").doc(uid);
       const snap = await ref.get();
 
       const base = {
         email,
-        username,
+        emailLower,
         lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
       };
 
       if (!snap.exists) {
         await ref.set({
           ...base,
+          username,
+          usernameLower,
+          displayName: username || usernameLower,
           role: (email === ADMIN_EMAIL ? "admin" : "user"),
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
       } else {
         const old = snap.data() || {};
-        await ref.update({
-          ...base,
-          username: username || old.username || "",
-        });
+        const patch = { ...base };
+        if (!old.username && username) patch.username = username;
+        if (!old.usernameLower && usernameLower) patch.usernameLower = usernameLower;
+        if (!old.displayName && (username || usernameLower)) patch.displayName = username || usernameLower;
+        await ref.set(patch, { merge: true });
       }
 
       if (email === ADMIN_EMAIL) {

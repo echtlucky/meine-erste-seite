@@ -162,7 +162,10 @@
   let selectedGroupUnsubscribe = null;
   let messagesUnsubscribe = null;
   let friendSearchTimeout = null;
+  let friendsSearchSeq = 0;
   let currentUserFriends = [];
+  let friendsUnsubscribe = null;
+  let groupsUnsubscribe = null;
   const userCache = new Map();
   const groupsCache = new Map(); // groupId -> groupData (from snapshot)
   let groupContextState = null; // { groupId, groupData }
@@ -278,6 +281,17 @@
   }
   const userCacheInFlight = new Set(); // uid
   const userProfileSubscriptions = new Map();
+  const lowEndDevice = (() => {
+    try {
+      const mem = Number(navigator.deviceMemory || 0);
+      const cores = Number(navigator.hardwareConcurrency || 0);
+      if (mem && mem <= 2) return true;
+      if (cores && cores <= 4) return true;
+      return false;
+    } catch (_) {
+      return false;
+    }
+  })();
 
   function isMobileLayout() {
     return window.matchMedia && window.matchMedia("(max-width: 900px)").matches;
@@ -342,6 +356,37 @@
         userProfileSubscriptions.set(uid, null);
       }
     });
+  }
+
+  let profileSyncTimer = null;
+  function syncUserProfileSubscriptions() {
+    if (profileSyncTimer) return;
+    profileSyncTimer = window.setTimeout(() => {
+      profileSyncTimer = null;
+      try {
+        const want = new Set();
+        const myUid = auth?.currentUser?.uid || currentUser?.uid;
+        if (myUid) want.add(myUid);
+        if (Array.isArray(currentUserFriends)) currentUserFriends.forEach((u) => u && want.add(u));
+        if (selectedDmUid) want.add(selectedDmUid);
+        if (Array.isArray(selectedGroupData?.members)) selectedGroupData.members.forEach((u) => u && want.add(u));
+
+        const maxSubs = lowEndDevice ? 120 : 220;
+        const keys = Array.from(userProfileSubscriptions.keys());
+        for (const uid of keys) {
+          if (!want.has(uid) || want.size > maxSubs) {
+            const unsub = userProfileSubscriptions.get(uid);
+            try {
+              if (typeof unsub === "function") unsub();
+            } catch (_) {}
+            userProfileSubscriptions.delete(uid);
+          }
+        }
+
+        const list = Array.from(want);
+        subscribeUserProfiles(list.length > maxSubs ? list.slice(0, maxSubs) : list);
+      } catch (_) {}
+    }, 120);
   }
 
   function escapeHtml(str) {
@@ -474,6 +519,7 @@
     if (emptyChatState) emptyChatState.hidden = true;
     setMembersTabVisible(false);
     setMobilePanelUi("middle");
+    syncUserProfileSubscriptions();
 
     const chatGroupTitle = document.getElementById("chatGroupTitle");
     subscribeUserProfiles([uid]);
@@ -569,11 +615,18 @@
     if (!currentUser) return;
 
     try {
-      db.collection("users")
+      try {
+        if (typeof friendsUnsubscribe === "function") friendsUnsubscribe();
+      } catch (_) {}
+      friendsUnsubscribe = null;
+
+      friendsUnsubscribe = db
+        .collection("users")
         .doc(currentUser.uid)
         .onSnapshot((doc) => {
           currentUserFriends = doc.data()?.friends || [];
           renderDmList();
+          syncUserProfileSubscriptions();
         });
     } catch (err) {
     }
@@ -583,7 +636,13 @@
     if (!currentUser) return;
 
     try {
-      db.collection("groups")
+      try {
+        if (typeof groupsUnsubscribe === "function") groupsUnsubscribe();
+      } catch (_) {}
+      groupsUnsubscribe = null;
+
+      groupsUnsubscribe = db
+        .collection("groups")
         .where("members", "array-contains", currentUser.uid)
         .onSnapshot((snapshot) => {
           groupsCache.clear();
@@ -662,6 +721,7 @@
 
     setMembersTabVisible(true);
     setMobilePanelUi("middle");
+    syncUserProfileSubscriptions();
 
     const chatGroupTitle = document.getElementById("chatGroupTitle");
     if (chatGroupTitle) chatGroupTitle.textContent = `Gruppe: ${groupData.name || "Gruppe"}`;
@@ -697,6 +757,7 @@
       selectedGroupUnsubscribe();
       selectedGroupUnsubscribe = null;
     }
+    syncUserProfileSubscriptions();
   }
 
   function canManageGroupMembers(groupDoc) {
@@ -1304,31 +1365,63 @@
     if (btn) btn.disabled = !enabled;
   }
 
+  async function getUsersByPrefix(field, q, limit) {
+    if (!db) return null;
+    const query = String(q || "").trim().toLowerCase();
+    if (!query) return null;
+
+    const max = Number(limit || 20) || 20;
+
+    try {
+      return await db
+        .collection("users")
+        .where(field, ">=", query)
+        .where(field, "<=", query + "\uf8ff")
+        .orderBy(field)
+        .limit(max)
+        .get();
+    } catch (_) {
+      return null;
+    }
+  }
+
   async function searchUsersForGroup(query) {
     if (!currentUser || !selectedGroupId) return [];
 
-    const lowerQuery = String(query || "").toLowerCase();
-    if (!lowerQuery) return [];
-
-    const snap = await db.collection("users").get();
     const groupMembers = Array.isArray(selectedGroupData?.members) ? selectedGroupData.members : [];
 
+    const q = String(query || "").trim().toLowerCase();
+    if (!q) return [];
+
+    const limit = 24;
+
+    const [nameSnap, emailLowerSnap, emailSnap] = await Promise.all([
+      getUsersByPrefix("usernameLower", q, limit),
+      getUsersByPrefix("emailLower", q, limit),
+      getUsersByPrefix("email", q, limit)
+    ]);
+
     const results = [];
-    snap.forEach((doc) => {
-      const user = doc.data() || {};
-      const uid = doc.id;
-      const displayName = user.username || user.displayName || user.email?.split("@")[0] || "User";
+    const seen = new Set();
 
-      if (uid === currentUser.uid) return;
-      if (groupMembers.includes(uid)) return;
+    const consume = (snap) => {
+      if (!snap || typeof snap.forEach !== "function") return;
+      snap.forEach((doc) => {
+        const uid = doc.id;
+        if (!uid || uid === currentUser.uid) return;
+        if (groupMembers.includes(uid)) return;
+        if (seen.has(uid)) return;
 
-      if (
-        String(displayName).toLowerCase().includes(lowerQuery) ||
-        String(user.email || "").toLowerCase().includes(lowerQuery)
-      ) {
+        const user = doc.data() || {};
+        const displayName = user.username || user.displayName || user.email?.split("@")[0] || "User";
         results.push({ uid, displayName, email: user.email || "" });
-      }
-    });
+        seen.add(uid);
+      });
+    };
+
+    consume(nameSnap);
+    consume(emailLowerSnap);
+    consume(emailSnap);
 
     return results.slice(0, 12);
   }
@@ -1586,82 +1679,86 @@
     });
   }
 
-  function searchFriends(query) {
+  async function searchFriends(query) {
     if (!currentUser) return;
 
     try {
-      const lowerQuery = query.toLowerCase();
+      const q = String(query || "").trim().toLowerCase();
+      if (q.length < 2) {
+        if (friendsSearchResults) friendsSearchResults.innerHTML = '<div class="empty-state"><p>🔍 Suche…</p></div>';
+        return;
+      }
 
-      db.collection("users")
-        .get()
-        .then((snapshot) => {
-          const results = [];
+      const seq = ++friendsSearchSeq;
+      const limit = 28;
 
-          snapshot.forEach((doc) => {
-            const user = doc.data();
-            const displayName =
-              user.username || user.displayName || user.email?.split("@")[0] || "User";
+      const [nameSnap, emailLowerSnap, emailSnap] = await Promise.all([
+        getUsersByPrefix("usernameLower", q, limit),
+        getUsersByPrefix("emailLower", q, limit),
+        getUsersByPrefix("email", q, limit)
+      ]);
 
-            if (doc.id === currentUser.uid || currentUserFriends.includes(doc.id)) {
-              return;
-            }
+      if (seq !== friendsSearchSeq) return;
 
-            if (
-              displayName.toLowerCase().includes(lowerQuery) ||
-              user.email?.toLowerCase().includes(lowerQuery)
-            ) {
-              results.push({
-                uid: doc.id,
-                displayName: displayName,
-                email: user.email
-              });
-            }
-          });
+      const results = [];
+      const seen = new Set();
+      const existing = new Set(Array.isArray(currentUserFriends) ? currentUserFriends : []);
 
-          if (results.length === 0) {
-            friendsSearchResults.innerHTML =
-              '<div class="empty-state"><p>😞 Keine Benutzer gefunden</p></div>';
-            return;
-          }
+      const consume = (snap) => {
+        if (!snap || typeof snap.forEach !== "function") return;
+        snap.forEach((doc) => {
+          const uid = doc.id;
+          if (!uid || uid === currentUser.uid) return;
+          if (existing.has(uid)) return;
+          if (seen.has(uid)) return;
 
-          friendsSearchResults.innerHTML = results
-            .map((user) => {
-              const initials = (user.displayName || "U")
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()
-                .substring(0, 2);
-
-              return `
-                <div class="friend-search-item">
-                  <div class="friend-search-item-avatar" style="background: rgba(0,255,136,0.75); color: #041a10;">
-                    ${initials}
-                  </div>
-                  <div class="friend-search-item-name">${renderUserDisplayName(user.displayName)}</div>
-                  <div class="friend-search-item-action">
-                    <button class="btn btn-sm" data-friend-uid="${escapeHtml(user.uid)}" data-friend-name="${escapeHtml(user.displayName)}">
-                      ➕ Hinzufügen
-                    </button>
-                  </div>
-                </div>
-              `;
-            })
-            .join("");
-
-          friendsSearchResults
-            .querySelectorAll("button[data-friend-uid]")
-            .forEach((btn) => {
-              btn.addEventListener("click", () => {
-                const friendUid = btn.dataset.friendUid;
-                const friendName = btn.dataset.friendName;
-                window.echtluckyAddFriend(friendUid, friendName);
-              });
-            });
+          const user = doc.data() || {};
+          const displayName = user.username || user.displayName || user.email?.split("@")[0] || "User";
+          results.push({ uid, displayName, email: user.email || "" });
+          seen.add(uid);
         });
+      };
+
+      consume(nameSnap);
+      consume(emailLowerSnap);
+      consume(emailSnap);
+
+      if (!friendsSearchResults) return;
+
+      if (results.length === 0) {
+        friendsSearchResults.innerHTML = '<div class="empty-state"><p>😞 Keine Benutzer gefunden</p></div>';
+        return;
+      }
+
+      friendsSearchResults.innerHTML = results
+        .slice(0, 12)
+        .map((user) => {
+          const initials = (user.displayName || "U")
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase()
+            .substring(0, 2);
+
+          return `
+            <div class="friend-search-item">
+              <div class="friend-search-item-avatar" style="background: rgba(0,255,136,0.75); color: #041a10;">
+                ${escapeHtml(initials)}
+              </div>
+              <div class="friend-search-item-name">${renderUserDisplayName(user.displayName)}</div>
+              <div class="friend-search-item-action">
+                <button class="btn btn-sm" data-friend-uid="${escapeHtml(user.uid)}" data-friend-name="${escapeHtml(user.displayName)}">
+                  ➕ Hinzufügen
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
     } catch (err) {
-      friendsSearchResults.innerHTML =
-        '<div class="empty-state"><p>❌ Fehler bei der Suche</p></div>';
+      if (friendsSearchResults) {
+        friendsSearchResults.innerHTML = '<div class="empty-state"><p>❌ Fehler bei der Suche</p></div>';
+      }
     }
   }
 
@@ -1773,6 +1870,41 @@
     currentUser = auth.currentUser;
 
     if (!currentUser) {
+      try {
+        if (typeof friendsUnsubscribe === "function") friendsUnsubscribe();
+      } catch (_) {}
+      friendsUnsubscribe = null;
+
+      try {
+        if (typeof groupsUnsubscribe === "function") groupsUnsubscribe();
+      } catch (_) {}
+      groupsUnsubscribe = null;
+
+      try {
+        detachSelectedGroupListener();
+      } catch (_) {}
+      try {
+        detachMessagesListener();
+      } catch (_) {}
+
+      try {
+        for (const [, unsub] of userProfileSubscriptions) {
+          try {
+            if (typeof unsub === "function") unsub();
+          } catch (_) {}
+        }
+        userProfileSubscriptions.clear();
+      } catch (_) {}
+
+      currentUserFriends = [];
+      userCache.clear();
+      groupsCache.clear();
+      activeChatMode = "dm";
+      selectedDmUid = null;
+      selectedDmName = "";
+      selectedGroupId = null;
+      selectedGroupData = null;
+
       if (statusLabel) statusLabel.textContent = "Nicht eingeloggt";
       if (btnLogin) btnLogin.hidden = false;
       if (authStatusCard) authStatusCard.hidden = false;
