@@ -895,3 +895,73 @@ body.modal-open{ overflow:hidden; }
   .legal-modal.show{ padding: 14px; }
   .legal-modal__content{ padding: 0 1.4rem 2rem; }
 }
+
+
+/* LIVE Badge for Streaming */
+.live-badge{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.live-badge__square{
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 2px solid #00ff88;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  position: relative;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.live-badge__square:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.25);
+}
+
+.live-badge__dot{
+  width: 8px;
+  height: 8px;
+  background: #ff3366;
+  border-radius: 50%;
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+.live-badge__text{
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-style: italic;
+  color: #ff3366;
+  letter-spacing: 0.5px;
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 4px rgba(255, 51, 102, 0.55);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 8px rgba(255, 51, 102, 0.35);
+  }
+}
+
+
+/* Blue border for accessible dropdowns */
+.nav-dropdown:focus-within,
+.nav-dropdown:hover{
+  outline: 2px solid #3399ff;
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+.nav-dropdown:focus-within .nav-link-btn,
+.nav-dropdown:hover .nav-link-btn{
+  border-color: #3399ff;
+  box-shadow: 0 0 0 1px rgba(51, 153, 255, 0.3);
+}
