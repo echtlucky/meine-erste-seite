@@ -208,36 +208,22 @@ window.renderAuthUI = function renderAuthUI(user) {
     });
   }
 
-  function wireHubDropdown() {
-    const toggle = qs("hubToggle");
-    const menu = qs("hubMenu");
-    if (!toggle || !menu || toggle.__wired) return;
-
-    toggle.__wired = true;
-    toggle.setAttribute("aria-expanded", "false");
-
-    toggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.classList.toggle("show");
-      const isOpen = menu.classList.contains("show");
-      toggle.setAttribute("aria-expanded", String(isOpen));
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-        closeDropdown(menu);
-        toggle.setAttribute("aria-expanded", "false");
-      }
-    });
-
-    wireHoverDelay(toggle, menu);
+  function wireHubLinkVisibility() {
+    // HUB link is only visible on hub.html page
+    const hubLink = document.querySelector('[data-hub-only]');
+    if (!hubLink) return;
+    
+    const currentPath = window.location.pathname.split("/").pop() || "index.html";
+    const isHubPage = currentPath === "hub.html" || currentPath === "connect.html";
+    
+    hubLink.style.display = isHubPage ? '' : 'none';
   }
 
   
   window.initHeaderScripts = function initHeaderScripts() {
     wireMobileMenu();
     wireDropdown();
-    wireHubDropdown();
+    wireHubLinkVisibility();
     setActiveNavLink();
 
     renderAuthUI(window.__ECHTLUCKY_CURRENT_USER__);
