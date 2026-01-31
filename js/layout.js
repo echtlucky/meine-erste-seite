@@ -129,13 +129,14 @@ const setupFooter = () => {
 export const loadLayout = async () => {
   if (!headerContainer || !footerContainer) return;
 
+  const base = window.location.pathname.includes("/pages/") ? "../" : "";
   const [header, footer] = await Promise.all([
-    fetch("/partials/header.html").then((res) => res.text()),
-    fetch("/partials/footer.html").then((res) => res.text())
+    fetch(`${base}partials/header.html`).then((res) => res.text()),
+    fetch(`${base}partials/footer.html`).then((res) => res.text())
   ]);
 
-  headerContainer.innerHTML = header;
-  footerContainer.innerHTML = footer;
+  headerContainer.innerHTML = header.replaceAll("{{BASE}}", base);
+  footerContainer.innerHTML = footer.replaceAll("{{BASE}}", base);
 
   setupHeader();
   setupFooter();
