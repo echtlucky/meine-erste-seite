@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Rollen - LCKY HUB</title>
+    <link rel="icon" type="image/png" href="assets/logo-rbg.png">
+    <link rel="stylesheet" href="css/lcky-design.css">
+</head>
+<body class="admin-page">
+    <div id="header-container"></div>
+
+    <main class="admin-container">
+        <div class="admin-header">
+            <div class="admin-shield-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="M12 7v9"/>
+                    <path d="M9.5 10.5h5"/>
+                </svg>
+            </div>
+            <h1>Rollen & Freischalten</h1>
+            <p>Verwalte Nutzerrollen und Status direkt im App-Projekt.</p>
+        </div>
+
+        <div class="admin-card" id="roles-status" style="margin-bottom: 2rem;">
+            <h2>
+                <span class="icon">🔐</span>
+                Admin Zugriff
+            </h2>
+            <p class="admin-status-text">Status wird geladen...</p>
+            <form class="blog-form" id="roles-login-form" style="margin-top: 1.5rem;">
+                <div class="form-group">
+                    <label for="roles-login-email">E-Mail</label>
+                    <input type="email" id="roles-login-email" placeholder="admin@lcky.de" required>
+                </div>
+                <div class="form-group">
+                    <label for="roles-login-password">Passwort</label>
+                    <input type="password" id="roles-login-password" placeholder="Passwort" required>
+                </div>
+                <button type="submit" class="admin-btn">
+                    <span>🔐</span>
+                    Admin anmelden
+                </button>
+                <button type="button" class="admin-btn secondary" id="roles-logout" style="margin-top: 0.75rem;">
+                    <span>🚪</span>
+                    Abmelden
+                </button>
+            </form>
+            <p class="comment-meta" id="roles-login-message" style="margin-top: 1rem;"></p>
+        </div>
+
+        <div class="admin-card" id="roles-hint" style="margin-bottom: 2rem; display: none;">
+            <h2>
+                <span class="icon">🧭</span>
+                Hinweis
+            </h2>
+            <p class="comment-meta">Wenn du einen User als Admin setzen willst, musst du zusätzlich den Admin-Claim per Backend setzen. Siehe <code>BACKEND-SETUP.md</code>.</p>
+        </div>
+
+        <div class="admin-grid" id="roles-grid" style="display: none;">
+            <div class="admin-card">
+                <h2>
+                    <span class="icon">👥</span>
+                    Nutzerrollen
+                </h2>
+                <div class="blog-list" id="roles-user-list"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script type="module" src="js/admin-roles.js"></script>
+</body>
+</html>

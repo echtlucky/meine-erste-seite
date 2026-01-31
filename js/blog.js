@@ -42,18 +42,26 @@ const formatDate = (value) => {
   }
 };
 
-const ensureProfile = async (user) => {
+const ensureProfile = async (user, displayName = "") => {
   const userRef = doc(appDb, "users", user.uid);
   const snapshot = await getDoc(userRef);
   if (!snapshot.exists()) {
     await setDoc(userRef, {
       uid: user.uid,
       email: user.email,
+      displayName: displayName || "",
       createdAt: serverTimestamp(),
       role: "user",
       status: "active"
     });
+    return { displayName: displayName || "", email: user.email };
   }
+  const data = snapshot.data();
+  if (displayName && data.displayName !== displayName) {
+    await setDoc(userRef, { displayName }, { merge: true });
+    return { ...data, displayName };
+  }
+  return data;
 };
 
 const renderComment = (commentData) => {
@@ -73,6 +81,8 @@ const renderComment = (commentData) => {
   item.append(meta, text);
   return item;
 };
+
+let currentProfile = null;
 
 const renderPosts = async (currentUser) => {
   postsContainer.innerHTML = "";
@@ -169,7 +179,7 @@ const renderPosts = async (currentUser) => {
 
       await addDoc(collection(appDb, "posts", postDoc.id, "comments"), {
         uid: currentUser.uid,
-        author: currentUser.email,
+        author: (currentProfile && currentProfile.displayName) || currentUser.email,
         content,
         createdAt: serverTimestamp()
       });
@@ -188,11 +198,12 @@ registerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   authMessage.textContent = "";
 
+  const displayName = document.getElementById("register-display-name").value.trim();
   const email = document.getElementById("register-email").value.trim();
   const password = document.getElementById("register-password").value.trim();
   try {
     const credential = await createUserWithEmailAndPassword(appAuth, email, password);
-    await ensureProfile(credential.user);
+    currentProfile = await ensureProfile(credential.user, displayName);
     authMessage.textContent = "Account erstellt und eingeloggt.";
   } catch (error) {
     authMessage.textContent = `Fehler: ${error.message}`;
@@ -207,7 +218,7 @@ loginForm.addEventListener("submit", async (event) => {
   const password = document.getElementById("login-password").value.trim();
   try {
     const credential = await signInWithEmailAndPassword(appAuth, email, password);
-    await ensureProfile(credential.user);
+    currentProfile = await ensureProfile(credential.user);
     authMessage.textContent = "Willkommen zurück.";
   } catch (error) {
     authMessage.textContent = `Fehler: ${error.message}`;
@@ -229,13 +240,14 @@ if (!appAuth || !appDb) {
       currentUserLabel.textContent = user.email || user.uid;
       registerForm.style.display = "none";
       loginForm.style.display = "none";
-      await ensureProfile(user);
+      currentProfile = await ensureProfile(user);
       renderPosts(user);
     } else {
       authState.style.display = "none";
       currentUserLabel.textContent = "-";
       registerForm.style.display = "flex";
       loginForm.style.display = "flex";
+      currentProfile = null;
       renderPosts(null);
     }
   });
