@@ -4,6 +4,21 @@
   --primary-hover: #7C3AED;
   --primary-light: #A78BFA;
   --primary-dark: #6D28D9;
+  --primary-rgb: 139, 92, 246;
+
+  /* NEON ACCENTS */
+  --neon-cyan: #00FFFF;
+  --neon-cyan-rgb: 0, 255, 255;
+  --neon-pink: #FF4DFF;
+  --neon-green: #00FF88;
+
+  /* BACKGROUND */
+  --bg-darkest: #0B0A12;
+  --bg-dark: #11101A;
+  --bg-card: #18162A;
+  --bg-card-hover: #1E1A35;
+  --bg-glass: rgba(24, 22, 42, 0.8);
+  --bg-glass-light: rgba(30, 26, 53, 0.6);
 
   /* NEON ACCENTS */
   --neon-cyan: #00FFFF;
@@ -28,14 +43,21 @@
   --shadow-medium: 0 8px 32px rgba(139, 92, 246, 0.15);
   --shadow-strong: 0 16px 48px rgba(139, 92, 246, 0.2);
   --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.4);
-  --glow-primary: 0 0 40px rgba(139, 92, 246, 0.4);
-  --glow-cyan: 0 0 30px rgba(0, 255, 255, 0.3);
-  --glow-subtle: 0 0 20px rgba(139, 92, 246, 0.2);
+  --glow-primary: 0 0 60px rgba(139, 92, 246, 0.5);
+  --glow-cyan: 0 0 40px rgba(0, 255, 255, 0.4);
+  --glow-subtle: 0 0 30px rgba(139, 92, 246, 0.3);
 
   /* GLASSMORPHISM */
   --glass-bg: rgba(17, 16, 26, 0.6);
   --glass-border: rgba(139, 92, 246, 0.15);
   --glass-blur: blur(20px);
+
+  /* CARD GRADIENTS */
+  --gradient-purple: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.1));
+  --gradient-cyan: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(139, 92, 246, 0.1));
+  --gradient-pink: linear-gradient(135deg, rgba(255, 77, 255, 0.25), rgba(139, 92, 246, 0.1));
+  --gradient-blue: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.15));
+  --gradient-gold: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(139, 92, 246, 0.1));
 
   /* TRANSITIONS */
   --transition-fast: 0.2s ease;
@@ -215,15 +237,15 @@ a:hover {
 }
 
 .logo img {
-  height: 55px;
+  height: 150px;
   width: auto;
-  filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.4));
+  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.5)) brightness(1.1);
   transition: all var(--transition-fast);
 }
 
 .logo:hover img {
-  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.7));
-  transform: scale(1.08);
+  filter: drop-shadow(0 0 50px rgba(139, 92, 246, 0.9)) brightness(1.2);
+  transform: scale(1.1);
 }
 
 /* NAVIGATION - CENTERED */

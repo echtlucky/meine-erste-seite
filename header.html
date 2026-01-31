@@ -1,0 +1,309 @@
+<!-- Universal Header -->
+<header class="site-header" id="site-header">
+    <div class="header-container">
+        <!-- Logo -->
+        <a href="index.html" class="header-logo">
+            <img src="assets/logo-rbg.png" alt="LCKY HUB" class="logo-image">
+        </a>
+        
+        <!-- Navigation -->
+        <nav class="header-nav">
+            <a href="index.html" class="nav-link active" data-page="index">
+                <span>Home</span>
+                <div class="nav-glow"></div>
+            </a>
+            <a href="blog.html" class="nav-link" data-page="blog">
+                <span>Blog</span>
+                <div class="nav-glow"></div>
+            </a>
+        </nav>
+        
+        <!-- CTA Button -->
+        <a href="hub-download.html" class="header-cta">
+            <span class="cta-text">HUB Downloaden</span>
+            <span class="cta-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+            </span>
+            <div class="cta-glow"></div>
+        </a>
+    </div>
+</header>
+
+<!-- Header Styles -->
+<style>
+    /* Header Styles */
+    .site-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        padding: 1rem 2rem;
+        background: linear-gradient(180deg, 
+            rgba(11, 10, 18, 0.95) 0%, 
+            rgba(17, 16, 26, 0.85) 50%,
+            transparent 100%
+        );
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .site-header.scrolled {
+        background: rgba(11, 10, 18, 0.98);
+        padding: 0.75rem 2rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+    
+    /* Logo - Much Larger */
+    .header-logo {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        transition: transform 0.3s ease;
+    }
+    
+    .header-logo:hover {
+        transform: scale(1.05);
+    }
+    
+    .logo-image {
+        height: 50px;
+        width: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.3));
+        transition: filter 0.3s ease;
+    }
+    
+    .header-logo:hover .logo-image {
+        filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.5));
+    }
+    
+    /* Navigation */
+    .header-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(139, 92, 246, 0.05);
+        border: 1px solid rgba(139, 92, 246, 0.1);
+        border-radius: 50px;
+        padding: 0.5rem;
+        backdrop-filter: blur(20px);
+    }
+    
+    .nav-link {
+        position: relative;
+        padding: 0.75rem 1.5rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.95rem;
+        text-decoration: none;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .nav-link span {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .nav-link .nav-glow {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, 
+            rgba(139, 92, 246, 0.2), 
+            rgba(0, 255, 255, 0.1)
+        );
+        border-radius: 50px;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.3s ease;
+        z-index: 1;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+        color: var(--text-primary);
+    }
+    
+    .nav-link:hover .nav-glow,
+    .nav-link.active .nav-glow {
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    .nav-link.active {
+        background: rgba(139, 92, 246, 0.15);
+        box-shadow: 
+            0 4px 20px rgba(139, 92, 246, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    /* CTA Button */
+    .header-cta {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1.75rem;
+        background: linear-gradient(135deg, var(--primary), #7C3AED);
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        border-radius: 50px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 
+            0 4px 20px rgba(139, 92, 246, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    .header-cta .cta-text {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .header-cta .cta-icon {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .header-cta .cta-glow {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.2),
+            transparent 50%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+    
+    .header-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 
+            0 8px 30px rgba(139, 92, 246, 0.5),
+            0 0 40px rgba(139, 92, 246, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    .header-cta:hover .cta-glow {
+        opacity: 1;
+    }
+    
+    .header-cta:hover .cta-icon {
+        transform: translateY(2px);
+    }
+    
+    /* Mobile Menu Toggle */
+    .mobile-menu-toggle {
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        padding: 10px;
+        background: rgba(139, 92, 246, 0.1);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-menu-toggle span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: var(--text-primary);
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-menu-toggle:hover {
+        background: rgba(139, 92, 246, 0.2);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .site-header {
+            padding: 0.75rem 1rem;
+        }
+        
+        .header-container {
+            gap: 1rem;
+        }
+        
+        .logo-image {
+            height: 40px;
+        }
+        
+        .header-nav {
+            display: none;
+        }
+        
+        .header-cta {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.85rem;
+        }
+        
+        .header-cta .cta-text {
+            display: none;
+        }
+        
+        .mobile-menu-toggle {
+            display: flex;
+        }
+    }
+    
+    /* CSS Variables */
+    :root {
+        --bg-darkest: #0B0A12;
+        --bg-dark: #11101A;
+        --text-primary: #FFFFFF;
+        --text-muted: #6B7280;
+        --primary: #8B5CF6;
+    }
+</style>
+
+<!-- Header Scripts -->
+<script>
+    // Scroll effect for header
+    window.addEventListener('scroll', () => {
+        const header = document.getElementById('site-header');
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+    
+    // Set active nav link based on current page
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const pageName = currentPage.replace('.html', '') || 'index';
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.dataset.page === pageName) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>
