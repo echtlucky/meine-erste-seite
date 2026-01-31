@@ -13,23 +13,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="site-header" id="header">
-        <div class="header-inner">
-            <!-- Logo -->
-            <a href="#home" class="logo">
-                <img src="assets/logo-rbg.png" alt="LCKY">
-            </a>
-            
-            <!-- Navigation - Centered -->
-            <nav class="nav">
-                <a href="#home" class="nav-link active">Home</a>
-                <a href="#blog" class="nav-link">Blog</a>
-            </nav>
-            
-            <!-- CTA Button -->
-            <a href="hub-download.html" class="header-cta">HUB Downloaden</a>
-        </div>
-    </header>
+    <div id="header-container"></div>
 
     <!-- Main Content -->
     <main>
@@ -207,50 +191,35 @@
             </div>
         </section>
 
-        <!-- Blog Section -->
-        <section id="blog" class="blog-section">
+        <!-- Blog Preview Section -->
+        <section class="blog-section">
             <div class="container">
                 <div class="section-header">
                     <h2>Unsere Gedanken</h2>
                     <p>Insights, Updates und Geschichten aus der Welt von LCKY.</p>
                 </div>
                 
-                <div class="blog-container">
-                    <article class="blog-post">
-                        <div class="blog-meta">
-                            <time datetime="2024-01-15">15. Januar 2024</time>
+                <div class="blog-preview-grid">
+                    <article class="blog-preview-card">
+                        <div class="blog-preview-meta">
+                            <time datetime="2026-01-15">15. Januar 2026</time>
                         </div>
                         <h3>Die Geburt einer Vision</h3>
-                        <p>Alles begann mit einer einfachen Frage: Warum nicht besser? Warum nicht eleganter? Warum nicht mutiger? In diesem Artikel erzählen wir die Geschichte von LCKY – wie aus einer Idee eine Mission wurde, wie aus einem Gedanken ein Projekt entstand, das unsere ganze Leidenschaft und unser gesamtes Können fordert.</p>
-                        <p>Wir nehmen dich mit auf die Reise von den ersten Skizzen bis zu dem, was heute vor dir liegt. Eine Geschichte voller Zweifel, Durchbrüche und der unerschütterlichen Überzeugung, dass es sich lohnt, anders zu denken.</p>
-                        <a href="#" class="read-more">
-                            <span>Weiterlesen</span>
+                        <p>Wie aus einer Idee eine Mission wurde und warum wir nie den leichten Weg gehen.</p>
+                        <a href="blog.html" class="read-more">
+                            <span>Zum Blog</span>
                             <span>→</span>
                         </a>
                     </article>
                     
-                    <article class="blog-post">
-                        <div class="blog-meta">
-                            <time datetime="2024-01-10">10. Januar 2024</time>
+                    <article class="blog-preview-card">
+                        <div class="blog-preview-meta">
+                            <time datetime="2026-01-10">10. Januar 2026</time>
                         </div>
                         <h3>Warum Design wichtiger ist als Features</h3>
-                        <p>In einer Welt, die von Funktionen überflutet ist, vergessen wir oft das Wichtigste: wie sich etwas anfühlt. Wir teilen unsere Philosophie zu Design, Ästhetik und der Kunst der Reduktion. Warum weniger oft mehr ist und warum das Löschen schwieriger ist als das Hinzufügen.</p>
-                        <p>Design ist nicht nur, wie es aussieht. Design ist, wie es funktioniert, wie es sich anfühlt, wie es dich beim Nutzen begleitet. Gutes Design ist unsichtbar – es verschwindet und lässt nur das Erlebnis zurück.</p>
-                        <a href="#" class="read-more">
-                            <span>Weiterlesen</span>
-                            <span>→</span>
-                        </a>
-                    </article>
-                    
-                    <article class="blog-post">
-                        <div class="blog-meta">
-                            <time datetime="2024-01-05">5. Januar 2024</time>
-                        </div>
-                        <h3>Der erste Schritt ist der schwerste</h3>
-                        <p>Jede große Reise beginnt mit einem einzigen Schritt. Unser erster Schritt war der Entschluss, etwas zu schaffen, das uns selbst begeistert. Hier erfährst du, was uns antreibt, was uns nachts wach hält und warum wir glauben, dass die Welt bereit ist für LCKY.</p>
-                        <p>Der Anfang ist immer der schwierigste Teil. Die Leere des weißen Blatts, die Unsicherheit des Unbekannten, die Stimmen, die sagen: "Das schaffst du nicht." Aber genau dort, in diesem Moment der größten Unsicherheit, entsteht etwas Magisches.</p>
-                        <a href="#" class="read-more">
-                            <span>Weiterlesen</span>
+                        <p>Unser Blick auf Ästhetik, Fokus und die Kunst der Reduktion.</p>
+                        <a href="blog.html" class="read-more">
+                            <span>Zum Blog</span>
                             <span>→</span>
                         </a>
                     </article>
@@ -260,69 +229,12 @@
     </main>
 
     <!-- Footer -->
-    <footer class="site-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-links">
-                    <a href="impressum.html" class="footer-link">Impressum</a>
-                    <a href="datenschutz.html" class="footer-link">Datenschutz</a>
-                    <a href="nutzungsbedingungen.html" class="footer-link">Nutzungsbedingungen</a>
-                </div>
-                <div class="footer-bottom">
-                    <p>&copy; 2024 LCKY. Alle Rechte vorbehalten.</p>
-                    <a href="admin-panel.html" style="opacity: 0.5;">Admin</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
     <!-- Scripts -->
-    <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Header scroll effect
-        window.addEventListener('scroll', function() {
-            const header = document.getElementById('header');
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-
-        // Active navigation link
-        const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('.nav-link');
-
-        window.addEventListener('scroll', () => {
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
-                if (scrollY >= sectionTop - 200) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href').slice(1) === current) {
-                    link.classList.add('active');
-                }
-            });
-        });
+    <script type="module">
+        import { loadLayout } from './js/layout.js';
+        loadLayout();
     </script>
 </body>
 </html>

@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCKY HUB - Blog</title>
+    <link rel="icon" type="image/png" href="assets/logo-rbg.png">
+    <link rel="stylesheet" href="css/lcky-design.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="blog-page">
+        <section class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Blog & Community</h2>
+                    <p>Artikel, Updates und Kommentare aus der LCKY Welt.</p>
+                </div>
+
+                <div class="auth-card" id="auth-card">
+                    <h3 style="margin-bottom: 1.5rem;">Account</h3>
+                    <div class="auth-grid">
+                        <form class="form-stack" id="register-form">
+                            <h4>Registrieren</h4>
+                            <input class="input-field" type="email" id="register-email" placeholder="E-Mail" required>
+                            <input class="input-field" type="password" id="register-password" placeholder="Passwort" required>
+                            <button class="btn btn-primary" type="submit">Registrieren</button>
+                        </form>
+
+                        <form class="form-stack" id="login-form">
+                            <h4>Anmelden</h4>
+                            <input class="input-field" type="email" id="login-email" placeholder="E-Mail" required>
+                            <input class="input-field" type="password" id="login-password" placeholder="Passwort" required>
+                            <button class="btn btn-glass" type="submit">Anmelden</button>
+                        </form>
+                    </div>
+
+                    <div class="subcard-grid" id="auth-state" style="display: none;">
+                        <div class="subcard">
+                            <h5>Eingeloggt</h5>
+                            <p id="current-user">-</p>
+                        </div>
+                        <div class="subcard">
+                            <h5>Aktion</h5>
+                            <button class="btn btn-glass" id="logout-btn" type="button">Abmelden</button>
+                        </div>
+                    </div>
+
+                    <p id="auth-message" style="margin-top: 1rem; color: var(--text-muted);"></p>
+                </div>
+
+                <div id="posts-container" style="margin-top: 3rem;"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script type="module" src="js/blog.js"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - LCKY HUB</title>
-    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="icon" type="image/png" href="assets/logo-rbg.png">
     <link rel="stylesheet" href="css/lcky-design.css">
     <style>
         /* Admin Panel Specific Styles */
@@ -342,11 +342,38 @@
                 </svg>
             </div>
             <h1>Admin Panel</h1>
-            <p>Verwalte deinen Blog und überwache deine Inhalte</p>
+            <p>Verwalte Blog, Nutzer und Kommentare in einem Kontrollzentrum</p>
+        </div>
+
+        <div class="admin-card" id="admin-status" style="margin-bottom: 2rem;">
+            <h2>
+                <span class="icon">🛡️</span>
+                Zugriff
+            </h2>
+            <p class="admin-status-text">Status wird geladen...</p>
+            <form class="blog-form" id="admin-login-form" style="margin-top: 1.5rem;">
+                <div class="form-group">
+                    <label for="admin-login-email">E-Mail</label>
+                    <input type="email" id="admin-login-email" placeholder="admin@lcky.de" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-login-password">Passwort</label>
+                    <input type="password" id="admin-login-password" placeholder="Passwort" required>
+                </div>
+                <button type="submit" class="admin-btn">
+                    <span>🔐</span>
+                    Admin anmelden
+                </button>
+                <button type="button" class="admin-btn secondary" id="admin-logout" style="margin-top: 0.75rem;">
+                    <span>🚪</span>
+                    Abmelden
+                </button>
+            </form>
+            <p class="comment-meta" id="admin-login-message" style="margin-top: 1rem;"></p>
         </div>
         
         <!-- Admin Grid -->
-        <div class="admin-grid">
+        <div class="admin-grid" style="display: none;">
             <!-- Create Blog Post -->
             <div class="admin-card">
                 <h2>
@@ -379,29 +406,7 @@
                     <span class="icon">📚</span>
                     Veröffentlichte Posts
                 </h2>
-                <div class="blog-list" id="blog-list">
-                    <!-- Blog items will be loaded here -->
-                    <div class="blog-item">
-                        <div class="blog-item-info">
-                            <h4>Willkommen bei LCKY HUB</h4>
-                            <span>Veröffentlicht am 15. Januar 2026</span>
-                        </div>
-                        <div class="blog-item-actions">
-                            <button class="action-btn" title="Bearbeiten">✏️</button>
-                            <button class="action-btn delete" title="Löschen">🗑️</button>
-                        </div>
-                    </div>
-                    <div class="blog-item">
-                        <div class="blog-item-info">
-                            <h4>Die Zukunft der digitalen Innovation</h4>
-                            <span>Veröffentlicht am 10. Januar 2026</span>
-                        </div>
-                        <div class="blog-item-actions">
-                            <button class="action-btn" title="Bearbeiten">✏️</button>
-                            <button class="action-btn delete" title="Löschen">🗑️</button>
-                        </div>
-                    </div>
-                </div>
+                <div class="blog-list" id="blog-list"></div>
             </div>
             
             <!-- Statistics -->
@@ -412,24 +417,42 @@
                 </h2>
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <div class="stat-value">12</div>
+                        <div class="stat-value" id="stat-posts">0</div>
                         <div class="stat-label">Blog Posts</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value">1.2K</div>
-                        <div class="stat-label">Aufrufe</div>
+                        <div class="stat-value" id="stat-users">0</div>
+                        <div class="stat-label">Nutzer</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value">48</div>
+                        <div class="stat-value" id="stat-comments">0</div>
                         <div class="stat-label">Kommentare</div>
                     </div>
                 </div>
                 <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(139, 92, 246, 0.1);">
-                    <button class="admin-btn secondary" style="width: 100%;">
+                    <button class="admin-btn secondary" style="width: 100%;" id="refresh-stats">
                         <span>📈</span>
-                        Detaillierte Analytics
+                        Daten aktualisieren
                     </button>
                 </div>
+            </div>
+
+            <!-- User Management -->
+            <div class="admin-card">
+                <h2>
+                    <span class="icon">👥</span>
+                    Nutzer verwalten
+                </h2>
+                <div class="blog-list" id="user-list"></div>
+            </div>
+
+            <!-- Comment Overview -->
+            <div class="admin-card">
+                <h2>
+                    <span class="icon">💬</span>
+                    Letzte Kommentare
+                </h2>
+                <div class="blog-list" id="comment-list"></div>
             </div>
         </div>
     </main>
@@ -438,37 +461,6 @@
     <div id="footer-container"></div>
     
     <!-- Scripts -->
-    <script>
-        // Load header and footer
-        fetch('header.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('header-container').innerHTML = data;
-            });
-        
-        fetch('footer.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('footer-container').innerHTML = data;
-            });
-        
-        // Blog form handling
-        document.getElementById('blog-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const title = document.getElementById('post-title').value;
-            const excerpt = document.getElementById('post-excerpt').value;
-            const content = document.getElementById('post-content').value;
-            
-            // Here you would typically send data to a server
-            console.log('New blog post:', { title, excerpt, content });
-            
-            // Show success message
-            alert('Blog-Post erfolgreich erstellt!');
-            
-            // Reset form
-            this.reset();
-        });
-    </script>
+    <script type="module" src="js/admin.js"></script>
 </body>
 </html>
