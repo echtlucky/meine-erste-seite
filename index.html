@@ -1,272 +1,197 @@
 ﻿<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Home | echtlcky</title>
-
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/pages/fonts.css" />
-  <link rel="stylesheet" href="css/pages/home.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCKY HUB - Die digitale Bühne für deine Vision</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/lcky-design.css">
+    
+    <!-- Remove old styles -->
+    <style>
+        /* Hide old elements */
+        #header-placeholder, #footer-placeholder {
+            display: none;
+        }
+    </style>
 </head>
-
-<body class="page-transition home-page">
-  <div id="header-placeholder"></div>
-
-  <main class="container home-shell">
-
-    
-    <section class="home-hero">
-      <div class="home-hero__inner">
-        <div class="home-badge">⚡ echtlcky • Competitive</div>
-
-        <h1 class="home-title">echtlcky</h1>
-
-        <p class="home-sub">
-          Unreal Grind • Ballistic &amp; Ranked • EU Competitive Scene • Auf dem Weg nach ganz oben
-        </p>
-
-        <div class="home-hero__cta">
-          <a class="btn" href="hub.html#ranked">Ranked starten</a>
-          <a class="btn btn-secondary" href="hub.html#reflex">Reflex Lab</a>
-          <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">Discord joinen</a>
+<body>
+    <!-- Navigation -->
+    <header class="site-header" id="header">
+        <div class="container flex justify-between items-center">
+            <!-- Logo -->
+            <a href="#home" class="logo">
+                <img src="assets/logo-rbg.png" alt="LCKY" style="height: 40px; width: auto;">
+                <span class="hidden sm:block ml-2">LCKY</span>
+            </a>
+            
+            <!-- Navigation -->
+            <nav class="hidden md:flex gap-6">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#blog" class="nav-link">Blog</a>
+            </nav>
+            
+            <!-- CTA Button -->
+            <a href="hub-download.html" class="header-cta">
+                <span class="hidden sm:inline">HUB Downloaden</span>
+                <span class="sm:hidden">HUB</span>
+            </a>
         </div>
+    </header>
 
-        <div class="home-hero__mini">
-          <span class="mini-pill">Guides</span>
-          <span class="mini-pill">Challenges</span>
-          <span class="mini-pill">Customs / Scrims</span>
-          <span class="mini-pill">EU Focus</span>
+    <!-- Main Content -->
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="home-hero fade-in">
+            <div class="container text-center max-w-2xl mx-auto">
+                <!-- Badge -->
+                <div class="home-badge mb-8">
+                    <span>🌟 LCKY HUB</span>
+                </div>
+                
+                <!-- Title -->
+                <h1 class="mb-6">
+                    Die digitale Bühne<br>
+                    für deine Vision
+                </h1>
+                
+                <!-- Subtitle -->
+                <p class="home-subtitle text-secondary mb-8 max-w-2xl mx-auto">
+                    Willkommen im Zentrum der Innovation. Hier beginnt deine Reise in eine Welt voller Möglichkeiten, 
+                    wo Kreativität auf Technologie trifft und Visionen zur Realität werden.
+                </p>
+                
+                <!-- CTA Button -->
+                <a href="hub-download.html" download class="btn-cta mb-4">
+                    <span>LCKY HUB jetzt herunterladen</span>
+                    <span class="hidden sm:inline">und starten</span>
+                </a>
+                
+                <!-- Secondary CTA -->
+                <p class="text-muted mt-4">
+                    <a href="#blog" class="text-secondary hover:text-primary">
+                        Entdecke unsere Reise →
+                    </a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Blog Section -->
+        <section id="blog" class="section bg-secondary">
+            <div class="container">
+                <div class="text-center mb-12">
+                    <h2>Unsere Reise</h2>
+                    <p class="text-secondary max-w-2xl mx-auto">
+                        Folge unseren Gedanken, Entdeckungen und Meilensteinen auf dem Weg zu etwas Außergewöhnlichem.
+                    </p>
+                </div>
+                
+                <div class="blog-container">
+                    <!-- Blog Post 1 -->
+                    <article class="blog-post">
+                        <div class="blog-meta">
+                            <time datetime="2024-01-15">15. Januar 2024</time>
+                        </div>
+                        <h3>Die Geburt einer Vision</h3>
+                        <p>
+                            Alles begann mit einer einfachen Idee: die Art und Weise, wie wir digitale Erlebnisse schaffen, 
+                            zu revolutionieren. Heute stehen wir am Anfang von etwas Großem.
+                        </p>
+                        <a href="#" class="text-primary hover:text-neon-cyan">
+                            Weiterlesen →
+                        </a>
+                    </article>
+                    
+                    <!-- Blog Post 2 -->
+                    <article class="blog-post">
+                        <div class="blog-meta">
+                            <time datetime="2024-01-10">10. Januar 2024</time>
+                        </div>
+                        <h3>Warum LCKY anders ist</h3>
+                        <p>
+                            In einer Welt voller Standardlösungen haben wir uns für den außergewöhnlichen Weg entschieden. 
+                            Hier erfährst du, was uns antreibt.
+                        </p>
+                        <a href="#" class="text-primary hover:text-neon-cyan">
+                            Weiterlesen →
+                        </a>
+                    </article>
+                    
+                    <!-- Blog Post 3 -->
+                    <article class="blog-post">
+                        <div class="blog-meta">
+                            <time datetime="2024-01-05">5. Januar 2024</time>
+                        </div>
+                        <h3>Der erste Schritt</h3>
+                        <p>
+                            Jede große Reise beginnt mit einem ersten Schritt. Hier teilen wir unsere ersten Erfahrungen 
+                            und was uns für die Zukunft erwartet.
+                        </p>
+                        <a href="#" class="text-primary hover:text-neon-cyan">
+                            Weiterlesen →
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="impressum.html" class="footer-link">Impressum</a>
+                    <a href="datenschutz.html" class="footer-link">Datenschutz</a>
+                    <a href="nutzungsbedingungen.html" class="footer-link">Nutzungsbedingungen</a>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 LCKY. Alle Rechte vorbehalten.</p>
+                </div>
+            </div>
         </div>
-      </div>
-    </section>
+    </footer>
 
-    <section class="home-connect" aria-label="Connect Einladung">
-      <div class="home-connect__inner">
-        <div class="home-connect__left">
-          <span class="home-connect__tag">Jetzt Connecten</span>
-          <h2>Connect Zone</h2>
-          <p>
-            Schnell rein ins Zentrum: Freunde, Gruppen, Call-Control – alles direkt
-            auf der Website.
-          </p>
-          <div class="home-connect__cta">
-            <a class="btn" href="hub.html">HUB öffnen</a>
-            <button class="btn btn-secondary" id="homeCreateGroupBtn" type="button">Gruppe erstellen</button>
-          </div>
-        </div>
-        <div class="home-connect__right">
-          <div class="home-friends" id="homeFriendsList"></div>
-          <div class="home-groups" id="homeGroupList"></div>
-        </div>
-      </div>
-    </section>
+    <!-- Scripts -->
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
 
-    
-    <section class="home-navcard">
-      <header class="home-sectionhead">
-        <h2>Wohin willst du?</h2>
-        <p>3 schnelle Wege – alles bleibt auf der Website, kein Chaos.</p>
-      </header>
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
 
-      <div class="home-navgrid">
-        <article class="nav-spot">
-          <div class="nav-spot__text">
-            <h3>Blog</h3>
-            <p>Updates, Meta-Talk, Short Guides – schnell rein, schnell besser werden.</p>
-          </div>
-
-          <div class="nav-arrow" aria-hidden="true"></div>
-
-          <a class="btn btn-secondary nav-spot__btn" href="blog.html">Zum Blog</a>
-        </article>
-
-        <article class="nav-spot">
-          <div class="nav-spot__text">
-            <h3>Ranked Challenge</h3>
-            <p>Dailies + XP + Streak. Mini Tasks, maximaler Progress.</p>
-          </div>
-
-          <div class="nav-arrow" aria-hidden="true"></div>
-
-          <a class="btn nav-spot__btn" href="hub.html#ranked">Ranked öffnen</a>
-        </article>
-
-        <article class="nav-spot">
-          <div class="nav-spot__text">
-            <h3>Reflex Lab</h3>
-            <p>Targets klicken, Zeit messen, Rating abholen. Crosshair only im Game.</p>
-          </div>
-
-          <div class="nav-arrow" aria-hidden="true"></div>
-
-          <a class="btn btn-secondary nav-spot__btn" href="hub.html#reflex">Reflex starten</a>
-        </article>
-      </div>
-    </section>
-
-    
-    <section class="home-community">
-      <header class="home-sectionhead">
-        <h2>Werde Teil der echten Grind-Community</h2>
-        <p>Mehr als nur „join Discord“. Hier geht’s um Struktur, Progress und Tryhard ohne Toxic.</p>
-      </header>
-
-      <div class="home-features">
-        <div class="home-feature">
-          <h3>Scrims &amp; Customs</h3>
-          <p>Regelmäßige Lobbies, klare Regeln, fairer Grind.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>Team-Suche</h3>
-          <p>Rollen, Region, Zeiten – match dich sauber mit Leuten.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>VOD-Talk</h3>
-          <p>Mini Reviews &amp; Learnings: kein Roman, nur das was hilft.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>Ranked Dailies</h3>
-          <p>Streak halten, XP farmen, konstant besser werden.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>Reflex Drills</h3>
-          <p>Mechanics warm-up, schnell, flüssig, messbar.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>Roadmap</h3>
-          <p>Features &amp; Updates transparent – du siehst was kommt.</p>
-        </div>
-      </div>
-
-      <div class="home-actions">
-        <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">Discord Community</a>
-
-        
-        <a class="btn btn-secondary"
-          data-account-cta
-          data-cta-logged-out-text="Account erstellen"
-          data-cta-logged-in-text="Account verwalten"
-          data-cta-logged-out-href="login.html"
-          data-cta-logged-in-href="account.html"
-          href="login.html">
-          Account erstellen
-        </a>
-      </div>
-    </section>
-
-    
-    <section class="home-stats">
-      <header class="home-sectionhead">
-        <h2>Ballistic Stats</h2>
-        <p>Aktueller Status.</p>
-      </header>
-
-      <div class="stats-grid">
-        <div class="stat-big">
-          <div class="stat-big__label">Aktueller Rang</div>
-          <div class="stat-big__value" id="rankValue">Unranked</div>
-          <div class="stat-big__hint" id="rankHint">Wird demnächst live angebunden.</div>
-        </div>
-
-        <div class="stat-mini">
-          <div class="stat-mini__label">Peak</div>
-          <div class="stat-mini__value" id="peakValue">—</div>
-        </div>
-
-        <div class="stat-mini">
-          <div class="stat-mini__label">Season</div>
-          <div class="stat-mini__value" id="seasonValue">—</div>
-        </div>
-      </div>
-
-      <div class="home-actions home-actions--spread">
-        <a class="btn" href="hub.html#ranked">Ranked Dailies</a>
-        <a class="btn btn-secondary" href="blog.html">Meta / Updates</a>
-      </div>
-    </section>
-
-    
-    <section class="home-discord">
-      <header class="home-sectionhead">
-        <h2>Discord Community</h2>
-        <p>Wenn du wirklich grindest: komm rein. Rollen, LFG, Events – clean organisiert.</p>
-      </header>
-
-      <div class="discord-split">
-        <div class="discord-left">
-          <ul class="home-list">
-            <li>✅ LFG / Team-Search</li>
-            <li>✅ Customs / Scrims</li>
-            <li>✅ Guides / Settings / Diskussionen</li>
-            <li>✅ Updates direkt ohne Social-Spam</li>
-          </ul>
-        </div>
-
-        <div class="discord-right">
-          <div class="discord-box">
-            <div class="discord-box__title">Ready to join?</div>
-            <div class="discord-box__text">2 Klicks, dann bist du drin.</div>
-            <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">Discord öffnen</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    
-    <section class="home-more">
-      <header class="home-sectionhead">
-        <h2>Was als Nächstes kommt</h2>
-        <p>Mehr Stuff auf der Website – damit Leute hier bleiben und nicht nach 10 Sekunden weg sind.</p>
-      </header>
-
-      <div class="more-grid">
-        <div class="more-card">
-          <h3>Account-Übersicht</h3>
-          <p>Ranked/Reflex Fortschritt, Bestzeiten, Streak, Stats – alles in „Konto verwalten“.</p>
-        </div>
-        <div class="more-card">
-          <h3>Weekly Challenges</h3>
-          <p>Wöchentliche Ziele + Rewards. Optional „sweaty mode“.</p>
-        </div>
-        <div class="more-card">
-          <h3>Leaderboard</h3>
-          <p>Reflex Bestzeiten / Ranked XP – fair &amp; clean, kein Cheat-Spam.</p>
-        </div>
-        <div class="more-card">
-          <h3>FAQ / Quickstart</h3>
-          <p>Neue Leute checken sofort, was abgeht – ohne wall of text.</p>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  
-  <div id="footer-placeholder"></div>
-
-  
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
-  
-  <script src="firebase.js"></script>
-  <script src="js/auth-state.js"></script>
-
-  <script src="js/menu.js"></script>
-  <script src="js/legal-modal.js"></script>
-  <script src="js/notify.js"></script>
-  <script src="js/modal-dialog.js"></script>
-  <script src="js/layout.js"></script>
-  <script src="js/overlays.js"></script>
-  <script src="js/fonts.js"></script>
-  <script src="js/tickets.js"></script>
+        // Add hover effect to blog posts
+        document.querySelectorAll('.blog-post').forEach(post => {
+            post.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+            });
+            
+            post.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
 </body>
 </html>
