@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="registerTitle">LCKY HUB - Registrieren</title>
     <link rel="stylesheet" href="css/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -521,6 +521,7 @@
     </div>
 
     <script src="js/i18n.js"></script>
+    <script src="../js/firebase.js"></script>
     <script src="web.js"></script>
     <script>
         // ============================================
@@ -553,6 +554,7 @@
                 registerErrorTerms: 'Bitte akzeptiere die AGB.',
                 registerErrorEmailExists: 'Diese E-Mail wird bereits verwendet.',
                 registerErrorWeakPassword: 'Passwort ist zu schwach.',
+                registerErrorUsernameTaken: 'Dieser Benutzername ist bereits vergeben.',
                 
                 successRegister: 'Konto erfolgreich erstellt!'
             },
@@ -580,6 +582,7 @@
                 registerErrorTerms: 'Please accept the terms.',
                 registerErrorEmailExists: 'This email is already in use.',
                 registerErrorWeakPassword: 'Password is too weak.',
+                registerErrorUsernameTaken: 'This username is already taken.',
                 
                 successRegister: 'Account created successfully!'
             }

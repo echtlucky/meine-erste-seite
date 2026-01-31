@@ -128,7 +128,7 @@
      TYPOGRAPHY
      ============================================ */
   
-  --font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-family: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
   
   --font-size-xs: 12px;
   --font-size-sm: 14px;
@@ -792,6 +792,19 @@ input::placeholder {
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   transition: all var(--transition-fast);
+}
+
+.card,
+.sidebar,
+.friends-column,
+.nav-column,
+.dashboard-tile,
+.admin-sidebar,
+.admin-stat-card,
+.admin-table,
+.auth-card {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .card:hover {

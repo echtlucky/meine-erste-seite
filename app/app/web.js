@@ -7,13 +7,13 @@
     'use strict';
 
     // Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyB8qzqMJIaL2jNOWsNoNn6knbRKlwLzgNI",
-        authDomain: "echtlcky-app.firebaseapp.com",
-        projectId: "echtlcky-app",
-        storageBucket: "echtlcky-app.appspot.com",
-        messagingSenderId: "1025229928138",
-        appId: "1:1025229928138:web:11aa6a6776cde15a8be633"
+    const firebaseConfig = window.LCKY_FIREBASE_CONFIG || {
+        apiKey: "REPLACE_WITH_API_KEY",
+        authDomain: "echtlucky-blog.firebaseapp.com",
+        projectId: "echtlucky-blog",
+        storageBucket: "echtlucky-blog.appspot.com",
+        messagingSenderId: "411123885314",
+        appId: "1:411123885314:web:869d4cfabaaea3849d0e1b"
     };
 
     // State
@@ -47,7 +47,7 @@
                 }
 
                 // Check if config is valid
-                if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
+                if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY" || firebaseConfig.apiKey === "REPLACE_WITH_API_KEY") {
                     console.log('Firebase: Using demo mode (config not set)');
                     isDemoMode = true;
                     resolve();
@@ -107,14 +107,14 @@
             return auth?.currentUser || null;
         },
 
-        // Sign in with email and password
-        signInWithEmailAndPassword: function(email, password) {
+        // Sign in with email or username and password
+        signInWithEmailAndPassword: function(identifier, password) {
             return new Promise((resolve, reject) => {
                 // Wait for Firebase to be ready
-                this.ready().then(() => {
+                this.ready().then(async () => {
                     if (isDemoMode) {
                         // Demo mode - accept any credentials
-                        if (!email || !password) {
+                        if (!identifier || !password) {
                             reject(new Error('loginErrorEmpty'));
                             return;
                         }
@@ -124,26 +124,47 @@
                             return;
                         }
                         
+                        const displayName = identifier.includes('@')
+                            ? identifier.split('@')[0]
+                            : identifier;
+                        
                         const userData = {
                             uid: 'demo_' + Date.now(),
-                            email: email,
-                            displayName: email.split('@')[0],
+                            email: identifier.includes('@') ? identifier : `${identifier}@demo.local`,
+                            displayName: displayName,
                             photoURL: null
                         };
                         
                         localStorage.setItem('lucky_hub_session', JSON.stringify({
                             ...userData,
+                            username: displayName,
                             discriminator: Math.floor(1000 + Math.random() * 9000),
                             avatar: null,
                             avatarColor: '#8B5CF6',
-                            initial: userData.displayName.charAt(0).toUpperCase(),
+                            initial: displayName.charAt(0).toUpperCase(),
                             status: 'online',
-                            isCreator: false,
+                            role: 'user',
                             createdAt: Date.now()
                         }));
                         
                         resolve(userData);
                         return;
+                    }
+
+                    if (!identifier || !password) {
+                        reject(new Error('loginErrorEmpty'));
+                        return;
+                    }
+
+                    let email = identifier.trim();
+                    if (!email.includes('@')) {
+                        const usernameKey = email.toLowerCase();
+                        const usernameDoc = await db.collection('usernames').doc(usernameKey).get();
+                        if (!usernameDoc.exists) {
+                            reject(this.getErrorMessage('loginErrorNotFound'));
+                            return;
+                        }
+                        email = usernameDoc.data().email;
                     }
                     
                     // Real Firebase auth
@@ -164,7 +185,7 @@
         // Sign up with email and password
         createUserWithEmailAndPassword: function(email, password, username) {
             return new Promise((resolve, reject) => {
-                this.ready().then(() => {
+                this.ready().then(async () => {
                     if (isDemoMode) {
                         // Demo mode
                         if (!email || !password || !username) {
@@ -191,36 +212,56 @@
                         
                         localStorage.setItem('lucky_hub_session', JSON.stringify({
                             ...userData,
+                            username: username,
                             discriminator: Math.floor(1000 + Math.random() * 9000),
                             avatar: null,
                             avatarColor: '#8B5CF6',
                             initial: username.charAt(0).toUpperCase(),
                             status: 'online',
-                            isCreator: false,
+                            role: 'user',
                             createdAt: Date.now()
                         }));
                         
                         resolve(userData);
                         return;
                     }
+
+                    if (!email || !password || !username) {
+                        reject(new Error('registerErrorEmpty'));
+                        return;
+                    }
+
+                    const usernameKey = username.trim().toLowerCase();
+                    const usernameRef = db.collection('usernames').doc(usernameKey);
+                    const usernameSnapshot = await usernameRef.get();
+                    if (usernameSnapshot.exists) {
+                        reject(this.getErrorMessage('registerErrorUsernameTaken'));
+                        return;
+                    }
                     
                     // Real Firebase auth
                     auth.createUserWithEmailAndPassword(email, password)
-                        .then((userCredential) => {
+                        .then(async (userCredential) => {
                             const user = userCredential.user;
                             
                             // Update display name
-                            user.updateProfile({ displayName: username });
+                            await user.updateProfile({ displayName: username });
                             
                             // Create user document in Firestore
-                            db.collection('users').doc(user.uid).set({
+                            await db.collection('users').doc(user.uid).set({
+                                uid: user.uid,
                                 email: email,
                                 username: username,
-                                discriminator: Math.floor(1000 + Math.random() * 9000),
-                                avatar: null,
-                                avatarColor: '#8B5CF6',
-                                status: 'online',
+                                displayName: username,
                                 role: 'user',
+                                status: 'active',
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+
+                            await usernameRef.set({
+                                uid: user.uid,
+                                email: email,
+                                username: username,
                                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
                             });
                             
@@ -260,12 +301,28 @@
         },
 
         // Send password reset email
-        sendPasswordResetEmail: function(email) {
+        sendPasswordResetEmail: function(identifier) {
             return new Promise((resolve, reject) => {
-                this.ready().then(() => {
+                this.ready().then(async () => {
                     if (isDemoMode) {
                         resolve();
                         return;
+                    }
+
+                    if (!identifier) {
+                        reject(this.getErrorMessage('loginErrorEmpty'));
+                        return;
+                    }
+
+                    let email = identifier.trim();
+                    if (!email.includes('@')) {
+                        const usernameKey = email.toLowerCase();
+                        const usernameDoc = await db.collection('usernames').doc(usernameKey).get();
+                        if (!usernameDoc.exists) {
+                            reject(this.getErrorMessage('loginErrorNotFound'));
+                            return;
+                        }
+                        email = usernameDoc.data().email;
                     }
                     
                     auth.sendPasswordResetEmail(email)
@@ -294,6 +351,7 @@
                 'auth/weak-password': 'registerErrorWeakPassword',
                 'auth/operation-not-allowed': 'registerErrorNotAllowed',
                 'auth/invalid-password': 'registerErrorInvalidPassword',
+                'registerErrorUsernameTaken': 'registerErrorUsernameTaken',
                 
                 // Generic/Other
                 'auth/popup-closed-by-user': 'errorPopupClosed',
@@ -335,12 +393,14 @@
                 db.collection('users').doc(user.uid).get()
                     .then((doc) => {
                         if (doc.exists) {
-                            resolve({ uid: user.uid, ...user, ...doc.data() });
+                            resolve({ uid: user.uid, ...doc.data() });
                         } else {
                             resolve({
                                 uid: user.uid,
                                 email: user.email,
                                 displayName: user.displayName,
+                                username: user.displayName || '',
+                                role: 'user',
                                 photoURL: user.photoURL
                             });
                         }
@@ -350,6 +410,8 @@
                             uid: user.uid,
                             email: user.email,
                             displayName: user.displayName,
+                            username: user.displayName || '',
+                            role: 'user',
                             photoURL: user.photoURL
                         });
                     });

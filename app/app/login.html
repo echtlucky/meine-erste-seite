@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="loginTitle">LCKY HUB - Login</title>
     <link rel="stylesheet" href="css/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -368,9 +368,9 @@
             <!-- Form -->
             <form class="auth-form" id="login-form">
                 <div class="form-group">
-                    <label for="email" data-i18n="emailLabel">E-Mail</label>
-                    <input type="email" id="email" class="form-input" 
-                           placeholder="E-Mail eingeben" required>
+                    <label for="identifier" data-i18n="identifierLabel">E-Mail oder Benutzername</label>
+                    <input type="text" id="identifier" class="form-input" 
+                           placeholder="E-Mail oder Benutzername" required>
                 </div>
 
                 <div class="form-group">
@@ -396,6 +396,7 @@
     </div>
 
     <script src="js/i18n.js"></script>
+    <script src="../js/firebase.js"></script>
     <script src="web.js"></script>
     <script>
         // ============================================
@@ -408,13 +409,14 @@
                 loginTitle: 'LCKY HUB - Login',
                 loginHeading: 'Willkommen zurück',
                 loginSubtitle: 'Melde dich an, um fortzufahren',
-                emailLabel: 'E-Mail',
-                emailPlaceholder: 'E-Mail eingeben',
+                identifierLabel: 'E-Mail oder Benutzername',
+                identifierPlaceholder: 'E-Mail oder Benutzername eingeben',
                 passwordLabel: 'Passwort',
                 passwordPlaceholder: 'Passwort eingeben',
                 loginButton: 'Anmelden',
                 noAccount: 'Kein Konto? <a href="register.html">Registrieren</a>',
                 forgotPassword: 'Passwort vergessen?',
+                successPasswordReset: 'E-Mail zum Zurücksetzen des Passworts gesendet',
                 
                 // Error messages
                 errorGeneric: 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.',
@@ -433,13 +435,14 @@
                 loginTitle: 'LCKY HUB - Login',
                 loginHeading: 'Welcome back',
                 loginSubtitle: 'Sign in to continue',
-                emailLabel: 'Email',
-                emailPlaceholder: 'Enter your email',
+                identifierLabel: 'Email or username',
+                identifierPlaceholder: 'Enter email or username',
                 passwordLabel: 'Password',
                 passwordPlaceholder: 'Enter your password',
                 loginButton: 'Sign In',
                 noAccount: "Don't have an account? <a href='register.html'>Register</a>",
                 forgotPassword: 'Forgot password?',
+                successPasswordReset: 'Password reset email sent',
                 
                 // Error messages
                 errorGeneric: 'An error occurred. Please try again.',
@@ -466,7 +469,7 @@
         const submitBtn = document.getElementById('submit-btn');
         const langDropdown = document.getElementById('lang-dropdown');
         const langBtn = document.getElementById('lang-btn');
-        const emailInput = document.getElementById('email');
+        const identifierInput = document.getElementById('identifier');
         const passwordInput = document.getElementById('password');
 
         // ============================================
@@ -524,10 +527,10 @@
             event.preventDefault();
             hideError();
 
-            const email = emailInput.value.trim();
+            const identifier = identifierInput.value.trim();
             const password = passwordInput.value;
 
-            if (!email || !password) {
+            if (!identifier || !password) {
                 showError('loginErrorEmpty');
                 return;
             }
@@ -538,7 +541,7 @@
                 // Wait for Firebase to be ready, then sign in
                 await window.firebaseAuth.ready();
                 
-                const user = await window.firebaseAuth.signInWithEmailAndPassword(email, password);
+                const user = await window.firebaseAuth.signInWithEmailAndPassword(identifier, password);
                 
                 // Get session data
                 const sessionData = await window.firebaseAuth.getSessionData();
@@ -555,7 +558,7 @@
         // Forgot password link
         document.getElementById('forgot-password-link')?.addEventListener('click', async (e) => {
             e.preventDefault();
-            const email = emailInput.value.trim();
+            const email = identifierInput.value.trim();
             
             if (email) {
                 try {

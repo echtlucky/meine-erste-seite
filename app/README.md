@@ -215,7 +215,7 @@ lucky-hub/
 ├── main.js                     # Electron Main Process
 ├── preload.js                  # IPC Bridge
 ├── package.json                # Dependencies & Build Config
-├── firebase.rule               # Firestore Security Rules
+├── firestore.rules             # Firestore Security Rules
 └── README.md                   # Diese Datei
 ```
 
@@ -265,7 +265,7 @@ const firebaseConfig = {
 
 ### Firestore Rules
 
-Die Sicherheitsregeln sind in `firebase.rule` definiert und umfassen:
+Die Sicherheitsregeln sind in `firestore.rules` definiert und umfassen:
 - Benötigte Authentifizierung
 - Rollenbasierter Zugriff (User, Admin, Streamer)
 - Sichere Chats, Streams, Gruppen und Q&A

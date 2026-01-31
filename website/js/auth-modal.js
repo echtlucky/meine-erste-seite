@@ -22,7 +22,6 @@ let authForms = [];
 
 const normalizeUsername = (value) => value.trim().toLowerCase();
 const isValidUsername = (value) => /^[a-z0-9._-]{3,20}$/.test(value);
-const usernameToEmail = (username) => `${username}@lcky.app`;
 
 const openModal = () => {
   if (!authModal) return;
@@ -137,6 +136,11 @@ const bindAuthModal = () => {
     const repeatPassword = document.getElementById("auth-register-password-repeat").value.trim();
     const username = normalizeUsername(rawUsername);
 
+    if (!emailInput) {
+      authMessage.textContent = "Bitte E-Mail eingeben.";
+      return;
+    }
+
     if (!isValidUsername(username)) {
       authMessage.textContent = "Nutzername ungültig (3-20, a-z, 0-9, . _ -).";
       return;
@@ -155,7 +159,7 @@ const bindAuthModal = () => {
     }
 
     try {
-      const email = emailInput || usernameToEmail(username);
+      const email = emailInput;
       const credential = await createUserWithEmailAndPassword(appAuth, email, password);
       await ensureProfile(credential.user, username);
       authMessage.textContent = "Account erstellt.";
@@ -177,7 +181,11 @@ const bindAuthModal = () => {
     if (!rawIdentifier.includes("@")) {
       const username = normalizeUsername(rawIdentifier);
       const usernameSnap = await getDoc(doc(appDb, "usernames", username));
-      email = usernameSnap.exists() ? usernameSnap.data().email : usernameToEmail(username);
+      if (!usernameSnap.exists()) {
+        authMessage.textContent = "Nutzername nicht gefunden.";
+        return;
+      }
+      email = usernameSnap.data().email;
     }
 
     try {

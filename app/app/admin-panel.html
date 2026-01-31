@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - LCKY HUB</title>
     <link rel="stylesheet" href="css/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         .admin-container {
             display: flex;
@@ -323,72 +323,94 @@
         </main>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase.js"></script>
     <script src="web.js"></script>
     <script>
-        // Check admin access
-        document.addEventListener('DOMContentLoaded', () => {
-            const sessionData = localStorage.getItem('lucky_hub_session');
-            if (sessionData) {
-                const user = JSON.parse(sessionData);
-                if (!user.isAdmin) {
-                    // Not an admin, redirect to dashboard
-                    window.location.href = '../index.html';
-                }
-            } else {
-                window.location.href = 'login.html';
-            }
-            loadAdminData();
-        });
+    const ownerEmail = 'lucassteckel04@gmail.com';
 
-        function loadAdminData() {
-            // Load users
-            const users = [
-                { id: 1, name: 'Admin User', email: 'admin@lcky.com', role: 'admin', status: 'online' },
-                { id: 2, name: 'Mod User', email: 'mod@lcky.com', role: 'moderator', status: 'online' },
-                { id: 3, name: 'Test User', email: 'test@lcky.com', role: 'user', status: 'offline' },
-                { id: 4, name: 'Pro Gamer', email: 'pro@lcky.com', role: 'user', status: 'online' },
-            ];
+    // Check admin access
+    document.addEventListener('DOMContentLoaded', async () => {
+        await window.firebaseAuth.ready();
+        const sessionData = await window.firebaseAuth.getSessionData();
 
-            renderUsersTable(users);
+        if (!sessionData) {
+            window.location.href = 'login.html';
+            return;
         }
 
-        function renderUsersTable(users) {
-            const tbody = document.getElementById('users-table');
-            if (!tbody) return;
+        const isAdmin = sessionData.role === 'admin' || sessionData.email === ownerEmail;
+        if (!isAdmin) {
+            window.location.href = '../index.html';
+            return;
+        }
 
-            tbody.innerHTML = users.map(user => `
+        loadAdminData();
+    });
+
+    async function loadAdminData() {
+        const db = firebase.firestore();
+        const snapshot = await db.collection('users').orderBy('createdAt', 'desc').limit(100).get();
+        const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        renderUsersTable(users);
+    }
+
+    function renderUsersTable(users) {
+        const tbody = document.getElementById('users-table');
+        if (!tbody) return;
+
+        tbody.innerHTML = users.map(user => {
+            const name = user.displayName || user.username || user.email || user.id;
+            const role = user.role || 'user';
+            const status = user.status || 'offline';
+            const initials = name.substring(0, 2).toUpperCase();
+
+            return `
                 <tr>
                     <td>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <div class="avatar" style="width: 32px; height: 32px;">
-                                <span style="font-size: 12px;">${user.name.substring(0, 2).toUpperCase()}</span>
+                                <span style="font-size: 12px;">${initials}</span>
                             </div>
-                            ${user.name}
+                            ${name}
                         </div>
                     </td>
-                    <td>${user.email}</td>
-                    <td><span class="role-badge ${user.role}">${user.role}</span></td>
+                    <td>${user.email || '-'}</td>
                     <td>
-                        <span class="status-dot ${user.status}" style="position: relative; bottom: auto; right: auto; margin-right: 8px;"></span>
-                        ${user.status}
+                        <select class="form-input" data-user-role="${user.id}">
+                            <option value="user" ${role === 'user' ? 'selected' : ''}>user</option>
+                            <option value="admin" ${role === 'admin' ? 'selected' : ''}>admin</option>
+                            <option value="streamer" ${role === 'streamer' ? 'selected' : ''}>streamer</option>
+                        </select>
                     </td>
                     <td>
-                        <button class="action-btn edit" onclick="editUser(${user.id})">Bearbeiten</button>
-                        <button class="action-btn delete" onclick="deleteUser(${user.id})">Löschen</button>
+                        <span class="status-dot ${status}" style="position: relative; bottom: auto; right: auto; margin-right: 8px;"></span>
+                        ${status}
+                    </td>
+                    <td>
+                        <button class="action-btn edit" onclick="saveRole('${user.id}')">Speichern</button>
                     </td>
                 </tr>
-            `).join('');
-        }
+            `;
+        }).join('');
+    }
 
-        function editUser(userId) {
-            showToast('Benutzer bearbeiten: ' + userId, 'info');
-        }
+    async function saveRole(userId) {
+        const select = document.querySelector(`[data-user-role="${userId}"]`);
+        if (!select) return;
+        const role = select.value;
+        const db = firebase.firestore();
+        await db.collection('users').doc(userId).set({ role: role }, { merge: true });
+        showToast('Rolle aktualisiert', 'success');
+    }
 
-        function deleteUser(userId) {
-            if (confirm('Benutzer wirklich löschen?')) {
-                showToast('Benutzer gelöscht', 'success');
-            }
-        }
-    </script>
+    function showToast(message) {
+        alert(message);
+    }
+</script>
 </body>
 </html>
+
+
