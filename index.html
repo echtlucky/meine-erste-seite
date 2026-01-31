@@ -10,129 +10,241 @@
     
     <!-- Styles -->
     <link rel="stylesheet" href="css/lcky-design.css">
-    
-    <!-- Remove old styles -->
-    <style>
-        /* Hide old elements */
-        #header-placeholder, #footer-placeholder {
-            display: none;
-        }
-    </style>
 </head>
 <body>
-    <!-- Navigation -->
+    <!-- Header -->
     <header class="site-header" id="header">
-        <div class="container flex justify-between items-center">
+        <div class="header-inner">
             <!-- Logo -->
             <a href="#home" class="logo">
-                <img src="assets/logo-rbg.png" alt="LCKY" style="height: 40px; width: auto;">
-                <span class="hidden sm:block ml-2">LCKY</span>
+                <img src="assets/logo-rbg.png" alt="LCKY">
             </a>
             
-            <!-- Navigation -->
-            <nav class="hidden md:flex gap-6">
+            <!-- Navigation - Centered -->
+            <nav class="nav">
                 <a href="#home" class="nav-link active">Home</a>
                 <a href="#blog" class="nav-link">Blog</a>
             </nav>
             
             <!-- CTA Button -->
-            <a href="hub-download.html" class="header-cta">
-                <span class="hidden sm:inline">HUB Downloaden</span>
-                <span class="sm:hidden">HUB</span>
-            </a>
+            <a href="hub-download.html" class="header-cta">HUB Downloaden</a>
         </div>
     </header>
 
     <!-- Main Content -->
     <main>
-        <!-- Home Section -->
-        <section id="home" class="home-hero fade-in">
-            <div class="container text-center max-w-2xl mx-auto">
-                <!-- Badge -->
-                <div class="home-badge mb-8">
-                    <span>🌟 LCKY HUB</span>
+        <!-- Hero Section -->
+        <section id="home" class="home-hero">
+            <div class="container">
+                <div class="home-content fade-in">
+                    <div class="home-badge">
+                        <span>✦</span>
+                        <span>LCKY HUB</span>
+                    </div>
+                    
+                    <h1>
+                        Die digitale Bühne<br>
+                        für deine Vision
+                    </h1>
+                    
+                    <p class="home-subtitle">
+                        Willkommen im Zentrum der Innovation. Hier beginnt deine Reise in eine Welt voller Möglichkeiten, 
+                        wo Kreativität auf Technologie trifft und Visionen zur Realität werden.
+                    </p>
+                    
+                    <a href="hub-download.html" class="btn btn-primary">
+                        <span>LCKY HUB herunterladen</span>
+                        <span>→</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Introduction Section -->
+        <section class="section section-alt">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Was ist LCKY?</h2>
+                    <p>LCKY ist mehr als ein Projekt. Es ist eine Philosophie, eine Vision, ein neuer Weg zu denken und zu schaffen.</p>
                 </div>
                 
-                <!-- Title -->
-                <h1 class="mb-6">
-                    Die digitale Bühne<br>
-                    für deine Vision
-                </h1>
+                <div class="content-grid">
+                    <div class="card">
+                        <h4>Die Idee</h4>
+                        <p>LCKY wurde aus dem Wunsch geboren, etwas Außergewöhnliches zu schaffen. Nicht nur ein Produkt, sondern eine Plattform, die Kreativität und Technologie auf neue Weise verbindet. Wir glauben daran, dass die besten Ideen entstehen, wenn man den Mut hat, anders zu denken.</p>
+                        <p>Jede Zeile Code, jedes Design-Element, jede Entscheidung bei LCKY ist durchdacht und intentional. Wir setzen auf Qualität statt Quantität, auf Substanz statt Oberfläche.</p>
+                    </div>
+                    <div class="card card-glass">
+                        <h4>Die Philosophie</h4>
+                        <p>Hinter LCKY steht eine klare Vision: Wir wollen die Art und Weise, wie Menschen mit digitalen Erlebnissen interagieren, grundlegend verändern. Nicht durch hype oder Trends, sondern durch echte Innovation und durchdachtes Design.</p>
+                        <p>Wir glauben an die Kraft der Einfachheit. An die Schönheit des Minimalen. An den Glanz der Perfektion.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The HUB Section -->
+        <section class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Der LCKY HUB</h2>
+                    <p>Das Herzstück unserer Vision. Ein Ort, an dem alles zusammenkommt.</p>
+                </div>
                 
-                <!-- Subtitle -->
-                <p class="home-subtitle text-secondary mb-8 max-w-2xl mx-auto">
-                    Willkommen im Zentrum der Innovation. Hier beginnt deine Reise in eine Welt voller Möglichkeiten, 
-                    wo Kreativität auf Technologie trifft und Visionen zur Realität werden.
-                </p>
+                <div class="content-grid reverse">
+                    <div class="card">
+                        <h4>Was ist der HUB?</h4>
+                        <p>Der LCKY HUB ist das Zentrum deiner digitalen Erfahrung. Ein Ort, an dem du nicht nur konsumierst, sondern kreierst. Ein Raum, der sich deinen Bedürfnissen anpasst und mit dir wächst.</p>
+                        <p>Wir haben den HUB nicht als weiteres Tool konzipiert, sondern als Erweiterung deiner selbst. Er versteht, was du brauchst, bevor du es selbst weißt.</p>
+                    </div>
+                    <div class="card card-glass">
+                        <h4>Warum der HUB?</h4>
+                        <p>In einer Welt voller Fragmentierung und Ablenkung brauchen wir einen Ort der Klarheit. Einen Raum, in dem Fokus möglich ist. Einen HUB, der alles verbindet, ohne überladen zu sein.</p>
+                        <p>Der LCKY HUB ist unsere Antwort auf die Komplexität der modernen digitalen Welt. Einfach, elegant, kraftvoll.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vision Section -->
+        <section class="section section-alt">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Unsere Vision</h2>
+                    <p>Wohin die Reise geht und warum es sich lohnt, dabei zu sein.</p>
+                </div>
                 
-                <!-- CTA Button -->
-                <a href="hub-download.html" download class="btn-cta mb-4">
-                    <span>LCKY HUB jetzt herunterladen</span>
-                    <span class="hidden sm:inline">und starten</span>
-                </a>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">◆</div>
+                        <h4>Intentional Design</h4>
+                        <p>Jedes Element hat seinen Zweck. Nichts ist Zufall. Wir gestalten mit Bedacht und Respekt vor deiner Zeit und Aufmerksamkeit.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">◇</div>
+                        <h4>Qualität zuerst</h4>
+                        <p>Wir veröffentlichen nichts, das nicht unseren höchsten Standards entspricht. Lieber spät und perfekt als früh und halbherzig.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">✦</div>
+                        <h4>Zukunftsweisend</h4>
+                        <p>Wir denken nicht nur an das Heute, sondern gestalten aktiv das Morgen. Unsere Vision reicht weit über das Offensichtliche hinaus.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preview Section -->
+        <section class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Einblicke</h2>
+                    <p>Erste Einblicke in das, was kommt. Konzepte, Visionen, Momente.</p>
+                </div>
                 
-                <!-- Secondary CTA -->
-                <p class="text-muted mt-4">
-                    <a href="#blog" class="text-secondary hover:text-primary">
-                        Entdecke unsere Reise →
+                <div class="preview-grid">
+                    <div class="preview-card">
+                        <div class="preview-image" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
+                            <img src="assets/preview-1.png" alt="Preview 1" onerror="this.style.display='none'">
+                        </div>
+                        <div class="preview-content">
+                            <h4>Das Interface</h4>
+                            <p>Ein erster Blick auf die klare, intuitive Oberfläche des LCKY HUB.</p>
+                        </div>
+                    </div>
+                    <div class="preview-card">
+                        <div class="preview-image" style="background: linear-gradient(135deg, #16213e, #0f3460);">
+                            <img src="assets/preview-2.png" alt="Preview 2" onerror="this.style.display='none'">
+                        </div>
+                        <div class="preview-content">
+                            <h4>Die Architektur</h4>
+                            <p>Wie wir Struktur und Flexibilität in perfektes Gleichgewicht bringen.</p>
+                        </div>
+                    </div>
+                    <div class="preview-card">
+                        <div class="preview-image" style="background: linear-gradient(135deg, #0f3460, #1a1a2e);">
+                            <img src="assets/preview-3.png" alt="Preview 3" onerror="this.style.display='none'">
+                        </div>
+                        <div class="preview-content">
+                            <h4>Das Erlebnis</h4>
+                            <p>Design, das nicht nur funktioniert, sondern begeistert.</p>
+                        </div>
+                    </div>
+                    <div class="preview-card">
+                        <div class="preview-image" style="background: linear-gradient(135deg, #1a1a2e, #533483);">
+                            <img src="assets/preview-4.png" alt="Preview 4" onerror="this.style.display='none'">
+                        </div>
+                        <div class="preview-content">
+                            <h4>Die Vision</h4>
+                            <p>Wohin die Reise geht und was dich erwartet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Future Section -->
+        <section class="section section-alt">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Die Zukunft</h2>
+                    <p>Das ist erst der Anfang. Wir haben große Pläne.</p>
+                </div>
+                
+                <div class="card" style="max-width: 900px; margin: 0 auto; text-align: center;">
+                    <h4>Ein Versprechen</h4>
+                    <p style="font-size: 1.25rem; line-height: 2;">LCKY ist nicht nur ein Projekt, das wir bauen – es ist eine Bewegung, die wir starten. Eine Einladung, anders zu denken, mutiger zu sein, besser zu machen. Wir laden dich ein, Teil dieser Reise zu werden.</p>
+                    <p style="font-size: 1.25rem; line-height: 2;">Die Zukunft ist nicht etwas, das passiert. Die Zukunft ist etwas, das wir gestalten. Gemeinsam.</p>
+                    <a href="hub-download.html" class="btn btn-primary mt-3">
+                        <span>Jetzt Teil werden</span>
+                        <span>→</span>
                     </a>
-                </p>
+                </div>
             </div>
         </section>
 
         <!-- Blog Section -->
-        <section id="blog" class="section bg-secondary">
+        <section id="blog" class="blog-section">
             <div class="container">
-                <div class="text-center mb-12">
-                    <h2>Unsere Reise</h2>
-                    <p class="text-secondary max-w-2xl mx-auto">
-                        Folge unseren Gedanken, Entdeckungen und Meilensteinen auf dem Weg zu etwas Außergewöhnlichem.
-                    </p>
+                <div class="section-header">
+                    <h2>Unsere Gedanken</h2>
+                    <p>Insights, Updates und Geschichten aus der Welt von LCKY.</p>
                 </div>
                 
                 <div class="blog-container">
-                    <!-- Blog Post 1 -->
                     <article class="blog-post">
                         <div class="blog-meta">
                             <time datetime="2024-01-15">15. Januar 2024</time>
                         </div>
                         <h3>Die Geburt einer Vision</h3>
-                        <p>
-                            Alles begann mit einer einfachen Idee: die Art und Weise, wie wir digitale Erlebnisse schaffen, 
-                            zu revolutionieren. Heute stehen wir am Anfang von etwas Großem.
-                        </p>
-                        <a href="#" class="text-primary hover:text-neon-cyan">
-                            Weiterlesen →
+                        <p>Alles begann mit einer einfachen Frage: Warum nicht besser? Warum nicht eleganter? Warum nicht mutiger? In diesem Artikel erzählen wir die Geschichte von LCKY – wie aus einer Idee eine Mission wurde.</p>
+                        <a href="#" class="read-more">
+                            <span>Weiterlesen</span>
+                            <span>→</span>
                         </a>
                     </article>
                     
-                    <!-- Blog Post 2 -->
                     <article class="blog-post">
                         <div class="blog-meta">
                             <time datetime="2024-01-10">10. Januar 2024</time>
                         </div>
-                        <h3>Warum LCKY anders ist</h3>
-                        <p>
-                            In einer Welt voller Standardlösungen haben wir uns für den außergewöhnlichen Weg entschieden. 
-                            Hier erfährst du, was uns antreibt.
-                        </p>
-                        <a href="#" class="text-primary hover:text-neon-cyan">
-                            Weiterlesen →
+                        <h3>Warum Design wichtiger ist als Features</h3>
+                        <p>In einer Welt, die von Funktionen überflutet ist, vergessen wir oft das Wichtigste: wie sich etwas anfühlt. Wir teilen unsere Philosophie zu Design, Ästhetik und der Kunst der Reduktion.</p>
+                        <a href="#" class="read-more">
+                            <span>Weiterlesen</span>
+                            <span>→</span>
                         </a>
                     </article>
                     
-                    <!-- Blog Post 3 -->
                     <article class="blog-post">
                         <div class="blog-meta">
                             <time datetime="2024-01-05">5. Januar 2024</time>
                         </div>
-                        <h3>Der erste Schritt</h3>
-                        <p>
-                            Jede große Reise beginnt mit einem ersten Schritt. Hier teilen wir unsere ersten Erfahrungen 
-                            und was uns für die Zukunft erwartet.
-                        </p>
-                        <a href="#" class="text-primary hover:text-neon-cyan">
-                            Weiterlesen →
+                        <h3>Der erste Schritt ist der schwerste</h3>
+                        <p>Jede große Reise beginnt mit einem einzigen Schritt. Unser erster Schritt war der Entschluss, etwas zu schaffen, das uns selbst begeistert. Hier erfährst du, was uns antreibt.</p>
+                        <a href="#" class="read-more">
+                            <span>Weiterlesen</span>
+                            <span>→</span>
                         </a>
                     </article>
                 </div>
@@ -151,6 +263,7 @@
                 </div>
                 <div class="footer-bottom">
                     <p>&copy; 2024 LCKY. Alle Rechte vorbehalten.</p>
+                    <a href="admin-panel.html" style="opacity: 0.5;">Admin</a>
                 </div>
             </div>
         </div>
@@ -175,21 +288,32 @@
         // Header scroll effect
         window.addEventListener('scroll', function() {
             const header = document.getElementById('header');
-            if (window.scrollY > 100) {
+            if (window.scrollY > 50) {
                 header.classList.add('scrolled');
             } else {
                 header.classList.remove('scrolled');
             }
         });
 
-        // Add hover effect to blog posts
-        document.querySelectorAll('.blog-post').forEach(post => {
-            post.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-4px)';
+        // Active navigation link
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
             });
-            
-            post.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').slice(1) === current) {
+                    link.classList.add('active');
+                }
             });
         });
     </script>
