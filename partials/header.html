@@ -4,6 +4,7 @@
         <!-- Logo -->
         <a href="{{BASE}}index.html" class="header-logo">
             <img src="{{BASE}}assets/logo-rbg.png" alt="LCKY HUB" class="logo-image">
+            <span class="logo-text">LCKY</span>
         </a>
         
         <!-- Navigation -->
@@ -53,18 +54,23 @@
         </div>
 
         <form class="auth-form active" id="auth-login-form">
-            <label for="auth-login-username">Nutzername</label>
-            <input id="auth-login-username" type="text" placeholder="deinname" required>
+            <label for="auth-login-identifier">E-Mail oder Nutzername</label>
+            <input id="auth-login-identifier" type="text" placeholder="name@lcky.de oder deinname" required>
             <label for="auth-login-password">Passwort</label>
             <input id="auth-login-password" type="password" placeholder="Passwort" required>
+            <button type="button" class="auth-link" id="auth-forgot">Passwort vergessen?</button>
             <button type="submit" class="btn btn-primary">Anmelden</button>
         </form>
 
         <form class="auth-form" id="auth-register-form">
+            <label for="auth-register-email">E-Mail</label>
+            <input id="auth-register-email" type="email" placeholder="name@lcky.de" required>
             <label for="auth-register-username">Nutzername</label>
             <input id="auth-register-username" type="text" placeholder="deinname" required>
             <label for="auth-register-password">Passwort</label>
             <input id="auth-register-password" type="password" placeholder="Passwort" required>
+            <label for="auth-register-password-repeat">Passwort wiederholen</label>
+            <input id="auth-register-password-repeat" type="password" placeholder="Passwort wiederholen" required>
             <button type="submit" class="btn btn-primary">Registrieren</button>
         </form>
 
@@ -94,6 +100,10 @@
         border-bottom: 1px solid rgba(139, 92, 246, 0.1);
         transition: all 0.3s ease;
     }
+
+    .site-header.hidden {
+        transform: translateY(-120%);
+    }
     
     .site-header.scrolled {
         background: rgba(11, 10, 18, 0.98);
@@ -108,12 +118,14 @@
         align-items: center;
         justify-content: space-between;
         gap: 2rem;
+        position: relative;
     }
     
     /* Logo - Much Larger */
     .header-logo {
         display: flex;
         align-items: center;
+        gap: 0.75rem;
         flex-shrink: 0;
         transition: transform 0.3s ease;
     }
@@ -136,6 +148,9 @@
     
     /* Navigation */
     .header-nav {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -324,3 +339,9 @@
     }
 </style>
 
+    .logo-text {
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.2rem;
+        color: var(--text-primary);
+    }

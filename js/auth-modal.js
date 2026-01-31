@@ -2,7 +2,8 @@
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
   doc,
@@ -62,6 +63,7 @@ const ensureProfile = async (user, username = "") => {
     if (username) {
       await setDoc(doc(appDb, "usernames", username), {
         uid: user.uid,
+        email: user.email,
         createdAt: serverTimestamp()
       });
     }
@@ -72,6 +74,7 @@ const ensureProfile = async (user, username = "") => {
     await setDoc(userRef, { username, displayName: username }, { merge: true });
     await setDoc(doc(appDb, "usernames", username), {
       uid: user.uid,
+      email: user.email,
       createdAt: serverTimestamp()
     });
   }
@@ -80,6 +83,7 @@ const ensureProfile = async (user, username = "") => {
 let registerForm = null;
 let loginForm = null;
 let bound = false;
+let forgotBtn = null;
 
 const bindAuthModal = () => {
   if (bound) return;
@@ -91,6 +95,7 @@ const bindAuthModal = () => {
   authForms = authModal ? authModal.querySelectorAll(".auth-form") : [];
   registerForm = document.getElementById("auth-register-form");
   loginForm = document.getElementById("auth-login-form");
+  forgotBtn = document.getElementById("auth-forgot");
 
   if (profileBtn && authModal) {
     bound = true;
@@ -104,6 +109,10 @@ const bindAuthModal = () => {
       if (event.key === "Escape") closeModal();
     });
   }
+
+  document.querySelectorAll("[data-auth-open]").forEach((button) => {
+    button.addEventListener("click", openModal);
+  });
 
   if (authTabs.length) {
     authTabs.forEach((tab) => {
@@ -122,12 +131,19 @@ const bindAuthModal = () => {
     registerForm.addEventListener("submit", async (event) => {
       event.preventDefault();
 
+    const emailInput = document.getElementById("auth-register-email").value.trim();
     const rawUsername = document.getElementById("auth-register-username").value.trim();
     const password = document.getElementById("auth-register-password").value.trim();
+    const repeatPassword = document.getElementById("auth-register-password-repeat").value.trim();
     const username = normalizeUsername(rawUsername);
 
     if (!isValidUsername(username)) {
       authMessage.textContent = "Nutzername ungültig (3-20, a-z, 0-9, . _ -).";
+      return;
+    }
+
+    if (password !== repeatPassword) {
+      authMessage.textContent = "Passwörter stimmen nicht überein.";
       return;
     }
 
@@ -139,7 +155,7 @@ const bindAuthModal = () => {
     }
 
     try {
-      const email = usernameToEmail(username);
+      const email = emailInput || usernameToEmail(username);
       const credential = await createUserWithEmailAndPassword(appAuth, email, password);
       await ensureProfile(credential.user, username);
       authMessage.textContent = "Account erstellt.";
@@ -154,10 +170,15 @@ const bindAuthModal = () => {
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-    const rawUsername = document.getElementById("auth-login-username").value.trim();
+    const rawIdentifier = document.getElementById("auth-login-identifier").value.trim();
     const password = document.getElementById("auth-login-password").value.trim();
-    const username = normalizeUsername(rawUsername);
-    const email = rawUsername.includes("@") ? rawUsername : usernameToEmail(username);
+    let email = rawIdentifier;
+
+    if (!rawIdentifier.includes("@")) {
+      const username = normalizeUsername(rawIdentifier);
+      const usernameSnap = await getDoc(doc(appDb, "usernames", username));
+      email = usernameSnap.exists() ? usernameSnap.data().email : usernameToEmail(username);
+    }
 
     try {
       const credential = await signInWithEmailAndPassword(appAuth, email, password);
@@ -168,6 +189,35 @@ const bindAuthModal = () => {
       authMessage.textContent = `Fehler: ${error.message}`;
     }
   });
+  }
+
+  if (forgotBtn) {
+    forgotBtn.addEventListener("click", async () => {
+      const rawIdentifier = document.getElementById("auth-login-identifier").value.trim();
+      if (!rawIdentifier) {
+        authMessage.textContent = "Bitte E-Mail oder Nutzername eingeben.";
+        return;
+      }
+
+      let email = rawIdentifier;
+      if (!rawIdentifier.includes("@")) {
+        const username = normalizeUsername(rawIdentifier);
+        const usernameSnap = await getDoc(doc(appDb, "usernames", username));
+        email = usernameSnap.exists() ? usernameSnap.data().email : null;
+      }
+
+      if (!email) {
+        authMessage.textContent = "E-Mail nicht gefunden.";
+        return;
+      }
+
+      try {
+        await sendPasswordResetEmail(appAuth, email);
+        authMessage.textContent = "Passwort-Reset gesendet.";
+      } catch (error) {
+        authMessage.textContent = `Fehler: ${error.message}`;
+      }
+    });
   }
 
   if (authLogoutBtn) {
@@ -192,3 +242,6 @@ const bindAuthModal = () => {
 };
 
 window.addEventListener("layout:ready", bindAuthModal);
+
+
+

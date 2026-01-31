@@ -1,16 +1,31 @@
 ﻿const headerContainer = document.getElementById("header-container");
+import "./generator-modal.js";
+
 const footerContainer = document.getElementById("footer-container");
 
 const setupHeader = () => {
   const header = document.getElementById("site-header");
   if (!header) return;
 
+  let lastScroll = window.scrollY;
   window.addEventListener("scroll", () => {
-    if (window.scrollY > 50) {
+    const current = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight;
+    const nearBottom = current + window.innerHeight >= docHeight - 80;
+
+    if (current > 50) {
       header.classList.add("scrolled");
     } else {
       header.classList.remove("scrolled");
     }
+
+    if (nearBottom || current < lastScroll) {
+      header.classList.remove("hidden");
+    } else if (current > 120) {
+      header.classList.add("hidden");
+    }
+
+    lastScroll = current;
   });
 
   const currentPage = window.location.pathname.split("/").pop() || "index.html";

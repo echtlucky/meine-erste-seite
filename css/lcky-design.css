@@ -111,7 +111,7 @@ body::before {
   right: 0;
   bottom: 0;
   background: url('../assets/bg.png') center/cover no-repeat;
-  opacity: 0.25;
+  opacity: 0.18;
   z-index: -2;
 }
 
@@ -334,6 +334,15 @@ main {
   background: linear-gradient(180deg, rgba(139, 92, 246, 0.06) 0%, rgba(11, 10, 18, 0.2) 100%);
 }
 
+.glass-stage {
+  background: rgba(16, 14, 28, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-radius: 28px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(18px) saturate(1.1);
+}
+
 .section-header {
   text-align: center;
   max-width: 800px;
@@ -416,6 +425,19 @@ main {
 
 .hero-shell {
   padding: 3.5rem;
+  width: min(1180px, 94vw);
+  margin: 0 auto;
+  border-radius: 32px;
+  position: relative;
+}
+
+.hero-shell::before {
+  content: "";
+  position: absolute;
+  inset: -30px;
+  background: rgba(139, 92, 246, 0.12);
+  filter: blur(40px);
+  z-index: -1;
 }
 
 .hero-grid {
@@ -566,12 +588,13 @@ main {
 }
 
 .preview-card {
-  background: linear-gradient(135deg, rgba(24, 22, 42, 0.8), rgba(30, 26, 53, 0.7));
-  backdrop-filter: blur(30px) saturate(1.2);
+  background: rgba(24, 22, 42, 0.75);
+  backdrop-filter: blur(18px) saturate(1.2);
   border: 1px solid rgba(139, 92, 246, 0.15);
   border-radius: var(--radius-lg);
   overflow: hidden;
   transition: all var(--transition-normal);
+  cursor: pointer;
   box-shadow: 
     0 20px 60px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(139, 92, 246, 0.08),
@@ -596,6 +619,7 @@ main {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
 }
 
 .preview-image img {
@@ -680,7 +704,7 @@ main {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1.5rem;
 }
 
 .profile-btn {
@@ -868,6 +892,75 @@ main {
   font-size: 1rem;
 }
 
+/* LIGHTBOX */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 2rem;
+}
+
+.lightbox.active {
+  display: flex;
+}
+
+.lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 20, 0.75);
+  backdrop-filter: blur(12px);
+}
+
+.lightbox-panel {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  width: 100%;
+  background: rgba(16, 14, 28, 0.9);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+}
+
+.lightbox-image {
+  width: 100%;
+  border-radius: 16px;
+  display: block;
+}
+
+.lightbox-close,
+.lightbox-prev,
+.lightbox-next {
+  position: absolute;
+  top: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.lightbox-close {
+  right: 1rem;
+}
+
+.lightbox-prev {
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox-next {
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
 /* FONT GENERATOR */
 .font-generator {
   display: grid;
@@ -1030,6 +1123,20 @@ main {
   border-radius: 12px;
   border: 1px solid rgba(139, 92, 246, 0.2);
   background: rgba(11, 10, 18, 0.6);
+  color: var(--text-primary);
+}
+
+.auth-link {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.auth-link:hover {
   color: var(--text-primary);
 }
 
@@ -1543,6 +1650,10 @@ main {
 
   .hero-shell {
     padding: 2.5rem 1.5rem;
+  }
+
+  .glass-stage {
+    padding: 1.5rem;
   }
 
   .admin-container {

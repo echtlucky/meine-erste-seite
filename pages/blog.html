@@ -20,37 +20,22 @@
 
                 <div class="auth-card" id="auth-card">
                     <h3 style="margin-bottom: 1.5rem;">Account</h3>
-                    <div class="auth-grid">
-                        <form class="form-stack" id="register-form">
-                            <h4>Registrieren</h4>
-                            <input class="input-field" type="text" id="register-username" placeholder="Nutzername" required>
-                            <input class="input-field" type="password" id="register-password" placeholder="Passwort" required>
-                            <button class="btn btn-primary" type="submit">Registrieren</button>
-                        </form>
-
-                        <form class="form-stack" id="login-form">
-                            <h4>Anmelden</h4>
-                            <input class="input-field" type="text" id="login-username" placeholder="Nutzername" required>
-                            <input class="input-field" type="password" id="login-password" placeholder="Passwort" required>
-                            <button class="btn btn-glass" type="submit">Anmelden</button>
-                        </form>
-                    </div>
-
-                    <div class="subcard-grid" id="auth-state" style="display: none;">
+                    <div class="subcard-grid">
                         <div class="subcard">
-                            <h5>Eingeloggt</h5>
-                            <p id="current-user">-</p>
+                            <h5>Status</h5>
+                            <p id="current-user">Nicht angemeldet</p>
                         </div>
                         <div class="subcard">
-                            <h5>Aktion</h5>
-                            <button class="btn btn-glass" id="logout-btn" type="button">Abmelden</button>
+                            <h5>Zugang</h5>
+                            <button class="btn btn-primary" type="button" data-auth-open>Jetzt anmelden</button>
                         </div>
                     </div>
-
-                    <p id="auth-message" style="margin-top: 1rem; color: var(--text-muted);"></p>
+                    <p id="auth-message" style="margin-top: 1rem; color: var(--text-muted);">Bitte logge dich ein, um zu kommentieren.</p>
                 </div>
 
-                <div id="posts-container" style="margin-top: 3rem;"></div>
+                <div class="glass-stage" style="margin-top: 3rem;">
+                    <div id="posts-container"></div>
+                </div>
             </div>
         </section>
     </main>

@@ -1,7 +1,4 @@
 ﻿import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
@@ -22,12 +19,7 @@ import "./auth-modal.js";
 
 const postsContainer = document.getElementById("posts-container");
 const authMessage = document.getElementById("auth-message");
-const authState = document.getElementById("auth-state");
 const currentUserLabel = document.getElementById("current-user");
-const logoutBtn = document.getElementById("logout-btn");
-
-const registerForm = document.getElementById("register-form");
-const loginForm = document.getElementById("login-form");
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -42,10 +34,6 @@ const formatDate = (value) => {
     return "-";
   }
 };
-
-const normalizeUsername = (value) => value.trim().toLowerCase();
-const isValidUsername = (value) => /^[a-z0-9._-]{3,20}$/.test(value);
-const usernameToEmail = (username) => `${username}@lcky.app`;
 
 const ensureProfile = async (user, username = "") => {
   const userRef = doc(appDb, "users", user.uid);
@@ -63,6 +51,7 @@ const ensureProfile = async (user, username = "") => {
     if (username) {
       await setDoc(doc(appDb, "usernames", username), {
         uid: user.uid,
+        email: user.email,
         createdAt: serverTimestamp()
       });
     }
@@ -73,6 +62,7 @@ const ensureProfile = async (user, username = "") => {
     await setDoc(userRef, { username, displayName: username }, { merge: true });
     await setDoc(doc(appDb, "usernames", username), {
       uid: user.uid,
+      email: user.email,
       createdAt: serverTimestamp()
     });
     return { ...data, username, displayName: username };
@@ -210,57 +200,9 @@ const renderPosts = async (currentUser) => {
   }
 };
 
-registerForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  authMessage.textContent = "";
-
-  const rawUsername = document.getElementById("register-username").value.trim();
-  const password = document.getElementById("register-password").value.trim();
-
-  const username = normalizeUsername(rawUsername);
-  if (!isValidUsername(username)) {
-    authMessage.textContent = "Nutzername ungültig (3-20, a-z, 0-9, . _ -).";
-    return;
-  }
-
-  const usernameRef = doc(appDb, "usernames", username);
-  const usernameSnap = await getDoc(usernameRef);
-  if (usernameSnap.exists()) {
-    authMessage.textContent = "Nutzername ist bereits vergeben.";
-    return;
-  }
-
-  const email = usernameToEmail(username);
-  try {
-    const credential = await createUserWithEmailAndPassword(appAuth, email, password);
-    currentProfile = await ensureProfile(credential.user, username);
-    authMessage.textContent = "Account erstellt und eingeloggt.";
-  } catch (error) {
-    authMessage.textContent = `Fehler: ${error.message}`;
-  }
-});
-
-loginForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  authMessage.textContent = "";
-
-  const rawUsername = document.getElementById("login-username").value.trim();
-  const password = document.getElementById("login-password").value.trim();
-
-  const username = normalizeUsername(rawUsername);
-  const email = rawUsername.includes("@") ? rawUsername : usernameToEmail(username);
-  try {
-    const credential = await signInWithEmailAndPassword(appAuth, email, password);
-    currentProfile = await ensureProfile(credential.user);
-    authMessage.textContent = "Willkommen zurück.";
-  } catch (error) {
-    authMessage.textContent = `Fehler: ${error.message}`;
-  }
-});
-
-logoutBtn.addEventListener("click", async () => {
-  await signOut(appAuth);
-});
+const setAuthMessage = (message) => {
+  authMessage.textContent = message;
+};
 
 loadLayout();
 
@@ -269,19 +211,16 @@ if (!appAuth || !appDb) {
 } else {
   onAuthStateChanged(appAuth, async (user) => {
     if (user) {
-      authState.style.display = "grid";
-      registerForm.style.display = "none";
-      loginForm.style.display = "none";
       currentProfile = await ensureProfile(user);
       currentUserLabel.textContent = (currentProfile && currentProfile.displayName) || user.email || user.uid;
+      setAuthMessage("Du bist angemeldet und kannst kommentieren.");
       renderPosts(user);
     } else {
-      authState.style.display = "none";
-      currentUserLabel.textContent = "-";
-      registerForm.style.display = "flex";
-      loginForm.style.display = "flex";
+      currentUserLabel.textContent = "Nicht angemeldet";
+      setAuthMessage("Bitte logge dich ein, um zu kommentieren.");
       currentProfile = null;
       renderPosts(null);
     }
   });
 }
+

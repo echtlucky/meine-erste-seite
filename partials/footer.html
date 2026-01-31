@@ -11,26 +11,10 @@
             
             <!-- Legal Links - Inline -->
             <div class="footer-legal">
-                <button class="legal-link" onclick="openLegalModal('impressum')">
-                    <span class="link-icon">📋</span>
-                    <span class="link-text">Impressum</span>
-                    <span class="link-arrow">→</span>
-                </button>
-                <button class="legal-link" onclick="openLegalModal('datenschutz')">
-                    <span class="link-icon">🔒</span>
-                    <span class="link-text">Datenschutz</span>
-                    <span class="link-arrow">→</span>
-                </button>
-                <button class="legal-link" onclick="openLegalModal('nutzungsbedingungen')">
-                    <span class="link-icon">📜</span>
-                    <span class="link-text">Nutzungsbedingungen</span>
-                    <span class="link-arrow">→</span>
-                </button>
-                <a href="{{BASE}}pages/fonts.html" class="legal-link">
-                    <span class="link-icon">✨</span>
-                    <span class="link-text">Schrift Generator</span>
-                    <span class="link-arrow">→</span>
-                </a>
+                <button class="legal-link" onclick="openLegalModal('impressum')">Impressum</button>
+                <button class="legal-link" onclick="openLegalModal('datenschutz')">Datenschutz</button>
+                <button class="legal-link" onclick="openLegalModal('nutzungsbedingungen')">Nutzungsbedingungen</button>
+                <button class="legal-link" id="open-generator">Schrift Generator</button>
             </div>
             
             <!-- Admin Shield (Far Right) -->
@@ -70,6 +54,34 @@
         </div>
         <div class="modal-body" id="modal-body">
             <!-- Content loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+<!-- Generator Modal -->
+<div class="generator-modal" id="generator-modal" aria-hidden="true">
+    <div class="generator-backdrop" data-generator-close></div>
+    <div class="generator-panel">
+        <button class="generator-close" data-generator-close aria-label="Schließen">✕</button>
+        <div class="modal-header">
+            <h2>Schrift Generator</h2>
+        </div>
+        <div class="generator-body">
+            <div class="generator-controls">
+                <label for="gen-text">Text</label>
+                <textarea id="gen-text" rows="3">Die digitale Bühne für deine Vision</textarea>
+
+                <label for="gen-style">Style</label>
+                <select id="gen-style">
+                    <option value="glow">Neon Glow</option>
+                    <option value="glass">Glass</option>
+                    <option value="outline">Outline</option>
+                    <option value="mini">ˡᶜᵏʸ</option>
+                </select>
+            </div>
+            <div class="generator-preview">
+                <p class="preview-text glow-text" id="gen-preview">Die digitale Bühne für deine Vision</p>
+            </div>
         </div>
     </div>
 </div>
@@ -133,58 +145,99 @@
     }
     
     .legal-link {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 1.5rem;
-        background: rgba(139, 92, 246, 0.05);
-        border: 1px solid rgba(139, 92, 246, 0.15);
-        border-radius: 12px;
+        background: transparent;
+        border: none;
         color: var(--text-secondary);
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         font-weight: 500;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: color 0.3s ease;
         text-decoration: none;
-        min-width: 180px;
-        justify-content: flex-start;
+        padding: 0;
     }
     
     .legal-link:hover {
-        background: rgba(139, 92, 246, 0.15);
-        border-color: rgba(139, 92, 246, 0.3);
         color: var(--text-primary);
-        transform: translateX(5px);
-        box-shadow: 
-            0 4px 20px rgba(139, 92, 246, 0.2),
-            0 0 30px rgba(139, 92, 246, 0.1);
     }
     
-    .legal-link .link-icon {
-        font-size: 1.1rem;
-        filter: grayscale(0.3);
-        transition: filter 0.3s ease;
+    /* Generator Modal */
+    .generator-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        z-index: 9999;
     }
-    
-    .legal-link:hover .link-icon {
-        filter: grayscale(0);
+
+    .generator-modal.active {
+        display: flex;
     }
-    
-    .legal-link .link-text {
-        flex: 1;
-        text-align: left;
+
+    .generator-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(11, 10, 18, 0.75);
+        backdrop-filter: blur(12px);
     }
-    
-    .legal-link .link-arrow {
-        opacity: 0;
-        transform: translateX(-10px);
-        transition: all 0.3s ease;
-        color: var(--neon-cyan);
+
+    .generator-panel {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 640px;
+        background: linear-gradient(145deg, rgba(24, 22, 42, 0.95), rgba(30, 26, 53, 0.9));
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
     }
-    
-    .legal-link:hover .link-arrow {
-        opacity: 1;
-        transform: translateX(0);
+
+    .generator-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        background: rgba(139, 92, 246, 0.1);
+        color: var(--text-primary);
+        cursor: pointer;
+    }
+
+    .generator-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .generator-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .generator-controls textarea,
+    .generator-controls select {
+        background: rgba(11, 10, 18, 0.6);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        border-radius: 12px;
+        color: var(--text-primary);
+        padding: 0.75rem;
+    }
+
+    .generator-preview {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(11, 10, 18, 0.5);
+        border: 1px solid rgba(139, 92, 246, 0.15);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
     }
     
     /* Admin Shield */
@@ -436,8 +489,8 @@
             justify-content: center;
         }
 
-        .legal-link .link-arrow {
-            display: none;
+        .generator-body {
+            grid-template-columns: 1fr;
         }
         
         .modal-content {
