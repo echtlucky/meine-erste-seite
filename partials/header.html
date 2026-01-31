@@ -2,40 +2,78 @@
 <header class="site-header" id="site-header">
     <div class="header-container">
         <!-- Logo -->
-        <a href="index.html" class="header-logo">
-            <img src="assets/logo-rbg.png" alt="LCKY HUB" class="logo-image">
+        <a href="/index.html" class="header-logo">
+            <img src="/assets/logo-rbg.png" alt="LCKY HUB" class="logo-image">
         </a>
         
         <!-- Navigation -->
         <nav class="header-nav">
-            <a href="index.html" class="nav-link active" data-page="index">
+            <a href="/index.html" class="nav-link active" data-page="index">
                 <span>Home</span>
                 <div class="nav-glow"></div>
             </a>
-            <a href="blog.html" class="nav-link" data-page="blog">
+            <a href="/pages/blog.html" class="nav-link" data-page="blog">
                 <span>Blog</span>
-                <div class="nav-glow"></div>
-            </a>
-            <a href="hub-download.html" class="nav-link" data-page="hub-download">
-                <span>Download</span>
                 <div class="nav-glow"></div>
             </a>
         </nav>
         
-        <!-- CTA Button -->
-        <a href="hub-download.html" class="header-cta">
-            <span class="cta-text">HUB Downloaden</span>
-            <span class="cta-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
+        <div class="header-actions">
+            <!-- CTA Button -->
+            <a href="/pages/hub-download.html" class="header-cta">
+                <span class="cta-text">HUB Downloaden</span>
+                <span class="cta-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </span>
+                <div class="cta-glow"></div>
+            </a>
+
+            <button class="profile-btn" id="profile-btn" type="button" aria-label="Profil">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c2.5-4 13.5-4 16 0"/>
                 </svg>
-            </span>
-            <div class="cta-glow"></div>
-        </a>
+            </button>
+        </div>
     </div>
 </header>
+
+<!-- Auth Modal -->
+<div class="auth-modal" id="auth-modal" aria-hidden="true">
+    <div class="auth-backdrop" data-auth-close></div>
+    <div class="auth-panel">
+        <button class="auth-close" data-auth-close aria-label="Schließen">✕</button>
+        <div class="auth-tabs">
+            <button class="auth-tab active" type="button" data-auth-tab="login">Anmelden</button>
+            <button class="auth-tab" type="button" data-auth-tab="register">Registrieren</button>
+        </div>
+
+        <form class="auth-form active" id="auth-login-form">
+            <label for="auth-login-username">Nutzername</label>
+            <input id="auth-login-username" type="text" placeholder="deinname" required>
+            <label for="auth-login-password">Passwort</label>
+            <input id="auth-login-password" type="password" placeholder="Passwort" required>
+            <button type="submit" class="btn btn-primary">Anmelden</button>
+        </form>
+
+        <form class="auth-form" id="auth-register-form">
+            <label for="auth-register-username">Nutzername</label>
+            <input id="auth-register-username" type="text" placeholder="deinname" required>
+            <label for="auth-register-password">Passwort</label>
+            <input id="auth-register-password" type="password" placeholder="Passwort" required>
+            <button type="submit" class="btn btn-primary">Registrieren</button>
+        </form>
+
+        <div class="auth-footer">
+            <p id="auth-modal-message">Bitte logge dich ein, um zu kommentieren.</p>
+            <button type="button" class="btn btn-glass" id="auth-logout-btn">Abmelden</button>
+        </div>
+    </div>
+</div>
 
 <!-- Header Styles -->
 <style>

@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schrift Generator - LCKY HUB</title>
+    <link rel="icon" type="image/png" href="/assets/logo-rbg.png">
+    <link rel="stylesheet" href="/css/lcky-design.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="blog-page">
+        <section class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Schrift Generator</h2>
+                    <p>Erzeuge deinen LCKY‑Look: Typografie, Glow und Glas‑Styles in Sekunden.</p>
+                </div>
+
+                <div class="font-generator">
+                    <div class="font-controls">
+                        <h3>Kontrollen</h3>
+                        <label for="font-text">Text</label>
+                        <textarea id="font-text" rows="4">Die digitale Bühne für deine Vision</textarea>
+
+                        <label for="font-size">Größe</label>
+                        <input type="range" id="font-size" min="18" max="96" value="40">
+
+                        <label for="font-weight">Gewicht</label>
+                        <input type="range" id="font-weight" min="300" max="800" step="100" value="600">
+
+                        <label for="letter-spacing">Letter Spacing</label>
+                        <input type="range" id="letter-spacing" min="-2" max="6" step="0.5" value="0">
+
+                        <label for="line-height">Line Height</label>
+                        <input type="range" id="line-height" min="1" max="2.2" step="0.1" value="1.2">
+
+                        <label for="text-transform">Transform</label>
+                        <select id="text-transform">
+                            <option value="none">Normal</option>
+                            <option value="uppercase">UPPERCASE</option>
+                            <option value="lowercase">lowercase</option>
+                            <option value="capitalize">Capitalize</option>
+                        </select>
+                    </div>
+
+                    <div class="font-preview">
+                        <div class="preview-card" data-style="glow">
+                            <h4>Neon Glow</h4>
+                            <p class="preview-text glow-text">Die digitale Bühne für deine Vision</p>
+                        </div>
+                        <div class="preview-card" data-style="glass">
+                            <h4>Glass</h4>
+                            <p class="preview-text glass-text">Die digitale Bühne für deine Vision</p>
+                        </div>
+                        <div class="preview-card" data-style="outline">
+                            <h4>Outline</h4>
+                            <p class="preview-text outline-text">Die digitale Bühne für deine Vision</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script type="module" src="/js/fonts.js"></script>
+</body>
+</html>

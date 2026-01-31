@@ -18,6 +18,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { appAuth, appDb } from "./firebase-init.js";
 import { loadLayout } from "./layout.js";
+import "./auth-modal.js";
 
 const postsContainer = document.getElementById("posts-container");
 const authMessage = document.getElementById("auth-message");
@@ -42,24 +43,39 @@ const formatDate = (value) => {
   }
 };
 
-const ensureProfile = async (user, displayName = "") => {
+const normalizeUsername = (value) => value.trim().toLowerCase();
+const isValidUsername = (value) => /^[a-z0-9._-]{3,20}$/.test(value);
+const usernameToEmail = (username) => `${username}@lcky.app`;
+
+const ensureProfile = async (user, username = "") => {
   const userRef = doc(appDb, "users", user.uid);
   const snapshot = await getDoc(userRef);
   if (!snapshot.exists()) {
     await setDoc(userRef, {
       uid: user.uid,
       email: user.email,
-      displayName: displayName || "",
+      username: username || "",
+      displayName: username || "",
       createdAt: serverTimestamp(),
       role: "user",
       status: "active"
     });
-    return { displayName: displayName || "", email: user.email };
+    if (username) {
+      await setDoc(doc(appDb, "usernames", username), {
+        uid: user.uid,
+        createdAt: serverTimestamp()
+      });
+    }
+    return { displayName: username || "", email: user.email, username };
   }
   const data = snapshot.data();
-  if (displayName && data.displayName !== displayName) {
-    await setDoc(userRef, { displayName }, { merge: true });
-    return { ...data, displayName };
+  if (username && data.username !== username) {
+    await setDoc(userRef, { username, displayName: username }, { merge: true });
+    await setDoc(doc(appDb, "usernames", username), {
+      uid: user.uid,
+      createdAt: serverTimestamp()
+    });
+    return { ...data, username, displayName: username };
   }
   return data;
 };
@@ -198,12 +214,26 @@ registerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   authMessage.textContent = "";
 
-  const displayName = document.getElementById("register-display-name").value.trim();
-  const email = document.getElementById("register-email").value.trim();
+  const rawUsername = document.getElementById("register-username").value.trim();
   const password = document.getElementById("register-password").value.trim();
+
+  const username = normalizeUsername(rawUsername);
+  if (!isValidUsername(username)) {
+    authMessage.textContent = "Nutzername ungültig (3-20, a-z, 0-9, . _ -).";
+    return;
+  }
+
+  const usernameRef = doc(appDb, "usernames", username);
+  const usernameSnap = await getDoc(usernameRef);
+  if (usernameSnap.exists()) {
+    authMessage.textContent = "Nutzername ist bereits vergeben.";
+    return;
+  }
+
+  const email = usernameToEmail(username);
   try {
     const credential = await createUserWithEmailAndPassword(appAuth, email, password);
-    currentProfile = await ensureProfile(credential.user, displayName);
+    currentProfile = await ensureProfile(credential.user, username);
     authMessage.textContent = "Account erstellt und eingeloggt.";
   } catch (error) {
     authMessage.textContent = `Fehler: ${error.message}`;
@@ -214,8 +244,11 @@ loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   authMessage.textContent = "";
 
-  const email = document.getElementById("login-email").value.trim();
+  const rawUsername = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
+
+  const username = normalizeUsername(rawUsername);
+  const email = rawUsername.includes("@") ? rawUsername : usernameToEmail(username);
   try {
     const credential = await signInWithEmailAndPassword(appAuth, email, password);
     currentProfile = await ensureProfile(credential.user);
@@ -237,10 +270,10 @@ if (!appAuth || !appDb) {
   onAuthStateChanged(appAuth, async (user) => {
     if (user) {
       authState.style.display = "grid";
-      currentUserLabel.textContent = user.email || user.uid;
       registerForm.style.display = "none";
       loginForm.style.display = "none";
       currentProfile = await ensureProfile(user);
+      currentUserLabel.textContent = (currentProfile && currentProfile.displayName) || user.email || user.uid;
       renderPosts(user);
     } else {
       authState.style.display = "none";

@@ -130,8 +130,8 @@ export const loadLayout = async () => {
   if (!headerContainer || !footerContainer) return;
 
   const [header, footer] = await Promise.all([
-    fetch("header.html").then((res) => res.text()),
-    fetch("footer.html").then((res) => res.text())
+    fetch("/partials/header.html").then((res) => res.text()),
+    fetch("/partials/footer.html").then((res) => res.text())
   ]);
 
   headerContainer.innerHTML = header;
@@ -139,4 +139,5 @@ export const loadLayout = async () => {
 
   setupHeader();
   setupFooter();
+  window.dispatchEvent(new Event("layout:ready"));
 };

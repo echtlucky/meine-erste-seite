@@ -14,6 +14,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { appAuth, appDb } from "./firebase-init.js";
 import { loadLayout } from "./layout.js";
+import "./auth-modal.js";
 
 const rolesStatus = document.getElementById("roles-status");
 const rolesStatusText = rolesStatus.querySelector(".admin-status-text");
@@ -23,6 +24,9 @@ const rolesLogoutBtn = document.getElementById("roles-logout");
 const rolesGrid = document.getElementById("roles-grid");
 const rolesHint = document.getElementById("roles-hint");
 const rolesUserList = document.getElementById("roles-user-list");
+
+const normalizeUsername = (value) => value.trim().toLowerCase();
+const usernameToEmail = (username) => `${username}@lcky.app`;
 
 const ensureAdmin = async (user) => {
   const token = await getIdTokenResult(user, true);
@@ -47,8 +51,8 @@ const renderUserRow = (docSnap) => {
   const meta = document.createElement("div");
   meta.className = "role-meta";
   meta.innerHTML = `
-    <strong>${data.displayName || data.email || docSnap.id}</strong>
-    <span>${data.email || "-"}</span>
+    <strong>${data.displayName || data.username || data.email || docSnap.id}</strong>
+    <span>${data.username ? `@${data.username}` : data.email || "-"}</span>
   `;
 
   const roleSelect = document.createElement("select");
@@ -105,8 +109,10 @@ rolesLoginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   rolesLoginMessage.textContent = "";
 
-  const email = document.getElementById("roles-login-email").value.trim();
+  const rawUsername = document.getElementById("roles-login-username").value.trim();
   const password = document.getElementById("roles-login-password").value.trim();
+  const username = normalizeUsername(rawUsername);
+  const email = rawUsername.includes("@") ? rawUsername : usernameToEmail(username);
 
   try {
     await signInWithEmailAndPassword(appAuth, email, password);

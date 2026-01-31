@@ -20,6 +20,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { appAuth, appDb } from "./firebase-init.js";
 import { loadLayout } from "./layout.js";
+import "./auth-modal.js";
 const adminStatus = document.getElementById("admin-status");
 const adminStatusText = adminStatus.querySelector(".admin-status-text");
 const adminGrid = document.querySelector(".admin-grid");
@@ -27,6 +28,9 @@ const adminGrid = document.querySelector(".admin-grid");
 const adminLoginForm = document.getElementById("admin-login-form");
 const adminLoginMessage = document.getElementById("admin-login-message");
 const adminLogoutBtn = document.getElementById("admin-logout");
+
+const normalizeUsername = (value) => value.trim().toLowerCase();
+const usernameToEmail = (username) => `${username}@lcky.app`;
 
 const blogForm = document.getElementById("blog-form");
 const blogList = document.getElementById("blog-list");
@@ -129,8 +133,8 @@ const loadUsers = async () => {
 
   snapshot.forEach((docSnap) => {
     const data = docSnap.data();
-    const title = data.email || docSnap.id;
-    const subtitle = `${data.role || "user"} · ${data.status || "active"}`;
+    const title = data.displayName || data.username || data.email || docSnap.id;
+    const subtitle = `${data.username ? `@${data.username}` : "ohne Nutzername"} · ${data.role || "user"} · ${data.status || "active"}`;
     const toggleStatus = createActionButton(
       data.status === "disabled" ? "Aktivieren" : "Sperren",
       "delete",
@@ -213,8 +217,10 @@ adminLoginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   adminLoginMessage.textContent = "";
 
-  const email = document.getElementById("admin-login-email").value.trim();
+  const rawUsername = document.getElementById("admin-login-username").value.trim();
   const password = document.getElementById("admin-login-password").value.trim();
+  const username = normalizeUsername(rawUsername);
+  const email = rawUsername.includes("@") ? rawUsername : usernameToEmail(username);
 
   try {
     await signInWithEmailAndPassword(appAuth, email, password);

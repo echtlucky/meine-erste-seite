@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCKY HUB - Download</title>
+    <link rel="stylesheet" href="/css/lcky-design.css">
+</head>
+<body class="text-center p-8">
+    <div id="header-container"></div>
+
+    <main class="section">
+        <div class="container">
+            <div class="card" style="max-width: 720px; margin: 0 auto; text-align: center;">
+                <h1 class="mb-4">LCKY HUB</h1>
+                <p class="text-secondary mb-6">
+                    Vielen Dank für dein Interesse am LCKY HUB!
+                    <br>
+                    Der Download sollte automatisch gestartet sein.
+                </p>
+                <button onclick="window.close()" class="btn mt-4">
+                    Fenster schließen
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+    
+    <script>
+        // Simulate download by creating a blob and triggering download
+        const content = `<?php echo 'LCKY HUB - Digital Stage'; ?>`;
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'lcky-hub.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    </script>
+    <script type="module">
+        import { loadLayout } from '/js/layout.js';
+        import '/js/auth-modal.js';
+        loadLayout();
+    </script>
+</body>
+</html>

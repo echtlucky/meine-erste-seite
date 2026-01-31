@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - LCKY HUB</title>
+    <link rel="icon" type="image/png" href="/assets/logo-rbg.png">
+    <link rel="stylesheet" href="/css/lcky-design.css">
+</head>
+<body class="admin-page">
+    <!-- Header -->
+    <div id="header-container"></div>
+    
+    <main class="admin-container">
+        <!-- Admin Header -->
+        <div class="admin-header">
+            <div class="admin-shield-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+            </div>
+            <h1>Admin Panel</h1>
+            <p>Verwalte Blog, Nutzer und Kommentare in einem Kontrollzentrum</p>
+        </div>
+
+        <div class="admin-card" id="admin-status" style="margin-bottom: 2rem;">
+            <h2>
+                <span class="icon">🛡️</span>
+                Zugriff
+            </h2>
+            <p class="admin-status-text">Status wird geladen...</p>
+            <form class="blog-form" id="admin-login-form" style="margin-top: 1.5rem;">
+                <div class="form-group">
+                    <label for="admin-login-username">Nutzername</label>
+                    <input type="text" id="admin-login-username" placeholder="admin" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-login-password">Passwort</label>
+                    <input type="password" id="admin-login-password" placeholder="Passwort" required>
+                </div>
+                <button type="submit" class="admin-btn">
+                    <span>🔐</span>
+                    Admin anmelden
+                </button>
+                <button type="button" class="admin-btn secondary" id="admin-logout" style="margin-top: 0.75rem;">
+                    <span>🚪</span>
+                    Abmelden
+                </button>
+            </form>
+            <p class="comment-meta" id="admin-login-message" style="margin-top: 1rem;"></p>
+        </div>
+        
+        <!-- Admin Grid -->
+        <div class="admin-grid" style="display: none;">
+            <!-- Create Blog Post -->
+            <div class="admin-card">
+                <h2>
+                    <span class="icon">✍️</span>
+                    Neuen Blog Post erstellen
+                </h2>
+                <form class="blog-form" id="blog-form">
+                    <div class="form-group">
+                        <label for="post-title">Titel</label>
+                        <input type="text" id="post-title" placeholder="Gib deinem Post einen Titel..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-excerpt">Kurzbeschreibung</label>
+                        <input type="text" id="post-excerpt" placeholder="Eine kurze Zusammenfassung...">
+                    </div>
+                    <div class="form-group">
+                        <label for="post-content">Inhalt</label>
+                        <textarea id="post-content" placeholder="Schreibe hier deinen Blog-Post..." required></textarea>
+                    </div>
+                    <button type="submit" class="admin-btn">
+                        <span>🚀</span>
+                        Post veröffentlichen
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Blog Posts List -->
+            <div class="admin-card">
+                <h2>
+                    <span class="icon">📚</span>
+                    Veröffentlichte Posts
+                </h2>
+                <div class="blog-list" id="blog-list"></div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="admin-card">
+                <h2>
+                    <span class="icon">📊</span>
+                    Statistiken
+                </h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-posts">0</div>
+                        <div class="stat-label">Blog Posts</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-users">0</div>
+                        <div class="stat-label">Nutzer</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-comments">0</div>
+                        <div class="stat-label">Kommentare</div>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(139, 92, 246, 0.1);">
+                    <button class="admin-btn secondary" style="width: 100%;" id="refresh-stats">
+                        <span>📈</span>
+                        Daten aktualisieren
+                    </button>
+                </div>
+            </div>
+
+            <!-- User Management -->
+            <div class="admin-card">
+                <h2>
+                    <span class="icon">👥</span>
+                    Nutzer verwalten
+                </h2>
+                <div class="blog-list" id="user-list"></div>
+            </div>
+
+            <!-- Comment Overview -->
+            <div class="admin-card">
+                <h2>
+                    <span class="icon">💬</span>
+                    Letzte Kommentare
+                </h2>
+                <div class="blog-list" id="comment-list"></div>
+            </div>
+
+            <!-- Roles & Access -->
+            <div class="admin-card">
+                <h2>
+                    <span class="icon">🛡️</span>
+                    Rollen & Freischalten
+                </h2>
+                <p class="comment-meta">Hier kannst du Rollen, Status und Freischaltungen verwalten.</p>
+                <a class="admin-btn secondary" href="/pages/admin-roles.html" style="margin-top: 1rem; width: 100%;">
+                    Rollen verwalten öffnen
+                </a>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <div id="footer-container"></div>
+    
+    <!-- Scripts -->
+    <script type="module" src="/js/admin.js"></script>
+</body>
+</html>
