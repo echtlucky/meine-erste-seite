@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Tool - LCKY HUB</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/ai-monitor.js"></script>
+    <script src="js/dev-tool-api.js"></script>
+    <style>
+        .devtool-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .devtool-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+        }
+        
+        .devtool-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .devtool-title svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .devtool-close {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .devtool-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .devtool-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .devtool-sidebar {
+            width: 200px;
+            min-width: 200px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-light);
+            padding: var(--spacing-md);
+        }
+        
+        .devtool-nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-bottom: var(--spacing-xs);
+            font-size: var(--font-size-sm);
+        }
+        
+        .devtool-nav-item:hover {
+            background: var(--bg-card-hover);
+        }
+        
+        .devtool-nav-item.active {
+            background: var(--primary);
+        }
+        
+        .devtool-main {
+            flex: 1;
+            padding: var(--spacing-md);
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        .devtool-section {
+            display: none;
+        }
+        
+        .devtool-section.active {
+            display: block;
+        }
+        
+        .devtool-section-title {
+            font-size: var(--font-size-md);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--primary);
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: var(--spacing-sm);
+        }
+        
+        .devtool-log-container {
+            background: var(--bg-darker);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .dev-log {
+            margin-bottom: var(--spacing-xs);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+        }
+        
+        .dev-log::before {
+            content: attr(data-time);
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        
+        .dev-log.info { background: rgba(0, 255, 255, 0.1); color: var(--neon-cyan); }
+        .dev-log.success { background: rgba(0, 255, 136, 0.1); color: var(--neon-green); }
+        .dev-log.warning { background: rgba(255, 215, 0, 0.1); color: var(--warning); }
+        .dev-log.error { background: rgba(255, 71, 87, 0.1); color: var(--error); }
+        .dev-log.debug { background: rgba(139, 92, 246, 0.1); color: var(--primary); }
+        
+        .feature-flag {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .feature-flag-info h4 {
+            font-size: var(--font-size-sm);
+            margin-bottom: 4px;
+        }
+        
+        .feature-flag-info p {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+        }
+        
+        .devtool-btn {
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .devtool-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .devtool-btn.secondary {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+        
+        .devtool-btn.danger {
+            background: var(--error);
+            color: white;
+        }
+        
+        .test-mode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
+        
+        .test-mode-badge.active {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--neon-green);
+        }
+        
+        .test-mode-badge.inactive {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--error);
+        }
+        
+        .debug-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .debug-info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+        }
+        
+        .debug-info-card h4 {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: var(--spacing-xs);
+        }
+        
+        .debug-info-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .debug-info-item span:first-child {
+            color: var(--text-muted);
+        }
+        
+        .cache-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-sm);
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .cache-key {
+            font-size: var(--font-size-sm);
+        }
+        
+        .cache-value {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-content">
+            <div class="content-header">
+                <div class="flex items-center gap-md">
+                    <a href="index.html" class="btn btn-secondary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        Zurück
+                    </a>
+                    <h1 class="content-title">Dev Tool</h1>
+                </div>
+                <span class="test-mode-badge inactive" id="devModeBadge">
+                    <span>●</span> Dev Mode Inaktiv
+                </span>
+            </div>
+            
+            <div class="content-body">
+                <div class="devtool-panel">
+                    <div class="devtool-sidebar">
+                        <div class="devtool-nav-item active" data-section="logs">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            Logs
+                        </div>
+                        <div class="devtool-nav-item" data-section="flags">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                                <line x1="4" y1="22" x2="4" y2="15"/>
+                            </svg>
+                            Feature Flags
+                        </div>
+                        <div class="devtool-nav-item" data-section="debug">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                            </svg>
+                            Debug Info
+                        </div>
+                        <div class="devtool-nav-item" data-section="cache">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                                <line x1="6" y1="6" x2="6.01" y2="6"/>
+                                <line x1="6" y1="18" x2="6.01" y2="18"/>
+                            </svg>
+                            Cache
+                        </div>
+                        <div class="devtool-nav-item" data-section="test">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                            </svg>
+                            Test Modus
+                        </div>
+                        <div class="devtool-nav-item" data-section="ai">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2a10 10 0 1 0 10 10"/>
+                                <path d="M12 2v10l7 7"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            AI Monitor
+                        </div>
+                    </div>
+                    
+                    <div class="devtool-main">
+                        <!-- Logs Section -->
+                        <div class="devtool-section active" id="section-logs">
+                            <h3 class="devtool-section-title">Console Logs</h3>
+                            <div class="devtool-log-container" id="logsContainer">
+                                <div class="dev-log info" data-time="02:30:15">[INFO] App initialisiert</div>
+                                <div class="dev-log success" data-time="02:30:16">[SUCCESS] Firebase verbunden</div>
+                                <div class="dev-log info" data-time="02:30:17">[INFO] UI Komponenten geladen</div>
+                                <div class="dev-log debug" data-time="02:30:18">[DEBUG] Sidebar breite: 72px</div>
+                                <div class="dev-log warning" data-time="02:31:00">[WARN] Hohe Latenz erkannt</div>
+                                <div class="dev-log success" data-time="02:31:05">[SUCCESS] Update verfügbar: v1.0.2</div>
+                            </div>
+                            <div style="display: flex; gap: var(--spacing-sm);">
+                                <button class="devtool-btn primary" id="clearLogs">Logs löschen</button>
+                                <button class="devtool-btn secondary" id="copyLogs">Kopieren</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Feature Flags Section -->
+                        <div class="devtool-section" id="section-flags">
+                            <h3 class="devtool-section-title">Feature Flags</h3>
+                            
+                            <div class="feature-flag">
+                                <div class="feature-flag-info">
+                                    <h4>Neue Sidebar</h4>
+                                    <p>Erweiterte Sidebar mit Server-Icons</p>
+                                </div>
+                                <label class="toggle active"></label>
+                            </div>
+                            
+                            <div class="feature-flag">
+                                <div class="feature-flag-info">
+                                    <h4>Dark Mode</h4>
+                                    <p>Dunkles Design mit Neon-Akzenten</p>
+                                </div>
+                                <label class="toggle active"></label>
+                            </div>
+                            
+                            <div class="feature-flag">
+                                <div class="feature-flag-info">
+                                    <h4>Admin Panel</h4>
+                                    <p>Administrative Funktionen</p>
+                                </div>
+                                <label class="toggle active"></label>
+                            </div>
+                            
+                            <div class="feature-flag">
+                                <div class="feature-flag-info">
+                                    <h4>Auto-Updater</h4>
+                                    <p>Automatische Updates via GitHub</p>
+                                </div>
+                                <label class="toggle active"></label>
+                            </div>
+                            
+                            <div class="feature-flag">
+                                <div class="feature-flag-info">
+                                    <h4>Reflex Lab</h4>
+                                    <p>Reflex & Aim Training Spiele</p>
+                                </div>
+                                <label class="toggle active"></label>
+                            </div>
+                            
+                            <div class="feature-flag">
+                                <div class="feature-flag-info">
+                                    <h4>Neue Farbpalette</h4>
+                                    <p>Lila/Neon Theme</p>
+                                </div>
+                                <label class="toggle active"></label>
+                            </div>
+                        </div>
+                        
+                        <!-- Debug Info Section -->
+                        <div class="devtool-section" id="section-debug">
+                            <h3 class="devtool-section-title">Debug Informationen</h3>
+                            
+                            <div class="debug-info-grid">
+                                <div class="debug-info-card">
+                                    <h4>App Info</h4>
+                                    <div class="debug-info-item">
+                                        <span>Version</span>
+                                        <span>v1.0.1</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Build</span>
+                                        <span>#12345</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Environment</span>
+                                        <span>Production</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="debug-info-card">
+                                    <h4>Session</h4>
+                                    <div class="debug-info-item">
+                                        <span>User ID</span>
+                                        <span>admin#0001</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Role</span>
+                                        <span>Admin</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Session ID</span>
+                                        <span>abc123xyz</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="debug-info-card">
+                                    <h4>Performance</h4>
+                                    <div class="debug-info-item">
+                                        <span>Memory</span>
+                                        <span>128 MB</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>CPU</span>
+                                        <span>5%</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Uptime</span>
+                                        <span>2h 30m</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="debug-info-card">
+                                    <h4>Network</h4>
+                                    <div class="debug-info-item">
+                                        <span>Status</span>
+                                        <span style="color: var(--neon-green);">Online</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Latenz</span>
+                                        <span>24ms</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Firebase</span>
+                                        <span style="color: var(--neon-green);">Connected</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cache Section -->
+                        <div class="devtool-section" id="section-cache">
+                            <h3 class="devtool-section-title">Lokal Storage & Cache</h3>
+                            
+                            <div id="cacheList">
+                                <div class="cache-item">
+                                    <div>
+                                        <div class="cache-key">user_session</div>
+                                        <div class="cache-value">{"id": "admin", "role": "admin"}</div>
+                                    </div>
+                                    <button class="devtool-btn secondary btn-sm">Löschen</button>
+                                </div>
+                                <div class="cache-item">
+                                    <div>
+                                        <div class="cache-key">reflexBest</div>
+                                        <div class="cache-value">182 ms</div>
+                                    </div>
+                                    <button class="devtool-btn secondary btn-sm">Löschen</button>
+                                </div>
+                                <div class="cache-item">
+                                    <div>
+                                        <div class="cache-key">precisionHigh</div>
+                                        <div class="cache-value">1250 pts</div>
+                                    </div>
+                                    <button class="devtool-btn secondary btn-sm">Löschen</button>
+                                </div>
+                                <div class="cache-item">
+                                    <div>
+                                        <div class="cache-key">theme</div>
+                                        <div class="cache-value">neon-lila</div>
+                                    </div>
+                                    <button class="devtool-btn secondary btn-sm">Löschen</button>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: var(--spacing-md); display: flex; gap: var(--spacing-sm);">
+                                <button class="devtool-btn danger" id="clearAllCache">Alles löschen</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Test Mode Section -->
+                        <div class="devtool-section" id="section-test">
+                            <h3 class="devtool-section-title">Test Modus</h3>
+                            
+                            <div class="feature-flag">
+                                <div class="feature-flag-info">
+                                    <h4>Demo Mode</h4>
+                                    <p>Test ohne Firebase-Verbindung</p>
+                                </div>
+                                <label class="toggle" id="demoModeToggle"></label>
+                            </div>
+                            
+                            <div class="feature-flag">
+                                <div class="feature-flag-info">
+                                    <h4>Mock Server</h4>
+                                    <p>Lokale Server simulieren</p>
+                                </div>
+                                <label class="toggle" id="mockServerToggle"></label>
+                            </div>
+                            
+                            <div class="feature-flag">
+                                <div class="feature-flag-info">
+                                    <h4>Verbose Logging</h4>
+                                    <p>Detaillierte Konsolenausgaben</p>
+                                </div>
+                                <label class="toggle active" id="verboseLogToggle"></label>
+                            </div>
+                            
+                            <div style="margin-top: var(--spacing-lg);">
+                                <h4 style="margin-bottom: var(--spacing-md);">Schnelltests</h4>
+                                <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+                                    <button class="devtool-btn secondary" onclick="addLog('Test-Benutzer erstellt', 'success')">Create Test User</button>
+                                    <button class="devtool-btn secondary" onclick="addLog('Notification ausgelöst', 'info')">Trigger Notification</button>
+                                    <button class="devtool-btn secondary" onclick="addLog('Session verlängert', 'info')">Extend Session</button>
+                                    <button class="devtool-btn danger" onclick="addLog('Simulierter Fehler', 'error')">Simulate Error</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Monitoring Section -->
+                        <div class="devtool-section" id="section-ai">
+                            <h3 class="devtool-section-title">Self-Healing AI Monitor</h3>
+                            
+                            <!-- Performance Metrics -->
+                            <div class="debug-info-grid" style="margin-bottom: var(--spacing-lg);">
+                                <div class="debug-info-card">
+                                    <h4>Performance</h4>
+                                    <div class="debug-info-item">
+                                        <span>FPS</span>
+                                        <span id="perf-fps">60</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Memory</span>
+                                        <span id="perf-memory">--</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Uptime</span>
+                                        <span id="perf-uptime">0h 0m</span>
+                                    </div>
+                                </div>
+                                <div class="debug-info-card">
+                                    <h4>Status</h4>
+                                    <div class="debug-info-item">
+                                        <span>AI Monitor</span>
+                                        <span style="color: #00FF88;">Active</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Auto-Fix</span>
+                                        <span id="autofix-status" style="color: #FF4757;">Off</span>
+                                    </div>
+                                    <div class="debug-info-item">
+                                        <span>Issues Found</span>
+                                        <span id="issue-count">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Auto-Fix Toggle -->
+                            <div class="feature-flag" style="margin-bottom: var(--spacing-lg);">
+                                <div class="feature-flag-info">
+                                    <h4>Auto-Fix Enable</h4>
+                                    <p>Erlaube AI automatische UI-Korrekturen (sicher, reversibel)</p>
+                                </div>
+                                <button class="devtool-btn secondary" id="toggleAutoFix" onclick="devToolAPI.toggleAutoFix()">
+                                    Auto-Fix: AUS
+                                </button>
+                            </div>
+                            
+                            <!-- Issues List -->
+                            <h4 style="margin-bottom: var(--spacing-md); color: var(--text-secondary);">
+                                Detected Issues
+                            </h4>
+                            <div id="ai-issues-list" style="max-height: 400px; overflow-y: auto;">
+                                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.5;">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 6v6l4 2"/>
+                                    </svg>
+                                    <br>
+                                    Keine Probleme erkannt
+                                </div>
+                            </div>
+                            
+                            <!-- Fix History -->
+                            <h4 style="margin: var(--spacing-lg) 0 var(--spacing-md) 0; color: var(--text-secondary);">
+                                Fix History
+                            </h4>
+                            <div id="fix-history-list" style="max-height: 200px; overflow-y: auto;">
+                                <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px;">
+                                    Keine Fixes angewendet
+                                </div>
+                            </div>
+                            
+                            <!-- Controls -->
+                            <div style="margin-top: var(--spacing-lg); display: flex; gap: var(--spacing-sm);">
+                                <button class="devtool-btn secondary" onclick="clearAIIssues()">
+                                    Issues löschen
+                                </button>
+                                <button class="devtool-btn secondary" onclick="pauseAIMonitor()">
+                                    Monitor pausieren
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Navigation
+        document.querySelectorAll('.devtool-nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.devtool-nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                const section = item.dataset.section;
+                document.querySelectorAll('.devtool-section').forEach(s => s.classList.remove('active'));
+                document.getElementById('section-' + section).classList.add('active');
+            });
+        });
+        
+        // Toggle switches
+        document.querySelectorAll('.toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                toggle.classList.toggle('active');
+            });
+        });
+        
+        // Add log function
+        function addLog(message, type = 'info') {
+            const container = document.getElementById('logsContainer');
+            const log = document.createElement('div');
+            const time = new Date().toLocaleTimeString('de-DE', { hour12: false });
+            log.className = `dev-log ${type}`;
+            log.setAttribute('data-time', time);
+            log.textContent = `[${type.toUpperCase()}] ${message}`;
+            container.insertBefore(log, container.firstChild);
+        }
+        
+        // Clear logs
+        document.getElementById('clearLogs').addEventListener('click', () => {
+            document.getElementById('logsContainer').innerHTML = '';
+            addLog('Logs gelöscht', 'info');
+        });
+        
+        // Copy logs
+        document.getElementById('copyLogs').addEventListener('click', () => {
+            const logs = document.getElementById('logsContainer').textContent;
+            navigator.clipboard.writeText(logs).then(() => {
+                addLog('Logs in Zwischenablage kopiert', 'success');
+            });
+        });
+        
+        // Clear all cache
+        document.getElementById('clearAllCache').addEventListener('click', () => {
+            if (confirm('Möchst du wirklich alle Cache-Daten löschen?')) {
+                localStorage.clear();
+                addLog('Alle Cache-Daten gelöscht', 'warning');
+                document.getElementById('cacheList').innerHTML = '<p style="color: var(--text-muted);">Cache geleert</p>';
+            }
+        });
+        
+        // Demo mode toggle
+        document.getElementById('demoModeToggle').addEventListener('click', function() {
+            this.classList.toggle('active');
+            const badge = document.getElementById('devModeBadge');
+            if (this.classList.contains('active')) {
+                badge.innerHTML = '<span>●</span> Demo Mode Aktiv';
+                badge.className = 'test-mode-badge active';
+                addLog('Demo Mode aktiviert', 'success');
+            } else {
+                badge.innerHTML = '<span>●</span> Dev Mode Inaktiv';
+                badge.className = 'test-mode-badge inactive';
+            }
+        });
+    </script>
+    
+    <script>
+        // AI Monitor helper functions
+        function clearAIIssues() {
+            if (window.aiMonitor) {
+                window.aiMonitor.clearIssues();
+            }
+            const container = document.getElementById('ai-issues-list');
+            if (container) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.5;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><br>Keine Probleme erkannt</div>';
+            }
+        }
+        
+        function pauseAIMonitor() {
+            if (window.aiMonitor) {
+                window.aiMonitor.setEnabled(false);
+            }
+            alert('AI Monitor pausiert - Seite neu laden um wieder zu aktivieren');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGB & Datenschutz - LCKY HUB</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Page Layout */
+        .agb-page {
+            min-height: 100vh;
+            background: #0D0B14;
+            background-image: url('../assets/img/bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .agb-page::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 11, 20, 0.85);
+            pointer-events: none;
+        }
+
+        /* Header */
+        .agb-header {
+            position: relative;
+            z-index: 10;
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .agb-logo {
+            width: 40px;
+            height: 40px;
+        }
+
+        .agb-logo img {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
+        }
+
+        .agb-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .agb-title span {
+            color: #8B5CF6;
+        }
+
+        /* Content */
+        .agb-content {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            padding: 40px 32px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .agb-card {
+            background: rgba(21, 18, 31, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            padding: 48px;
+        }
+
+        .agb-section {
+            margin-bottom: 40px;
+        }
+
+        .agb-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .agb-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .agb-section p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .agb-section ul {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            line-height: 1.8;
+            padding-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .agb-section li {
+            margin-bottom: 8px;
+        }
+
+        .agb-section strong {
+            color: white;
+            font-weight: 500;
+        }
+
+        /* Back Button */
+        .agb-back {
+            position: relative;
+            z-index: 10;
+            padding: 0 32px 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 10px;
+            color: #A78BFA;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: #8B5CF6;
+            transform: translateX(-4px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .agb-header {
+                padding: 20px;
+            }
+            .agb-content {
+                padding: 20px;
+            }
+            .agb-card {
+                padding: 24px;
+            }
+            .agb-section h2 {
+                font-size: 18px;
+            }
+            .agb-back {
+                padding: 0 20px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="agb-page">
+        <!-- Header -->
+        <div class="agb-header">
+            <div class="agb-logo">
+                <img src="../assets/img/logo-rgb.png" alt="LCKY HUB">
+            </div>
+            <h1 class="agb-title">LCKY <span>HUB</span> - AGB & Datenschutz</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="agb-content">
+            <div class="agb-card">
+                <div class="agb-section">
+                    <h2>1. Allgemeines</h2>
+                    <p>Die LCKY HUB Anwendung (nachfolgend "App" genannt) wird von uns als Software-as-a-Service bereitgestellt. Durch die Nutzung unserer App erklären Sie sich mit diesen Allgemeinen Geschäftsbedingungen (AGB) einverstanden.</p>
+                    <p>Die App richtet sich an Nutzer ab 16 Jahren. Minderjährige benötigen die Zustimmung ihrer Erziehungsberechtigten.</p>
+                </div>
+
+                <div class="agb-section">
+                    <h2>2. Kontoerstellung</h2>
+                    <p>Für die Nutzung der App ist die Erstellung eines Kontos erforderlich. Sie sind verpflichtet, bei der Registrierung wahrheitsgemäße und vollständige Angaben zu machen.</p>
+                    <p>Jeder Benutzername ist einzigartig und wird mit einer automatisch generierten Discriminator (#XXXX) versehen, um Eindeutigkeit zu gewährleisten.</p>
+                </div>
+
+                <div class="agb-section">
+                    <h2>3. Datenschutz</h2>
+                    <p>Wir nehmen den Schutz Ihrer persönlichen Daten ernst. Die Verarbeitung Ihrer Daten erfolgt ausschließlich gemäß unserer Datenschutzerklärung und den geltenden Datenschutzgesetzen (DSGVO).</p>
+                    <ul>
+                        <li>E-Mail-Adresse für Account-Verwaltung und Wiederherstellung</li>
+                        <li>Benutzername und Profilbild für die Darstellung in der App</li>
+                        <li>Status-Informationen (online, abwesend, nicht stören)</li>
+                        <li>Kommunikationsdaten für Direktnachrichten</li>
+                    </ul>
+                    <p>Ihre Daten werden nicht an Dritte verkauft. Eine Weitergabe erfolgt nur mit Ihrer ausdrücklichen Zustimmung oder auf behördliche Anforderung.</p>
+                </div>
+
+                <div class="agb-section">
+                    <h2>4. Nutzungsregeln</h2>
+                    <p>Sie verpflichten sich, die App nicht für folgende Zwecke zu nutzen:</p>
+                    <ul>
+                        <li>Verbreitung von illegalen, rassistischen oder menschenverachtenden Inhalten</li>
+                        <li>Belästigung oder Bedrohung anderer Nutzer</li>
+                        <li>Spam oder unerwünschte Massennachrichten</li>
+                        <li>Verbreitung von Malware oder schädlicher Software</li>
+                        <li>Verletzung von Urheberrechten oder anderen Schutzrechten</li>
+                    </ul>
+                </div>
+
+                <div class="agb-section">
+                    <h2>5. Geistiges Eigentum</h2>
+                    <p>Alle Rechte an der App, einschließlich des Designs, der Marken "LCKY HUB" sowie der zugrunde liegenden Software, liegen beim Entwickler. Die Nutzung zu anderen als den in dieser App vorgesehenen Zwecken ist untersagt.</p>
+                </div>
+
+                <div class="agb-section">
+                    <h2>6. Haftungsbeschränkung</h2>
+                    <p>Die App wird "wie besehen" bereitgestellt. Wir übernehmen keine Gewähr für die ununterbrochene Verfügbarkeit, Fehlerfreiheit oder die Erreichung bestimmter Ergebnisse. Für indirekte Schäden oder Folgeschäden haften wir nur bei Vorsatz oder grober Fahrlässigkeit.</p>
+                </div>
+
+                <div class="agb-section">
+                    <h2>7. Account-Löschung</h2>
+                    <p>Sie können Ihren Account jederzeit in den Einstellungen löschen. Nach der Löschung werden Ihre Daten gemäß unserer Aufbewahrungsrichtlinie innerhalb von 30 Tagen vollständig entfernt. Aus gesetzlichen Gründen aufbewahrungspflichtige Daten werden zuvor anonymisiert.</p>
+                </div>
+
+                <div class="agb-section">
+                    <h2>8. Änderungen der AGB</h2>
+                    <p>Wir behalten uns vor, diese AGB jederzeit zu ändern. Wesentliche Änderungen werden Sie per E-Mail oder innerhalb der App informieren. Die fortgesetzte Nutzung nach Inkrafttreten der Änderungen gilt als Zustimmung.</p>
+                </div>
+
+                <div class="agb-section">
+                    <h2>9. Kontakt</h2>
+                    <p>Bei Fragen zu diesen AGB oder dem Datenschutz wenden Sie sich bitte an:<br>
+                    <strong style="color: #A78BFA;">LCKY HUB Support</strong><br>
+                    <span style="color: #A78BFA;">lucassteckel04@gmail.com</span></p>
+                </div>
+
+                <div class="agb-section" style="margin-bottom: 0;">
+                    <p style="color: rgba(255, 255, 255, 0.4); font-size: 12px; text-align: center;">Stand: Januar 2025</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="agb-back">
+            <a href="javascript:history.back()" class="btn-back">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Zurück
+            </a>
+        </div>
+    </div>
+</body>
+</html>

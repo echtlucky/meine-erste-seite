@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LCKY HUB - Notification System</title>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="notify.css">
+</head>
+<body>
+  <!-- Notification container wird automatisch von notify.js erstellt -->
+  
+  <!-- Scripts -->
+  <script src="notify.js"></script>
+  
+  <!-- ===========================================
+       BEISPIEL-VERWENDUNG (diese Sektion entfernen im echten Projekt)
+       =========================================== -->
+  <script>
+    // BEISPIEL: Wie man das Notification-System verwendet
+    
+    console.log('=== LCKY HUB Notification System Examples ===');
+    
+    // 1. Info Notification
+    // notify.info('Titel', 'Nachricht');
+    
+    // 2. Success Notification
+    // notify.success('Gespeichert', 'Deine Änderungen wurden gespeichert.');
+    
+    // 3. Error Notification
+    // notify.error('Fehler', 'Verbindung verloren. Bitte versuche es erneut.');
+    
+    // 4. Warning Notification
+    // notify.warning('Achtung', 'Deine Session läuft bald ab.');
+    
+    // 5. Confirm Dialog (Promise-basiert)
+    // const result = await notify.confirm(
+    //   'Freund entfernen',
+    //   'Möchtest du diesen Freund wirklich entfernen?'
+    // );
+    // if (result) { /* bestätigt */ }
+    
+    // 6. Danger Dialog
+    // const confirmed = await notify.danger(
+    //   'Account löschen',
+    //   'Diese Aktion kann nicht rückgängig gemacht werden.'
+    // );
+    
+    // 7. Incoming Call
+    // const action = await notify.incomingCall({
+    //   name: 'Max Mustermann',
+    //   discriminator: '1234',
+    //   color: '#10b981',
+    //   isVideo: true
+    // });
+    // if (action.action === 'accept') { /* Call starten */ }
+    
+    // 8. Active Call
+    // const call = notify.activeCall({
+    //   peer: { name: 'Max Mustermann', color: '#10b981' },
+    //   isVideo: true,
+    //   onMuteToggle: (muted) => console.log('Muted:', muted),
+    //   onScreenShare: (sharing) => console.log('Screen sharing:', sharing),
+    //   onEndCall: () => console.log('Call ended')
+    // });
+    
+    // call.updatePeer({ name: 'Neuer Name', color: '#ef4444' });
+    // call.setStatus('Warte...');
+    // call.end(); // Call beenden
+    
+    // ===========================================
+    // TEST-BUTTONS (nur für Demo - entfernen!)
+    // ===========================================
+    
+    function createDemoButtons() {
+      const demo = document.createElement('div');
+      demo.style.cssText = 'position:fixed;bottom:24px;left:24px;display:flex;flex-direction:column;gap:8px;z-index:999999;';
+      demo.innerHTML = `
+        <button onclick="notify.success('Erfolg','Einstellungen gespeichert')" style="padding:10px 16px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-family: Montserrat;">
+          Success
+        </button>
+        <button onclick="notify.error('Fehler','Verbindung verloren')" style="padding:10px 16px;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;font-family: Montserrat;">
+          Error
+        </button>
+        <button onclick="testConfirm()" style="padding:10px 16px;background:#059669;color:white;border:none;border-radius:8px;cursor:pointer;font-family: Montserrat;">
+          Confirm Dialog
+        </button>
+        <button onclick="testIncomingCall()" style="padding:10px 16px;background:#7c3aed;color:white;border:none;border-radius:8px;cursor:pointer;font-family: Montserrat;">
+          Incoming Call
+        </button>
+        <button onclick="testActiveCall()" style="padding:10px 16px;background:#2563eb;color:white;border:none;border-radius:8px;cursor:pointer;font-family: Montserrat;">
+          Active Call
+        </button>
+      `;
+      document.body.appendChild(demo);
+    }
+    
+    async function testConfirm() {
+      const result = await notify.confirm(
+        'Einstellungen verwerfen',
+        'Möchtest du deine ungespeicherten Änderungen verwerfen?'
+      );
+      if (result) {
+        notify.success('Bestätigt', 'Änderungen verworfen');
+      } else {
+        notify.info('Abgebrochen', 'Änderungen bleiben erhalten');
+      }
+    }
+    
+    async function testIncomingCall() {
+      const action = await notify.incomingCall({
+        name: 'Lukas',
+        discriminator: '0420',
+        color: '#10b981',
+        isVideo: true
+      });
+      if (action.action === 'accept') {
+        notify.success('Anruf angenommen', 'Verbindung wird hergestellt...');
+        // Hier würde der eigentliche Call starten
+      } else {
+        notify.info('Anruf abgelehnt');
+      }
+    }
+    
+    let activeCallDemo = null;
+    
+    function testActiveCall() {
+      if (activeCallDemo) {
+        activeCallDemo.end();
+        activeCallDemo = null;
+        return;
+      }
+      
+      activeCallDemo = notify.activeCall({
+        peer: { name: 'Sarah', color: '#8b5cf6' },
+        isVideo: true,
+        onMuteToggle: (muted) => console.log('Muted:', muted),
+        onScreenShare: (sharing) => console.log('Screen sharing:', sharing),
+        onEndCall: () => {
+          notify.info('Anruf beendet');
+          activeCallDemo = null;
+        }
+      });
+    }
+    
+    // Demo-Buttons nach kurzer Verzögerung anzeigen
+    setTimeout(createDemoButtons, 1000);
+  </script>
+</body>
+</html>

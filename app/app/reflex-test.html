@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflex Test - LCKY HUB</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .game-container {
+            width: 100%;
+            height: calc(100vh - var(--titlebar-height));
+            background: #0D0B14;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: crosshair;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Crosshair */
+        .crosshair {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .crosshair::before {
+            width: 24px;
+            height: 2px;
+            left: -12px;
+            top: -1px;
+        }
+
+        .crosshair::after {
+            width: 2px;
+            height: 24px;
+            left: -1px;
+            top: -12px;
+        }
+
+        .crosshair .dot {
+            width: 4px;
+            height: 4px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            position: absolute;
+            left: -2px;
+            top: -2px;
+        }
+
+        /* Target */
+        .target {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--neon-pink);
+            border-radius: 50%;
+            background: transparent;
+            box-shadow: var(--glow-pink);
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .target:hover {
+            transform: scale(1.1);
+        }
+
+        .target::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--neon-pink);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .target::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--neon-pink);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: var(--glow-pink);
+        }
+
+        /* Game UI */
+        .game-ui {
+            position: fixed;
+            top: var(--titlebar-height);
+            left: 0;
+            right: 0;
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(11, 10, 18, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            z-index: 100;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: var(--spacing-xl);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-value.best {
+            color: var(--success);
+        }
+
+        /* Start/End Screen */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 10, 18, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            cursor: default;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .overlay-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .overlay-score {
+            font-size: var(--font-size-2xl);
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .overlay-score span {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+
+        .result-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xl);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            min-width: 200px;
+        }
+
+        .result-item.success {
+            border-left: 3px solid var(--success);
+        }
+
+        .result-item.fast {
+            border-left: 3px solid var(--neon-cyan);
+        }
+
+        .btn-primary {
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: var(--font-size-lg);
+        }
+
+        .instructions {
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-lg);
+            text-align: center;
+        }
+
+        /* Countdown */
+        .countdown {
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 10, 18, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+            cursor: default;
+        }
+
+        .countdown.hidden {
+            display: none;
+        }
+
+        .countdown-number {
+            font-size: 120px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            animation: pulse 1s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: fixed;
+            top: calc(var(--titlebar-height) + 80px);
+            left: var(--spacing-md);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Titlebar -->
+    <div class="titlebar">
+        <div class="titlebar-left">
+            <a href="../index.html" class="titlebar-logo">
+                <img src="../assets/img/logo-rbg.png" alt="LCKY HUB" width="24" height="24">
+            </a>
+            <div class="titlebar-brand">
+                <span>Reflex Test</span>
+            </div>
+        </div>
+        <div class="titlebar-right">
+            <button class="titlebar-btn minimize" onclick="window.electronAPI?.minimize()">
+                <svg viewBox="0 0 14 14"><rect y="6" width="14" height="2" fill="currentColor"/></svg>
+            </button>
+            <button class="titlebar-btn maximize" onclick="window.electronAPI?.maximize()">
+                <svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+            <button class="titlebar-btn close" onclick="window.electronAPI?.close()">
+                <svg viewBox="0 0 14 14"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Game UI -->
+    <div class="game-ui">
+        <div class="game-stats">
+            <div class="stat-item">
+                <div class="stat-label">Time</div>
+                <div class="stat-value" id="timer">0.0s</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Best</div>
+                <div class="stat-value best" id="best">--</div>
+            </div>
+        </div>
+        <button class="btn btn-secondary" onclick="endGame()">End Game</button>
+    </div>
+
+    <!-- Back Button -->
+    <a href="../index.html" class="btn btn-secondary back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back
+    </a>
+
+    <!-- Game Container -->
+    <div class="game-container" id="game-container">
+        <!-- Crosshair -->
+        <div class="crosshair" id="crosshair">
+            <div class="dot"></div>
+        </div>
+
+        <!-- Start Screen -->
+        <div class="overlay" id="start-screen">
+            <h1 class="overlay-title">Reflex Test</h1>
+            <p class="overlay-score">Click the targets as fast as you can</p>
+            <button class="btn btn-primary" onclick="startGame()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Start
+            </button>
+            <p class="instructions">Wait for the target to appear, then click it as fast as possible</p>
+        </div>
+
+        <!-- Countdown -->
+        <div class="countdown hidden" id="countdown">
+            <div class="countdown-number" id="countdown-text">3</div>
+        </div>
+
+        <!-- End Screen -->
+        <div class="overlay hidden" id="end-screen">
+            <h1 class="overlay-title">Game Over</h1>
+            <p class="overlay-score">Average: <span id="avg-time">0</span>ms</p>
+            <div class="result-list" id="result-list"></div>
+            <button class="btn btn-primary" onclick="startGame()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Play Again
+            </button>
+            <a href="../index.html" class="btn btn-secondary" style="margin-top: var(--spacing-md);">
+                Back to Menu
+            </a>
+        </div>
+    </div>
+
+    <script src="js/game-settings.js"></script>
+    <script>
+        // Game State
+        let gameState = {
+            isPlaying: false,
+            score: 0,
+            bestTime: null,
+            results: [],
+            currentTime: 0,
+            timerInterval: null,
+            targetTimeout: null,
+            roundStartTime: 0
+        };
+
+        // Settings Integration
+        function getGameSetting(key, defaultValue) {
+            try {
+                const settings = JSON.parse(localStorage.getItem('lcky_hub_settings') || '{}');
+                const audio = JSON.parse(localStorage.getItem('lcky_hub_audio') || '{}');
+                return audio[key] ?? settings[key] ?? defaultValue;
+            } catch (e) {
+                return defaultValue;
+            }
+        }
+
+        // Audio feedback
+        function playHitSound() {
+            if (!getGameSetting('sounds', true) || getGameSetting('fullMuted', false)) return;
+            
+            const volume = getGameSetting('sfxVolume', 0.8) * getGameSetting('masterVolume', 1.0);
+            
+            // Create audio context for hit sound
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(volume * 0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } catch (e) {
+                // Ignore audio errors
+            }
+        }
+
+        // DOM Elements
+        const gameContainer = document.getElementById('game-container');
+        const crosshair = document.getElementById('crosshair');
+        const startScreen = document.getElementById('start-screen');
+        const endScreen = document.getElementById('end-screen');
+        const countdown = document.getElementById('countdown');
+        const countdownText = document.getElementById('countdown-text');
+        const timerDisplay = document.getElementById('timer');
+        const scoreDisplay = document.getElementById('score');
+        const bestDisplay = document.getElementById('best');
+        const avgTimeDisplay = document.getElementById('avg-time');
+        const resultList = document.getElementById('result-list');
+
+        // Crosshair Follow Mouse
+        document.addEventListener('mousemove', (e) => {
+            crosshair.style.left = e.clientX + 'px';
+            crosshair.style.top = e.clientY + 'px';
+        });
+
+        // Apply settings
+        function applyGameSettings() {
+            const reduceMotion = getGameSetting('reduceMotion', false);
+            const themeAccent = getGameSetting('themeAccent', 'purple');
+            
+            // Apply reduce motion
+            if (reduceMotion) {
+                countdownText.style.animation = 'none';
+                document.querySelectorAll('.target').forEach(t => t.style.transition = 'none');
+            }
+            
+            // Apply theme accent to target color
+            const accentColors = {
+                purple: '#8B5CF6',
+                cyan: '#00FFFF',
+                pink: '#FF00FF',
+                green: '#00FF88',
+                orange: '#FF9500'
+            };
+            const accent = accentColors[themeAccent] || accentColors.purple;
+            document.documentElement.style.setProperty('--neon-pink', accent);
+        }
+
+        // Initialize settings
+        applyGameSettings();
+
+        // Start Game
+        function startGame() {
+            gameState = {
+                isPlaying: true,
+                score: 0,
+                bestTime: localStorage.getItem('reflexBest') ? parseInt(localStorage.getItem('reflexBest')) : null,
+                results: [],
+                currentTime: 0,
+                timerInterval: null,
+                targetTimeout: null,
+                roundStartTime: 0
+            };
+
+            scoreDisplay.textContent = '0';
+            if (gameState.bestTime) {
+                bestDisplay.textContent = gameState.bestTime + 'ms';
+            } else {
+                bestDisplay.textContent = '--';
+            }
+
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            countdown.classList.remove('hidden');
+
+            let count = 3;
+            countdownText.textContent = count;
+
+            const countInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownText.textContent = count;
+                    countdownText.style.animation = 'none';
+                    countdownText.offsetHeight; // Trigger reflow
+                    countdownText.style.animation = 'pulse 1s ease-in-out';
+                } else if (count === 0) {
+                    countdownText.textContent = 'GO!';
+                    countdownText.style.color = 'var(--success)';
+                } else {
+                    clearInterval(countInterval);
+                    countdown.classList.add('hidden');
+                    countdownText.style.color = 'var(--neon-cyan)';
+                    startTimer();
+                    spawnTarget();
+                }
+            }, 1000);
+        }
+
+        // Start Timer
+        function startTimer() {
+            const startTime = Date.now();
+            gameState.timerInterval = setInterval(() => {
+                gameState.currentTime = (Date.now() - startTime) / 1000;
+                timerDisplay.textContent = gameState.currentTime.toFixed(1) + 's';
+            }, 100);
+        }
+
+        // Spawn Target
+        function spawnTarget() {
+            if (!gameState.isPlaying) return;
+
+            const target = document.createElement('div');
+            target.className = 'target';
+
+            // Random position (avoiding UI areas)
+            const containerRect = gameContainer.getBoundingClientRect();
+            const padding = 80;
+            const maxX = containerRect.width - padding - 60;
+            const maxY = containerRect.height - padding - 60;
+
+            const x = Math.random() * maxX + padding / 2;
+            const y = Math.random() * maxY + padding;
+
+            target.style.left = x + 'px';
+            target.style.top = y + 'px';
+
+            // Random delay before target appears (1-3 seconds)
+            const delay = Math.random() * 2000 + 1000;
+            target.style.display = 'none';
+
+            gameContainer.appendChild(target);
+
+            setTimeout(() => {
+                if (!gameState.isPlaying) {
+                    target.remove();
+                    return;
+                }
+                target.style.display = 'block';
+                gameState.roundStartTime = Date.now();
+
+                // Auto-hide after 3 seconds if not clicked
+                gameState.targetTimeout = setTimeout(() => {
+                    if (target.parentNode) {
+                        target.remove();
+                        if (gameState.isPlaying) {
+                            spawnTarget();
+                        }
+                    }
+                }, 3000);
+            }, delay);
+
+            target.addEventListener('click', () => {
+                const reactionTime = Date.now() - gameState.roundStartTime;
+                gameState.score++;
+                gameState.results.push(reactionTime);
+                scoreDisplay.textContent = gameState.score;
+                
+                // Play hit sound
+                playHitSound();
+
+                // Check for best time
+                if (!gameState.bestTime || reactionTime < gameState.bestTime) {
+                    gameState.bestTime = reactionTime;
+                    localStorage.setItem('reflexBest', reactionTime);
+                    bestDisplay.textContent = reactionTime + 'ms';
+                }
+
+                target.remove();
+                clearTimeout(gameState.targetTimeout);
+
+                // Spawn next target immediately
+                spawnTarget();
+            });
+        }
+
+        // End Game
+        function endGame() {
+            if (!gameState.isPlaying) return;
+
+            gameState.isPlaying = false;
+            clearInterval(gameState.timerInterval);
+            clearTimeout(gameState.targetTimeout);
+
+            // Remove any remaining targets
+            document.querySelectorAll('.target').forEach(t => t.remove());
+
+            // Calculate average
+            const avg = gameState.results.length > 0
+                ? Math.round(gameState.results.reduce((a, b) => a + b, 0) / gameState.results.length)
+                : 0;
+
+            avgTimeDisplay.textContent = avg;
+
+            // Show results
+            resultList.innerHTML = gameState.results.slice(-10).map((time, i) => {
+                const isFast = time < 200;
+                const isSuccess = time < 300;
+                return `<div class="result-item ${isFast ? 'fast' : ''} ${isSuccess ? 'success' : ''}">
+                    <span>Round ${gameState.results.length - 10 + i + 1}</span>
+                    <span style="color: ${isFast ? 'var(--neon-cyan)' : isSuccess ? 'var(--success)' : 'var(--text-primary)'}">${time}ms</span>
+                </div>`;
+            }).join('');
+
+            endScreen.classList.remove('hidden');
+        }
+
+        // Keyboard shortcut to end game
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && gameState.isPlaying) {
+                endGame();
+            }
+        });
+
+        // Load best time on page load
+        if (localStorage.getItem('reflexBest')) {
+            bestDisplay.textContent = localStorage.getItem('reflexBest') + 'ms';
+        }
+    </script>
+</body>
+</html>

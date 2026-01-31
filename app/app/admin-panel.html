@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - LCKY HUB</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-container {
+            display: flex;
+            min-height: calc(100vh - var(--titlebar-height));
+        }
+
+        .admin-sidebar {
+            width: 240px;
+            min-width: 240px;
+            background: rgba(13, 11, 20, 0.95);
+            border-right: 1px solid var(--border-light);
+            padding: var(--spacing-lg);
+        }
+
+        .admin-sidebar h2 {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .admin-nav-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .admin-nav-item.active {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--primary-light);
+        }
+
+        .admin-nav-item svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: var(--spacing-xl);
+            overflow-y: auto;
+        }
+
+        .admin-header {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .admin-header h1 {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .admin-header p {
+            color: var(--text-muted);
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .admin-stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+        }
+
+        .admin-stat-card h3 {
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .admin-stat-card .value {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .admin-table {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .admin-table th {
+            background: rgba(139, 92, 246, 0.1);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+        }
+
+        .admin-table td {
+            font-size: var(--font-size-sm);
+            color: var(--text-primary);
+        }
+
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-table tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .role-badge {
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-badge.admin {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--error);
+        }
+
+        .role-badge.moderator {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .role-badge.user {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--primary-light);
+        }
+
+        .action-btn {
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: none;
+            margin-right: 4px;
+        }
+
+        .action-btn.edit {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .action-btn.delete {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--error);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .search-bar input {
+            flex: 1;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Titlebar -->
+    <div class="titlebar">
+        <div class="titlebar-left">
+            <div class="titlebar-logo">
+                <img src="../assets/img/logo-rbg.png" alt="LCKY HUB" width="24" height="24">
+            </div>
+            <div class="titlebar-brand">
+                <span>LCKY HUB</span>
+            </div>
+        </div>
+        <div class="titlebar-center">
+            <span class="current-server">Admin Panel</span>
+        </div>
+        <div class="titlebar-right">
+            <button class="titlebar-btn minimize" onclick="window.electronAPI?.minimize()">
+                <svg viewBox="0 0 14 14"><rect y="6" width="14" height="2" fill="currentColor"/></svg>
+            </button>
+            <button class="titlebar-btn close" onclick="window.electronAPI?.close()">
+                <svg viewBox="0 0 14 14"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <!-- Admin Sidebar -->
+        <nav class="admin-sidebar">
+            <h2>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Admin
+            </h2>
+            <div class="admin-nav-item active" data-section="overview">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span>Übersicht</span>
+            </div>
+            <div class="admin-nav-item" data-section="users">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>Benutzer</span>
+            </div>
+            <div class="admin-nav-item" data-section="roles">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <span>Rollen</span>
+            </div>
+            <div class="admin-nav-item" data-section="analytics">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10"/>
+                    <line x1="12" y1="20" x2="12" y2="4"/>
+                    <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+                <span>Analytics</span>
+            </div>
+            <div class="admin-nav-item" data-section="logs">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                <span>Logs</span>
+            </div>
+        </nav>
+
+        <!-- Admin Content -->
+        <main class="admin-content">
+            <div class="admin-header">
+                <h1>Dashboard Übersicht</h1>
+                <p>Willkommen im LCKY HUB Admin Panel</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="admin-stats">
+                <div class="admin-stat-card">
+                    <h3>Benutzer</h3>
+                    <div class="value" id="stat-users">1,234</div>
+                </div>
+                <div class="admin-stat-card">
+                    <h3>Aktive Sessions</h3>
+                    <div class="value" id="stat-sessions">856</div>
+                </div>
+                <div class="admin-stat-card">
+                    <h3>Spiele gespielt</h3>
+                    <div class="value" id="stat-games">45.2K</div>
+                </div>
+                <div class="admin-stat-card">
+                    <h3>Fehler heute</h3>
+                    <div class="value" id="stat-errors">3</div>
+                </div>
+            </div>
+
+            <!-- User Management -->
+            <div class="search-bar">
+                <input type="text" class="form-input" placeholder="Benutzer suchen..." id="user-search">
+                <button class="btn btn-primary">Suchen</button>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Benutzer</th>
+                        <th>E-Mail</th>
+                        <th>Rolle</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table">
+                    <!-- Users loaded dynamically -->
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <script src="web.js"></script>
+    <script>
+        // Check admin access
+        document.addEventListener('DOMContentLoaded', () => {
+            const sessionData = localStorage.getItem('lucky_hub_session');
+            if (sessionData) {
+                const user = JSON.parse(sessionData);
+                if (!user.isAdmin) {
+                    // Not an admin, redirect to dashboard
+                    window.location.href = '../index.html';
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+            loadAdminData();
+        });
+
+        function loadAdminData() {
+            // Load users
+            const users = [
+                { id: 1, name: 'Admin User', email: 'admin@lcky.com', role: 'admin', status: 'online' },
+                { id: 2, name: 'Mod User', email: 'mod@lcky.com', role: 'moderator', status: 'online' },
+                { id: 3, name: 'Test User', email: 'test@lcky.com', role: 'user', status: 'offline' },
+                { id: 4, name: 'Pro Gamer', email: 'pro@lcky.com', role: 'user', status: 'online' },
+            ];
+
+            renderUsersTable(users);
+        }
+
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('users-table');
+            if (!tbody) return;
+
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="avatar" style="width: 32px; height: 32px;">
+                                <span style="font-size: 12px;">${user.name.substring(0, 2).toUpperCase()}</span>
+                            </div>
+                            ${user.name}
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td><span class="role-badge ${user.role}">${user.role}</span></td>
+                    <td>
+                        <span class="status-dot ${user.status}" style="position: relative; bottom: auto; right: auto; margin-right: 8px;"></span>
+                        ${user.status}
+                    </td>
+                    <td>
+                        <button class="action-btn edit" onclick="editUser(${user.id})">Bearbeiten</button>
+                        <button class="action-btn delete" onclick="deleteUser(${user.id})">Löschen</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editUser(userId) {
+            showToast('Benutzer bearbeiten: ' + userId, 'info');
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Benutzer wirklich löschen?')) {
+                showToast('Benutzer gelöscht', 'success');
+            }
+        }
+    </script>
+</body>
+</html>

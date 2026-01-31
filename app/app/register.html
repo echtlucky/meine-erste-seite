@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="registerTitle">LCKY HUB - Registrieren</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        /* ============================================
+           AUTH PAGE - REGISTER
+           Split layout: Welcome panel + Register card
+           ============================================ */
+        
+        /* Language Selector */
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            background: rgba(21, 18, 31, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            border-color: #8B5CF6;
+            color: white;
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: rgba(21, 18, 31, 0.95);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            padding: 8px;
+            min-width: 120px;
+            display: none;
+        }
+
+        .lang-dropdown.show {
+            display: block;
+        }
+
+        .lang-option {
+            padding: 10px 12px;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .lang-option:hover {
+            background: rgba(139, 92, 246, 0.2);
+            color: white;
+        }
+
+        .lang-option.active {
+            background: rgba(139, 92, 246, 0.3);
+            color: #A78BFA;
+        }
+
+        /* Auth Page Layout - Split */
+        .auth-page-split {
+            min-height: 100vh;
+            background: #0D0B14;
+            background-image: url('../assets/img/bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            position: relative;
+        }
+
+        .auth-page-split::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 11, 20, 0.7);
+            pointer-events: none;
+        }
+
+        /* Left Panel - Welcome */
+        .auth-left-panel {
+            width: 45%;
+            min-width: 400px;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 1;
+            position: relative;
+        }
+
+        .left-panel-content {
+            max-width: 400px;
+        }
+
+        .auth-logo-large {
+            margin-bottom: 40px;
+        }
+
+        .auth-logo-large img {
+            width: 100px;
+            height: 100px;
+            filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.6));
+        }
+
+        .welcome-title {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #7C3AED 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .welcome-message {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .welcome-motivational {
+            font-size: 16px;
+            color: rgba(167, 139, 250, 0.9);
+            font-weight: 500;
+            padding-left: 20px;
+            border-left: 3px solid #8B5CF6;
+        }
+
+        /* Right Panel - Register Card */
+        .auth-right-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            z-index: 1;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(21, 18, 31, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            padding: 48px 40px;
+            animation: cardFadeIn 0.5s ease;
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        /* Form */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(13, 11, 20, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8B5CF6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Password strength indicator */
+        .password-strength {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .password-strength-bar.weak { width: 33%; background: #FF4757; }
+        .password-strength-bar.medium { width: 66%; background: #FFD700; }
+        .password-strength-bar.strong { width: 100%; background: #00FF88; }
+
+        /* Terms Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: #8B5CF6;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: none;
+            letter-spacing: 0;
+            cursor: pointer;
+            line-height: 1.5;
+        }
+
+        .checkbox-group a {
+            color: #A78BFA;
+            text-decoration: none;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        /* Submit Button */
+        .btn-auth {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-auth:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+        }
+
+        .btn-auth:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-auth .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+        }
+
+        .btn-auth.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-auth.loading .btn-text {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error message */
+        .error-message {
+            background: rgba(255, 71, 87, 0.15);
+            border: 1px solid rgba(255, 71, 87, 0.5);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #FF4757;
+            font-size: 13px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Footer */
+        .auth-footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-footer p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+        }
+
+        .auth-footer a {
+            color: #A78BFA;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive - Stack on mobile */
+        @media (max-width: 900px) {
+            .auth-page-split {
+                flex-direction: column;
+            }
+            
+            .auth-left-panel {
+                width: 100%;
+                min-width: auto;
+                padding: 40px 20px;
+                text-align: center;
+            }
+            
+            .left-panel-content {
+                max-width: none;
+            }
+            
+            .welcome-motivational {
+                border-left: none;
+                border-top: 3px solid #8B5CF6;
+                padding-left: 0;
+                padding-top: 16px;
+            }
+            
+            .auth-right-panel {
+                padding: 40px 20px;
+            }
+            
+            .auth-card {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-page-split">
+        <!-- Language Selector -->
+        <div class="language-selector">
+            <button class="lang-btn" id="lang-btn">
+                <span id="current-lang">DE</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="lang-dropdown" id="lang-dropdown">
+                <div class="lang-option active" data-lang="de">Deutsch</div>
+                <div class="lang-option" data-lang="en">English</div>
+                <div class="lang-option" data-lang="fr">Français</div>
+                <div class="lang-option" data-lang="es">Español</div>
+            </div>
+        </div>
+
+        <!-- Left Panel - Welcome -->
+        <div class="auth-left-panel">
+            <div class="left-panel-content">
+                <div class="auth-logo-large">
+                    <img src="../assets/img/logo-rbg.png" alt="LCKY HUB">
+                </div>
+                <h1 class="welcome-title" data-i18n="welcomeTitle">Join LCKY HUB</h1>
+                <p class="welcome-message" data-i18n="welcomeMessage">Erstelle dein Konto und werde Teil unserer Gaming-Community.</p>
+                <p class="welcome-motivational" data-i18n="welcomeMotivational">Verbessere deine Reflexe. Spiele gemeinsam. Hab Spaß.</p>
+            </div>
+        </div>
+
+        <!-- Right Panel - Register Card -->
+        <div class="auth-right-panel">
+            <div class="auth-card">
+                <!-- Header -->
+                <div class="auth-header">
+                    <h1 class="auth-title" data-i18n="registerHeading">Konto erstellen</h1>
+                    <p class="auth-subtitle" data-i18n="registerSubtitle">Melde dich an, um loszulegen</p>
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message" id="error-message"></div>
+
+                <!-- Form -->
+                <form class="auth-form" id="register-form">
+                    <div class="form-group">
+                        <label for="username" data-i18n="usernameLabel">Benutzername</label>
+                        <input type="text" id="username" class="form-input" 
+                               placeholder="Wähle einen Benutzernamen" required minlength="3">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" data-i18n="emailLabel">E-Mail</label>
+                        <input type="email" id="email" class="form-input" 
+                               placeholder="E-Mail eingeben" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" data-i18n="passwordLabel">Passwort</label>
+                        <input type="password" id="password" class="form-input" 
+                               placeholder="Passwort erstellen" required minlength="6">
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="password-strength-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password" data-i18n="confirmPasswordLabel">Passwort bestätigen</label>
+                        <input type="password" id="confirm-password" class="form-input" 
+                               placeholder="Passwort wiederholen" required>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms" data-i18n="termsLabel">
+                            Ich akzeptiere die <a href="agb.html" data-i18n="termsLink">AGB</a> und <a href="#" data-i18n="privacyLink">Datenschutzrichtlinie</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-auth" id="submit-btn">
+                        <span class="spinner"></span>
+                        <span class="btn-text" data-i18n="registerButton">Registrieren</span>
+                    </button>
+                </form>
+
+                <!-- Footer -->
+                <div class="auth-footer">
+                    <p data-i18n="hasAccount">Bereits ein Konto? <a href="login.html">Anmelden</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="web.js"></script>
+    <script>
+        // ============================================
+        // INTERNATIONALIZATION
+        // ============================================
+        
+        const i18n = new I18n();
+        i18n.translations = {
+            de: {
+                registerTitle: 'LCKY HUB - Registrieren',
+                welcomeTitle: 'Join LCKY HUB',
+                welcomeMessage: 'Erstelle dein Konto und werde Teil unserer Gaming-Community.',
+                welcomeMotivational: 'Verbessere deine Reflexe. Spiele gemeinsam. Hab Spaß.',
+                registerHeading: 'Konto erstellen',
+                registerSubtitle: 'Melde dich an, um loszulegen',
+                usernameLabel: 'Benutzername',
+                emailLabel: 'E-Mail',
+                passwordLabel: 'Passwort',
+                confirmPasswordLabel: 'Passwort bestätigen',
+                registerButton: 'Registrieren',
+                hasAccount: 'Bereits ein Konto? <a href="login.html">Anmelden</a>',
+                termsLabel: 'Ich akzeptiere die <a href="agb.html">AGB</a> und <a href="#">Datenschutzrichtlinie</a>',
+                
+                // Error messages
+                errorGeneric: 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.',
+                registerErrorEmpty: 'Bitte fülle alle Felder aus.',
+                registerErrorPassword: 'Passwort muss mindestens 6 Zeichen haben.',
+                registerErrorUsername: 'Benutzername muss mindestens 3 Zeichen haben.',
+                registerErrorPasswordMatch: 'Passwörter stimmen nicht überein.',
+                registerErrorTerms: 'Bitte akzeptiere die AGB.',
+                registerErrorEmailExists: 'Diese E-Mail wird bereits verwendet.',
+                registerErrorWeakPassword: 'Passwort ist zu schwach.',
+                
+                successRegister: 'Konto erfolgreich erstellt!'
+            },
+            en: {
+                registerTitle: 'LCKY HUB - Register',
+                welcomeTitle: 'Join LCKY HUB',
+                welcomeMessage: 'Create your account and become part of our gaming community.',
+                welcomeMotivational: 'Improve your reflexes. Play together. Have fun.',
+                registerHeading: 'Create Account',
+                registerSubtitle: 'Sign up to get started',
+                usernameLabel: 'Username',
+                emailLabel: 'Email',
+                passwordLabel: 'Password',
+                confirmPasswordLabel: 'Confirm Password',
+                registerButton: 'Register',
+                hasAccount: 'Already have an account? <a href="login.html">Sign In</a>',
+                termsLabel: 'I accept the <a href="agb.html">Terms</a> and <a href="#">Privacy Policy</a>',
+                
+                // Error messages
+                errorGeneric: 'An error occurred. Please try again.',
+                registerErrorEmpty: 'Please fill in all fields.',
+                registerErrorPassword: 'Password must be at least 6 characters.',
+                registerErrorUsername: 'Username must be at least 3 characters.',
+                registerErrorPasswordMatch: 'Passwords do not match.',
+                registerErrorTerms: 'Please accept the terms.',
+                registerErrorEmailExists: 'This email is already in use.',
+                registerErrorWeakPassword: 'Password is too weak.',
+                
+                successRegister: 'Account created successfully!'
+            }
+        };
+        i18n.init();
+
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        
+        const registerForm = document.getElementById('register-form');
+        const errorMessage = document.getElementById('error-message');
+        const submitBtn = document.getElementById('submit-btn');
+        const langDropdown = document.getElementById('lang-dropdown');
+        const langBtn = document.getElementById('lang-btn');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const strengthBar = document.getElementById('password-strength-bar');
+
+        // ============================================
+        // LANGUAGE SELECTOR
+        // ============================================
+        
+        langBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.language-selector')) {
+                langDropdown?.classList.remove('show');
+            }
+        });
+
+        document.querySelectorAll('.lang-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const lang = option.dataset.lang;
+                i18n.setLanguage(lang);
+                document.getElementById('current-lang').textContent = lang.toUpperCase();
+                document.querySelectorAll('.lang-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.lang === lang);
+                });
+                localStorage.setItem('lcky_language', lang);
+                langDropdown.classList.remove('show');
+            });
+        });
+
+        // ============================================
+        // PASSWORD STRENGTH
+        // ============================================
+        
+        passwordInput?.addEventListener('input', () => {
+            const password = passwordInput.value;
+            let strength = 0;
+            
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            strengthBar.className = 'password-strength-bar';
+            if (strength <= 2) {
+                strengthBar.classList.add('weak');
+            } else if (strength <= 4) {
+                strengthBar.classList.add('medium');
+            } else {
+                strengthBar.classList.add('strong');
+            }
+        });
+
+        // ============================================
+        // ERROR HANDLING
+        // ============================================
+        
+        function showError(messageKey) {
+            const message = i18n.t(messageKey) || messageKey;
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        function setLoading(loading) {
+            submitBtn.classList.toggle('loading', loading);
+            submitBtn.disabled = loading;
+        }
+
+        // ============================================
+        // REGISTRATION
+        // ============================================
+        
+        registerForm?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            hideError();
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const termsAccepted = document.getElementById('terms').checked;
+
+            // Validation
+            if (!username || !email || !password || !confirmPassword) {
+                showError('registerErrorEmpty');
+                return;
+            }
+
+            if (username.length < 3) {
+                showError('registerErrorUsername');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('registerErrorPassword');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('registerErrorPasswordMatch');
+                return;
+            }
+
+            if (!termsAccepted) {
+                showError('registerErrorTerms');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                // Wait for Firebase to be ready, then sign up
+                await window.firebaseAuth.ready();
+                
+                const user = await window.firebaseAuth.createUserWithEmailAndPassword(email, password, username);
+                
+                // Get session data
+                const sessionData = await window.firebaseAuth.getSessionData();
+                localStorage.setItem('lucky_hub_session', JSON.stringify(sessionData));
+                
+                // Success - redirect to main app
+                window.location.href = 'index.html';
+            } catch (error) {
+                showError(error || 'errorGeneric');
+                setLoading(false);
+            }
+        });
+
+        // ============================================
+        // KEYBOARD SHORTCUTS
+        // ============================================
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !submitBtn.disabled) {
+                registerForm?.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

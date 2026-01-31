@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy Background</title>
+    <link rel="stylesheet" href="galaxy.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="galaxy-container">
+        <!-- Nebula effects -->
+        <div class="galaxy-nebula purple"></div>
+        <div class="galaxy-nebula green"></div>
+
+        <!-- Glow spots -->
+        <div class="galaxy-glow"></div>
+        <div class="galaxy-glow"></div>
+
+        <!-- Stars container -->
+        <div class="galaxy-stars" id="stars"></div>
+
+        <!-- Shooting stars -->
+        <div class="shooting-star" id="shootingStar1"></div>
+    </div>
+
+    <script>
+        // Generate stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+
+                // Random properties
+                const size = Math.random();
+                let sizeClass = 'tiny';
+                if (size > 0.6) sizeClass = 'medium';
+                else if (size > 0.3) sizeClass = 'small';
+                star.classList.add(sizeClass);
+
+                // Position
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+
+                // Animation properties
+                const duration = 2 + Math.random() * 4; // 2-6 seconds
+                const delay = Math.random() * 3;
+                const opacity = 0.2 + Math.random() * 0.6;
+
+                star.style.setProperty('--duration', duration + 's');
+                star.style.setProperty('--delay', delay + 's');
+                star.style.setProperty('--opacity', opacity);
+
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Initialize
+        createStars();
+
+        // Shooting star animation timing
+        setTimeout(() => {
+            const shootingStar = document.getElementById('shootingStar1');
+            shootingStar.style.left = '10%';
+            shootingStar.style.top = '10%';
+        }, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="loginTitle">LCKY HUB - Login</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        /* ============================================
+           AUTH PAGE - LOGIN
+           Perfectly centered card with premium feel
+           ============================================ */
+        
+        /* Language Selector */
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            background: rgba(21, 18, 31, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            border-color: #8B5CF6;
+            color: white;
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: rgba(21, 18, 31, 0.95);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            padding: 8px;
+            min-width: 120px;
+            display: none;
+        }
+
+        .lang-dropdown.show {
+            display: block;
+        }
+
+        .lang-option {
+            padding: 10px 12px;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .lang-option:hover {
+            background: rgba(139, 92, 246, 0.2);
+            color: white;
+        }
+
+        .lang-option.active {
+            background: rgba(139, 92, 246, 0.3);
+            color: #A78BFA;
+        }
+
+        /* Auth Page Layout - Centered */
+        .auth-page {
+            min-height: 100vh;
+            background: #0D0B14;
+            background-image: url('../assets/img/bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl);
+            position: relative;
+        }
+
+        /* Dark overlay for readability */
+        .auth-page::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 11, 20, 0.6);
+            pointer-events: none;
+        }
+
+        /* Login Card - Perfectly Centered */
+        .auth-card {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            background: rgba(21, 18, 31, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            padding: 48px 40px;
+            z-index: 1;
+            animation: cardFadeIn 0.5s ease;
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Logo */
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-logo img {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+        }
+
+        /* Header */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        /* Form */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(13, 11, 20, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8B5CF6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Links */
+        .auth-links {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+
+        .auth-link {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .auth-link:hover {
+            color: #A78BFA;
+        }
+
+        /* Submit Button */
+        .btn-auth {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-auth:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+        }
+
+        .btn-auth:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-auth:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading state */
+        .btn-auth .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+        }
+
+        .btn-auth.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-auth.loading .btn-text {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error message */
+        .error-message {
+            background: rgba(255, 71, 87, 0.15);
+            border: 1px solid rgba(255, 71, 87, 0.5);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #FF4757;
+            font-size: 13px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Footer */
+        .auth-footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-footer p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+        }
+
+        .auth-footer a {
+            color: #A78BFA;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 32px 24px;
+            }
+            .auth-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-page">
+        <!-- Language Selector -->
+        <div class="language-selector">
+            <button class="lang-btn" id="lang-btn">
+                <span id="current-lang">DE</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="lang-dropdown" id="lang-dropdown">
+                <div class="lang-option active" data-lang="de">Deutsch</div>
+                <div class="lang-option" data-lang="en">English</div>
+                <div class="lang-option" data-lang="fr">Français</div>
+                <div class="lang-option" data-lang="es">Español</div>
+            </div>
+        </div>
+
+        <!-- Login Card -->
+        <div class="auth-card">
+            <!-- Logo -->
+            <div class="auth-logo">
+                <img src="../assets/img/logo-rbg.png" alt="LCKY HUB">
+            </div>
+
+            <!-- Header -->
+            <div class="auth-header">
+                <h1 class="auth-title" data-i18n="loginHeading">Willkommen zurück</h1>
+                <p class="auth-subtitle" data-i18n="loginSubtitle">Melde dich an, um fortzufahren</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="error-message"></div>
+
+            <!-- Form -->
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label for="email" data-i18n="emailLabel">E-Mail</label>
+                    <input type="email" id="email" class="form-input" 
+                           placeholder="E-Mail eingeben" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" data-i18n="passwordLabel">Passwort</label>
+                    <input type="password" id="password" class="form-input" 
+                           placeholder="Passwort eingeben" required>
+                    <div class="auth-links">
+                        <a href="#" class="auth-link" id="forgot-password-link" data-i18n="forgotPassword">Passwort vergessen?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-auth" id="submit-btn">
+                    <span class="spinner"></span>
+                    <span class="btn-text" data-i18n="loginButton">Anmelden</span>
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p data-i18n="noAccount">Kein Konto? <a href="register.html" id="register-link">Registrieren</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="web.js"></script>
+    <script>
+        // ============================================
+        // INTERNATIONALIZATION
+        // ============================================
+        
+        const i18n = new I18n();
+        i18n.translations = {
+            de: {
+                loginTitle: 'LCKY HUB - Login',
+                loginHeading: 'Willkommen zurück',
+                loginSubtitle: 'Melde dich an, um fortzufahren',
+                emailLabel: 'E-Mail',
+                emailPlaceholder: 'E-Mail eingeben',
+                passwordLabel: 'Passwort',
+                passwordPlaceholder: 'Passwort eingeben',
+                loginButton: 'Anmelden',
+                noAccount: 'Kein Konto? <a href="register.html">Registrieren</a>',
+                forgotPassword: 'Passwort vergessen?',
+                
+                // Error messages
+                errorGeneric: 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.',
+                loginErrorEmpty: 'Bitte fülle alle Felder aus.',
+                loginErrorPassword: 'Passwort ist falsch.',
+                loginErrorNotFound: 'Benutzer nicht gefunden. Bitte registriere dich.',
+                loginErrorWrongPassword: 'Falsches Passwort. Bitte versuche es erneut.',
+                loginErrorInvalidEmail: 'Ungültige E-Mail-Adresse.',
+                loginErrorDisabled: 'Dieses Konto wurde deaktiviert.',
+                loginErrorTooMany: 'Zu viele Versuche. Bitte warte kurz.',
+                loginErrorNetwork: 'Netzwerkfehler. Bitte überprüfe deine Verbindung.',
+                
+                successLogin: 'Anmeldung erfolgreich!'
+            },
+            en: {
+                loginTitle: 'LCKY HUB - Login',
+                loginHeading: 'Welcome back',
+                loginSubtitle: 'Sign in to continue',
+                emailLabel: 'Email',
+                emailPlaceholder: 'Enter your email',
+                passwordLabel: 'Password',
+                passwordPlaceholder: 'Enter your password',
+                loginButton: 'Sign In',
+                noAccount: "Don't have an account? <a href='register.html'>Register</a>",
+                forgotPassword: 'Forgot password?',
+                
+                // Error messages
+                errorGeneric: 'An error occurred. Please try again.',
+                loginErrorEmpty: 'Please fill in all fields.',
+                loginErrorPassword: 'Incorrect password.',
+                loginErrorNotFound: 'User not found. Please register.',
+                loginErrorWrongPassword: 'Wrong password. Please try again.',
+                loginErrorInvalidEmail: 'Invalid email address.',
+                loginErrorDisabled: 'This account has been disabled.',
+                loginErrorTooMany: 'Too many attempts. Please wait.',
+                loginErrorNetwork: 'Network error. Please check your connection.',
+                
+                successLogin: 'Login successful!'
+            }
+        };
+        i18n.init();
+
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        
+        const loginForm = document.getElementById('login-form');
+        const errorMessage = document.getElementById('error-message');
+        const submitBtn = document.getElementById('submit-btn');
+        const langDropdown = document.getElementById('lang-dropdown');
+        const langBtn = document.getElementById('lang-btn');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        // ============================================
+        // LANGUAGE SELECTOR
+        // ============================================
+        
+        langBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.language-selector')) {
+                langDropdown?.classList.remove('show');
+            }
+        });
+
+        document.querySelectorAll('.lang-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const lang = option.dataset.lang;
+                i18n.setLanguage(lang);
+                document.getElementById('current-lang').textContent = lang.toUpperCase();
+                document.querySelectorAll('.lang-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.lang === lang);
+                });
+                localStorage.setItem('lcky_language', lang);
+                langDropdown.classList.remove('show');
+            });
+        });
+
+        // ============================================
+        // ERROR HANDLING
+        // ============================================
+        
+        function showError(messageKey) {
+            const message = i18n.t(messageKey) || messageKey;
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        function setLoading(loading) {
+            submitBtn.classList.toggle('loading', loading);
+            submitBtn.disabled = loading;
+        }
+
+        // ============================================
+        // AUTHENTICATION
+        // ============================================
+        
+        loginForm?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            hideError();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showError('loginErrorEmpty');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                // Wait for Firebase to be ready, then sign in
+                await window.firebaseAuth.ready();
+                
+                const user = await window.firebaseAuth.signInWithEmailAndPassword(email, password);
+                
+                // Get session data
+                const sessionData = await window.firebaseAuth.getSessionData();
+                localStorage.setItem('lucky_hub_session', JSON.stringify(sessionData));
+                
+                // Success - redirect to main app
+                window.location.href = 'index.html';
+            } catch (error) {
+                showError(error || 'errorGeneric');
+                setLoading(false);
+            }
+        });
+
+        // Forgot password link
+        document.getElementById('forgot-password-link')?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            
+            if (email) {
+                try {
+                    await window.firebaseAuth.sendPasswordResetEmail(email);
+                    alert(i18n.t('successPasswordReset') || 'E-Mail zum Zurücksetzen des Passworts gesendet');
+                } catch (error) {
+                    showError(error || 'errorGeneric');
+                }
+            } else {
+                showError('loginErrorEmpty');
+            }
+        });
+
+        // ============================================
+        // KEYBOARD SHORTCUTS
+        // ============================================
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !submitBtn.disabled) {
+                loginForm?.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

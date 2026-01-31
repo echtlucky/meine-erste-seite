@@ -1,0 +1,22 @@
+directories:
+  output: dist
+  buildResources: assets
+appId: app.luckyhub
+productName: LCKY HUB
+asar: true
+compression: maximum
+files:
+  - filter:
+      - '**/*'
+      - '!**/*.map'
+      - '!node_modules/.bin'
+win:
+  target: nsis
+  icon: assets/img/logo.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: LCKY HUB
+electronVersion: 40.1.0

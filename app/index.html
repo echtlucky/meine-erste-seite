@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCKY HUB</title>
+    <link rel="stylesheet" href="app/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background -->
+    <div class="app-background"></div>
+
+    <!-- Custom Titlebar -->
+    <div class="titlebar">
+        <div class="titlebar-left">
+            <div class="titlebar-logo">
+                <img src="assets/img/logo-rbg.png" alt="LCKY HUB" width="24" height="24">
+            </div>
+            <div class="titlebar-brand">
+                <span>LCKY HUB</span>
+            </div>
+        </div>
+        <div class="titlebar-center">
+            <span class="current-server" id="current-server-name">Home</span>
+        </div>
+        <div class="titlebar-right">
+            <div class="audio-controls">
+                <button class="audio-btn" id="mic-mute" title="Microphone Mute" onclick="toggleMic()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                </button>
+                <button class="audio-btn" id="full-mute" title="Full Mute" onclick="toggleFullMute()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <line x1="23" y1="9" x2="17" y2="15"/>
+                        <line x1="17" y1="9" x2="23" y2="15"/>
+                    </svg>
+                </button>
+            </div>
+            <button class="titlebar-btn minimize" onclick="window.electronAPI?.minimize()">
+                <svg viewBox="0 0 14 14"><rect y="6" width="14" height="2" fill="currentColor"/></svg>
+            </button>
+            <button class="titlebar-btn close" onclick="window.electronAPI?.close()">
+                <svg viewBox="0 0 14 14"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Sidebar (Servers) - Fixed Width -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-item active" data-server="home" onclick="switchServer('home')" title="Home">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="sidebar-separator"></div>
+            <div class="sidebar-section" id="server-list">
+                <!-- Servers loaded dynamically -->
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-item add-server" data-action="add-server" onclick="showCreateServerModal()" title="Add Server">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Friends/Chats Column -->
+        <aside class="friends-column">
+            <div class="friends-header">
+                <div class="friends-tabs">
+                    <button class="friends-tab active" data-tab="friends" onclick="switchFriendsTab('friends')">Freunde</button>
+                    <button class="friends-tab" data-tab="pending" onclick="switchFriendsTab('pending')">Ausstehend</button>
+                </div>
+                <button class="add-friend-btn" onclick="openAddFriendModal()" title="Freund hinzufügen">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="text" class="friends-search" placeholder="Freunde suchen..." id="friend-search" oninput="filterFriends()">
+            <div class="friends-list" id="friends-list">
+                <!-- Friends loaded dynamically -->
+            </div>
+            
+            <!-- Friend Suggestions -->
+            <div class="friend-suggestions" id="friend-suggestions">
+                <div class="suggestions-header">Vorschläge</div>
+                <!-- Suggestion items loaded dynamically -->
+            </div>
+            
+            <!-- User Profile Area -->
+            <div class="user-profile-area">
+                <div class="user-profile-main" onclick="openSettings()">
+                    <div class="user-avatar" id="user-avatar">
+                        <span id="user-initials">LS</span>
+                        <span class="status-dot online" id="user-status"></span>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name" id="user-name">Loading...</div>
+                        <div class="user-status-text" id="user-status-text">Online</div>
+                    </div>
+                </div>
+                <div class="user-controls">
+                    <button class="control-btn" id="mic-mute-btn" onclick="toggleMicMute()" title="Microphone Mute">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </button>
+                    <button class="control-btn" id="full-mute-btn" onclick="toggleFullMute()" title="Full Mute">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                            <line x1="23" y1="9" x2="17" y2="15"/>
+                            <line x1="17" y1="9" x2="23" y2="15"/>
+                        </svg>
+                    </button>
+                    <button class="settings-btn" onclick="openSettings()" title="Settings">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Clock & Date -->
+            <div class="clock-container" id="clock-container">
+                <div class="clock-time" id="clock-time">--:--</div>
+                <div class="clock-date" id="clock-date">--/--/----</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="main-content">
+            <!-- Content loaded dynamically -->
+        </main>
+    </div>
+
+    <!-- Create Server Modal -->
+    <div class="modal-overlay" id="create-server-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Create Server</h2>
+                <button class="modal-close" onclick="closeCreateServerModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Server Name</label>
+                    <input type="text" class="form-input" id="server-name-input" placeholder="Enter server name">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeCreateServerModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createServer()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal modal-settings">
+            <div class="settings-layout">
+                <!-- Settings Navigation -->
+                <nav class="settings-nav">
+                    <div class="settings-nav-header">
+                        <h3>Einstellungen</h3>
+                    </div>
+                    <div class="settings-nav-section">
+                        <div class="settings-nav-item active" data-section="account">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            <span>Account</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="security">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <span>Sicherheit</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="appearance">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="5"/>
+                                <line x1="12" y1="1" x2="12" y2="3"/>
+                                <line x1="12" y1="21" x2="12" y2="23"/>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                <line x1="1" y1="12" x2="3" y2="12"/>
+                                <line x1="21" y1="12" x2="23" y2="12"/>
+                            </svg>
+                            <span>Erscheinung</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="accessibility">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="4.5" r="2.5"/>
+                                <path d="M10.2 6.3a5 5 0 0 1 7.6 6.3l-4.9 8.5a2 2 0 0 1-2.6 0L6.2 12.6a5 5 0 0 1 7.6-6.3"/>
+                                <path d="M6 18a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2"/>
+                            </svg>
+                            <span>Barrierefreiheit</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="audio-video">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                            <span>Audio & Video</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="notifications">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                            </svg>
+                            <span>Benachrichtigungen</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="privacy">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                            <span>Datenschutz</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="advanced">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                            </svg>
+                            <span>Erweitert</span>
+                        </div>
+                    </div>
+                </nav>
+                
+                <!-- Settings Content -->
+                <div class="settings-content">
+                    <div class="settings-header">
+                        <h2 id="settings-title">Account</h2>
+                        <button class="modal-close" onclick="closeSettingsModal()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Account Section -->
+                    <div class="settings-section-content active" id="section-account">
+                        <div class="settings-item">
+                            <div class="settings-item-label">Benutzername</div>
+                            <div class="settings-item-value">
+                                <input type="text" class="form-input" id="settings-username" placeholder="Benutzername">
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">E-Mail</div>
+                            <div class="settings-item-value">
+                                <input type="email" class="form-input" id="settings-email" placeholder="E-Mail">
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Anzeigename</div>
+                            <div class="settings-item-value">
+                                <input type="text" class="form-input" id="settings-display-name" placeholder="Anzeigename">
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Telefon</div>
+                            <div class="settings-item-value">
+                                <input type="tel" class="form-input" id="settings-phone" placeholder="Telefonnummer">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Section -->
+                    <div class="settings-section-content" id="section-security">
+                        <div class="settings-item">
+                            <div class="settings-item-label">Passwort ändern</div>
+                            <div class="settings-item-value">
+                                <button class="btn btn-secondary">Passwort ändern</button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Zwei-Faktor-Authentifizierung</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch" data-setting="twoFactorEnabled">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Appearance Section -->
+                    <div class="settings-section-content" id="section-appearance">
+                        <div class="settings-item">
+                            <div class="settings-item-label">Sprache</div>
+                            <div class="settings-item-value">
+                                <select class="form-input" id="settings-language" data-setting="language">
+                                    <option value="de">Deutsch</option>
+                                    <option value="en">English</option>
+                                    <option value="fr">Français</option>
+                                    <option value="es">Español</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Design</div>
+                            <div class="settings-item-value">
+                                <select class="form-input" id="settings-theme" data-setting="theme">
+                                    <option value="dark">Dunkel</option>
+                                    <option value="light">Hell</option>
+                                    <option value="custom">Benutzerdefiniert</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Akzentfarbe</div>
+                            <div class="settings-item-value">
+                                <select class="form-input" id="settings-theme-accent" data-setting="themeAccent">
+                                    <option value="purple">Lila</option>
+                                    <option value="cyan">Cyan</option>
+                                    <option value="pink">Pink</option>
+                                    <option value="green">Grün</option>
+                                    <option value="orange">Orange</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Chat-Schriftgröße</div>
+                            <div class="settings-item-value">
+                                <select class="form-input" id="settings-chat-font-size" data-setting="chatFontSize">
+                                    <option value="small">Klein</option>
+                                    <option value="medium">Mittel</option>
+                                    <option value="large">Groß</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Audio Volume Controls -->
+                        <div class="settings-item">
+                            <div class="settings-item-label">Master-Lautstärke</div>
+                            <div class="settings-item-value">
+                                <div class="settings-slider">
+                                    <input type="range" id="settings-master-volume" data-audio="masterVolume" min="0" max="100" value="100">
+                                    <span class="settings-slider-value">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Musik-Lautstärke</div>
+                            <div class="settings-item-value">
+                                <div class="settings-slider">
+                                    <input type="range" id="settings-music-volume" data-audio="musicVolume" min="0" max="100" value="70">
+                                    <span class="settings-slider-value">70%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">SFX-Lautstärke</div>
+                            <div class="settings-item-value">
+                                <div class="settings-slider">
+                                    <input type="range" id="settings-sfx-volume" data-audio="sfxVolume" min="0" max="100" value="80">
+                                    <span class="settings-slider-value">80%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Accessibility Section -->
+                    <div class="settings-section-content" id="section-accessibility">
+                        <div class="settings-item">
+                            <div class="settings-item-label">Animationen reduzieren</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch" data-setting="reduceMotion">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Hoher Kontrast</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch" data-setting="highContrast">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Farbenblind-Modus</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch" data-setting="colorBlindMode">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Audio & Video Section -->
+                    <div class="settings-section-content" id="section-audio-video">
+                        <div class="settings-item">
+                            <div class="settings-item-label">Geräuschunterdrückung</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch active" data-setting="noiseSuppression">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Echokompensation</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch active" data-setting="echoCancellation">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notifications Section -->
+                    <div class="settings-section-content" id="section-notifications">
+                        <div class="settings-item">
+                            <div class="settings-item-label">Soundeffekte</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch active" data-audio="sounds">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Desktop-Benachrichtigungen</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch active" data-setting="desktopNotifications">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Erwähnungston</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch active" data-audio="mentionSound">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Privacy Section -->
+                    <div class="settings-section-content" id="section-privacy">
+                        <div class="settings-item">
+                            <div class="settings-item-label">Online-Status teilen</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch active" data-setting="shareStatus">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Aktivitätsstatus anzeigen</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch active" data-setting="showActivity">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Section -->
+                    <div class="settings-section-content" id="section-advanced">
+                        <div class="settings-item">
+                            <div class="settings-item-label">Entwicklermodus</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch" data-setting="devMode">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Auto-Start</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch" data-setting="autostart">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-label">Hardware-Beschleunigung</div>
+                            <div class="settings-item-value">
+                                <button class="toggle-switch active" data-setting="hardwareAcceleration">
+                                    <span class="toggle-slider"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="settings-actions">
+                        <button class="btn btn-primary" onclick="saveSettings()">Speichern</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app/web.js"></script>
+    <script src="app/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,780 @@
+/**
+ * LCKY HUB - Notification System Styles
+ * Global notification, dialog, and call UI
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Brand Colors - PURPLE */
+  --lucky: #8B5CF6;
+  --lucky-light: #A78BFA;
+  --lucky-dark: #7C3AED;
+  --lucky-glow: rgba(139, 92, 246, 0.5);
+  --lucky-glow-soft: rgba(139, 92, 246, 0.25);
+  
+  --hub: #FF00FF;
+  --hub-light: #FF4DFF;
+  --hub-dark: #CC00CC;
+  --hub-glow: rgba(255, 0, 255, 0.4);
+  
+  --online: #00FF88;
+  --idle: #FFD700;
+  --dnd: #FF4757;
+  --offline: #6B7280;
+  
+  --bg-darkest: #0D0B14;
+  --bg-dark: #15121F;
+  --bg-card: rgba(21, 18, 31, 0.95);
+  --bg-overlay: rgba(0, 0, 0, 0.85);
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  
+  --border-subtle: rgba(139, 92, 246, 0.2);
+  --border-focus: rgba(139, 92, 246, 0.4);
+  
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+  
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 60px rgba(139, 92, 246, 0.15);
+  --shadow-glow-strong: 0 0 80px rgba(139, 92, 246, 0.25);
+  --shadow-card: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-card-glow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 40px var(--lucky-glow-soft);
+  
+  --transition-fast: 200ms ease;
+  --transition-smooth: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --font-primary: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ===========================================
+   NOTIFICATION CONTAINER
+   =========================================== */
+
+#notify-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+#notify-container.active {
+  pointer-events: auto;
+}
+
+/* ===========================================
+   TOAST NOTIFICATIONS
+   =========================================== */
+
+.notify-toast {
+  position: fixed;
+  padding: 16px 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-primary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-card-glow);
+  animation: notifySlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  pointer-events: auto;
+  max-width: 400px;
+  min-width: 300px;
+}
+
+.notify-toast:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-strong);
+}
+
+.notify-toast.hiding {
+  animation: notifySlideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Positions */
+.notify-toast.top-right {
+  top: 80px;
+  right: 24px;
+}
+
+.notify-toast.bottom-right {
+  bottom: 24px;
+  right: 24px;
+}
+
+.notify-toast.top-left {
+  top: 80px;
+  left: 24px;
+}
+
+.notify-toast.bottom-left {
+  bottom: 24px;
+  left: 24px;
+}
+
+.notify-toast.top-center {
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.notify-toast.bottom-center {
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Toast Types */
+.notify-toast.success {
+  background: linear-gradient(135deg, #00FF88 0%, #00CC6A 100%);
+  color: white;
+  border: 1px solid #00FF88;
+}
+
+.notify-toast.error {
+  background: linear-gradient(135deg, var(--hub) 0%, var(--hub-dark) 100%);
+  color: white;
+  border: 1px solid var(--hub);
+}
+
+.notify-toast.warning {
+  background: linear-gradient(135deg, var(--idle) 0%, #d97706 100%);
+  color: white;
+  border: 1px solid var(--idle);
+}
+
+.notify-toast.info {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.notify-toast .notify-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.notify-toast .notify-content {
+  flex: 1;
+}
+
+.notify-toast .notify-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.notify-toast .notify-message {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.notify-toast .notify-close {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.notify-toast .notify-close:hover {
+  opacity: 1;
+}
+
+/* ===========================================
+   MODAL DIALOGS
+   =========================================== */
+
+.notify-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  animation: notifyFadeIn 0.3s ease;
+  z-index: 100000;
+}
+
+.notify-modal-overlay.hiding {
+  animation: notifyFadeOut 0.3s ease forwards;
+}
+
+.notify-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card-glow);
+  max-width: 440px;
+  width: 90%;
+  overflow: hidden;
+  animation: notifyScaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.notify-modal.hiding {
+  animation: notifyScaleOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Modal Header */
+.notify-modal-header {
+  padding: 24px 28px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.notify-modal-header .notify-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notify-modal-header .notify-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.notify-modal-header .notify-icon.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--hub);
+  box-shadow: 0 0 20px var(--hub-glow);
+}
+
+.notify-modal-header .notify-icon.success {
+  background: rgba(0, 255, 136, 0.15);
+  color: #00FF88;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.notify-modal-header .notify-icon.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--idle);
+}
+
+.notify-modal-header .notify-icon.question {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--lucky);
+}
+
+.notify-modal-header .notify-text {
+  flex: 1;
+}
+
+.notify-modal-header .notify-title {
+  font-family: var(--font-primary);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.notify-modal-header .notify-subtitle {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Modal Body */
+.notify-modal-body {
+  padding: 0 28px 20px;
+}
+
+.notify-modal-body .notify-description {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Modal Footer */
+.notify-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 20px 28px 24px;
+  justify-content: flex-end;
+}
+
+.notify-modal-footer .notify-btn {
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  border: none;
+}
+
+.notify-btn-cancel {
+  background: var(--bg-overlay);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.notify-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--text-muted);
+}
+
+.notify-btn-confirm {
+  background: linear-gradient(135deg, var(--lucky) 0%, var(--lucky-dark) 100%);
+  color: white;
+  box-shadow: var(--shadow-glow);
+}
+
+.notify-btn-confirm:hover {
+  background: linear-gradient(135deg, var(--lucky-light) 0%, var(--lucky) 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-strong);
+}
+
+.notify-btn-danger {
+  background: linear-gradient(135deg, var(--hub) 0%, var(--hub-dark) 100%);
+  color: white;
+  box-shadow: 0 0 20px var(--hub-glow);
+}
+
+.notify-btn-danger:hover {
+  background: linear-gradient(135deg, var(--hub-light) 0%, var(--hub) 100%);
+  transform: translateY(-2px);
+}
+
+/* ===========================================
+   INCOMING CALL OVERLAY
+   =========================================== */
+
+.notify-call-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-darkest);
+  pointer-events: auto;
+  z-index: 100001;
+  animation: notifyFadeIn 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.notify-call-overlay.hiding {
+  animation: notifyFadeOut 0.4s ease forwards;
+}
+
+/* Caller Avatar */
+.notify-call-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  font-weight: 700;
+  color: white;
+  box-shadow: var(--shadow-glow-strong), 0 0 100px rgba(139, 92, 246, 0.2);
+  margin-bottom: 32px;
+  animation: notifyPulse 2s ease-in-out infinite;
+}
+
+@keyframes notifyPulse {
+  0%, 100% { transform: scale(1); box-shadow: var(--shadow-glow-strong), 0 0 100px rgba(139, 92, 246, 0.2); }
+  50% { transform: scale(1.02); box-shadow: var(--shadow-glow-strong), 0 0 120px var(--lucky-glow); }
+}
+
+/* Caller Info */
+.notify-call-info {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.notify-call-name {
+  font-family: var(--font-primary);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  text-shadow: 0 0 30px var(--lucky-glow);
+}
+
+.notify-call-type {
+  font-family: var(--font-primary);
+  font-size: 18px;
+  color: var(--lucky);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.notify-call-type svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Call Buttons */
+.notify-call-actions {
+  display: flex;
+  gap: 24px;
+}
+
+.notify-call-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notify-call-btn svg {
+  width: 32px;
+  height: 32px;
+}
+
+.notify-call-btn.decline {
+  background: linear-gradient(135deg, var(--hub) 0%, var(--hub-dark) 100%);
+  color: white;
+  box-shadow: 0 0 30px var(--hub-glow);
+}
+
+.notify-call-btn.decline:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 40px var(--hub-glow);
+}
+
+.notify-call-btn.accept {
+  background: linear-gradient(135deg, var(--lucky) 0%, var(--lucky-dark) 100%);
+  color: white;
+  box-shadow: 0 0 30px var(--lucky-glow);
+}
+
+.notify-call-btn.accept:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 40px var(--lucky-glow);
+}
+
+/* ===========================================
+   ACTIVE CALL OVERLAY
+   =========================================== */
+
+.notify-active-call {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-darkest);
+  pointer-events: auto;
+  z-index: 100001;
+  display: flex;
+  flex-direction: column;
+}
+
+.notify-active-call.hiding {
+  animation: notifyFadeOut 0.4s ease forwards;
+}
+
+/* Call Header */
+.notify-active-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.notify-active-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.notify-active-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  color: white;
+}
+
+.notify-active-name {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.notify-active-status {
+  font-family: var(--font-primary);
+  font-size: 13px;
+  color: var(--online);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notify-active-status .dot {
+  width: 8px;
+  height: 8px;
+  background: var(--online);
+  border-radius: 50%;
+  animation: notifyPulseDot 1.5s ease-in-out infinite;
+}
+
+@keyframes notifyPulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.notify-active-timer {
+  font-family: var(--font-primary);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--lucky);
+  text-shadow: 0 0 20px var(--lucky-glow);
+}
+
+/* Call Main Area */
+.notify-active-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.notify-active-avatar-large {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  font-weight: 700;
+  color: white;
+  box-shadow: var(--shadow-glow-strong);
+}
+
+/* Screen Sharing Indicator */
+.notify-screen-share {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--hub);
+  border-radius: var(--radius-full);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--hub);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 0 20px var(--hub-glow-soft);
+}
+
+.notify-screen-share .dot {
+  width: 10px;
+  height: 10px;
+  background: var(--hub);
+  border-radius: 50%;
+  animation: notifyPulseDot 1s ease-in-out infinite;
+}
+
+/* Call Controls */
+.notify-active-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 28px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.notify-control-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.notify-control-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
+}
+
+.notify-control-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.notify-control-btn.active {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--lucky);
+  box-shadow: 0 0 20px var(--lucky-glow-soft);
+}
+
+.notify-control-btn.muted {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--hub);
+}
+
+.notify-control-btn.end-call {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--hub) 0%, var(--hub-dark) 100%);
+  color: white;
+  box-shadow: 0 0 30px var(--hub-glow);
+}
+
+.notify-control-btn.end-call:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 40px var(--hub-glow);
+}
+
+.notify-control-btn.screen-share {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--lucky);
+}
+
+.notify-control-btn.screen-share.active {
+  background: var(--lucky);
+  color: white;
+}
+
+/* ===========================================
+   ANIMATIONS
+   =========================================== */
+
+@keyframes notifyFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes notifyFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes notifyScaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes notifyScaleOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.9); opacity: 0; }
+}
+
+@keyframes notifySlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes notifySlideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+/* ===========================================
+   RESPONSIVE
+   =========================================== */
+
+@media (max-width: 768px) {
+  .notify-toast {
+    max-width: calc(100% - 48px);
+    left: 24px;
+    right: 24px;
+  }
+  
+  .notify-toast.top-right,
+  .notify-toast.bottom-right,
+  .notify-toast.top-left,
+  .notify-toast.bottom-left {
+    left: 24px;
+    right: 24px;
+  }
+  
+  .notify-modal {
+    margin: 24px;
+  }
+  
+  .notify-call-avatar {
+    width: 120px;
+    height: 120px;
+    font-size: 48px;
+  }
+  
+  .notify-call-name {
+    font-size: 26px;
+  }
+  
+  .notify-call-actions {
+    gap: 20px;
+  }
+  
+  .notify-call-btn {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .notify-active-avatar-large {
+    width: 160px;
+    height: 160px;
+    font-size: 64px;
+  }
+  
+  .notify-active-controls {
+    gap: 16px;
+    padding: 20px;
+  }
+  
+  .notify-control-btn {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .notify-control-btn.end-call {
+    width: 64px;
+    height: 64px;
+  }
+}

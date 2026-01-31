@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aim Dummies - LCKY HUB</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .game-container {
+            width: 100%;
+            height: calc(100vh - var(--titlebar-height));
+            background: #0D0B14;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: crosshair;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Crosshair */
+        .crosshair {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .crosshair::before {
+            width: 24px;
+            height: 2px;
+            left: -12px;
+            top: -1px;
+        }
+
+        .crosshair::after {
+            width: 2px;
+            height: 24px;
+            left: -1px;
+            top: -12px;
+        }
+
+        .crosshair .dot {
+            width: 4px;
+            height: 4px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            position: absolute;
+            left: -2px;
+            top: -2px;
+        }
+
+        /* Dummy */
+        .dummy {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .dummy:hover {
+            transform: scale(1.05);
+        }
+
+        .dummy.hit {
+            animation: dummyHit 0.2s ease-out;
+        }
+
+        @keyframes dummyHit {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); filter: brightness(2); }
+            100% { transform: scale(1); }
+        }
+
+        .dummy-body {
+            width: 80px;
+            height: 120px;
+            background: linear-gradient(180deg, #2a2a3a 0%, #1a1a2a 100%);
+            border-radius: 40px 40px 20px 20px;
+            border: 2px solid var(--border-light);
+            position: relative;
+        }
+
+        .dummy-head {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(180deg, #3a3a4a 0%, #2a2a3a 100%);
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .dummy-headshot-zone {
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, rgba(255, 71, 87, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Hit Marker */
+        .hit-marker {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            font-size: 24px;
+            font-weight: 700;
+            animation: hitMarker 0.5s ease-out forwards;
+        }
+
+        .hit-marker.headshot {
+            color: var(--success);
+            text-shadow: var(--glow-green);
+            font-size: 28px;
+        }
+
+        .hit-marker.body {
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        @keyframes hitMarker {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
+        }
+
+        /* Game UI */
+        .game-ui {
+            position: fixed;
+            top: var(--titlebar-height);
+            left: 0;
+            right: 0;
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(11, 10, 18, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            z-index: 100;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: var(--spacing-xl);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-value.score {
+            color: var(--primary-light);
+        }
+
+        .stat-value.headshots {
+            color: var(--success);
+        }
+
+        .stat-value.time {
+            color: var(--neon-cyan);
+        }
+
+        /* Score Legend */
+        .score-legend {
+            position: fixed;
+            bottom: var(--spacing-md);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: var(--spacing-lg);
+            background: rgba(11, 10, 18, 0.9);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border-light);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: var(--font-size-sm);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.headshot { background: var(--success); }
+        .legend-dot.body { background: var(--neon-cyan); }
+
+        /* Overlay Screens */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 10, 18, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            cursor: default;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .overlay-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            text-align: center;
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-card .label {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-card .value {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+        }
+
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .value.cyan { color: var(--neon-cyan); }
+        .stat-card .value.purple { color: var(--primary-light); }
+
+        .btn-primary {
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: var(--font-size-lg);
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: fixed;
+            top: calc(var(--titlebar-height) + 80px);
+            left: var(--spacing-md);
+            z-index: 100;
+        }
+
+        /* Hit Sound Indicator */
+        .sound-wave {
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
+            border: 2px solid var(--success);
+            border-radius: 50%;
+            animation: soundWave 0.3s ease-out forwards;
+        }
+
+        @keyframes soundWave {
+            0% { width: 0; height: 0; opacity: 1; }
+            100% { width: 100px; height: 100px; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Titlebar -->
+    <div class="titlebar">
+        <div class="titlebar-left">
+            <a href="../index.html" class="titlebar-logo">
+                <img src="../assets/img/logo-rbg.png" alt="LCKY HUB" width="24" height="24">
+            </a>
+            <div class="titlebar-brand">
+                <span>Aim Dummies</span>
+            </div>
+        </div>
+        <div class="titlebar-right">
+            <button class="titlebar-btn minimize" onclick="window.electronAPI?.minimize()">
+                <svg viewBox="0 0 14 14"><rect y="6" width="14" height="2" fill="currentColor"/></svg>
+            </button>
+            <button class="titlebar-btn maximize" onclick="window.electronAPI?.maximize()">
+                <svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+            <button class="titlebar-btn close" onclick="window.electronAPI?.close()">
+                <svg viewBox="0 0 14 14"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Game UI -->
+    <div class="game-ui">
+        <div class="game-stats">
+            <div class="stat-item">
+                <div class="stat-label">Score</div>
+                <div class="stat-value score" id="score">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Headshots</div>
+                <div class="stat-value headshots" id="headshots">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Time</div>
+                <div class="stat-value time" id="time">30s</div>
+            </div>
+        </div>
+        <button class="btn btn-secondary" onclick="endGame()">End</button>
+    </div>
+
+    <!-- Back Button -->
+    <a href="../index.html" class="btn btn-secondary back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back
+    </a>
+
+    <!-- Game Container -->
+    <div class="game-container" id="game-container">
+        <!-- Crosshair -->
+        <div class="crosshair" id="crosshair">
+            <div class="dot"></div>
+        </div>
+
+        <!-- Dummies will be spawned here -->
+        <div id="dummies-container"></div>
+
+        <!-- Score Legend -->
+        <div class="score-legend">
+            <div class="legend-item">
+                <div class="legend-dot headshot"></div>
+                <span>Headshot: 2pts</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot body"></div>
+                <span>Body Hit: 1pt</span>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div class="overlay" id="start-screen">
+            <h1 class="overlay-title">Aim Dummies</h1>
+            <div class="stats-grid" style="margin-bottom: var(--spacing-lg);">
+                <div class="stat-card">
+                    <div class="label">Headshot</div>
+                    <div class="value green">2 points</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Body Hit</div>
+                    <div class="value cyan">1 point</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Time</div>
+                    <div class="value purple">30 seconds</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="startGame()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Start
+            </button>
+        </div>
+
+        <!-- End Screen -->
+        <div class="overlay hidden" id="end-screen">
+            <h1 class="overlay-title">Game Over</h1>
+            <p class="overlay-title" style="font-size: var(--font-size-2xl);" id="final-score">0</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">Headshots</div>
+                    <div class="value green" id="final-headshots">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Body Hits</div>
+                    <div class="value cyan" id="final-body-hits">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Accuracy</div>
+                    <div class="value purple" id="final-accuracy">0%</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="startGame()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Play Again
+            </button>
+            <a href="../index.html" class="btn btn-secondary" style="margin-top: var(--spacing-md);">
+                Back to Menu
+            </a>
+        </div>
+    </div>
+
+    <!-- Audio for hit sounds -->
+</div>
+
+<script>
+        // Create hit sound
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playHitSound(isHeadshot) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            if (isHeadshot) {
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            } else {
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            }
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.15);
+        }
+
+        // Game State
+        let gameState = {
+            isPlaying: false,
+            score: 0,
+            headshots: 0,
+            bodyHits: 0,
+            totalClicks: 0,
+            timeLeft: 30,
+            timerInterval: null,
+            dummies: [],
+            spawnInterval: null
+        };
+
+        // DOM Elements
+        const gameContainer = document.getElementById('game-container');
+        const crosshair = document.getElementById('crosshair');
+        const dummiesContainer = document.getElementById('dummies-container');
+        const startScreen = document.getElementById('start-screen');
+        const endScreen = document.getElementById('end-screen');
+        const scoreDisplay = document.getElementById('score');
+        const headshotsDisplay = document.getElementById('headshots');
+        const timeDisplay = document.getElementById('time');
+
+        // Crosshair Follow Mouse
+        document.addEventListener('mousemove', (e) => {
+            crosshair.style.left = e.clientX + 'px';
+            crosshair.style.top = e.clientY + 'px';
+        });
+
+        // Start Game
+        function startGame() {
+            // Resume audio context on user interaction
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            gameState = {
+                isPlaying: true,
+                score: 0,
+                headshots: 0,
+                bodyHits: 0,
+                totalClicks: 0,
+                timeLeft: 30,
+                timerInterval: null,
+                dummies: [],
+                spawnInterval: null
+            };
+
+            updateDisplay();
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            dummiesContainer.innerHTML = '';
+
+            // Start timer
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft--;
+                timeDisplay.textContent = gameState.timeLeft + 's';
+                if (gameState.timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            // Spawn dummies
+            spawnDummy();
+            spawnDummy();
+            spawnDummy();
+
+            gameState.spawnInterval = setInterval(() => {
+                if (gameState.dummies.length < 8) {
+                    spawnDummy();
+                }
+            }, 1500);
+        }
+
+        // Spawn Dummy
+        function spawnDummy() {
+            const dummy = document.createElement('div');
+            dummy.className = 'dummy';
+            
+            const containerRect = gameContainer.getBoundingClientRect();
+            const padding = 100;
+            const x = Math.random() * (containerRect.width - padding * 2) + padding;
+            const y = Math.random() * (containerRect.height - padding * 2 - 100) + padding + 80;
+
+            dummy.style.left = x + 'px';
+            dummy.style.top = y + 'px';
+            dummy.innerHTML = `
+                <div class="dummy-head">
+                    <div class="dummy-headshot-zone" data-zone="head"></div>
+                </div>
+                <div class="dummy-body" data-zone="body"></div>
+            `;
+
+            dummy.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleDummyHit(dummy, e);
+            });
+
+            dummiesContainer.appendChild(dummy);
+            gameState.dummies.push(dummy);
+
+            // Remove dummy after 4 seconds if not hit
+            setTimeout(() => {
+                if (dummy.parentNode && gameState.isPlaying) {
+                    dummy.remove();
+                    gameState.dummies = gameState.dummies.filter(d => d !== dummy);
+                }
+            }, 4000);
+        }
+
+        // Handle Hit
+        function handleDummyHit(dummy, e) {
+            if (!gameState.isPlaying) return;
+
+            gameState.totalClicks++;
+            playHitSound(false);
+
+            // Check if clicked on head or body
+            const headshotZone = dummy.querySelector('.dummy-headshot-zone');
+            const headZoneRect = headshotZone.getBoundingClientRect();
+            const bodyZone = dummy.querySelector('.dummy-body');
+            const bodyZoneRect = bodyZone.getBoundingClientRect();
+
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+
+            let isHeadshot = false;
+
+            // Check if click is in head zone
+            if (clickX >= headZoneRect.left && clickX <= headZoneRect.right &&
+                clickY >= headZoneRect.top && clickY <= headZoneRect.bottom) {
+                isHeadshot = true;
+            }
+
+            // Check if click is in body zone
+            if (clickX >= bodyZoneRect.left && clickX <= bodyZoneRect.right &&
+                clickY >= bodyZoneRect.top && clickY <= bodyZoneRect.bottom) {
+                isHeadshot = false;
+            }
+
+            if (isHeadshot) {
+                gameState.score += 2;
+                gameState.headshots++;
+                playHitSound(true);
+                showHitMarker(e.clientX, e.clientY, true);
+                showSoundWave(e.clientX, e.clientY);
+            } else {
+                gameState.score += 1;
+                gameState.bodyHits++;
+                showHitMarker(e.clientX, e.clientY, false);
+            }
+
+            // Animate dummy
+            dummy.classList.add('hit');
+            setTimeout(() => dummy.classList.remove('hit'), 200);
+
+            // Remove dummy
+            dummy.remove();
+            gameState.dummies = gameState.dummies.filter(d => d !== dummy);
+
+            updateDisplay();
+        }
+
+        // Show Hit Marker
+        function showHitMarker(x, y, isHeadshot) {
+            const marker = document.createElement('div');
+            marker.className = `hit-marker ${isHeadshot ? 'headshot' : 'body'}`;
+            marker.textContent = isHeadshot ? '+2' : '+1';
+            marker.style.left = x + 'px';
+            marker.style.top = y + 'px';
+
+            gameContainer.appendChild(marker);
+
+            setTimeout(() => marker.remove(), 500);
+        }
+
+        // Show Sound Wave
+        function showSoundWave(x, y) {
+            const wave = document.createElement('div');
+            wave.className = 'sound-wave';
+            wave.style.left = x + 'px';
+            wave.style.top = y + 'px';
+            wave.style.transform = 'translate(-50%, -50%)';
+
+            gameContainer.appendChild(wave);
+
+            setTimeout(() => wave.remove(), 300);
+        }
+
+        // Update Display
+        function updateDisplay() {
+            scoreDisplay.textContent = gameState.score;
+            headshotsDisplay.textContent = gameState.headshots;
+            timeDisplay.textContent = gameState.timeLeft + 's';
+        }
+
+        // End Game
+        function endGame() {
+            if (!gameState.isPlaying) return;
+
+            gameState.isPlaying = false;
+            clearInterval(gameState.timerInterval);
+            clearInterval(gameState.spawnInterval);
+
+            // Remove all dummies
+            dummiesContainer.innerHTML = '';
+            gameState.dummies = [];
+
+            // Calculate accuracy
+            const accuracy = gameState.totalClicks > 0
+                ? Math.round(((gameState.headshots + gameState.bodyHits) / gameState.totalClicks) * 100)
+                : 0;
+
+            // Update end screen
+            document.getElementById('final-score').textContent = gameState.score;
+            document.getElementById('final-headshots').textContent = gameState.headshots;
+            document.getElementById('final-body-hits').textContent = gameState.bodyHits;
+            document.getElementById('final-accuracy').textContent = accuracy + '%';
+
+            endScreen.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        gameContainer.addEventListener('click', () => {
+            if (gameState.isPlaying) {
+                gameState.totalClicks++;
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && gameState.isPlaying) {
+                endGame();
+            }
+        });
+    </script>
+</body>
+</html>
