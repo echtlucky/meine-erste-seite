@@ -3,8 +3,8 @@
     <div class="header-container">
         <!-- Logo -->
         <a href="{{BASE}}index.html" class="header-logo">
-            <img src="{{BASE}}assets/logo-rbg.png" alt="LCKY HUB" class="logo-image">
             <span class="logo-text">LCKY</span>
+            <img src="{{BASE}}assets/logo-rbg.png" alt="LCKY HUB" class="logo-image">
         </a>
         
         <!-- Navigation -->
@@ -210,6 +210,21 @@
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 7rem;
+        margin-left: auto;
+    }
+
+    .logo-text {
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: 0.28rem;
+        color: var(--primary-light);
+        text-shadow: 0 0 18px rgba(139, 92, 246, 0.55);
+    }
+
     /* CTA Button */
     .header-cta {
         position: relative;
@@ -336,12 +351,6 @@
         --text-primary: #FFFFFF;
         --text-muted: #6B7280;
         --primary: #8B5CF6;
+        --primary-light: #A78BFA;
     }
 </style>
-
-    .logo-text {
-        font-size: 1.1rem;
-        font-weight: 700;
-        letter-spacing: 0.2rem;
-        color: var(--text-primary);
-    }

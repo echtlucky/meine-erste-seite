@@ -24,35 +24,38 @@
             <p>Verwalte Blog, Nutzer und Kommentare in einem Kontrollzentrum</p>
         </div>
 
-        <div class="admin-card" id="admin-status" style="margin-bottom: 2rem;">
-            <h2>
-                <span class="icon">🛡️</span>
-                Zugriff
-            </h2>
-            <p class="admin-status-text">Status wird geladen...</p>
-            <form class="blog-form" id="admin-login-form" style="margin-top: 1.5rem;">
-                <div class="form-group">
-                    <label for="admin-login-username">Nutzername</label>
-                    <input type="text" id="admin-login-username" placeholder="admin" required>
-                </div>
-                <div class="form-group">
-                    <label for="admin-login-password">Passwort</label>
-                    <input type="password" id="admin-login-password" placeholder="Passwort" required>
-                </div>
-                <button type="submit" class="admin-btn">
-                    <span>🔐</span>
-                    Admin anmelden
-                </button>
-                <button type="button" class="admin-btn secondary" id="admin-logout" style="margin-top: 0.75rem;">
-                    <span>🚪</span>
-                    Abmelden
-                </button>
-            </form>
-            <p class="comment-meta" id="admin-login-message" style="margin-top: 1rem;"></p>
+        <div class="glass-stage">
+            <div class="admin-card" id="admin-status" style="margin-bottom: 0;">
+                <h2>
+                    <span class="icon">🛡️</span>
+                    Zugriff
+                </h2>
+                <p class="admin-status-text">Status wird geladen...</p>
+                <form class="blog-form" id="admin-login-form" style="margin-top: 1.5rem;">
+                    <div class="form-group">
+                        <label for="admin-login-username">Nutzername</label>
+                        <input type="text" id="admin-login-username" placeholder="admin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-login-password">Passwort</label>
+                        <input type="password" id="admin-login-password" placeholder="Passwort" required>
+                    </div>
+                    <button type="submit" class="admin-btn">
+                        <span>🔐</span>
+                        Admin anmelden
+                    </button>
+                    <button type="button" class="admin-btn secondary" id="admin-logout" style="margin-top: 0.75rem;">
+                        <span>🚪</span>
+                        Abmelden
+                    </button>
+                </form>
+                <p class="comment-meta" id="admin-login-message" style="margin-top: 1rem;"></p>
+            </div>
         </div>
         
         <!-- Admin Grid -->
-        <div class="admin-grid" style="display: none;">
+        <div class="glass-stage" style="margin-top: 2rem;">
+            <div class="admin-grid" id="admin-grid" style="display: none;">
             <!-- Create Blog Post -->
             <div class="admin-card">
                 <h2>
@@ -144,6 +147,7 @@
                 <a class="admin-btn secondary" href="admin-roles.html" style="margin-top: 1rem; width: 100%;">
                     Rollen verwalten öffnen
                 </a>
+            </div>
             </div>
         </div>
     </main>

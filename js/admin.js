@@ -23,7 +23,7 @@ import { loadLayout } from "./layout.js";
 import "./auth-modal.js";
 const adminStatus = document.getElementById("admin-status");
 const adminStatusText = adminStatus.querySelector(".admin-status-text");
-const adminGrid = document.querySelector(".admin-grid");
+const adminGrid = document.getElementById("admin-grid");
 
 const adminLoginForm = document.getElementById("admin-login-form");
 const adminLoginMessage = document.getElementById("admin-login-message");
